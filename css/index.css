@@ -1,0 +1,32 @@
+.page-header {
+	width: 100%;
+	text-align: center;
+	background-color: #4e50a5;
+	color: #fff;
+	padding: 2em 0;
+}
+
+.project-name {
+	padding-top: 2em;
+	padding-bottom: 1em;
+	font-size: 2em;
+}
+.project-tagline {
+	font-size: 1em;
+	opacity: 0.7;
+	padding: 2em;
+}
+.btn-transparent {
+	margin: 0 0.5em;
+	color: #fff;
+	background: rgba(255, 255, 255, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.4)
+}
+.btn-transparent:hover {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.3);
+}
+
+.main-content {
+	padding: 2em;
+}
