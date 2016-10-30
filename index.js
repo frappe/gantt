@@ -47,9 +47,6 @@ var gantt = new Gantt({
     parent_selector: '#gantt',
     tasks: tasks,
     date_format: "YYYY-MM-DD",
-    bar: {
-        height: 24
-    },
     events: {
         bar_on_click: function (task) {
             console.log(task);

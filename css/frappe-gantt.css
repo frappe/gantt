@@ -1,17 +1,17 @@
 .gantt #grid .grid-background {
   fill: none; }
 .gantt #grid .grid-header {
-  fill: #fff;
+  fill: #ffffff;
   stroke: #e0e0e0;
   stroke-width: 1.4; }
-.gantt #grid .row-odd {
+.gantt #grid .grid-row {
   fill: #ffffff; }
-.gantt #grid .row-even {
+.gantt #grid .grid-row:nth-child(even) {
   fill: #f5f5f5; }
 .gantt #grid .row-line {
-  stroke: #EBEFF2; }
+  stroke: #ebeff2; }
 .gantt #grid .tick {
-  stroke: #aaa;
+  stroke: #e0e0e0;
   stroke-width: 0.2; }
   .gantt #grid .tick.thick {
     stroke-width: 0.4; }
@@ -65,20 +65,20 @@
   font-size: 12px;
   text-anchor: middle; }
 .gantt .primary-text {
-  fill: #999; }
-.gantt .secondary-text {
   fill: #555; }
+.gantt .secondary-text {
+  fill: #333; }
 .gantt #details {
   font-size: 14; }
   .gantt #details .details-container {
-    stroke: #c1c1c1;
+    stroke: #e0e0e0;
     stroke-width: 1.1;
     fill: #fff; }
   .gantt #details .details-heading {
-    fill: #424242;
+    fill: #333;
     font-weight: 500; }
   .gantt #details .details-body {
-    fill: #757575; }
+    fill: #555; }
 .gantt .hide {
   display: none; }
 

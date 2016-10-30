@@ -12,15 +12,33 @@
 </head>
 <body>
   <section class="container-fluid page-header">
-    <h1 class="project-name">Gantt</h1>
+    <h1 class="display-3">Gantt</h1>
     <h2 class="project-tagline">A simple, modern gantt chart library for the web</h2>
     <a href="https://github.com/frappe/gantt" target="_blank" class="btn btn-transparent">View on GitHub</a>
   </section>
   <div class="container">
     <section class="row main-content">
       <h4>Interactive Gantt Chart entirely made in SVG!</h4>
-      <div style="overflow: scroll">
-        <svg id="gantt" width="400" height="600"></svg>
+      <div class="row">
+        <div class="col col-sm-6">
+          <h5>Demo</h5>
+          <div style="overflow: scroll">
+            <svg id="gantt" width="400" height="600"></svg>
+          </div>
+        </div>
+        <div class="col col-sm-6">
+          <h5>Usage</h5>
+          <pre class="highlight">
+	          <code class="language-javascript">
+              var gantt = new Gantt({
+                parent_selector: '#gantt',
+                tasks: tasks,
+                date_format: "YYYY-MM-DD"
+              });
+              gantt.render();
+            </code>
+          </pre>
+        </div>
       </div>
       <footer class="site-footer">
         Project maintained by <a href="https://github.com/frappe">frappe</a>
