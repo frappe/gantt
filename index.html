@@ -14,7 +14,7 @@
   <section class="container-fluid page-header">
     <h1 class="project-name">Gantt</h1>
     <h2 class="project-tagline">A simple, modern gantt chart library for the web</h2>
-    <a href="https://github.com/frappe/gantt" class="btn btn-transparent">View on GitHub</a>
+    <a href="https://github.com/frappe/gantt" target="_blank" class="btn btn-transparent">View on GitHub</a>
   </section>
   <div class="container">
     <section class="row main-content">
@@ -30,40 +30,6 @@
   <script src="js/moment.min.js"></script>
   <script src="js/snap.svg-min.js"></script>
   <script src="js/frappe-gantt.min.js"></script>
-  <script>
-    var arr = [1, 2, 3, 4, 5, 6];
-    var tasks = arr.map(function(i){
-      return {
-        start: "2016-10-0"+i,
-        end: "2016-10-2"+i,
-        name: "Task "+i,
-        id: i,
-        progress: i*10
-      }
-    });
-    var gantt = new Gantt({
-      parent_selector: '#gantt',
-      tasks: tasks,
-      date_format: "YYYY-MM-DD",
-      bar: {
-        height: 20
-      },
-      events: {
-        bar_on_click: function (task) {
-          console.log(task);
-        },
-        bar_on_date_change: function(task, start, end) {
-          console.log(task, start, end);
-        },
-        bar_on_progress_change: function(task, progress) {
-          console.log(task, progress);
-        },
-        on_viewmode_change: function(mode) {
-          console.log(mode);
-        }
-      }
-    });
-    gantt.render();
-  </script>
+  <script src="index.js"></script>
 </body>
 </html>
