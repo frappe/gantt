@@ -43,23 +43,54 @@ var tasks = [
         progress: 0
     }
 ]
-var gantt = new Gantt({
-    parent_selector: '#gantt',
+var gantt_1 = new Gantt({
+    parent_selector: '#gantt-1',
+    tasks: tasks,
+    date_format: "YYYY-MM-DD",
+    events: {
+        on_viewmode_change: function (mode) { }
+    }
+});
+gantt_1.render();
+
+var gantt_2 = new Gantt({
+    parent_selector: '#gantt-2',
+    tasks: tasks,
+    date_format: "YYYY-MM-DD",
+    events: {
+        on_viewmode_change: function (mode) { }
+    }
+});
+gantt_2.render();
+gantt_2.set_view_mode('Half Day');
+
+$(function() {
+    $(".gantt-2 .btn-group").on("click", "button", function() {
+        $btn = $(this);
+        var mode = $btn.text();
+        gantt_2.set_view_mode(mode);
+        $btn.parent().find('button').removeClass('active');
+        $btn.addClass('active');
+    });
+});
+
+var gantt_3 = new Gantt({
+    parent_selector: '#gantt-3',
     tasks: tasks,
     date_format: "YYYY-MM-DD",
     events: {
         bar_on_click: function (task) {
-            console.log(task);
+            console.log('bar_on_click', task);
         },
         bar_on_date_change: function (task, start, end) {
-            console.log(task, start, end);
+            console.log('bar_on_date_change', task, start, end);
         },
         bar_on_progress_change: function (task, progress) {
-            console.log(task, progress);
+            console.log('bar_on_progress_change', task, progress);
         },
         on_viewmode_change: function (mode) {
-            console.log(mode);
+            console.log('on_viewmode_change', mode);
         }
     }
 });
-gantt.render();
+gantt_3.render();

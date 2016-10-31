@@ -29,3 +29,25 @@
 .main-content {
 	padding: 2em;
 }
+
+.main-content .row {
+	margin-bottom: 20px;
+}
+
+hr {
+	margin-bottom: 2rem;
+}
+
+.gantt-container {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+}
+
+pre.highlight {
+	background: #f7f7f7;
+	border-radius: 3px;
+}
+
+.btn-group>.btn {
+	outline: none !important;
+}

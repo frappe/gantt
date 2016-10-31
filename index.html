@@ -13,29 +13,101 @@
 <body>
   <section class="container-fluid page-header">
     <h1 class="display-3">Gantt</h1>
-    <h2 class="project-tagline">A simple, modern gantt chart library for the web</h2>
+    <h2 class="project-tagline">A simple, interactive, modern gantt chart library for the web</h2>
     <a href="https://github.com/frappe/gantt" target="_blank" class="btn btn-transparent">View on GitHub</a>
   </section>
   <div class="container">
     <section class="row main-content">
-      <h4>Interactive Gantt Chart entirely made in SVG!</h4>
       <div class="row">
         <div class="col col-sm-6">
-          <h5>Demo</h5>
-          <div style="overflow: scroll">
-            <svg id="gantt" width="400" height="600"></svg>
+          <h5>Simple Gantt Chart</h5>
+          <div class="gantt-container" style="overflow: scroll">
+            <svg id="gantt-1" width="400" height="600"></svg>
           </div>
         </div>
         <div class="col col-sm-6">
           <h5>Usage</h5>
           <pre class="highlight">
 	          <code class="language-javascript">
-              var gantt = new Gantt({
-                parent_selector: '#gantt',
-                tasks: tasks,
-                date_format: "YYYY-MM-DD"
-              });
-              gantt.render();
+  var gantt = new Gantt({
+    parent_selector: '#gantt',
+    tasks: [
+      {
+        start: "2016-10-04",
+        end: "2016-10-10",
+        name: "Explore ERPNext",
+        id: 0,
+        progress: 30
+      },
+      ...
+    ],
+    date_format: "YYYY-MM-DD"
+  });
+  gantt.render();
+            </code>
+          </pre>
+        </div>
+      </div>
+      <hr />
+      <div class="row gantt-2">
+        <div class="col col-sm-6">
+          <h5>Change view modes</h5>
+          <div class="gantt-container" style="overflow: scroll">
+            <svg id="gantt-2" width="400" height="600"></svg>
+          </div>
+          <div class="btn-group mt-1 mx-auto" role="group" aria-label="Basic example">
+            <button type="button" class="btn btn-secondary">Quarter Day</button>
+            <button type="button" class="btn btn-secondary active">Half Day</button>
+            <button type="button" class="btn btn-secondary">Day</button>
+            <button type="button" class="btn btn-secondary">Week</button>
+            <button type="button" class="btn btn-secondary">Month</button>
+          </div>
+        </div>
+        <div class="col col-sm-6">
+          <h5>Usage</h5>
+          <pre class="highlight">
+	          <code class="language-javascript">
+  var gantt = new Gantt({
+    ...
+    ...
+  });
+  gantt.render();
+  gantt.set_viewmode('Half Day');
+            </code>
+          </pre>
+        </div>
+      </div>
+      <hr />
+      <div class="row gantt-3">
+        <div class="col col-sm-6">
+          <h5>Set events</h5>
+          <div class="gantt-container" style="overflow: scroll">
+            <svg id="gantt-3" width="400" height="600"></svg>
+          </div>
+        </div>
+        <div class="col col-sm-6">
+          <h5>Usage</h5>
+          <pre class="highlight">
+	          <code class="language-javascript">
+  var gantt = new Gantt({
+    ...
+    events: {
+        bar_on_click: function (task) {
+            console.log(task);
+        },
+        bar_on_date_change: function (task, start, end) {
+            console.log(task, start, end);
+        },
+        bar_on_progress_change: function (task, progress) {
+            console.log(task, progress);
+        },
+        on_viewmode_change: function (mode) {
+            console.log(mode);
+        }
+    }
+    ...
+  });
+  gantt.render();
             </code>
           </pre>
         </div>
@@ -48,6 +120,7 @@
   <script src="js/moment.min.js"></script>
   <script src="js/snap.svg-min.js"></script>
   <script src="js/frappe-gantt.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
   <script src="index.js"></script>
 </body>
 </html>
