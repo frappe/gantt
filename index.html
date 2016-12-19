@@ -34,11 +34,11 @@
 				start: "2016-10-0"+i,
 				end: "2016-10-2"+i,
 				name: "Task "+i,
-				id: i,
+				id: "Task"+i,
 				progress: i*10
 			}
 		});
-		tasks[0].dependencies = '2, 3';
+		tasks[0].dependencies = 'Task2, Task3';
 
 		var gantt_chart = gantt("#gantt", tasks, {
                 date_format: "YYYY-MM-DD",

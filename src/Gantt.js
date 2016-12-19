@@ -433,9 +433,10 @@ export default function Gantt(element, tasks, config) {
 	}
 
 	function make_arrows() {
-
+		self._arrows = [];
 		for(let task of self.tasks) {
-			self._arrows = task.dependencies.map(dep => {
+			let arrows = [];
+			arrows = task.dependencies.map(dep => {
 				const dependency = get_task(dep);
 				if(!dependency) return;
 
@@ -447,6 +448,7 @@ export default function Gantt(element, tasks, config) {
 				self.element_groups.arrow.add(arrow.element);
 				return arrow; // eslint-disable-line
 			});
+			self._arrows = self._arrows.concat(arrows);
 		}
 	}
 
@@ -460,11 +462,10 @@ export default function Gantt(element, tasks, config) {
 	}
 
 	function map_arrows_on_bars() {
-
 		for(let bar of self._bars) {
 			bar.arrows = self._arrows.filter(arrow => {
-				return arrow.from_task.task.id === bar.task.id ||
-					arrow.to_task.task.id === bar.task.id;
+				return (arrow.from_task.task.id === bar.task.id) ||
+					(arrow.to_task.task.id === bar.task.id);
 			});
 		}
 	}
@@ -498,13 +499,13 @@ export default function Gantt(element, tasks, config) {
 	self.view_is = view_is;
 
 	function get_task(id) {
-		self.tasks.find((task) => {
+		return self.tasks.find((task) => {
 			return task.id === id;
 		});
 	}
 
 	function get_bar(id) {
-		self._bars.find((bar) => {
+		return self._bars.find((bar) => {
 			return bar.task.id === id;
 		});
 	}

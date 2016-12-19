@@ -225,12 +225,6 @@ export default function Bar(gt, task) {
 		left.drag(onmove_left, onstart, onstop_left);
 		right.drag(onmove_right, onstart, onstop_right);
 
-		function onstart() {
-			onstart();
-			this.ox = this.getX();
-			this.oy = this.getY();
-		}
-
 		function onmove_right(dx, dy) {
 			onmove_handle_right(dx, dy);
 		}
@@ -255,25 +249,15 @@ export default function Bar(gt, task) {
 
 	function bind_drag() {
 		self.bar_group.drag(onmove, onstart, onstop);
-
-		function onmove(dx, dy) {
-			onmove(dx, dy);
-		}
-		function onstop() {
-			onstop();
-		}
-		function onstart() {
-			onstart();
-		}
 	}
 
 	function bind_resize_progress() {
 		const bar = self.$bar,
 			bar_progress = self.$bar_progress,
 			handle = self.group.select('.handle.progress');
-		handle && handle.drag(onmove, onstart, onstop);
+		handle && handle.drag(on_move, on_start, on_stop);
 
-		function onmove(dx, dy) {
+		function on_move(dx, dy) {
 			if (dx > bar_progress.max_dx) {
 				dx = bar_progress.max_dx;
 			}
@@ -285,12 +269,12 @@ export default function Bar(gt, task) {
 			handle.transform(`t{dx},0`);
 			bar_progress.finaldx = dx;
 		}
-		function onstop() {
+		function on_stop() {
 			if (!bar_progress.finaldx) return;
 			progress_changed();
 			set_action_completed();
 		}
-		function onstart() {
+		function on_start() {
 			bar_progress.finaldx = 0;
 			bar_progress.owidth = bar_progress.getWidth();
 			bar_progress.min_dx = -bar_progress.getWidth();

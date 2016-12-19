@@ -77,7 +77,7 @@ export default function Arrow(gt, from_task, to_task) {
 						end_x: self.end_x,
 						end_y: self.end_y,
 						down_1: gt.config.padding / 2 - self.curve,
-						down_2: to_task.$bar.getY() + to_task.$bar.get('height') / 2 - self.curve_y,
+						down_2: to_task.$bar.getY() + to_task.$bar.getHeight() / 2 - self.curve_y,
 						left: to_task.$bar.getX() - gt.config.padding,
 						offset: self.offset,
 						curve: self.curve,
@@ -88,13 +88,13 @@ export default function Arrow(gt, from_task, to_task) {
 	}
 
 	function draw() {
-		self.element = self.gantt.canvas.path(self.path)
+		self.element = gt.canvas.path(self.path)
 			.attr('data-from', self.from_task.task.id)
 			.attr('data-to', self.to_task.task.id);
 	}
 
 	function update() { // eslint-disable-line
-		self.prepare();
+		prepare();
 		self.element.attr('d', self.path);
 	}
 	self.update = update;
