@@ -44,24 +44,21 @@
                 date_format: "YYYY-MM-DD",
                 bar: {
                     height: 20
-                }
-                // events: {
-                //     bar_on_click: function (task) {
-                //         console.log(task);
-                //     },
-                //     bar_on_date_change: function(task, start, end) {
-                //         console.log(task, start, end);
-                //     },
-                //     bar_on_progress_change: function(task, progress) {
-                //         console.log(task, progress);
-                //     },
-                //     on_viewmode_change: function(mode) {
-                //         console.log(mode);
-                //     }
-                // }
+                },
+				on_click: function (task) {
+					console.log(task);
+				},
+				on_date_change: function(task, start, end) {
+					console.log(task, start, end);
+				},
+				on_progress_change: function(task, progress) {
+					console.log(task, progress);
+				},
+				on_view_change: function(mode) {
+					console.log(mode);
+				}
             });
 		console.log(gantt_chart);
-		// gantt.render();
 	</script>
 </body>
 </html>

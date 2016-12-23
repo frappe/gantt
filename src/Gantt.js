@@ -58,6 +58,8 @@ export default function Gantt(element, tasks, config) {
 		set_scale(mode);
 		prepare();
 		render();
+		// fire viewmode_change event
+		trigger_event('view_change', [mode]);
 	}
 
 	function prepare() {
@@ -148,7 +150,6 @@ export default function Gantt(element, tasks, config) {
 		make_bars();
 		make_arrows();
 		map_arrows_on_bars();
-		setup_events();
 		set_width();
 		set_scroll_position();
 		bind_grid_click();
@@ -202,10 +203,6 @@ export default function Gantt(element, tasks, config) {
 
 	function set_scale(scale) {
 		self.config.view_mode = scale;
-
-		// fire viewmode_change event
-		// self.events.on_viewmode_change(scale);
-		// trigger("view_mode_change");
 
 		if(scale === 'Day') {
 			self.config.step = 24;
@@ -470,14 +467,6 @@ export default function Gantt(element, tasks, config) {
 		}
 	}
 
-	function setup_events() {
-		// this._bars.forEach(function(bar) {
-		// 	bar.events.on_date_change = me.events.bar_on_date_change;
-		// 	bar.events.on_progress_change = me.events.bar_on_progress_change;
-		// 	bar.click(me.events.bar_on_click);
-		// });
-	}
-
 	function bind_grid_click() {
 		self.element_groups.grid.click(() => {
 			self.canvas.selectAll('.bar-wrapper').forEach(el => {
@@ -510,6 +499,13 @@ export default function Gantt(element, tasks, config) {
 		});
 	}
 	self.get_bar = get_bar; // required in Bar
+
+	function trigger_event(event, args) {
+		if(self.config['on_' + event]) {
+			self.config['on_' + event].apply(null, args);
+		}
+	}
+	self.trigger_event = trigger_event;
 
 	init();
 

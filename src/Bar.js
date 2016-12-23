@@ -128,30 +128,13 @@ export default function Bar(gt, task) {
 		}
 	}
 
-	// function draw_invalid_bar() {
-	// 	const x = moment().startOf('day').diff(gt.gantt_start, 'hours') /
-	// 		gt.config.step * gt.config.column_width;
-
-	// 	gt.canvas.rect(x, self.y,
-	// 		gt.config.column_width * 2, self.height,
-	// 		self.corner_radius, self.corner_radius)
-	// 		.addClass('bar-invalid')
-	// 		.appendTo(self.bar_group);
-
-	// 	gt.canvas.text(
-	// 		x + gt.config.column_width,
-	// 		self.y + self.height / 2,
-	// 		'Dates not set')
-	// 		.addClass('bar-label big')
-	// 		.appendTo(self.bar_group);
-	// }
-
 	function bind() {
 		if (self.invalid) return;
 		show_details();
 		bind_resize();
 		bind_drag();
 		bind_resize_progress();
+		setup_click_event();
 	}
 
 	function show_details() {
@@ -358,47 +341,34 @@ export default function Bar(gt, task) {
 		update_details_position();
 	}
 
-	// function click(callback) {
-	// 	self.group.click(function () {
-	// 		if (self.action_completed) {
-	// 			// just finished a move action, wait for a few seconds
-	// 			return;
-	// 		}
-	// 		if (self.group.hasClass('active')) {
-	// 			callback(self.task);
-	// 		}
-	// 		unselect_all();
-	// 		self.group.toggleClass('active');
-	// 	});
-	// }
+	function setup_click_event() {
+		self.group.click(function () {
+			if (self.action_completed) {
+				// just finished a move action, wait for a few seconds
+				return;
+			}
+			if (self.group.hasClass('active')) {
+				gt.trigger_event('click', [self.task]);
+			}
+			unselect_all();
+			self.group.toggleClass('active');
+		});
+	}
 
 	function date_changed() {
-		self.events.on_date_change &&
-			self.events.on_date_change(
-				self.task,
-				compute_start_date(),
-				compute_end_date()
-			);
+		gt.trigger_event('date_change',
+			[self.task, compute_start_date(), compute_end_date()]);
 	}
 
 	function progress_changed() {
-		self.events.on_progress_change &&
-			self.events.on_progress_change(
-				self.task,
-				compute_progress()
-			);
+		gt.trigger_event('progress_change',
+			[self.task, compute_progress()]);
 	}
 
 	function set_action_completed() {
 		self.action_completed = true;
 		setTimeout(() => self.action_completed = false, 2000);
 	}
-
-	// function compute_date(x) {
-	// 	const shift = (x - compute_x()) / gt.config.column_width;
-	// 	const date = self.task._start.clone().add(gt.config.step * shift, 'hours');
-	// 	return date;
-	// }
 
 	function compute_start_date() {
 		const bar = self.$bar,
@@ -500,11 +470,11 @@ export default function Bar(gt, task) {
 		details_box && details_box.transform(`t${pos.x},${pos.y}`);
 	}
 
-	// function unselect_all() {
-	// 	gt.canvas.selectAll('.bar-wrapper').forEach(function (el) {
-	// 		el.removeClass('active');
-	// 	});
-	// }
+	function unselect_all() {
+		gt.canvas.selectAll('.bar-wrapper').forEach(function (el) {
+			el.removeClass('active');
+		});
+	}
 
 	init();
 
