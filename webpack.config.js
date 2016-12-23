@@ -3,7 +3,7 @@ var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 var path = require('path');
 var env = require('yargs').argv.mode;
 
-var libraryName = 'gantt';
+var libraryName = 'frappe-gantt';
 
 var plugins = [], outputFile;
 
@@ -18,9 +18,9 @@ let config = {
 	entry: __dirname + '/src/Gantt.js',
 	devtool: 'source-map',
 	output: {
-		path: __dirname + '/lib',
+		path: __dirname + '/dist',
 		filename: outputFile,
-		library: libraryName,
+		library: 'Gantt',
 		libraryTarget: 'umd',
 		umdNamedDefine: true
 	},

@@ -2,11 +2,11 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define("gantt", [], factory);
+		define("Gantt", [], factory);
 	else if(typeof exports === 'object')
-		exports["gantt"] = factory();
+		exports["Gantt"] = factory();
 	else
-		root["gantt"] = factory();
+		root["Gantt"] = factory();
 })(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -117,6 +117,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			// fire viewmode_change event
 			trigger_event('view_change', [mode]);
 		}
+		self.change_view_mode = change_view_mode;
 	
 		function prepare() {
 			prepare_tasks();
@@ -141,9 +142,11 @@ return /******/ (function(modules) { // webpackBootstrap
 				if (!task.start && !task.end) {
 					task._start = moment().startOf('day');
 					task._end = moment().startOf('day').add(2, 'days');
-				} else if (!task.start) {
+				}
+				if (!task.start && task.end) {
 					task._start = task._end.clone().add(-2, 'days');
-				} else {
+				}
+				if (task.start && !task.end) {
 					task._end = task._start.clone().add(2, 'days');
 				}
 	
@@ -153,19 +156,17 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 	
 				// dependencies
-				var deps = void 0;
-	
-				if (task.dependencies) {
-					deps = task.dependencies.split(',').map(function (d) {
-						return d.trim();
-					}).filter(function (d) {
-						return d;
-					});
-				} else {
-					deps = [];
+				if (typeof task.dependencies === 'string' || !task.dependencies) {
+					var deps = [];
+					if (task.dependencies) {
+						deps = task.dependencies.split(',').map(function (d) {
+							return d.trim();
+						}).filter(function (d) {
+							return d;
+						});
+					}
+					task.dependencies = deps;
 				}
-				task.dependencies = deps;
-	
 				return task;
 			});
 		}
@@ -1518,7 +1519,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			var x = self.task._start.diff(gt.gantt_start, 'hours') / gt.config.step * gt.config.column_width;
 	
 			if (gt.view_is('Month')) {
-				x = self.task._start.diff(gt.config.start, 'days') * gt.config.column_width / 30;
+				x = self.task._start.diff(gt.gantt_start, 'days') * gt.config.column_width / 30;
 			}
 			return x;
 		}
@@ -1721,4 +1722,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ])
 });
 ;
-//# sourceMappingURL=gantt.js.map
+//# sourceMappingURL=frappe-gantt.js.map

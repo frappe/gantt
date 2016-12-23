@@ -61,6 +61,7 @@ export default function Gantt(element, tasks, config) {
 		// fire viewmode_change event
 		trigger_event('view_change', [mode]);
 	}
+	self.change_view_mode = change_view_mode;
 
 	function prepare() {
 		prepare_tasks();
@@ -85,9 +86,11 @@ export default function Gantt(element, tasks, config) {
 			if(!task.start && !task.end) {
 				task._start = moment().startOf('day');
 				task._end = moment().startOf('day').add(2, 'days');
-			} else if(!task.start) {
+			}
+			if(!task.start && task.end) {
 				task._start = task._end.clone().add(-2, 'days');
-			} else {
+			}
+			if(task.start && !task.end) {
 				task._end = task._start.clone().add(2, 'days');
 			}
 
@@ -97,18 +100,16 @@ export default function Gantt(element, tasks, config) {
 			}
 
 			// dependencies
-			let deps;
-
-			if(task.dependencies) {
-				deps = task.dependencies
-					.split(',')
-					.map(d => d.trim())
-					.filter((d) => d);
-			} else {
-				deps = [];
+			if(typeof task.dependencies === 'string' || !task.dependencies) {
+				let deps = [];
+				if(task.dependencies) {
+					deps = task.dependencies
+						.split(',')
+						.map(d => d.trim())
+						.filter((d) => d);
+				}
+				task.dependencies = deps;
 			}
-			task.dependencies = deps;
-
 			return task;
 		});
 	}

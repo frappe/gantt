@@ -1,6 +1,6 @@
 {
-  "name": "gantt",
-  "version": "0.1.3",
+  "name": "frappe-gantt",
+  "version": "0.0.1",
   "description": "Visualize tasks on a timeline",
   "main": "lib/gantt.js",
   "scripts": {
@@ -28,23 +28,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/krasimir/webpack-library-starter.git"
+    "url": "https://github.com/frappe/gantt.git"
   },
   "keywords": [
-    "webpack",
-    "es6",
-    "starter",
-    "library",
-    "universal",
-    "umd",
-    "commonjs"
+    "gantt",
+    "svg",
+    "simple gantt",
+    "project timeline"
   ],
-  "author": "Krasimir Tsonev",
+  "author": "Faris Ansari",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/krasimir/webpack-library-starter/issues"
+    "url": "https://github.com/frappe/gantt/issues"
   },
-  "homepage": "https://github.com/krasimir/webpack-library-starter",
+  "homepage": "https://github.com/frappe/gantt",
   "dependencies": {
     "moment": "^2.17.1",
     "snapsvg": "^0.4.0"

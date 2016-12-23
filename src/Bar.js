@@ -400,7 +400,7 @@ export default function Bar(gt, task) {
 			gt.config.step * gt.config.column_width;
 
 		if (gt.view_is('Month')) {
-			x = self.task._start.diff(gt.config.start, 'days') *
+			x = self.task._start.diff(gt.gantt_start, 'days') *
 				gt.config.column_width / 30;
 		}
 		return x;
