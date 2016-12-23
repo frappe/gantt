@@ -38,7 +38,8 @@
 				progress: i*10
 			}
 		});
-		tasks[0].dependencies = 'Task2, Task3';
+		tasks[1].dependencies = 'Task1';
+		tasks[2].dependencies = 'Task2';
 
 		var gantt_chart = gantt("#gantt", tasks, {
                 date_format: "YYYY-MM-DD",

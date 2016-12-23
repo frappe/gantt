@@ -296,7 +296,7 @@ export default function Bar(gt, task) {
 		const bar = self.$bar;
 		bar.finaldx = get_snap_position(dx);
 		update_bar_position(bar.ox + bar.finaldx, bar.owidth - bar.finaldx);
-		run_method_for_dependencies('onmove_handle_left', [dx, dy]);
+		run_method_for_dependencies('onmove', [dx, dy]);
 	}
 	self.onmove_handle_left = onmove_handle_left;
 
@@ -304,7 +304,7 @@ export default function Bar(gt, task) {
 		const bar = self.$bar;
 		if (bar.finaldx) date_changed();
 		set_action_completed();
-		run_method_for_dependencies('onstop_handle_left');
+		run_method_for_dependencies('onstop');
 	}
 	self.onstop_handle_left = onstop_handle_left;
 
