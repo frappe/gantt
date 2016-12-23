@@ -469,11 +469,17 @@ export default function Gantt(element, tasks, config) {
 
 	function bind_grid_click() {
 		self.element_groups.grid.click(() => {
-			self.canvas.selectAll('.bar-wrapper').forEach(el => {
-				el.removeClass('active');
-			});
+			unselect_all();
+			self.element_groups.details.addClass('hide');
 		});
 	}
+
+	function unselect_all() {
+		self.canvas.selectAll('.bar-wrapper').forEach(el => {
+			el.removeClass('active');
+		});
+	}
+	self.unselect_all = unselect_all;
 
 	function view_is(modes) {
 		if (typeof modes === 'string') {

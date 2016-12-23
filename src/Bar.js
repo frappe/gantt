@@ -130,11 +130,11 @@ export default function Bar(gt, task) {
 
 	function bind() {
 		if (self.invalid) return;
+		setup_click_event();
 		show_details();
 		bind_resize();
 		bind_drag();
 		bind_resize_progress();
-		setup_click_event();
 	}
 
 	function show_details() {
@@ -160,9 +160,18 @@ export default function Bar(gt, task) {
 				.attr({ dx: 10, dy: 90 })
 				.addClass('details-body')
 				.appendTo(details_box);
+			const f = gt.canvas.filter(
+				Snap.filter.shadow(0, 1, 1, '#666', 0.6));
+			details_box.attr({
+				filter: f
+			});
 		}
 
-		self.group.mouseover((e, x, y) => {
+		self.group.click((e) => {
+			if (self.action_completed) {
+				// just finished a move action, wait for a few seconds
+				return;
+			}
 			popover_group.removeClass('hide');
 
 			const pos = get_details_position();
@@ -188,10 +197,6 @@ export default function Bar(gt, task) {
 			const $body = popover_group.selectAll('.details-body');
 			$body[0].attr('text', body1);
 			$body[1].attr('text', body2);
-		});
-
-		self.group.mouseout(() => {
-			setTimeout(() => popover_group.addClass('hide'), 500);
 		});
 	}
 
@@ -350,7 +355,7 @@ export default function Bar(gt, task) {
 			if (self.group.hasClass('active')) {
 				gt.trigger_event('click', [self.task]);
 			}
-			unselect_all();
+			gt.unselect_all();
 			self.group.toggleClass('active');
 		});
 	}
@@ -468,12 +473,6 @@ export default function Bar(gt, task) {
 		const details_box = gt.element_groups.details.select('.details-wrapper');
 		const pos = get_details_position();
 		details_box && details_box.transform(`t${pos.x},${pos.y}`);
-	}
-
-	function unselect_all() {
-		gt.canvas.selectAll('.bar-wrapper').forEach(function (el) {
-			el.removeClass('active');
-		});
 	}
 
 	init();
