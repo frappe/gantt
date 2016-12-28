@@ -1,96 +1,60 @@
+var names = [
+    ["Redesign website", [0, 7]],
+    ["Write new content", [1, 4]],
+    ["Apply new styles", [3, 6]],
+    ["Review", [7, 7]],
+    ["Deploy", [8, 9]],
+    ["Go Live!", [10, 10]]
+];
 
-var tasks = [
-    {
-        start: "2016-10-04",
-        end: "2016-10-10",
-        name: "Explore ERPNext",
-        id: 0,
-        progress: 30
-    },
-    {
-        start: "2016-10-04",
-        end: "2016-10-06",
-        name: "Run Sales Cycle",
-        id: 1,
-        progress: 40
-    },
-    {
-        start: "2016-10-06",
-        end: "2016-10-08",
-        name: "Run Billing Cycle",
-        id: 2,
-        progress: 30
-    },
-    {
-        start: "2016-10-08",
-        end: "2016-10-10",
-        name: "Run Purchase Cycle",
-        id: 3,
-        progress: 20
-    },
-    {
-        start: "2016-10-10",
-        end: "2016-10-11",
-        name: "Import Data",
-        id: 4,
-        progress: 0
-    },
-    {
-        start: "2016-10-11",
-        end: "2016-10-11",
-        name: "Go Live!",
-        id: 5,
-        progress: 0
-    }
-]
-var gantt_1 = new Gantt({
-    parent_selector: '#gantt-1',
-    tasks: tasks,
-    date_format: "YYYY-MM-DD",
-    events: {
-        on_viewmode_change: function (mode) { }
+var tasks = names.map(function(name, i) {
+    var today = new Date();
+    var start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    var end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    start.setDate(today.getDate() + name[1][0]);
+    end.setDate(today.getDate() + name[1][1]);
+    return {
+        start: start,
+        end: end,
+        name: name[0],
+        id: "Task " + i,
+        progress: parseInt(Math.random() * 100, 10)
     }
 });
-gantt_1.render();
+tasks[1].dependencies = "Task 0"
+tasks[2].dependencies = "Task 1"
+tasks[3].dependencies = "Task 2"
+tasks[5].dependencies = "Task 4"
 
-var gantt_2 = new Gantt({
-    parent_selector: '#gantt-2',
-    tasks: tasks,
-    date_format: "YYYY-MM-DD",
-    events: {
-        on_viewmode_change: function (mode) { }
-    }
-});
-gantt_2.render();
-gantt_2.set_view_mode('Half Day');
+var gantt_chart = new Gantt("#gantt-1", tasks);
+document.querySelector(".gantt-container").scrollLeft = 1959;
+
+// change view mode example
+var gantt2 = new Gantt("#gantt-2", tasks);
+gantt2.change_view_mode('Week');
 
 $(function() {
-    $(".gantt-2 .btn-group").on("click", "button", function() {
+    $(".btn-group").on("click", "button", function() {
         $btn = $(this);
         var mode = $btn.text();
-        gantt_2.set_view_mode(mode);
+        gantt2.change_view_mode(mode);
         $btn.parent().find('button').removeClass('active');
         $btn.addClass('active');
     });
 });
 
-var gantt_3 = new Gantt({
-    parent_selector: '#gantt-3',
-    tasks: tasks,
-    date_format: "YYYY-MM-DD",
-    events: {
-        bar_on_click: function (task) {
-            console.log('bar_on_click', task);
-        },
-        bar_on_date_change: function (task, start, end) {
-            console.log('bar_on_date_change', task, start, end);
-        },
-        bar_on_progress_change: function (task, progress) {
-            console.log('bar_on_progress_change', task, progress);
-        },
-        on_viewmode_change: function (mode) {
-            console.log('on_viewmode_change', mode);
-        }
+// event listener example
+var gantt3 = new Gantt("#gantt-3", tasks, {
+    on_click: function (task) {
+        console.log(task);
+    },
+    on_date_change: function(task, start, end) {
+        console.log(task, start, end);
+    },
+    on_progress_change: function(task, progress) {
+        console.log(task, progress);
+    },
+    on_view_change: function(mode) {
+        console.log(mode);
     }
 });
-gantt_3.render();
