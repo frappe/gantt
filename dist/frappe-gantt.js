@@ -79,6 +79,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 		function init() {
 			set_defaults();
+	
+			// expose methods
+			self.change_view_mode = change_view_mode;
+			self.unselect_all = unselect_all;
+			self.view_is = view_is;
+			self.get_bar = get_bar;
+			self.trigger_event = trigger_event;
+	
 			// initialize with default view mode
 			change_view_mode(self.config.view_mode);
 		}
@@ -117,7 +125,6 @@ return /******/ (function(modules) { // webpackBootstrap
 			// fire viewmode_change event
 			trigger_event('view_change', [mode]);
 		}
-		self.change_view_mode = change_view_mode;
 	
 		function prepare() {
 			prepare_tasks();
@@ -170,6 +177,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				return task;
 			});
 		}
+	
 		function prepare_dependencies() {
 	
 			self.dependency_map = {};
@@ -710,7 +718,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				el.removeClass('active');
 			});
 		}
-		self.unselect_all = unselect_all;
 	
 		function view_is(modes) {
 			if (typeof modes === 'string') {
@@ -744,7 +751,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				return false;
 			}
 		}
-		self.view_is = view_is;
 	
 		function get_task(id) {
 			return self.tasks.find(function (task) {
@@ -757,14 +763,12 @@ return /******/ (function(modules) { // webpackBootstrap
 				return bar.task.id === id;
 			});
 		}
-		self.get_bar = get_bar; // required in Bar
 	
 		function trigger_event(event, args) {
 			if (self.config['on_' + event]) {
 				self.config['on_' + event].apply(null, args);
 			}
 		}
-		self.trigger_event = trigger_event;
 	
 		init();
 	
@@ -814,7 +818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	
 	// module
-	exports.push([module.id, ".gantt #grid .grid-background {\n  fill: none; }\n\n.gantt #grid .grid-header {\n  fill: #ffffff;\n  stroke: #e0e0e0;\n  stroke-width: 1.4; }\n\n.gantt #grid .grid-row {\n  fill: #ffffff; }\n\n.gantt #grid .grid-row:nth-child(even) {\n  fill: #f5f5f5; }\n\n.gantt #grid .row-line {\n  stroke: #ebeff2; }\n\n.gantt #grid .tick {\n  stroke: #e0e0e0;\n  stroke-width: 0.2; }\n  .gantt #grid .tick.thick {\n    stroke-width: 0.4; }\n\n.gantt #grid .today-highlight {\n  fill: #fcf8e3;\n  opacity: 0.5; }\n\n.gantt #arrow {\n  fill: none;\n  stroke: #666;\n  stroke-width: 1.4; }\n\n.gantt .bar {\n  fill: #b8c2cc;\n  stroke: #8D99A6;\n  stroke-width: 0;\n  transition: stroke-width .3s ease; }\n\n.gantt .bar-progress {\n  fill: #a3a3ff; }\n\n.gantt .bar-invalid {\n  fill: transparent;\n  stroke: #8D99A6;\n  stroke-width: 1;\n  stroke-dasharray: 5; }\n  .gantt .bar-invalid ~ .bar-label {\n    fill: #555; }\n\n.gantt .bar-label {\n  fill: #fff;\n  dominant-baseline: central;\n  text-anchor: middle;\n  font-size: 12px;\n  font-weight: lighter;\n  letter-spacing: 0.8px; }\n  .gantt .bar-label.big {\n    fill: #555;\n    text-anchor: start; }\n\n.gantt .handle {\n  fill: #ddd;\n  cursor: ew-resize;\n  opacity: 0;\n  visibility: hidden;\n  transition: opacity .3s ease; }\n\n.gantt .bar-wrapper {\n  cursor: pointer; }\n  .gantt .bar-wrapper:hover .bar {\n    stroke-width: 2; }\n  .gantt .bar-wrapper:hover .handle {\n    visibility: visible;\n    opacity: 1; }\n  .gantt .bar-wrapper.active .bar {\n    stroke-width: 2; }\n\n.gantt .primary-text, .gantt .secondary-text {\n  font-size: 12px;\n  text-anchor: middle; }\n\n.gantt .primary-text {\n  fill: #555; }\n\n.gantt .secondary-text {\n  fill: #333; }\n\n.gantt #details {\n  font-size: 14; }\n  .gantt #details .details-container {\n    stroke: #e0e0e0;\n    stroke-width: 1.1;\n    fill: #fff; }\n  .gantt #details .details-heading {\n    fill: #333;\n    font-weight: 500; }\n  .gantt #details .details-body {\n    fill: #555; }\n\n.gantt .hide {\n  display: none; }\n", "", {"version":3,"sources":["/./src/src/gantt.scss"],"names":[],"mappings":"AAYA;EAGG,WAAU,EACV;;AAJH;EAMG,cAAa;EACb,gBAjBmB;EAkBnB,kBAAiB,EACjB;;AATH;EAWG,cAAa,EACb;;AAZH;EAcG,cAvBe,EAwBf;;AAfH;EAiBG,gBAzByB,EA0BzB;;AAlBH;EAoBG,gBA9BmB;EA+BnB,kBAAiB,EAIjB;EAzBH;IAuBI,kBAAiB,EACjB;;AAxBJ;EA2BG,cAlCmB;EAmCnB,aAAY,EACZ;;AA7BH;EAiCE,WAAU;EACV,aAxCe;EAyCf,kBAAiB,EACjB;;AApCF;EAuCE,cAnDiB;EAoDjB,gBAnDkB;EAoDlB,gBAAe;EACf,kCAAiC,EACjC;;AA3CF;EA6CE,cAhDY,EAiDZ;;AA9CF;EAgDE,kBAAiB;EACjB,gBA5DkB;EA6DlB,gBAAe;EACf,oBAAmB,EAKnB;EAxDF;IAsDG,WA3Dc,EA4Dd;;AAvDH;EA0DE,WAAU;EACV,2BAA0B;EAC1B,oBAAmB;EACnB,gBAAe;EACf,qBAAoB;EACpB,sBAAqB,EAMrB;EArEF;IAkEG,WAvEc;IAwEd,mBAAkB,EAClB;;AApEH;EAwEE,WA1EiB;EA2EjB,kBAAiB;EACjB,WAAU;EACV,mBAAkB;EAClB,6BAA4B,EAC5B;;AA7EF;EAgFE,gBAAe,EAkBf;EAlGF;IAoFI,gBAAe,EACf;EArFJ;IAwFI,oBAAmB;IACnB,WAAU,EACV;EA1FJ;IA+FI,gBAAe,EACf;;AAhGJ;EAqGE,gBAAe;EACf,oBAAmB,EACnB;;AAvGF;EAyGE,WA9Ge,EA+Gf;;AA1GF;EA4GE,WAhHe,EAiHf;;AA7GF;EAgHE,cAAa,EAcb;EA9HF;IAmHG,gBA7HmB;IA8HnB,kBAAiB;IACjB,WAAU,EACV;EAtHH;IAwHG,WA5Hc;IA6Hd,iBAAgB,EAChB;EA1HH;IA4HG,WAjIc,EAkId;;AA7HH;EAiIE,cAAa,EACb","file":"gantt.scss","sourcesContent":["$bar-color: #b8c2cc;\n$bar-stroke: #8D99A6;\n$border-color: #e0e0e0;\n$light-bg: #f5f5f5;\n$light-border-color: #ebeff2;\n$light-yellow: #fcf8e3;\n$text-muted: #666;\n$text-light: #555;\n$text-color: #333;\n$blue: #a3a3ff;\n$handle-color: #ddd;\n\n.gantt {\n\t#grid {\n\t\t.grid-background {\n\t\t\tfill: none;\n\t\t}\n\t\t.grid-header {\n\t\t\tfill: #ffffff;\n\t\t\tstroke: $border-color;\n\t\t\tstroke-width: 1.4;\n\t\t}\n\t\t.grid-row {\n\t\t\tfill: #ffffff;\n\t\t}\n\t\t.grid-row:nth-child(even) {\n\t\t\tfill: $light-bg;\n\t\t}\n\t\t.row-line {\n\t\t\tstroke: $light-border-color;\n\t\t}\n\t\t.tick {\n\t\t\tstroke: $border-color;\n\t\t\tstroke-width: 0.2;\n\t\t\t&.thick {\n\t\t\t\tstroke-width: 0.4;\n\t\t\t}\n\t\t}\n\t\t.today-highlight {\n\t\t\tfill: $light-yellow;\n\t\t\topacity: 0.5;\n\t\t}\n\t}\n\n\t#arrow {\n\t\tfill: none;\n\t\tstroke: $text-muted;\n\t\tstroke-width: 1.4;\n\t}\n\n\t.bar {\n\t\tfill: $bar-color;\n\t\tstroke: $bar-stroke;\n\t\tstroke-width: 0;\n\t\ttransition: stroke-width .3s ease;\n\t}\n\t.bar-progress {\n\t\tfill: $blue;\n\t}\n\t.bar-invalid {\n\t\tfill: transparent;\n\t\tstroke: $bar-stroke;\n\t\tstroke-width: 1;\n\t\tstroke-dasharray: 5;\n\n\t\t&~.bar-label {\n\t\t\tfill: $text-light;\n\t\t}\n\t}\n\t.bar-label {\n\t\tfill: #fff;\n\t\tdominant-baseline: central;\n\t\ttext-anchor: middle;\n\t\tfont-size: 12px;\n\t\tfont-weight: lighter;\n\t\tletter-spacing: 0.8px;\n\n\t\t&.big {\n\t\t\tfill: $text-light;\n\t\t\ttext-anchor: start;\n\t\t}\n\t}\n\n\t.handle {\n\t\tfill: $handle-color;\n\t\tcursor: ew-resize;\n\t\topacity: 0;\n\t\tvisibility: hidden;\n\t\ttransition: opacity .3s ease;\n\t}\n\n\t.bar-wrapper {\n\t\tcursor: pointer;\n\n\t\t&:hover {\n\t\t\t.bar {\n\t\t\t\tstroke-width: 2;\n\t\t\t}\n\n\t\t\t.handle {\n\t\t\t\tvisibility: visible;\n\t\t\t\topacity: 1;\n\t\t\t}\n\t\t}\n\n\t\t&.active {\n\t\t\t.bar {\n\t\t\t\tstroke-width: 2;\n\t\t\t}\n\t\t}\n\t}\n\n\t.primary-text, .secondary-text {\n\t\tfont-size: 12px;\n\t\ttext-anchor: middle;\n\t}\n\t.primary-text {\n\t\tfill: $text-light;\n\t}\n\t.secondary-text {\n\t\tfill: $text-color;\n\t}\n\n\t#details {\n\t\tfont-size: 14;\n\n\t\t.details-container {\n\t\t\tstroke: $border-color;\n\t\t\tstroke-width: 1.1;\n\t\t\tfill: #fff;\n\t\t}\n\t\t.details-heading {\n\t\t\tfill: $text-color;\n\t\t\tfont-weight: 500;\n\t\t}\n\t\t.details-body {\n\t\t\tfill: $text-light;\n\t\t}\n\t}\n\n\t.hide {\n\t\tdisplay: none;\n\t}\n}"],"sourceRoot":"webpack://"}]);
+	exports.push([module.id, ".gantt .grid-background {\n  fill: none; }\n\n.gantt .grid-header {\n  fill: #ffffff;\n  stroke: #e0e0e0;\n  stroke-width: 1.4; }\n\n.gantt .grid-row {\n  fill: #ffffff; }\n\n.gantt .grid-row:nth-child(even) {\n  fill: #f5f5f5; }\n\n.gantt .row-line {\n  stroke: #ebeff2; }\n\n.gantt .tick {\n  stroke: #e0e0e0;\n  stroke-width: 0.2; }\n  .gantt .tick.thick {\n    stroke-width: 0.4; }\n\n.gantt .today-highlight {\n  fill: #fcf8e3;\n  opacity: 0.5; }\n\n.gantt #arrow {\n  fill: none;\n  stroke: #666;\n  stroke-width: 1.4; }\n\n.gantt .bar {\n  fill: #b8c2cc;\n  stroke: #8D99A6;\n  stroke-width: 0;\n  transition: stroke-width .3s ease; }\n\n.gantt .bar-progress {\n  fill: #a3a3ff; }\n\n.gantt .bar-invalid {\n  fill: transparent;\n  stroke: #8D99A6;\n  stroke-width: 1;\n  stroke-dasharray: 5; }\n  .gantt .bar-invalid ~ .bar-label {\n    fill: #555; }\n\n.gantt .bar-label {\n  fill: #fff;\n  dominant-baseline: central;\n  text-anchor: middle;\n  font-size: 12px;\n  font-weight: lighter;\n  letter-spacing: 0.8px; }\n  .gantt .bar-label.big {\n    fill: #555;\n    text-anchor: start; }\n\n.gantt .handle {\n  fill: #ddd;\n  cursor: ew-resize;\n  opacity: 0;\n  visibility: hidden;\n  transition: opacity .3s ease; }\n\n.gantt .bar-wrapper {\n  cursor: pointer; }\n  .gantt .bar-wrapper:hover .bar {\n    stroke-width: 2; }\n  .gantt .bar-wrapper:hover .handle {\n    visibility: visible;\n    opacity: 1; }\n  .gantt .bar-wrapper.active .bar {\n    stroke-width: 2; }\n\n.gantt .primary-text, .gantt .secondary-text {\n  font-size: 12px;\n  text-anchor: middle; }\n\n.gantt .primary-text {\n  fill: #555; }\n\n.gantt .secondary-text {\n  fill: #333; }\n\n.gantt #details {\n  font-size: 14; }\n  .gantt #details .details-container {\n    stroke: #e0e0e0;\n    stroke-width: 1.1;\n    fill: #fff; }\n  .gantt #details .details-heading {\n    fill: #333;\n    font-weight: 500; }\n  .gantt #details .details-body {\n    fill: #555; }\n\n.gantt .hide {\n  display: none; }\n", "", {"version":3,"sources":["/./src/src/gantt.scss"],"names":[],"mappings":"AAYA;EAGE,WAAU,EACV;;AAJF;EAME,cAAa;EACb,gBAjBoB;EAkBpB,kBAAiB,EACjB;;AATF;EAWE,cAAa,EACb;;AAZF;EAcE,cAvBgB,EAwBhB;;AAfF;EAiBE,gBAzB0B,EA0B1B;;AAlBF;EAoBE,gBA9BoB;EA+BpB,kBAAiB,EAIjB;EAzBF;IAuBG,kBAAiB,EACjB;;AAxBH;EA2BE,cAlCoB;EAmCpB,aAAY,EACZ;;AA7BF;EAgCE,WAAU;EACV,aAvCe;EAwCf,kBAAiB,EACjB;;AAnCF;EAsCE,cAlDiB;EAmDjB,gBAlDkB;EAmDlB,gBAAe;EACf,kCAAiC,EACjC;;AA1CF;EA4CE,cA/CY,EAgDZ;;AA7CF;EA+CE,kBAAiB;EACjB,gBA3DkB;EA4DlB,gBAAe;EACf,oBAAmB,EAKnB;EAvDF;IAqDG,WA1Dc,EA2Dd;;AAtDH;EAyDE,WAAU;EACV,2BAA0B;EAC1B,oBAAmB;EACnB,gBAAe;EACf,qBAAoB;EACpB,sBAAqB,EAMrB;EApEF;IAiEG,WAtEc;IAuEd,mBAAkB,EAClB;;AAnEH;EAuEE,WAzEiB;EA0EjB,kBAAiB;EACjB,WAAU;EACV,mBAAkB;EAClB,6BAA4B,EAC5B;;AA5EF;EA+EE,gBAAe,EAkBf;EAjGF;IAmFI,gBAAe,EACf;EApFJ;IAuFI,oBAAmB;IACnB,WAAU,EACV;EAzFJ;IA8FI,gBAAe,EACf;;AA/FJ;EAoGE,gBAAe;EACf,oBAAmB,EACnB;;AAtGF;EAwGE,WA7Ge,EA8Gf;;AAzGF;EA2GE,WA/Ge,EAgHf;;AA5GF;EA+GE,cAAa,EAcb;EA7HF;IAkHG,gBA5HmB;IA6HnB,kBAAiB;IACjB,WAAU,EACV;EArHH;IAuHG,WA3Hc;IA4Hd,iBAAgB,EAChB;EAzHH;IA2HG,WAhIc,EAiId;;AA5HH;EAgIE,cAAa,EACb","file":"gantt.scss","sourcesContent":["$bar-color: #b8c2cc;\n$bar-stroke: #8D99A6;\n$border-color: #e0e0e0;\n$light-bg: #f5f5f5;\n$light-border-color: #ebeff2;\n$light-yellow: #fcf8e3;\n$text-muted: #666;\n$text-light: #555;\n$text-color: #333;\n$blue: #a3a3ff;\n$handle-color: #ddd;\n\n.gantt {\n\n\t.grid-background {\n\t\tfill: none;\n\t}\n\t.grid-header {\n\t\tfill: #ffffff;\n\t\tstroke: $border-color;\n\t\tstroke-width: 1.4;\n\t}\n\t.grid-row {\n\t\tfill: #ffffff;\n\t}\n\t.grid-row:nth-child(even) {\n\t\tfill: $light-bg;\n\t}\n\t.row-line {\n\t\tstroke: $light-border-color;\n\t}\n\t.tick {\n\t\tstroke: $border-color;\n\t\tstroke-width: 0.2;\n\t\t&.thick {\n\t\t\tstroke-width: 0.4;\n\t\t}\n\t}\n\t.today-highlight {\n\t\tfill: $light-yellow;\n\t\topacity: 0.5;\n\t}\n\n\t#arrow {\n\t\tfill: none;\n\t\tstroke: $text-muted;\n\t\tstroke-width: 1.4;\n\t}\n\n\t.bar {\n\t\tfill: $bar-color;\n\t\tstroke: $bar-stroke;\n\t\tstroke-width: 0;\n\t\ttransition: stroke-width .3s ease;\n\t}\n\t.bar-progress {\n\t\tfill: $blue;\n\t}\n\t.bar-invalid {\n\t\tfill: transparent;\n\t\tstroke: $bar-stroke;\n\t\tstroke-width: 1;\n\t\tstroke-dasharray: 5;\n\n\t\t&~.bar-label {\n\t\t\tfill: $text-light;\n\t\t}\n\t}\n\t.bar-label {\n\t\tfill: #fff;\n\t\tdominant-baseline: central;\n\t\ttext-anchor: middle;\n\t\tfont-size: 12px;\n\t\tfont-weight: lighter;\n\t\tletter-spacing: 0.8px;\n\n\t\t&.big {\n\t\t\tfill: $text-light;\n\t\t\ttext-anchor: start;\n\t\t}\n\t}\n\n\t.handle {\n\t\tfill: $handle-color;\n\t\tcursor: ew-resize;\n\t\topacity: 0;\n\t\tvisibility: hidden;\n\t\ttransition: opacity .3s ease;\n\t}\n\n\t.bar-wrapper {\n\t\tcursor: pointer;\n\n\t\t&:hover {\n\t\t\t.bar {\n\t\t\t\tstroke-width: 2;\n\t\t\t}\n\n\t\t\t.handle {\n\t\t\t\tvisibility: visible;\n\t\t\t\topacity: 1;\n\t\t\t}\n\t\t}\n\n\t\t&.active {\n\t\t\t.bar {\n\t\t\t\tstroke-width: 2;\n\t\t\t}\n\t\t}\n\t}\n\n\t.primary-text, .secondary-text {\n\t\tfont-size: 12px;\n\t\ttext-anchor: middle;\n\t}\n\t.primary-text {\n\t\tfill: $text-light;\n\t}\n\t.secondary-text {\n\t\tfill: $text-color;\n\t}\n\n\t#details {\n\t\tfont-size: 14;\n\n\t\t.details-container {\n\t\t\tstroke: $border-color;\n\t\t\tstroke-width: 1.1;\n\t\t\tfill: #fff;\n\t\t}\n\t\t.details-heading {\n\t\t\tfill: $text-color;\n\t\t\tfont-weight: 500;\n\t\t}\n\t\t.details-body {\n\t\t\tfill: $text-light;\n\t\t}\n\t}\n\n\t.hide {\n\t\tdisplay: none;\n\t}\n}"],"sourceRoot":"webpack://"}]);
 	
 	// exports
 

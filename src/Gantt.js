@@ -17,6 +17,14 @@ export default function Gantt(element, tasks, config) {
 
 	function init() {
 		set_defaults();
+
+		// expose methods
+		self.change_view_mode = change_view_mode;
+		self.unselect_all = unselect_all;
+		self.view_is = view_is;
+		self.get_bar = get_bar;
+		self.trigger_event = trigger_event;
+
 		// initialize with default view mode
 		change_view_mode(self.config.view_mode);
 	}
@@ -61,7 +69,6 @@ export default function Gantt(element, tasks, config) {
 		// fire viewmode_change event
 		trigger_event('view_change', [mode]);
 	}
-	self.change_view_mode = change_view_mode;
 
 	function prepare() {
 		prepare_tasks();
@@ -113,6 +120,7 @@ export default function Gantt(element, tasks, config) {
 			return task;
 		});
 	}
+
 	function prepare_dependencies() {
 
 		self.dependency_map = {};
@@ -480,7 +488,6 @@ export default function Gantt(element, tasks, config) {
 			el.removeClass('active');
 		});
 	}
-	self.unselect_all = unselect_all;
 
 	function view_is(modes) {
 		if (typeof modes === 'string') {
@@ -492,7 +499,6 @@ export default function Gantt(element, tasks, config) {
 			return false;
 		}
 	}
-	self.view_is = view_is;
 
 	function get_task(id) {
 		return self.tasks.find((task) => {
@@ -505,14 +511,12 @@ export default function Gantt(element, tasks, config) {
 			return bar.task.id === id;
 		});
 	}
-	self.get_bar = get_bar; // required in Bar
 
 	function trigger_event(event, args) {
 		if(self.config['on_' + event]) {
 			self.config['on_' + event].apply(null, args);
 		}
 	}
-	self.trigger_event = trigger_event;
 
 	init();
 

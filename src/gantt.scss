@@ -11,35 +11,34 @@ $blue: #a3a3ff;
 $handle-color: #ddd;
 
 .gantt {
-	#grid {
-		.grid-background {
-			fill: none;
+
+	.grid-background {
+		fill: none;
+	}
+	.grid-header {
+		fill: #ffffff;
+		stroke: $border-color;
+		stroke-width: 1.4;
+	}
+	.grid-row {
+		fill: #ffffff;
+	}
+	.grid-row:nth-child(even) {
+		fill: $light-bg;
+	}
+	.row-line {
+		stroke: $light-border-color;
+	}
+	.tick {
+		stroke: $border-color;
+		stroke-width: 0.2;
+		&.thick {
+			stroke-width: 0.4;
 		}
-		.grid-header {
-			fill: #ffffff;
-			stroke: $border-color;
-			stroke-width: 1.4;
-		}
-		.grid-row {
-			fill: #ffffff;
-		}
-		.grid-row:nth-child(even) {
-			fill: $light-bg;
-		}
-		.row-line {
-			stroke: $light-border-color;
-		}
-		.tick {
-			stroke: $border-color;
-			stroke-width: 0.2;
-			&.thick {
-				stroke-width: 0.4;
-			}
-		}
-		.today-highlight {
-			fill: $light-yellow;
-			opacity: 0.5;
-		}
+	}
+	.today-highlight {
+		fill: $light-yellow;
+		opacity: 0.5;
 	}
 
 	#arrow {
