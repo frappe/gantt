@@ -1,7 +1,7 @@
 # Frappé Gantt
 A simple, interactive, modern gantt chart library for the web
 
-![image](https://cloud.githubusercontent.com/assets/9355208/19997551/5bc597f2-a28d-11e6-809a-4cfa5fdf96d2.png)
+![image](https://cloud.githubusercontent.com/assets/9355208/21537921/4a38b194-cdbd-11e6-8110-e0da19678a6d.png)
 
 ####View the demo [here](https://frappe.github.io/gantt).
 
@@ -13,21 +13,23 @@ npm install frappe-gantt
 ###Usage
 Include it in your html:
 ```
-<script src="frappe-gantt.js"></script>
+<script src="frappe-gantt.min.js"></script>
 ```
 
 And start hacking:
 ```
-var gantt = new Gantt(
-  "#gantt",
-  [
-    {
-      start: "2016-10-04", end: "2016-10-10",
-      id: 0, name: "Explore ERPNext"
-    },
-    ...
-  ]
-});
+var tasks = [
+  {
+    id: 'Task 1',
+    name: 'Redesign website',
+    start: '2016-12-28',
+    end: '2016-12-31',
+    progress: 20,
+    dependencies: 'Task 2, Task 3'
+  },
+  ...
+]
+var gantt = new Gantt("#gantt", tasks);
 ```
 
 If you want to contribute:
@@ -37,6 +39,7 @@ If you want to contribute:
 3. `npm install`
 4. `npm run dev`
 
+License: MIT
 
 ------------------
 Project maintained by [frappe](https://github.com/frappe)
