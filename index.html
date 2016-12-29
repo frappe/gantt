@@ -3,9 +3,12 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>Gantt by frappe</title>
+	<title>Open Source Javascript Gantt - Frappe Gantt</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" type="text/css" href="css/normalize.css" media="screen">
+  <meta name="keywords" content="open source javascript js gantt library svg interactive project management beautiful drag resize">
+  <meta name="description" content="A simple, interactive, modern gantt chart library for the web with drag, resize, dependencies and time scales">
+
+  <link rel="stylesheet" type="text/css" href="css/normalize.css" media="screen">
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" media="screen">
 	<link rel="stylesheet" type="text/css" href="css/frappe_theme.css" media="screen">
@@ -28,10 +31,10 @@
       </div>
 			
 			<div class="col-sm-10 push-sm-1 later" style="font-size: 14px;">
-        <p>Drag tasks across the timeline, resize to change duration, click to view more information  </p>
 				<div class="gantt-container" style="overflow: scroll">
 					<svg id="gantt-1"></svg>
 				</div>
+        <p class="mt-1"><strong>Try it!</strong> Drag tasks across the timeline, resize to change duration, click to view more information  </p>
 			</div>
 		</div>
 
@@ -48,14 +51,14 @@
         <div class="col-sm-10 push-sm-1">
           <div class="dashboard-section">
 						<h1>Usage</h1>
-            <p class="lead" style="margin: 2em 0 0 0">
+            <p class="lead" style="margin: 1em 0 0 0">
               Dependencies: <a target="_blank" href="http://momentjs.com">momentjs</a> and <a target="_blank" href="http://snapsvg.io">snapsvg</a> 
             </p>
 						<p class="lead" style="margin:2em 0 0 0">
               Include it in your html
             </p>
             <pre>
-              <code class="hljs html">&lt;script src="frappe-gantt.js" /&gt;</code>
+              <code class="hljs html">&lt;script src="frappe-gantt.min.js" /&gt;</code>
             </pre>
 						<p class="lead" style="margin:0">Create an svg element</p>
             <pre>
@@ -90,11 +93,11 @@ var gantt = new Gantt("#gantt", tasks);
               <svg id="gantt-2"></svg>
             </div>
             <div class="btn-group mt-1 mx-auto" role="group">
-              <button type="button" class="btn btn-secondary">Quarter Day</button>
-              <button type="button" class="btn btn-secondary">Half Day</button>
-              <button type="button" class="btn btn-secondary">Day</button>
-              <button type="button" class="btn btn-secondary active">Week</button>
-              <button type="button" class="btn btn-secondary">Month</button>
+              <button type="button" class="btn btn-sm btn-secondary">Quarter Day</button>
+              <button type="button" class="btn btn-sm btn-secondary">Half Day</button>
+              <button type="button" class="btn btn-sm btn-secondary">Day</button>
+              <button type="button" class="btn btn-sm btn-secondary active">Week</button>
+              <button type="button" class="btn btn-sm btn-secondary">Month</button>
             </div>
             <p class="lead" style="margin:2em 0 0 0">Add event listeners</p>
             <pre>
@@ -119,6 +122,7 @@ var gantt = new Gantt("#gantt", tasks);
             <div class="text-center" style="margin-top: 70px">
               <a href="https://github.com/frappe/gantt/archive/master.zip"><button class="large blue button">Download</button></a>
               <p class="mt-2"><a href="https://github.com/frappe/gantt" target="_blank">View on GitHub</a></p>
+              <p>License: MIT</p>
             </div>
 					</div>
 				</div>

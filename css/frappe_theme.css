@@ -247,7 +247,6 @@ h1 {
   padding: 70px 0;
   font-size: 1.6em;
   font-weight: 300;
-  border-bottom: 1px solid #e1e9f0;
   text-align: center;
 }
 .hero-content {
@@ -687,4 +686,8 @@ article hr + h3 {
 
 .text-center {
   text-align: center;
+}
+
+.jumbotron {
+  margin-bottom: 0;
 }
