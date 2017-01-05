@@ -1236,15 +1236,19 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (self.invalid) return;
 	
 			var bar = self.$bar,
-			    bar_progress = self.$bar_progress,
 			    handle_width = 8;
 	
 			gt.canvas.rect(bar.getX() + bar.getWidth() - 9, bar.getY() + 1, handle_width, self.height - 2, self.corner_radius, self.corner_radius).addClass('handle right').appendTo(self.handle_group);
 			gt.canvas.rect(bar.getX() + 1, bar.getY() + 1, handle_width, self.height - 2, self.corner_radius, self.corner_radius).addClass('handle left').appendTo(self.handle_group);
 	
 			if (self.task.progress && self.task.progress < 100) {
-				gt.canvas.polygon(bar_progress.getEndX() - 5, bar_progress.getY() + bar_progress.getHeight(), bar_progress.getEndX() + 5, bar_progress.getY() + bar_progress.getHeight(), bar_progress.getEndX(), bar_progress.getY() + bar_progress.getHeight() - 8.66).addClass('handle progress').appendTo(self.handle_group);
+				gt.canvas.polygon(get_progress_polygon_points()).addClass('handle progress').appendTo(self.handle_group);
 			}
+		}
+	
+		function get_progress_polygon_points() {
+			var bar_progress = self.$bar_progress;
+			return [bar_progress.getEndX() - 5, bar_progress.getY() + bar_progress.getHeight(), bar_progress.getEndX() + 5, bar_progress.getY() + bar_progress.getHeight(), bar_progress.getEndX(), bar_progress.getY() + bar_progress.getHeight() - 8.66];
 		}
 	
 		function bind() {
@@ -1357,7 +1361,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 	
 				bar_progress.attr('width', bar_progress.owidth + dx);
-				handle.transform('t{dx},0');
+				handle.attr('points', get_progress_polygon_points());
 				bar_progress.finaldx = dx;
 			}
 			function on_stop() {
@@ -1581,6 +1585,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			self.handle_group.select('.handle.right').attr({
 				'x': bar.getEndX() - 9
 			});
+			self.group.select('.handle.progress').attr('points', get_progress_polygon_points());
 		}
 	
 		function update_arrow_position() {

@@ -28,24 +28,35 @@
 		</div>
 	</div>
 	<script>
-		var arr = [1, 2, 3, 4, 5, 6];
-		var tasks = arr.map(function(i){
+		var names = [
+			["Redesign website", [0, 7]],
+			["Write new content", [1, 4]],
+			["Apply new styles", [3, 6]],
+			["Review", [7, 7]],
+			["Deploy", [8, 9]],
+			["Go Live!", [10, 10]]
+		];
+
+		var tasks = names.map(function(name, i) {
+			var today = new Date();
+			var start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+			var end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+			start.setDate(today.getDate() + name[1][0]);
+			end.setDate(today.getDate() + name[1][1]);
 			return {
-				start: "2016-10-0"+i,
-				end: "2016-11-0"+i,
-				name: "Task "+i,
-				id: "Task"+i,
-				progress: i*10
+				start: start,
+				end: end,
+				name: name[0],
+				id: "Task " + i,
+				progress: parseInt(Math.random() * 100, 10)
 			}
 		});
-		tasks[1].dependencies = 'Task1';
-		tasks[2].dependencies = 'Task2';
+		tasks[1].dependencies = "Task 0"
+		tasks[2].dependencies = "Task 1"
+		tasks[3].dependencies = "Task 2"
+		tasks[5].dependencies = "Task 4"
 
 		var gantt_chart = Gantt("#gantt", tasks, {
-                date_format: "YYYY-MM-DD",
-                bar: {
-                    height: 20
-                },
 				on_click: function (task) {
 					console.log(task);
 				},
