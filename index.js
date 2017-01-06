@@ -27,7 +27,7 @@ tasks[3].dependencies = "Task 2"
 tasks[5].dependencies = "Task 4"
 
 var gantt_chart = new Gantt("#gantt-1", tasks);
-document.querySelector(".gantt-container").scrollLeft = 2045;
+// document.querySelector(".gantt-container").scrollLeft = 2045;
 
 // change view mode example
 var gantt2 = new Gantt("#gantt-2", tasks);
