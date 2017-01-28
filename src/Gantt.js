@@ -244,7 +244,7 @@ export default function Gantt(element, tasks, config) {
 		if(!parent_element) return;
 
 		const scroll_pos = get_min_date().diff(self.gantt_start, 'hours') /
-			self.config.step * self.config.column_width;
+			self.config.step * self.config.column_width - self.config.column_width;
 		parent_element.scrollLeft = scroll_pos;
 	}
 

@@ -382,7 +382,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			var parent_element = document.querySelector(self.element).parentElement;
 			if (!parent_element) return;
 	
-			var scroll_pos = get_min_date().diff(self.gantt_start, 'hours') / self.config.step * self.config.column_width;
+			var scroll_pos = get_min_date().diff(self.gantt_start, 'hours') / self.config.step * self.config.column_width - self.config.column_width;
 			parent_element.scrollLeft = scroll_pos;
 		}
 	
@@ -1146,11 +1146,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		Class: Bar
 	
 		Opts:
-			canvas [reqd]
-			task [reqd]
-			column_width [reqd]
-			x
-			y
+			gt: Gantt object
+			task: task object
 	*/
 	
 	function Bar(gt, task) {
@@ -1286,23 +1283,30 @@ return /******/ (function(modules) { // webpackBootstrap
 				var pos = get_details_position();
 				details_box.transform('t' + pos.x + ',' + pos.y);
 	
-				var start_date = self.task._start.format('MMM D'),
-				    end_date = self.task._end.format('MMM D'),
-				    heading = self.task.name + ': ' + start_date + ' - ' + end_date;
-	
-				var $heading = popover_group.select('.details-heading').attr('text', heading);
-	
-				var bbox = $heading.getBBox();
-				details_box.select('.details-container').attr({ width: bbox.width + 20 });
-	
-				var duration = self.task._end.diff(self.task._start, 'days'),
-				    body1 = 'Duration: ' + duration + ' days',
-				    body2 = self.task.progress ? 'Progress: ' + self.task.progress : '';
-	
-				var $body = popover_group.selectAll('.details-body');
-				$body[0].attr('text', body1);
-				$body[1].attr('text', body2);
+				render_details();
 			});
+		}
+	
+		function render_details() {
+			var popover_group = gt.element_groups.details;
+			var details_box = popover_group.select('.details-wrapper');
+	
+			var start_date = self.task._start.format('MMM D'),
+			    end_date = self.task._end.format('MMM D'),
+			    heading = self.task.name + ': ' + start_date + ' - ' + end_date;
+	
+			var $heading = popover_group.select('.details-heading').attr('text', heading);
+	
+			var bbox = $heading.getBBox();
+			details_box.select('.details-container').attr({ width: bbox.width + 20 });
+	
+			var duration = self.task._end.diff(self.task._start, 'days'),
+			    body1 = 'Duration: ' + duration + ' days',
+			    body2 = self.task.progress ? 'Progress: ' + self.task.progress : '';
+	
+			var $body = popover_group.selectAll('.details-body');
+			$body[0].attr('text', body1);
+			$body[1].attr('text', body2);
 		}
 	
 		function get_details_position() {
@@ -1390,7 +1394,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		function onmove(dx, dy) {
 			var bar = self.$bar;
 			bar.finaldx = get_snap_position(dx);
-			update_bar_position(bar.ox + bar.finaldx);
+			update_bar_position({ x: bar.ox + bar.finaldx });
 			run_method_for_dependencies('onmove', [dx, dy]);
 		}
 		self.onmove = onmove;
@@ -1407,7 +1411,10 @@ return /******/ (function(modules) { // webpackBootstrap
 		function onmove_handle_left(dx, dy) {
 			var bar = self.$bar;
 			bar.finaldx = get_snap_position(dx);
-			update_bar_position(bar.ox + bar.finaldx, bar.owidth - bar.finaldx);
+			update_bar_position({
+				x: bar.ox + bar.finaldx,
+				width: bar.owidth - bar.finaldx
+			});
 			run_method_for_dependencies('onmove', [dx, dy]);
 		}
 		self.onmove_handle_left = onmove_handle_left;
@@ -1454,7 +1461,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		function onmove_handle_right(dx, dy) {
 			var bar = self.$bar;
 			bar.finaldx = get_snap_position(dx);
-			update_bar_position(null, bar.owidth + bar.finaldx);
+			update_bar_position({ width: bar.owidth + bar.finaldx });
 		}
 	
 		function onstop_handle_right() {
@@ -1463,10 +1470,31 @@ return /******/ (function(modules) { // webpackBootstrap
 			set_action_completed();
 		}
 	
-		function update_bar_position(x, width) {
+		function update_bar_position(_ref) {
+			var _ref$x = _ref.x,
+			    x = _ref$x === undefined ? null : _ref$x,
+			    _ref$width = _ref.width,
+			    width = _ref$width === undefined ? null : _ref$width;
+	
 			var bar = self.$bar;
-			if (x) update_attr(bar, 'x', x);
-			if (width) update_attr(bar, 'width', width);
+			if (x) {
+				// get all x values of parent task
+				var xs = task.dependencies.map(function (dep) {
+					return gt.get_bar(dep).$bar.getX();
+				});
+				// child task must not go before parent
+				var valid_x = xs.reduce(function (prev, curr) {
+					return x >= curr;
+				}, x);
+				if (!valid_x) {
+					width = null;
+					return;
+				}
+				update_attr(bar, 'x', x);
+			}
+			if (width && width >= gt.config.column_width) {
+				update_attr(bar, 'width', width);
+			}
 			update_label_position();
 			update_handle_position();
 			update_progressbar_position();

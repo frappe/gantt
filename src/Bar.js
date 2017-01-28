@@ -3,11 +3,8 @@
 	Class: Bar
 
 	Opts:
-		canvas [reqd]
-		task [reqd]
-		column_width [reqd]
-		x
-		y
+		gt: Gantt object
+		task: task object
 */
 
 export default function Bar(gt, task) {
@@ -181,27 +178,34 @@ export default function Bar(gt, task) {
 			const pos = get_details_position();
 			details_box.transform(`t${pos.x},${pos.y}`);
 
-			const start_date = self.task._start.format('MMM D'),
-				end_date = self.task._end.format('MMM D'),
-				heading = `${self.task.name}: ${start_date} - ${end_date}`;
-
-			const $heading = popover_group
-				.select('.details-heading')
-				.attr('text', heading);
-
-			const bbox = $heading.getBBox();
-			details_box.select('.details-container')
-				.attr({ width: bbox.width + 20 });
-
-			const duration = self.task._end.diff(self.task._start, 'days'),
-				body1 = `Duration: ${duration} days`,
-				body2 = self.task.progress ?
-					`Progress: ${self.task.progress}` : '';
-
-			const $body = popover_group.selectAll('.details-body');
-			$body[0].attr('text', body1);
-			$body[1].attr('text', body2);
+			render_details();
 		});
+	}
+
+	function render_details() {
+		const popover_group = gt.element_groups.details;
+		let details_box = popover_group.select('.details-wrapper');
+
+		const start_date = self.task._start.format('MMM D'),
+			end_date = self.task._end.format('MMM D'),
+			heading = `${self.task.name}: ${start_date} - ${end_date}`;
+
+		const $heading = popover_group
+			.select('.details-heading')
+			.attr('text', heading);
+
+		const bbox = $heading.getBBox();
+		details_box.select('.details-container')
+			.attr({ width: bbox.width + 20 });
+
+		const duration = self.task._end.diff(self.task._start, 'days'),
+			body1 = `Duration: ${duration} days`,
+			body2 = self.task.progress ?
+				`Progress: ${self.task.progress}` : '';
+
+		const $body = popover_group.selectAll('.details-body');
+		$body[0].attr('text', body1);
+		$body[1].attr('text', body2);
 	}
 
 	function get_details_position() {
@@ -287,7 +291,7 @@ export default function Bar(gt, task) {
 	function onmove(dx, dy) {
 		const bar = self.$bar;
 		bar.finaldx = get_snap_position(dx);
-		update_bar_position(bar.ox + bar.finaldx);
+		update_bar_position({x: bar.ox + bar.finaldx});
 		run_method_for_dependencies('onmove', [dx, dy]);
 	}
 	self.onmove = onmove;
@@ -304,7 +308,10 @@ export default function Bar(gt, task) {
 	function onmove_handle_left(dx, dy) {
 		const bar = self.$bar;
 		bar.finaldx = get_snap_position(dx);
-		update_bar_position(bar.ox + bar.finaldx, bar.owidth - bar.finaldx);
+		update_bar_position({
+			x: bar.ox + bar.finaldx,
+			width: bar.owidth - bar.finaldx
+		});
 		run_method_for_dependencies('onmove', [dx, dy]);
 	}
 	self.onmove_handle_left = onmove_handle_left;
@@ -330,7 +337,7 @@ export default function Bar(gt, task) {
 	function onmove_handle_right(dx, dy) {
 		const bar = self.$bar;
 		bar.finaldx = get_snap_position(dx);
-		update_bar_position(null, bar.owidth + bar.finaldx);
+		update_bar_position({width: bar.owidth + bar.finaldx});
 	}
 
 	function onstop_handle_right() {
@@ -339,10 +346,26 @@ export default function Bar(gt, task) {
 		set_action_completed();
 	}
 
-	function update_bar_position(x, width) {
+	function update_bar_position({x = null, width = null}) {
 		const bar = self.$bar;
-		if (x) update_attr(bar, 'x', x);
-		if (width) update_attr(bar, 'width', width);
+		if (x) {
+			// get all x values of parent task
+			const xs = task.dependencies.map(dep => {
+				return gt.get_bar(dep).$bar.getX();
+			});
+			// child task must not go before parent
+			const valid_x = xs.reduce((prev, curr) => {
+				return x >= curr;
+			}, x);
+			if(!valid_x) {
+				width = null;
+				return;
+			}
+			update_attr(bar, 'x', x);
+		}
+		if (width && width >= gt.config.column_width) {
+			update_attr(bar, 'width', width);
+		}
 		update_label_position();
 		update_handle_position();
 		update_progressbar_position();
