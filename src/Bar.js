@@ -145,7 +145,7 @@ export default function Bar(gt, task) {
 
 		if (!self.details_box) {
 			self.details_box = gt.canvas.group()
-				.addClass('details-wrapper')
+				.addClass('details-wrapper hide')
 				.attr('data-task', self.task.id)
 				.appendTo(popover_group);
 			gt.canvas.rect(0, 0, 0, 110, 2, 2)
