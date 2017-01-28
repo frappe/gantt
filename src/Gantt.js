@@ -479,7 +479,9 @@ export default function Gantt(element, tasks, config) {
 	function bind_grid_click() {
 		self.element_groups.grid.click(() => {
 			unselect_all();
-			self.element_groups.details.addClass('hide');
+			self.element_groups.details
+				.selectAll('.details-wrapper')
+				.forEach(el => el.addClass('hide'));
 		});
 	}
 

@@ -140,30 +140,32 @@ export default function Bar(gt, task) {
 
 	function show_details() {
 		const popover_group = gt.element_groups.details;
-		let details_box = popover_group.select('.details-wrapper');
+		self.details_box = popover_group
+			.select(`.details-wrapper[data-task='${self.task.id}']`);
 
-		if (!details_box) {
-			details_box = gt.canvas.group()
+		if (!self.details_box) {
+			self.details_box = gt.canvas.group()
 				.addClass('details-wrapper')
+				.attr('data-task', self.task.id)
 				.appendTo(popover_group);
 			gt.canvas.rect(0, 0, 0, 110, 2, 2)
 				.addClass('details-container')
-				.appendTo(details_box);
+				.appendTo(self.details_box);
 			gt.canvas.text(0, 0, '')
 				.attr({ dx: 10, dy: 30 })
 				.addClass('details-heading')
-				.appendTo(details_box);
+				.appendTo(self.details_box);
 			gt.canvas.text(0, 0, '')
 				.attr({ dx: 10, dy: 65 })
 				.addClass('details-body')
-				.appendTo(details_box);
+				.appendTo(self.details_box);
 			gt.canvas.text(0, 0, '')
 				.attr({ dx: 10, dy: 90 })
 				.addClass('details-body')
-				.appendTo(details_box);
+				.appendTo(self.details_box);
 			const f = gt.canvas.filter(
 				Snap.filter.shadow(0, 1, 1, '#666', 0.6));
-			details_box.attr({
+			self.details_box.attr({
 				filter: f
 			});
 		}
@@ -173,37 +175,35 @@ export default function Bar(gt, task) {
 				// just finished a move action, wait for a few seconds
 				return;
 			}
-			popover_group.removeClass('hide');
-
-			const pos = get_details_position();
-			details_box.transform(`t${pos.x},${pos.y}`);
-
+			popover_group.selectAll('.details-wrapper')
+				.forEach(el => el.addClass('hide'));
 			render_details();
+			self.details_box.removeClass('hide');
 		});
 	}
 
 	function render_details() {
-		const popover_group = gt.element_groups.details;
-		let details_box = popover_group.select('.details-wrapper');
+		const {x, y} = get_details_position();
+		self.details_box.transform(`t${x},${y}`);
 
 		const start_date = self.task._start.format('MMM D'),
 			end_date = self.task._end.format('MMM D'),
 			heading = `${self.task.name}: ${start_date} - ${end_date}`;
 
-		const $heading = popover_group
+		const $heading = self.details_box
 			.select('.details-heading')
 			.attr('text', heading);
 
 		const bbox = $heading.getBBox();
-		details_box.select('.details-container')
+		self.details_box.select('.details-container')
 			.attr({ width: bbox.width + 20 });
 
 		const duration = self.task._end.diff(self.task._start, 'days'),
-			body1 = `Duration: ${duration} days`,
+			body1 = `Duration: ${duration + 1} days`,
 			body2 = self.task.progress ?
 				`Progress: ${self.task.progress}` : '';
 
-		const $body = popover_group.selectAll('.details-body');
+		const $body = self.details_box.selectAll('.details-body');
 		$body[0].attr('text', body1);
 		$body[1].attr('text', body2);
 	}
@@ -388,13 +388,20 @@ export default function Bar(gt, task) {
 	}
 
 	function date_changed() {
+		const { new_start_date, new_end_date } = compute_start_end_date();
+		self.task._start = new_start_date;
+		self.task._end = new_end_date;
+		render_details();
 		gt.trigger_event('date_change',
-			[self.task, compute_start_date(), compute_end_date()]);
+			[self.task, new_start_date, new_end_date]);
 	}
 
 	function progress_changed() {
+		const new_progress = compute_progress();
+		self.task.progress = new_progress;
+		render_details();
 		gt.trigger_event('progress_change',
-			[self.task, compute_progress()]);
+			[self.task, new_progress]);
 	}
 
 	function set_action_completed() {
@@ -402,24 +409,18 @@ export default function Bar(gt, task) {
 		setTimeout(() => self.action_completed = false, 2000);
 	}
 
-	function compute_start_date() {
-		const bar = self.$bar,
-			shift = (bar.getX() - compute_x()) / gt.config.column_width,
-			new_start_date = self.task._start.clone().add(gt.config.step * shift, 'hours');
-		return new_start_date;
-	}
-
-	function compute_end_date() {
-		const bar = self.$bar,
-			og_x = compute_x() + self.duration * gt.config.column_width,
-			final_x = bar.getEndX(),
-			shift = (final_x - og_x) / gt.config.column_width,
-			new_end_date = self.task._end.clone().add(gt.config.step * shift, 'hours');
-		return new_end_date;
+	function compute_start_end_date() {
+		const bar = self.$bar;
+		const x_in_units = bar.getX() / gt.config.column_width;
+		const new_start_date = gt.gantt_start.clone().add(x_in_units * gt.config.step, 'hours');
+		const width_in_units = bar.getWidth() / gt.config.column_width;
+		const new_end_date = new_start_date.clone().add(width_in_units * gt.config.step, 'hours');
+		return { new_start_date, new_end_date };
 	}
 
 	function compute_progress() {
-		return self.$bar_progress.getWidth() / self.$bar.getWidth() * 100;
+		const progress = self.$bar_progress.getWidth() / self.$bar.getWidth() * 100;
+		return parseInt(progress, 10);
 	}
 
 	function compute_x() {
@@ -500,9 +501,8 @@ export default function Bar(gt, task) {
 	}
 
 	function update_details_position() {
-		const details_box = gt.element_groups.details.select('.details-wrapper');
-		const pos = get_details_position();
-		details_box && details_box.transform(`t${pos.x},${pos.y}`);
+		const {x, y} = get_details_position();
+		self.details_box && self.details_box.transform(`t${x},${y}`);
 	}
 
 	init();

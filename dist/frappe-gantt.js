@@ -709,7 +709,9 @@ return /******/ (function(modules) { // webpackBootstrap
 		function bind_grid_click() {
 			self.element_groups.grid.click(function () {
 				unselect_all();
-				self.element_groups.details.addClass('hide');
+				self.element_groups.details.selectAll('.details-wrapper').forEach(function (el) {
+					return el.addClass('hide');
+				});
 			});
 		}
 	
@@ -1259,16 +1261,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 		function show_details() {
 			var popover_group = gt.element_groups.details;
-			var details_box = popover_group.select('.details-wrapper');
+			self.details_box = popover_group.select('.details-wrapper[data-task=\'' + self.task.id + '\']');
 	
-			if (!details_box) {
-				details_box = gt.canvas.group().addClass('details-wrapper').appendTo(popover_group);
-				gt.canvas.rect(0, 0, 0, 110, 2, 2).addClass('details-container').appendTo(details_box);
-				gt.canvas.text(0, 0, '').attr({ dx: 10, dy: 30 }).addClass('details-heading').appendTo(details_box);
-				gt.canvas.text(0, 0, '').attr({ dx: 10, dy: 65 }).addClass('details-body').appendTo(details_box);
-				gt.canvas.text(0, 0, '').attr({ dx: 10, dy: 90 }).addClass('details-body').appendTo(details_box);
+			if (!self.details_box) {
+				self.details_box = gt.canvas.group().addClass('details-wrapper').attr('data-task', self.task.id).appendTo(popover_group);
+				gt.canvas.rect(0, 0, 0, 110, 2, 2).addClass('details-container').appendTo(self.details_box);
+				gt.canvas.text(0, 0, '').attr({ dx: 10, dy: 30 }).addClass('details-heading').appendTo(self.details_box);
+				gt.canvas.text(0, 0, '').attr({ dx: 10, dy: 65 }).addClass('details-body').appendTo(self.details_box);
+				gt.canvas.text(0, 0, '').attr({ dx: 10, dy: 90 }).addClass('details-body').appendTo(self.details_box);
 				var f = gt.canvas.filter(Snap.filter.shadow(0, 1, 1, '#666', 0.6));
-				details_box.attr({
+				self.details_box.attr({
 					filter: f
 				});
 			}
@@ -1278,33 +1280,35 @@ return /******/ (function(modules) { // webpackBootstrap
 					// just finished a move action, wait for a few seconds
 					return;
 				}
-				popover_group.removeClass('hide');
-	
-				var pos = get_details_position();
-				details_box.transform('t' + pos.x + ',' + pos.y);
-	
+				popover_group.selectAll('.details-wrapper').forEach(function (el) {
+					return el.addClass('hide');
+				});
 				render_details();
+				self.details_box.removeClass('hide');
 			});
 		}
 	
 		function render_details() {
-			var popover_group = gt.element_groups.details;
-			var details_box = popover_group.select('.details-wrapper');
+			var _get_details_position = get_details_position(),
+			    x = _get_details_position.x,
+			    y = _get_details_position.y;
+	
+			self.details_box.transform('t' + x + ',' + y);
 	
 			var start_date = self.task._start.format('MMM D'),
 			    end_date = self.task._end.format('MMM D'),
 			    heading = self.task.name + ': ' + start_date + ' - ' + end_date;
 	
-			var $heading = popover_group.select('.details-heading').attr('text', heading);
+			var $heading = self.details_box.select('.details-heading').attr('text', heading);
 	
 			var bbox = $heading.getBBox();
-			details_box.select('.details-container').attr({ width: bbox.width + 20 });
+			self.details_box.select('.details-container').attr({ width: bbox.width + 20 });
 	
 			var duration = self.task._end.diff(self.task._start, 'days'),
-			    body1 = 'Duration: ' + duration + ' days',
+			    body1 = 'Duration: ' + (duration + 1) + ' days',
 			    body2 = self.task.progress ? 'Progress: ' + self.task.progress : '';
 	
-			var $body = popover_group.selectAll('.details-body');
+			var $body = self.details_box.selectAll('.details-body');
 			$body[0].attr('text', body1);
 			$body[1].attr('text', body2);
 		}
@@ -1517,11 +1521,21 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	
 		function date_changed() {
-			gt.trigger_event('date_change', [self.task, compute_start_date(), compute_end_date()]);
+			var _compute_start_end_da = compute_start_end_date(),
+			    new_start_date = _compute_start_end_da.new_start_date,
+			    new_end_date = _compute_start_end_da.new_end_date;
+	
+			self.task._start = new_start_date;
+			self.task._end = new_end_date;
+			render_details();
+			gt.trigger_event('date_change', [self.task, new_start_date, new_end_date]);
 		}
 	
 		function progress_changed() {
-			gt.trigger_event('progress_change', [self.task, compute_progress()]);
+			var new_progress = compute_progress();
+			self.task.progress = new_progress;
+			render_details();
+			gt.trigger_event('progress_change', [self.task, new_progress]);
 		}
 	
 		function set_action_completed() {
@@ -1531,24 +1545,18 @@ return /******/ (function(modules) { // webpackBootstrap
 			}, 2000);
 		}
 	
-		function compute_start_date() {
-			var bar = self.$bar,
-			    shift = (bar.getX() - compute_x()) / gt.config.column_width,
-			    new_start_date = self.task._start.clone().add(gt.config.step * shift, 'hours');
-			return new_start_date;
-		}
-	
-		function compute_end_date() {
-			var bar = self.$bar,
-			    og_x = compute_x() + self.duration * gt.config.column_width,
-			    final_x = bar.getEndX(),
-			    shift = (final_x - og_x) / gt.config.column_width,
-			    new_end_date = self.task._end.clone().add(gt.config.step * shift, 'hours');
-			return new_end_date;
+		function compute_start_end_date() {
+			var bar = self.$bar;
+			var x_in_units = bar.getX() / gt.config.column_width;
+			var new_start_date = gt.gantt_start.clone().add(x_in_units * gt.config.step, 'hours');
+			var width_in_units = bar.getWidth() / gt.config.column_width;
+			var new_end_date = new_start_date.clone().add(width_in_units * gt.config.step, 'hours');
+			return { new_start_date: new_start_date, new_end_date: new_end_date };
 		}
 	
 		function compute_progress() {
-			return self.$bar_progress.getWidth() / self.$bar.getWidth() * 100;
+			var progress = self.$bar_progress.getWidth() / self.$bar.getWidth() * 100;
+			return parseInt(progress, 10);
 		}
 	
 		function compute_x() {
@@ -1644,9 +1652,11 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	
 		function update_details_position() {
-			var details_box = gt.element_groups.details.select('.details-wrapper');
-			var pos = get_details_position();
-			details_box && details_box.transform('t' + pos.x + ',' + pos.y);
+			var _get_details_position2 = get_details_position(),
+			    x = _get_details_position2.x,
+			    y = _get_details_position2.y;
+	
+			self.details_box && self.details_box.transform('t' + x + ',' + y);
 		}
 	
 		init();
