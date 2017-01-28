@@ -1264,7 +1264,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			self.details_box = popover_group.select('.details-wrapper[data-task=\'' + self.task.id + '\']');
 	
 			if (!self.details_box) {
-				self.details_box = gt.canvas.group().addClass('details-wrapper').attr('data-task', self.task.id).appendTo(popover_group);
+				self.details_box = gt.canvas.group().addClass('details-wrapper hide').attr('data-task', self.task.id).appendTo(popover_group);
 				gt.canvas.rect(0, 0, 0, 110, 2, 2).addClass('details-container').appendTo(self.details_box);
 				gt.canvas.text(0, 0, '').attr({ dx: 10, dy: 30 }).addClass('details-heading').appendTo(self.details_box);
 				gt.canvas.text(0, 0, '').attr({ dx: 10, dy: 65 }).addClass('details-body').appendTo(self.details_box);
