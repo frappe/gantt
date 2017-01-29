@@ -489,9 +489,8 @@ export default function Bar(gt, task) {
 		self.handle_group.select('.handle.right').attr({
 			'x': bar.getEndX() - 9
 		});
-		self.group.select('.handle.progress').attr(
-			'points', get_progress_polygon_points()
-		);
+		const handle = self.group.select('.handle.progress');
+		handle && handle.attr('points', get_progress_polygon_points());
 	}
 
 	function update_arrow_position() {
