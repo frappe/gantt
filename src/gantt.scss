@@ -109,14 +109,14 @@ $handle-color: #ddd;
 		}
 	}
 
-	.primary-text, .secondary-text {
+	.lower-text, .upper-text {
 		font-size: 12px;
 		text-anchor: middle;
 	}
-	.primary-text {
+	.upper-text {
 		fill: $text-light;
 	}
-	.secondary-text {
+	.lower-text {
 		fill: $text-color;
 	}
 

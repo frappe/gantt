@@ -134,6 +134,7 @@ export default function Gantt(element, tasks, config) {
 
 	function prepare_dates() {
 
+		self.gantt_start = self.gantt_end = null;
 		for(let task of self.tasks) {
 			// set global start and end date
 			if(!self.gantt_start || task._start < self.gantt_start) {
@@ -400,10 +401,13 @@ export default function Gantt(element, tasks, config) {
 			'Quarter Day_lower': date.format('HH'),
 			'Half Day_lower': date.format('HH'),
 			'Day_lower': date.date() !== last_date.date() ? date.format('D') : '',
-			'Week_lower': 'Week ' + date.format('W'),
+			'Week_lower': date.month() !== last_date.month() ?
+				date.format('D MMM') : date.format('D'),
 			'Month_lower': date.format('MMMM'),
 			'Quarter Day_upper': date.date() !== last_date.date() ? date.format('D MMM') : '',
-			'Half Day_upper': date.date() !== last_date.date() ? date.format('D MMM') : '',
+			'Half Day_upper': date.date() !== last_date.date() ?
+				date.month() !== last_date.month() ?
+				date.format('D MMM') : date.format('D') : '',
 			'Day_upper': date.month() !== last_date.month() ? date.format('MMMM') : '',
 			'Week_upper': date.month() !== last_date.month() ? date.format('MMMM') : '',
 			'Month_upper': date.year() !== last_date.year() ? date.format('YYYY') : ''
@@ -422,9 +426,9 @@ export default function Gantt(element, tasks, config) {
 			'Half Day_upper': 0,
 			'Day_lower': self.config.column_width / 2,
 			'Day_upper': (self.config.column_width * 30) / 2,
-			'Week_lower': self.config.column_width / 2,
+			'Week_lower': 0,
 			'Week_upper': (self.config.column_width * 4) / 2,
-			'Month_lower': (date.daysInMonth() * self.config.column_width / 30) / 2,
+			'Month_lower': self.config.column_width / 2,
 			'Month_upper': (self.config.column_width * 12) / 2
 		};
 
