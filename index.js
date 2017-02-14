@@ -58,3 +58,16 @@ var gantt3 = new Gantt("#gantt-3", tasks, {
         console.log(mode);
     }
 });
+
+var gantt4 = new Gantt("#gantt-4", tasks, {
+    custom_popup_html: function(task) {
+      const end_date = task._end.format('MMM D');
+      return `
+        <div class="details-container">
+          <h5>${task.name}</h5>
+          <p>Expected to finish by ${end_date}</p>
+          <p>${task.progress}% completed!</p>
+        </div>
+      `;
+    }
+})

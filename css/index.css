@@ -50,3 +50,10 @@ pre.highlight {
 .btn-group>.btn {
 	outline: none !important;
 }
+.dashboard-section h1 {
+	margin-left: -2px;
+}
+
+.hero .gantt-container {
+	text-align: left;
+}

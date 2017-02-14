@@ -51,20 +51,20 @@
         <div class="col-sm-10 push-sm-1">
           <div class="dashboard-section">
 						<h1>Usage</h1>
-            <p class="lead" style="margin: 1em 0 0 0">
+            <h6 class="text-muted" style="margin: 1em 0 0 0; font-weight: normal;">
               Dependencies: <a target="_blank" href="http://momentjs.com">momentjs</a> and <a target="_blank" href="http://snapsvg.io">snapsvg</a> 
-            </p>
-						<p class="lead" style="margin:2em 0 0 0">
+            </h6>
+						<h6 style="margin:2em 0 0 0">
               Include it in your html
-            </p>
+            </h6>
             <pre>
               <code class="hljs html">&lt;script src="frappe-gantt.min.js" /&gt;</code>
             </pre>
-						<p class="lead" style="margin:0">Create an svg element</p>
+						<h6 style="margin:0">Create an svg element</h6>
             <pre>
               <code class="hljs html">&lt;svg id="gantt"&gt;&lt;/svg&gt;</code>
             </pre>
-						<p class="lead" style="margin:0">Initiliaze a new Gantt object</p>
+						<h6 style="margin:0">Initiliaze a new Gantt object</h6>
             <pre>
               <code class="hljs javascript">var tasks = [
   {
@@ -85,7 +85,8 @@ var gantt = new Gantt("#gantt", tasks);
         <div class="col-sm-10 push-sm-1">
 					<div class="dashboard-section">
 						<h1>Examples</h1>
-            <p class="lead" style="margin:2em 0 0 0">Change view mode</p>
+            <!-- Change view mode -->
+            <h6 style="margin:2em 0 0 0">Change view mode</h6>
             <pre>
               <code class="hljs javascript">gantt.change_view_mode('Week') // Quarter Day, Half Day, Day, Week, Month </code>
             </pre>
@@ -99,7 +100,8 @@ var gantt = new Gantt("#gantt", tasks);
               <button type="button" class="btn btn-sm btn-secondary active">Week</button>
               <button type="button" class="btn btn-sm btn-secondary">Month</button>
             </div>
-            <p class="lead" style="margin:2em 0 0 0">Add event listeners</p>
+            <!-- Add event listeners -->
+            <h6 style="margin:2em 0 0 0">Add event listeners</h6>
             <pre>
               <code class="hljs javascript">var gantt = new Gantt('#gantt', tasks, {
     on_click: function (task) {
@@ -119,6 +121,32 @@ var gantt = new Gantt("#gantt", tasks);
             <div class="gantt-container" style="overflow: scroll; margin-top: -36px">
               <svg id="gantt-3"></svg>
             </div>
+
+            <!-- Custom HTML in popup -->
+            <h6 style="margin:2em 0 0 0">Custom HTML in popup</h6>
+            <pre>
+              <code class="hljs javascript">var gantt = new Gantt('#gantt', tasks, {
+    // can be a function that returns html
+    // or a simple html string
+    custom_popup_html: function(task) {
+      // the task object will contain the updated
+      // dates and progress value
+      const end_date = task._end.format('MMM D');
+      return `
+        &lt;div class="details-container">
+          &lt;h5>${task.name}&lt;/h5>
+          &lt;p>Expected to finish by ${end_date}&lt;/p>
+          &lt;p>${task.progress}% completed!&lt;/p>
+        &lt;/div>
+      `;
+    }
+});</code>
+            </pre>
+            <div class="gantt-container" style="overflow: scroll; margin-top: -36px">
+              <svg id="gantt-4"></svg>
+            </div>
+
+            <!-- Closing -->
             <div class="text-center" style="margin-top: 70px">
               <a href="https://github.com/frappe/gantt/archive/master.zip"><button class="large blue button">Download</button></a>
               <p class="mt-2"><a href="https://github.com/frappe/gantt" target="_blank">View on GitHub</a></p>
