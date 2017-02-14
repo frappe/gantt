@@ -86,6 +86,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			self.view_is = view_is;
 			self.get_bar = get_bar;
 			self.trigger_event = trigger_event;
+			self.refresh = refresh;
 	
 			// initialize with default view mode
 			change_view_mode(self.config.view_mode);
@@ -108,14 +109,24 @@ return /******/ (function(modules) { // webpackBootstrap
 				view_mode: 'Day',
 				date_format: 'YYYY-MM-DD'
 			};
+			self.config = Object.assign({}, defaults, config);
+	
+			reset_variables(tasks);
+		}
+	
+		function reset_variables(tasks) {
 	
 			self.element = element;
 			self._tasks = tasks;
-			self.config = Object.assign({}, defaults, config);
 	
 			self._bars = [];
 			self._arrows = [];
 			self.element_groups = {};
+		}
+	
+		function refresh(updated_tasks) {
+			reset_variables(updated_tasks);
+			change_view_mode(self.config.view_mode);
 		}
 	
 		function change_view_mode(mode) {
@@ -269,6 +280,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	
 		function prepare_canvas() {
+			if (self.canvas) return;
 			self.canvas = Snap(self.element).addClass('gantt');
 		}
 	
