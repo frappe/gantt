@@ -253,7 +253,7 @@ export default function Gantt(element, tasks, config) {
 
 	function set_width() {
 		const cur_width = self.canvas.node.getBoundingClientRect().width;
-		const actual_width = self.canvas.getBBox().width;
+		const actual_width = self.canvas.select('#grid .grid-row').attr('width');
 		if(cur_width < actual_width) {
 			self.canvas.attr('width', actual_width);
 		}

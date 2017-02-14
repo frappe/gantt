@@ -392,7 +392,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 		function set_width() {
 			var cur_width = self.canvas.node.getBoundingClientRect().width;
-			var actual_width = self.canvas.getBBox().width;
+			var actual_width = self.canvas.select('#grid .grid-row').attr('width');
 			if (cur_width < actual_width) {
 				self.canvas.attr('width', actual_width);
 			}
