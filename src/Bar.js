@@ -148,21 +148,9 @@ export default function Bar(gt, task) {
 				.addClass('details-wrapper hide')
 				.attr('data-task', self.task.id)
 				.appendTo(popover_group);
-			gt.canvas.rect(0, 0, 0, 110, 2, 2)
-				.addClass('details-container')
-				.appendTo(self.details_box);
-			gt.canvas.text(0, 0, '')
-				.attr({ dx: 10, dy: 30 })
-				.addClass('details-heading')
-				.appendTo(self.details_box);
-			gt.canvas.text(0, 0, '')
-				.attr({ dx: 10, dy: 65 })
-				.addClass('details-body')
-				.appendTo(self.details_box);
-			gt.canvas.text(0, 0, '')
-				.attr({ dx: 10, dy: 90 })
-				.addClass('details-body')
-				.appendTo(self.details_box);
+
+			render_details();
+
 			const f = gt.canvas.filter(
 				Snap.filter.shadow(0, 1, 1, '#666', 0.6));
 			self.details_box.attr({
@@ -177,7 +165,6 @@ export default function Bar(gt, task) {
 			}
 			popover_group.selectAll('.details-wrapper')
 				.forEach(el => el.addClass('hide'));
-			render_details();
 			self.details_box.removeClass('hide');
 		});
 	}
@@ -185,27 +172,48 @@ export default function Bar(gt, task) {
 	function render_details() {
 		const {x, y} = get_details_position();
 		self.details_box.transform(`t${x},${y}`);
+		self.details_box.clear();
 
-		const start_date = self.task._start.format('MMM D'),
-			end_date = self.task._end.format('MMM D'),
-			heading = `${self.task.name}: ${start_date} - ${end_date}`;
+		const html = get_details_html();
+		const foreign_object =
+			Snap.parse(`<foreignObject width="5000" height="2000">
+				<body xmlns="http://www.w3.org/1999/xhtml">
+					${html}
+				</body>
+				</foreignObject>`);
+		self.details_box.append(foreign_object);
+	}
 
-		const $heading = self.details_box
-			.select('.details-heading')
-			.attr('text', heading);
+	function get_details_html() {
 
-		const bbox = $heading.getBBox();
-		self.details_box.select('.details-container')
-			.attr({ width: bbox.width + 20 });
+		// custom html in config
+		if(gt.config.custom_popup_html) {
+			const html = gt.config.custom_popup_html;
+			if(typeof html === 'string') {
+				return html;
+			}
+			if(isFunction(html)) {
+				return html(task);
+			}
+		}
 
-		const duration = self.task._end.diff(self.task._start, 'days'),
-			body1 = `Duration: ${duration + 1} days`,
-			body2 = self.task.progress ?
-				`Progress: ${self.task.progress}` : '';
+		const start_date = self.task._start.format('MMM D');
+		const end_date = self.task._end.format('MMM D');
+		const heading = `${self.task.name}: ${start_date} - ${end_date}`;
 
-		const $body = self.details_box.selectAll('.details-body');
-		$body[0].attr('text', body1);
-		$body[1].attr('text', body2);
+		const line_1 = `Duration: ${self.duration} days`;
+		const line_2 = self.task.progress ? `Progress: ${self.task.progress}` : null;
+
+		const html = `
+			<div class="details-container">
+				<h5>${heading}</h5>
+				<p>${line_1}</p>
+				${
+					line_2 ? `<p>${line_2}</p>` : ''
+				}
+			</div>
+		`;
+		return html;
 	}
 
 	function get_details_position() {
@@ -502,6 +510,11 @@ export default function Bar(gt, task) {
 	function update_details_position() {
 		const {x, y} = get_details_position();
 		self.details_box && self.details_box.transform(`t${x},${y}`);
+	}
+
+	function isFunction(functionToCheck) {
+		var getType = {};
+		return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
 	}
 
 	init();

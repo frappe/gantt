@@ -51,7 +51,8 @@ export default function Gantt(element, tasks, config) {
 			},
 			padding: 18,
 			view_mode: 'Day',
-			date_format: 'YYYY-MM-DD'
+			date_format: 'YYYY-MM-DD',
+			custom_popup_html: null
 		};
 		self.config = Object.assign({}, defaults, config);
 
@@ -128,6 +129,12 @@ export default function Gantt(element, tasks, config) {
 				}
 				task.dependencies = deps;
 			}
+
+			// uids
+			if(!task.id) {
+				task.id = generate_id(task);
+			}
+
 			return task;
 		});
 	}
@@ -528,6 +535,10 @@ export default function Gantt(element, tasks, config) {
 		return self._bars.find((bar) => {
 			return bar.task.id === id;
 		});
+	}
+
+	function generate_id(task) {
+		return task.name + '_' + Math.random().toString(36).slice(2, 12);
 	}
 
 	function trigger_event(event, args) {

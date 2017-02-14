@@ -120,20 +120,30 @@ $handle-color: #ddd;
 		fill: $text-color;
 	}
 
-	#details {
-		font-size: 14;
+	#details .details-container {
+		background: #fff;
+		display: inline-block;
+		padding: 12px;
 
-		.details-container {
-			stroke: $border-color;
-			stroke-width: 1.1;
-			fill: #fff;
+		h5, p {
+			margin: 0;
 		}
-		.details-heading {
-			fill: $text-color;
-			font-weight: 500;
+
+		h5 {
+			font-size: 12px;
+			font-weight: bold;
+			margin-bottom: 10px;
+			color: $text-light;
 		}
-		.details-body {
-			fill: $text-light;
+
+		p {
+			font-size: 12px;
+			margin-bottom: 6px;
+			color: $text-muted;
+		}
+
+		p:last-child {
+			margin-bottom: 0;
 		}
 	}
 
