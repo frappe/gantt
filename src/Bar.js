@@ -74,6 +74,7 @@ export default function Bar(gt, task) {
 			self.width, self.height,
 			self.corner_radius, self.corner_radius)
 			.addClass('bar')
+			.addClass(self.task.bar_class)
 			.appendTo(self.bar_group);
 		if (self.invalid) {
 			self.$bar.addClass('bar-invalid');
@@ -86,6 +87,7 @@ export default function Bar(gt, task) {
 			self.progress_width, self.height,
 			self.corner_radius, self.corner_radius)
 			.addClass('bar-progress')
+			.addClass(self.task.progress_class)
 			.appendTo(self.bar_group);
 	}
 
@@ -94,6 +96,7 @@ export default function Bar(gt, task) {
 			self.y + self.height / 2,
 			self.task.name)
 			.addClass('bar-label')
+			.addClass(self.task.label_class)
 			.appendTo(self.bar_group);
 		update_label_position();
 	}

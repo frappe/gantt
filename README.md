@@ -17,7 +17,7 @@ Include it in your html:
 ```
 
 And start hacking:
-```
+```js
 var tasks = [
   {
     id: 'Task 1',
@@ -25,7 +25,10 @@ var tasks = [
     start: '2016-12-28',
     end: '2016-12-31',
     progress: 20,
-    dependencies: 'Task 2, Task 3'
+    dependencies: 'Task 2, Task 3',
+	bar_class: '',  # optional
+	progress_class: '',  # optional
+	label_class: 'my-class-label'  # optional
   },
   ...
 ]
