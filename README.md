@@ -3,14 +3,14 @@ A simple, interactive, modern gantt chart library for the web
 
 ![image](https://cloud.githubusercontent.com/assets/9355208/21537921/4a38b194-cdbd-11e6-8110-e0da19678a6d.png)
 
-####View the demo [here](https://frappe.github.io/gantt).
+#### View the demo [here](https://frappe.github.io/gantt).
 
-###Install
+### Install
 ```
 npm install frappe-gantt
 ```
 
-###Usage
+### Usage
 Include it in your html:
 ```
 <script src="frappe-gantt.min.js"></script>
