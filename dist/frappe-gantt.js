@@ -804,7 +804,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Gantt:
 	 * 	element: querySelector string, required
 	 * 	tasks: array of tasks, required
-	 *   task: { id, name, start, end, progress, dependencies, bar_class, progress_class, label_class }
+	 *   task: { id, name, start, end, progress, dependencies, custom_class }
 	 * 	config: configuration options, optional
 	 */
 	module.exports = exports['default'];
@@ -1206,7 +1206,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			self.duration = (self.task._end.diff(self.task._start, 'hours') + 24) / gt.config.step;
 			self.width = gt.config.column_width * self.duration;
 			self.progress_width = gt.config.column_width * self.duration * (self.task.progress / 100) || 0;
-			self.group = gt.canvas.group().addClass('bar-wrapper');
+			self.group = gt.canvas.group().addClass('bar-wrapper').addClass(self.task.custom_class);
 			self.bar_group = gt.canvas.group().addClass('bar-group').appendTo(self.group);
 			self.handle_group = gt.canvas.group().addClass('handle-group').appendTo(self.group);
 		}
@@ -1239,7 +1239,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	
 		function draw_bar() {
-			self.$bar = gt.canvas.rect(self.x, self.y, self.width, self.height, self.corner_radius, self.corner_radius).addClass('bar').addClass(self.task.bar_class).appendTo(self.bar_group);
+			self.$bar = gt.canvas.rect(self.x, self.y, self.width, self.height, self.corner_radius, self.corner_radius).addClass('bar').appendTo(self.bar_group);
 			if (self.invalid) {
 				self.$bar.addClass('bar-invalid');
 			}
@@ -1247,11 +1247,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 		function draw_progress_bar() {
 			if (self.invalid) return;
-			self.$bar_progress = gt.canvas.rect(self.x, self.y, self.progress_width, self.height, self.corner_radius, self.corner_radius).addClass('bar-progress').addClass(self.task.progress_class).appendTo(self.bar_group);
+			self.$bar_progress = gt.canvas.rect(self.x, self.y, self.progress_width, self.height, self.corner_radius, self.corner_radius).addClass('bar-progress').appendTo(self.bar_group);
 		}
 	
 		function draw_label() {
-			gt.canvas.text(self.x + self.width / 2, self.y + self.height / 2, self.task.name).addClass('bar-label').addClass(self.task.label_class).appendTo(self.bar_group);
+			gt.canvas.text(self.x + self.width / 2, self.y + self.height / 2, self.task.name).addClass('bar-label').appendTo(self.bar_group);
 			update_label_position();
 		}
 	

@@ -37,7 +37,7 @@ export default function Bar(gt, task) {
 		self.duration = (self.task._end.diff(self.task._start, 'hours') + 24) / gt.config.step;
 		self.width = gt.config.column_width * self.duration;
 		self.progress_width = gt.config.column_width * self.duration * (self.task.progress / 100) || 0;
-		self.group = gt.canvas.group().addClass('bar-wrapper');
+		self.group = gt.canvas.group().addClass('bar-wrapper').addClass(self.task.custom_class);
 		self.bar_group = gt.canvas.group().addClass('bar-group').appendTo(self.group);
 		self.handle_group = gt.canvas.group().addClass('handle-group').appendTo(self.group);
 	}
@@ -74,7 +74,6 @@ export default function Bar(gt, task) {
 			self.width, self.height,
 			self.corner_radius, self.corner_radius)
 			.addClass('bar')
-			.addClass(self.task.bar_class)
 			.appendTo(self.bar_group);
 		if (self.invalid) {
 			self.$bar.addClass('bar-invalid');
@@ -87,7 +86,6 @@ export default function Bar(gt, task) {
 			self.progress_width, self.height,
 			self.corner_radius, self.corner_radius)
 			.addClass('bar-progress')
-			.addClass(self.task.progress_class)
 			.appendTo(self.bar_group);
 	}
 
@@ -96,7 +94,6 @@ export default function Bar(gt, task) {
 			self.y + self.height / 2,
 			self.task.name)
 			.addClass('bar-label')
-			.addClass(self.task.label_class)
 			.appendTo(self.bar_group);
 		update_label_position();
 	}

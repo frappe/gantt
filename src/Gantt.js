@@ -3,7 +3,7 @@
  * Gantt:
  * 	element: querySelector string, required
  * 	tasks: array of tasks, required
- *   task: { id, name, start, end, progress, dependencies, bar_class, progress_class, label_class }
+ *   task: { id, name, start, end, progress, dependencies, custom_class }
  * 	config: configuration options, optional
  */
 import './gantt.scss';
