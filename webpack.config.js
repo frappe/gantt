@@ -14,7 +14,7 @@ if (env === 'build') {
 	outputFile = libraryName + '.js';
 }
 
-let config = {
+var config = {
 	entry: __dirname + '/src/Gantt.js',
 	devtool: 'source-map',
 	output: {
