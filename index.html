@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Simple Gantt</title>
-    <style>
+	<meta charset="UTF-8">
+	<title>Simple Gantt</title>
+	<style>
 		body {
 			font-family: sans-serif;
 			background: #ccc;
@@ -15,13 +15,17 @@
 		.gantt-container {
 			overflow: scroll;
 		}
+		/* custom class */
+		.gantt .bar-milestone .bar-progress {
+			fill: tomato;
+		}
 	</style>
-    <script src="node_modules/moment/min/moment.min.js"></script>
+	<script src="node_modules/moment/min/moment.min.js"></script>
 	<script src="node_modules/snapsvg/dist/snap.svg-min.js"></script>
-    <script src="dist/frappe-gantt.js"></script>
+	<script src="dist/frappe-gantt.js"></script>
 </head>
 <body>
-    <div class="container">
+	<div class="container">
 		<h2>Interactive Gantt Chart entirely made in SVG!</h2>
 		<div class="gantt-container">
 			<svg id="gantt" width="400" height="600"></svg>
@@ -56,21 +60,22 @@
 		tasks[2].dependencies = "Task 1"
 		tasks[3].dependencies = "Task 2"
 		tasks[5].dependencies = "Task 4"
+		tasks[5].custom_class = "bar-milestone";
 
 		var gantt_chart = Gantt("#gantt", tasks, {
-				on_click: function (task) {
-					console.log(task);
-				},
-				on_date_change: function(task, start, end) {
-					console.log(task, start, end);
-				},
-				on_progress_change: function(task, progress) {
-					console.log(task, progress);
-				},
-				on_view_change: function(mode) {
-					console.log(mode);
-				}
-            });
+			on_click: function (task) {
+				console.log(task);
+			},
+			on_date_change: function(task, start, end) {
+				console.log(task, start, end);
+			},
+			on_progress_change: function(task, progress) {
+				console.log(task, progress);
+			},
+			on_view_change: function(mode) {
+				console.log(mode);
+			}
+		});
 		console.log(gantt_chart);
 	</script>
 </body>
