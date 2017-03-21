@@ -804,7 +804,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Gantt:
 	 * 	element: querySelector string, required
 	 * 	tasks: array of tasks, required
-	 *   task: { id, name, start, end, progress, dependencies }
+	 *   task: { id, name, start, end, progress, dependencies, custom_class }
 	 * 	config: configuration options, optional
 	 */
 	module.exports = exports['default'];
@@ -1206,7 +1206,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			self.duration = (self.task._end.diff(self.task._start, 'hours') + 24) / gt.config.step;
 			self.width = gt.config.column_width * self.duration;
 			self.progress_width = gt.config.column_width * self.duration * (self.task.progress / 100) || 0;
-			self.group = gt.canvas.group().addClass('bar-wrapper');
+			self.group = gt.canvas.group().addClass('bar-wrapper').addClass(self.task.custom_class || '');
 			self.bar_group = gt.canvas.group().addClass('bar-group').appendTo(self.group);
 			self.handle_group = gt.canvas.group().addClass('handle-group').appendTo(self.group);
 		}
