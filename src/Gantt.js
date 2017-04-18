@@ -60,8 +60,20 @@ export default function Gantt(element, tasks, config) {
 	}
 
 	function reset_variables(tasks) {
-
-		self.element = element;
+		/*
+		  According to http://snapsvg.io/docs/, the Snap constructor supports
+			usage of a string css selector or a DOM SVG element, thus we support both.
+		*/
+		if(typeof element === "string") {
+		    self.element = document.querySelector(element);
+		}
+		else if (element instanceof SVGElement) {
+		    self.element = element;
+		}
+		else {
+		    throw new TypeError("Frappé Gantt only supports usage of a string CSS selector or SVG DOM element for the 'element' parameter to create a gantt chart.");
+		}
+		
 		self._tasks = tasks;
 
 		self._bars = [];
@@ -260,7 +272,8 @@ export default function Gantt(element, tasks, config) {
 	}
 
 	function set_scroll_position() {
-		const parent_element = document.querySelector(self.element).parentElement;
+			let parent_element = self.element.parentElement;
+
 		if(!parent_element) return;
 
 		const scroll_pos = get_min_date().diff(self.gantt_start, 'hours') /
