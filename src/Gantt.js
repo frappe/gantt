@@ -1,7 +1,7 @@
 /* global moment, Snap */
 /**
  * Gantt:
- * 	element: querySelector string, required
+ * 	element: querySelector string or HTML DOM element, required
  * 	tasks: array of tasks, required
  *   task: { id, name, start, end, progress, dependencies, custom_class }
  * 	config: configuration options, optional
@@ -69,6 +69,9 @@ export default function Gantt(element, tasks, config) {
 		}
 		else if (element instanceof SVGElement) {
 		    self.element = element;
+		}
+		else if (element instanceof HTMLElement) {
+		    self.element = element.querySelector('svg');
 		}
 		else {
 		    throw new TypeError("Frappé Gantt only supports usage of a string CSS selector or SVG DOM element for the 'element' parameter to create a gantt chart.");
