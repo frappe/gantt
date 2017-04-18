@@ -73,7 +73,7 @@ export default function Gantt(element, tasks, config) {
 		else {
 		    throw new TypeError("Frappé Gantt only supports usage of a string CSS selector or SVG DOM element for the 'element' parameter to create a gantt chart.");
 		}
-		
+
 		self._tasks = tasks;
 
 		self._bars = [];
@@ -272,7 +272,7 @@ export default function Gantt(element, tasks, config) {
 	}
 
 	function set_scroll_position() {
-			let parent_element = self.element.parentElement;
+		const parent_element = self.element.parentElement;
 
 		if(!parent_element) return;
 
