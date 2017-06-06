@@ -661,7 +661,9 @@ return /******/ (function(modules) { // webpackBootstrap
 						);
 						self.element_groups.arrow.add(arrow.element);
 						return arrow; // eslint-disable-line
-					});
+					}).filter(function (arr) {
+						return arr;
+					}); // filter falsy values
 					self._arrows = self._arrows.concat(arrows);
 				};
 	
@@ -1585,6 +1587,12 @@ return /******/ (function(modules) { // webpackBootstrap
 			var new_start_date = gt.gantt_start.clone().add(x_in_units * gt.config.step, 'hours');
 			var width_in_units = bar.getWidth() / gt.config.column_width;
 			var new_end_date = new_start_date.clone().add(width_in_units * gt.config.step, 'hours');
+			// lets say duration is 2 days
+			// start_date = May 24 00:00:00
+			// end_date = May 24 + 2 days = May 26 (incorrect)
+			// so subtract 1 second so that
+			// end_date = May 25 23:59:59
+			new_end_date.add('-1', 'seconds');
 			return { new_start_date: new_start_date, new_end_date: new_end_date };
 		}
 	

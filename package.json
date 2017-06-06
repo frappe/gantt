@@ -1,6 +1,6 @@
 {
   "name": "frappe-gantt",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A simple, modern, interactive gantt library for the web",
   "main": "dist/frappe-gantt.js",
   "scripts": {
