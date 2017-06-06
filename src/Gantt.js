@@ -476,7 +476,7 @@ export default function Gantt(element, tasks, config) {
 				);
 				self.element_groups.arrow.add(arrow.element);
 				return arrow; // eslint-disable-line
-			});
+			}).filter(arr => arr); // filter falsy values
 			self._arrows = self._arrows.concat(arrows);
 		}
 	}
