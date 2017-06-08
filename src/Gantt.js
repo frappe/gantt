@@ -294,7 +294,7 @@ export default function Gantt(element, tasks, config) {
 			.appendTo(self.element_groups.grid);
 
 		self.canvas.attr({
-			height: grid_height + self.config.padding,
+			height: grid_height + self.config.padding + 100,
 			width: '100%'
 		});
 	}
