@@ -1,7 +1,7 @@
 /* global moment, Snap */
 /**
  * Gantt:
- * 	element: querySelector string, required
+ * 	element: querySelector string, HTML DOM or SVG DOM element, required
  * 	tasks: array of tasks, required
  *   task: { id, name, start, end, progress, dependencies, custom_class }
  * 	config: configuration options, optional
@@ -60,8 +60,17 @@ export default function Gantt(element, tasks, config) {
 	}
 
 	function reset_variables(tasks) {
+		if(typeof element === 'string') {
+			self.element = document.querySelector(element);
+		} else if (element instanceof SVGElement) {
+			self.element = element;
+		} else if (element instanceof HTMLElement) {
+			self.element = element.querySelector('svg');
+		} else {
+			throw new TypeError('Frappé Gantt only supports usage of a string CSS selector,' +
+				' HTML DOM element or SVG DOM element for the \'element\' parameter');
+		}
 
-		self.element = element;
 		self._tasks = tasks;
 
 		self._bars = [];
@@ -260,7 +269,8 @@ export default function Gantt(element, tasks, config) {
 	}
 
 	function set_scroll_position() {
-		const parent_element = document.querySelector(self.element).parentElement;
+		const parent_element = self.element.parentElement;
+
 		if(!parent_element) return;
 
 		const scroll_pos = get_min_date().diff(self.gantt_start, 'hours') /
