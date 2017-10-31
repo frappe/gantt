@@ -10,6 +10,8 @@ import './gantt.scss';
 
 import Bar from './Bar';
 import Arrow from './Arrow';
+import moment from 'moment';
+import Snap from 'snapsvg';
 
 export default function Gantt(element, tasks, config) {
 
@@ -64,6 +66,8 @@ export default function Gantt(element, tasks, config) {
 			self.element = document.querySelector(element);
 		} else if (element instanceof SVGElement) {
 			self.element = element;
+		} else if (element instanceof SVGSVGElement) {
+			self.element = element.viewportElement;
 		} else if (element instanceof HTMLElement) {
 			self.element = element.querySelector('svg');
 		} else {
