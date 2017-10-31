@@ -1,52 +1,73 @@
-var webpack = require('webpack');
-var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
-var path = require('path');
-var env = require('yargs').argv.mode;
+const path = require('path');
+const webpack = require('webpack');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+const packageJson = require('./package.json');
 
-var libraryName = 'frappe-gantt';
+module.exports.default = () => ({
+    entry: {
+        index: path.join(__dirname, 'src/Gantt.js'),
+    },
 
-var plugins = [], outputFile;
+    output: {
+        path: path.join(__dirname, 'dist'),
+        filename: '[name].js',
+        library: packageJson.name,
+        libraryTarget: 'umd',
+    },
 
-if (env === 'build') {
-	plugins.push(new UglifyJsPlugin({ minimize: true }));
-	outputFile = libraryName + '.min.js';
-} else {
-	outputFile = libraryName + '.js';
-}
+    resolve: {
+        extensions: ['.js', '.jsx'],
+    },
 
-var config = {
-	entry: __dirname + '/src/Gantt.js',
-	devtool: 'source-map',
-	output: {
-		path: __dirname + '/dist',
-		filename: outputFile,
-		library: 'Gantt',
-		libraryTarget: 'umd',
-		umdNamedDefine: true
-	},
-	module: {
-		loaders: [
-			{
-				test: /(\.jsx|\.js)$/,
-				loader: 'babel',
-				exclude: /(node_modules|bower_components)/
-			},
-			{
-				test: /(\.jsx|\.js)$/,
-				loader: 'eslint-loader',
-				exclude: /node_modules/
+    module: {
+        rules: [
+            {
+                test: /.jsx?$/,
+                exclude: /node_modules/,
+                include: path.join(__dirname, 'src'),
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            babelrc: false,
+                            presets: [
+                                ['es2015', { modules: false }],
+                                'react',
+                            ],
+                        }
+                    }
+                ]
+            },
+            {
+                test: /\.(css)$/,
+                loader: 'style-loader!css-loader',
 			},
 			{
 				test: /\.scss$/,
-				loaders: [ 'style', 'css?sourceMap', 'sass?sourceMap' ]
-			}
-		]
-	},
-	resolve: {
-		root: path.resolve('./src'),
-		extensions: ['', '.js']
-	},
-	plugins: plugins
-};
+				loaders: ['style-loader', 'css-loader', 'sass-loader']
+			},
+			{
+				test: require.resolve('snapsvg/dist/snap.svg.js'),
+				use: 'imports-loader?this=>window,fix=>module.exports=0',
+			},
+        ]
+    },
 
-module.exports = config;
+    plugins: [
+        // Clean dist folder
+        new CleanWebpackPlugin(['dist/*.*']),
+
+        //CommonChunksPlugin will now extract all the common modules from vendor and main bundles
+        //https://medium.com/@adamrackis/vendor-and-code-splitting-in-webpack-2-6376358f1923
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            minChunks(module) {
+                return module.context && module.context.indexOf('node_modules') !== -1;
+            },
+        }),
+
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'manifest'
+        })
+    ]
+});
