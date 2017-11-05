@@ -196,6 +196,7 @@ export default function Gantt(element, tasks, config) {
 		set_width();
 		set_scroll_position();
 		bind_grid_click();
+		highlight_Public_Holiday(); //Highlight Public holidays
 	}
 
 	function clear() {
@@ -559,6 +560,46 @@ export default function Gantt(element, tasks, config) {
 	function trigger_event(event, args) {
 		if(self.config['on_' + event]) {
 			self.config['on_' + event].apply(null, args);
+		}
+	}
+	
+	//HighLight Public Holiday
+	function highlight_Public_Holiday() {
+
+		if (self.view_is('Day')) {
+			for (let t of self.tasks) {
+
+				if (t.holidays != undefined) {
+					let rowIndex = t._index + 1;
+					let _start = moment(t.holidays.start, self.config.date_format);
+					let _end = moment(t.holidays.end, self.config.date_format);
+					let row_y = self.config.header_height + self.config.padding / 2;
+					let row_height = self.config.bar.height + self.config.padding;
+					if (rowIndex > 1) {
+						for (var i = 1; i < rowIndex; i++) {
+							row_y += row_height;
+						}
+					}
+					self.canvas.selectAll('.grid-row').forEach(el => {
+
+						if (parseInt(el.node.attributes['y'].nodeValue) == parseInt(row_y)) {
+
+							var x = _start.diff(self.gantt_start, 'hours') /
+								self.config.step * self.config.column_width;
+							
+							let width = self.config.column_width;
+							const height = (self.config.bar.height + self.config.padding);
+
+							if (_start.format('L') != _end.format('L')) {
+								var x1 = _end.diff(self.gantt_start, 'hours') /
+									self.config.step * self.config.column_width;
+								width = x1 - x;
+							}
+							self.canvas.rect(x, row_y , width, height).addClass('holiday')
+						}
+					});
+				}
+			}
 		}
 	}
 
