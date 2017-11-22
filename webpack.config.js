@@ -46,7 +46,11 @@ var config = {
 		root: path.resolve('./src'),
 		extensions: ['', '.js']
 	},
-	plugins: plugins
+	plugins: plugins,
+	// do not package into the library.
+	externals: {
+		'moment': 'moment'
+	}
 };
 
 module.exports = config;
