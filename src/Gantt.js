@@ -1,4 +1,4 @@
-/* global moment, Snap */
+/* global Snap */
 /**
  * Gantt:
  * 	element: querySelector string, HTML DOM or SVG DOM element, required
@@ -8,6 +8,7 @@
  */
 import './gantt.scss';
 
+import moment from 'moment';
 import Bar from './Bar';
 import Arrow from './Arrow';
 
