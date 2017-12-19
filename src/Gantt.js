@@ -32,6 +32,8 @@ export default function Gantt(element, tasks, config) {
 
 	function set_defaults() {
 
+		const merge = require('deepmerge');
+
 		const defaults = {
 			header_height: 50,
 			column_width: 30,
@@ -54,7 +56,7 @@ export default function Gantt(element, tasks, config) {
 			date_format: 'YYYY-MM-DD',
 			custom_popup_html: null
 		};
-		self.config = Object.assign({}, defaults, config);
+		self.config = merge(defaults, config);
 
 		reset_variables(tasks);
 	}

@@ -45,6 +45,7 @@
   },
   "homepage": "https://github.com/frappe/gantt",
   "dependencies": {
+    "deepmerge": "^2.0.1",
     "moment": "^2.17.1",
     "snapsvg": "^0.4.0"
   }
