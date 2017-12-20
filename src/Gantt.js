@@ -46,7 +46,8 @@ export default function Gantt(element, tasks, config) {
 				'Month'
 			],
 			bar: {
-				height: 20
+				height: 20,
+				corner_radius: 3
 			},
 			arrow: {
 				curve: 5

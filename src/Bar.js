@@ -33,7 +33,7 @@ export default function Bar(gt, task) {
 		self.height = gt.config.bar.height;
 		self.x = compute_x();
 		self.y = compute_y();
-		self.corner_radius = 3;
+		self.corner_radius = gt.config.bar.corner_radius;
 		self.duration = (self.task._end.diff(self.task._start, 'hours') + 24) / gt.config.step;
 		self.width = gt.config.column_width * self.duration;
 		self.progress_width = gt.config.column_width * self.duration * (self.task.progress / 100) || 0;
