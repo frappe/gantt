@@ -11,7 +11,7 @@ import './gantt.scss';
 import Bar from './Bar';
 import Arrow from './Arrow';
 
-export default function Gantt(element, tasks, config) {
+export default function Gantt(element, tasks, config = {}) {
 
 	const self = {};
 
