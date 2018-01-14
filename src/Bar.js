@@ -28,13 +28,24 @@ export default function Bar(gt, task) {
 		prepare_plugins();
 	}
 
+	function calculate_duration() {
+		let duration = (self.task._end.diff(self.task._start, 'hours') + 24) / gt.config.step;
+		// #FIX_BUG_FOR_ERROR_DAY_COUNT
+		// when the duration is integer and the end time is 00:00:00 , the duration 
+		// must be decrease 1 
+		if (duration % 1 === 0 && ((self.task._end.valueOf() - new Date().getTimezoneOffset() * 6e4) % 864e5) === 0) {
+			self.duration = duration - 1;
+		} else {
+			self.duration = parseInt(duration, 10);
+		}
+	}
 	function prepare_values() {
 		self.invalid = self.task.invalid;
 		self.height = gt.config.bar.height;
 		self.x = compute_x();
 		self.y = compute_y();
 		self.corner_radius = 3;
-		self.duration = (self.task._end.diff(self.task._start, 'hours') + 24) / gt.config.step;
+		calculate_duration();
 		self.width = gt.config.column_width * self.duration;
 		self.progress_width = gt.config.column_width * self.duration * (self.task.progress / 100) || 0;
 		self.group = gt.canvas.group().addClass('bar-wrapper').addClass(self.task.custom_class || '');
@@ -201,7 +212,7 @@ export default function Bar(gt, task) {
 		const end_date = self.task._end.format('MMM D');
 		const heading = `${self.task.name}: ${start_date} - ${end_date}`;
 
-		const line_1 = `Duration: ${self.duration} days`;
+		const line_1 = `Duration: ${self.duration} ${self.duration > 1 ? `days` : `day`} `;
 		const line_2 = self.task.progress ? `Progress: ${self.task.progress}` : null;
 
 		const html = `
@@ -399,6 +410,7 @@ export default function Bar(gt, task) {
 		const { new_start_date, new_end_date } = compute_start_end_date();
 		self.task._start = new_start_date;
 		self.task._end = new_end_date;
+		calculate_duration();
 		render_details();
 		gt.trigger_event('date_change',
 			[self.task, new_start_date, new_end_date]);
@@ -428,7 +440,8 @@ export default function Bar(gt, task) {
 		// end_date = May 24 + 2 days = May 26 (incorrect)
 		// so subtract 1 second so that
 		// end_date = May 25 23:59:59
-		new_end_date.add('-1', 'seconds');
+		// fix it at #FIX_BUG_FOR_ERROR_DAY_COUNT
+		// new_end_date.add('-1', 'seconds');
 		return { new_start_date, new_end_date };
 	}
 
