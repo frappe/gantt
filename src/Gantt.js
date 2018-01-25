@@ -224,16 +224,13 @@ export default function Gantt(element, tasks, config = {}) {
 	function setup_dates() {
 
 		self.dates = [];
-		let cur_date = null;
+		let cur_date = self.gantt_start.clone().utc();
 
-		while(cur_date === null || cur_date < self.gantt_end) {
-			if(!cur_date) {
-				cur_date = self.gantt_start.clone();
-			} else {
-				cur_date = view_is('Month') ?
-					cur_date.clone().add(1, 'month') :
-					cur_date.clone().add(self.config.step, 'hours');
-			}
+		while(cur_date < self.gantt_end) {
+			cur_date = view_is('Month') ?
+				cur_date.clone().add(1, 'month') :
+				cur_date.clone().add(self.config.step, 'hours');
+
 			self.dates.push(cur_date);
 		}
 	}
