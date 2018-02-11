@@ -11,7 +11,6 @@ $blue: #a3a3ff;
 $handle-color: #ddd;
 
 .gantt {
-
 	.grid-background {
 		fill: none;
 	}
@@ -41,7 +40,7 @@ $handle-color: #ddd;
 		opacity: 0.5;
 	}
 
-	#arrow {
+	.arrow {
 		fill: none;
 		stroke: $text-muted;
 		stroke-width: 1.4;
@@ -52,6 +51,7 @@ $handle-color: #ddd;
 		stroke: $bar-stroke;
 		stroke-width: 0;
 		transition: stroke-width .3s ease;
+		user-select: none;
 	}
 	.bar-progress {
 		fill: $blue;
@@ -119,34 +119,40 @@ $handle-color: #ddd;
 		fill: $text-color;
 	}
 
-	#details .details-container {
-		background: #fff;
-		display: inline-block;
-		padding: 12px;
-
-		h5, p {
-			margin: 0;
-		}
-
-		h5 {
-			font-size: 12px;
-			font-weight: bold;
-			margin-bottom: 10px;
-			color: $text-light;
-		}
-
-		p {
-			font-size: 12px;
-			margin-bottom: 6px;
-			color: $text-muted;
-		}
-
-		p:last-child {
-			margin-bottom: 0;
-		}
-	}
-
 	.hide {
 		display: none;
+	}
+}
+
+.gantt-container {
+	position: relative;
+	font-size: 12px;
+
+	.popup-wrapper {
+		position: absolute;
+		top: 0;
+		left: 0;
+		background: rgba(0, 0, 0, 0.8);
+		padding: 0;
+		color: #959da5;
+		border-radius: 3px;
+
+		.title {
+			border-bottom: 3px solid $blue;
+			padding: 10px;
+		}
+
+		.subtitle {
+			padding: 10px;
+			color: #dfe2e5;
+		}
+
+		.pointer {
+			position: absolute;
+			height: 5px;
+			margin: 0 0 0 -5px;
+			border: 5px solid transparent;
+			border-top-color: rgba(0, 0, 0, 0.8);
+		}
 	}
 }

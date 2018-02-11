@@ -1,30 +1,14 @@
 {
   "name": "frappe-gantt",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "A simple, modern, interactive gantt library for the web",
-  "main": "dist/frappe-gantt.js",
+  "main": "src/index.js",
   "scripts": {
-    "build": "webpack --mode=build",
-    "dev": "webpack --progress --colors --watch --mode=dev",
-    "test": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js"
-  },
-  "devDependencies": {
-    "babel": "6.3.13",
-    "babel-core": "6.1.18",
-    "babel-eslint": "5.0.0",
-    "babel-loader": "6.1.0",
-    "babel-plugin-add-module-exports": "0.1.2",
-    "babel-preset-es2015": "6.3.13",
-    "chai": "3.4.1",
-    "css-loader": "^0.26.1",
-    "eslint": "1.7.2",
-    "eslint-loader": "1.1.0",
-    "mocha": "2.3.4",
-    "node-sass": "^4.0.0",
-    "sass-loader": "^4.1.0",
-    "style-loader": "^0.13.1",
-    "webpack": "1.12.9",
-    "yargs": "3.32.0"
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "prettier": "prettier es6 --write \"{src/*,tests/*,rollup.config}.js\""
   },
   "repository": {
     "type": "git",
@@ -44,8 +28,17 @@
     "url": "https://github.com/frappe/gantt/issues"
   },
   "homepage": "https://github.com/frappe/gantt",
-  "dependencies": {
-    "moment": "^2.17.1",
-    "snapsvg": "^0.4.0"
-  }
+  "devDependencies": {
+    "babel-preset-env": "^1.6.1",
+    "deepmerge": "^2.0.1",
+    "eslint": "^4.17.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "jest": "^22.2.1",
+    "prettier": "1.10.2",
+    "rollup": "^0.55.3",
+    "rollup-plugin-sass": "^0.5.3",
+    "rollup-plugin-uglify": "^3.0.0"
+  },
+  "eslintIgnore": ["dist"]
 }
