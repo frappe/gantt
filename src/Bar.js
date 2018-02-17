@@ -227,7 +227,10 @@ export default class Bar {
         this.update_handle_position();
         this.update_progressbar_position();
         this.update_arrow_position();
-        // this.update_details_position();
+
+        if (this.gantt.bar_being_dragged === this.task.id) {
+            this.show_popup();
+        }
     }
 
     date_changed() {
@@ -250,7 +253,7 @@ export default class Bar {
 
     set_action_completed() {
         this.action_completed = true;
-        setTimeout(() => (this.action_completed = false), 2000);
+        setTimeout(() => (this.action_completed = false), 1000);
     }
 
     compute_start_end_date() {
@@ -389,11 +392,6 @@ export default class Bar {
         for (let arrow of this.arrows) {
             arrow.update();
         }
-    }
-
-    update_details_position() {
-        const { x, y } = get_details_position();
-        this.details_box && this.details_box.transform(`t${x},${y}`);
     }
 }
 

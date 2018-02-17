@@ -575,6 +575,7 @@ export default class Gantt {
         let is_resizing_right = false;
         let parent_bar_id = null;
         let bars = []; // instanceof Bar
+        this.bar_being_dragged = null;
 
         function action_in_progress() {
             return is_dragging || is_resizing_left || is_resizing_right;
@@ -604,6 +605,8 @@ export default class Gantt {
                     ...this.get_all_dependent_tasks(parent_bar_id)
                 ];
                 bars = ids.map(id => this.get_bar(id));
+
+                this.bar_being_dragged = parent_bar_id;
 
                 bars.forEach(bar => {
                     const $bar = bar.$bar;

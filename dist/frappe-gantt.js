@@ -584,7 +584,10 @@ class Bar {
         this.update_handle_position();
         this.update_progressbar_position();
         this.update_arrow_position();
-        // this.update_details_position();
+
+        if (this.gantt.bar_being_dragged === this.task.id) {
+            this.show_popup();
+        }
     }
 
     date_changed() {
@@ -746,11 +749,6 @@ class Bar {
         for (let arrow of this.arrows) {
             arrow.update();
         }
-    }
-
-    update_details_position() {
-        const { x, y } = get_details_position();
-        this.details_box && this.details_box.transform(`t${x},${y}`);
     }
 }
 
@@ -1488,6 +1486,7 @@ class Gantt {
         let is_resizing_right = false;
         let parent_bar_id = null;
         let bars = []; // instanceof Bar
+        this.bar_being_dragged = null;
 
         function action_in_progress() {
             return is_dragging || is_resizing_left || is_resizing_right;
@@ -1517,6 +1516,8 @@ class Gantt {
                     ...this.get_all_dependent_tasks(parent_bar_id)
                 ];
                 bars = ids.map(id => this.get_bar(id));
+
+                this.bar_being_dragged = parent_bar_id;
 
                 bars.forEach(bar => {
                     const $bar = bar.$bar;
