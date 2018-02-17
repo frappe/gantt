@@ -245,7 +245,64 @@ function createSVG(tag, attrs) {
     return elem;
 }
 
+function animateSVG(svgElement, attr, from, to) {
+    const animatedSvgElement = getAnimationElement(svgElement, attr, from, to);
 
+    if (animatedSvgElement === svgElement) {
+        // triggered 2nd time programmatically
+        // trigger artificial click event
+        const event = document.createEvent('HTMLEvents');
+        event.initEvent('click', true, true);
+        event.eventName = 'click';
+        animatedSvgElement.dispatchEvent(event);
+    }
+}
+
+function getAnimationElement(
+    svgElement,
+    attr,
+    from,
+    to,
+    dur = '0.4s',
+    begin = '0.1s'
+) {
+    const animEl = svgElement.querySelector('animate');
+    if (animEl) {
+        $.attr(animEl, {
+            attributeName: attr,
+            from,
+            to,
+            dur,
+            begin: 'click + ' + begin // artificial click
+        });
+        return svgElement;
+    }
+
+    const animateElement = createSVG('animate', {
+        attributeName: attr,
+        from,
+        to,
+        dur,
+        begin,
+        calcMode: 'spline',
+        values: from + ';' + to,
+        keyTimes: '0; 1',
+        keySplines: cubic_bezier('ease-out')
+    });
+    svgElement.appendChild(animateElement);
+
+    return svgElement;
+}
+
+function cubic_bezier(name) {
+    return {
+        ease: '.25 .1 .25 1',
+        linear: '0 0 1 1',
+        'ease-in': '.42 0 1 1',
+        'ease-out': '0 0 .58 1',
+        'ease-in-out': '.42 0 .58 1'
+    }[name];
+}
 
 $.on = (element, event, selector, callback) => {
     if (!callback) {
@@ -385,6 +442,8 @@ class Bar {
             append_to: this.bar_group
         });
 
+        animateSVG(this.$bar, 'width', 0, this.width);
+
         if (this.invalid) {
             this.$bar.classList.add('bar-invalid');
         }
@@ -402,6 +461,8 @@ class Bar {
             class: 'bar-progress',
             append_to: this.bar_group
         });
+
+        animateSVG(this.$bar_progress, 'width', 0, this.progress_width);
     }
 
     draw_label() {
@@ -412,7 +473,8 @@ class Bar {
             class: 'bar-label',
             append_to: this.bar_group
         });
-        this.update_label_position();
+        // labels get BBox in the next tick
+        requestAnimationFrame(() => this.update_label_position());
     }
 
     draw_resize_handles() {
@@ -467,27 +529,35 @@ class Bar {
     bind() {
         if (this.invalid) return;
         this.setup_click_event();
-        this.show_details();
-        // this.bind_resize_progress();
     }
 
-    show_details() {
-        this.group.onclick = e => {
+    setup_click_event() {
+        $.on(this.group, 'click', e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
             }
 
-            const start_date = date_utils.format(this.task._start, 'MMM D');
-            const end_date = date_utils.format(this.task._end, 'MMM D');
-            const subtitle = start_date + ' - ' + end_date;
+            if (this.group.classList.contains('active')) {
+                this.gantt.trigger_event('click', [this.task]);
+            }
+            this.gantt.unselect_all();
+            this.group.classList.toggle('active');
 
-            this.gantt.show_popup({
-                target_element: this.$bar,
-                title: this.task.name,
-                subtitle: subtitle
-            });
-        };
+            this.show_popup();
+        });
+    }
+
+    show_popup() {
+        const start_date = date_utils.format(this.task._start, 'MMM D');
+        const end_date = date_utils.format(this.task._end, 'MMM D');
+        const subtitle = start_date + ' - ' + end_date;
+
+        this.gantt.show_popup({
+            target_element: this.$bar,
+            title: this.task.name,
+            subtitle: subtitle
+        });
     }
 
     update_bar_position({ x = null, width = null }) {
@@ -515,20 +585,6 @@ class Bar {
         this.update_progressbar_position();
         this.update_arrow_position();
         // this.update_details_position();
-    }
-
-    setup_click_event() {
-        this.group.onclick = () => {
-            if (this.action_completed) {
-                // just finished a move action, wait for a few seconds
-                return;
-            }
-            if (this.group.classList.contains('active')) {
-                this.gantt.trigger_event('click', [this.task]);
-            }
-            this.gantt.unselect_all();
-            this.group.classList.toggle('active');
-        };
     }
 
     date_changed() {
@@ -662,6 +718,7 @@ class Bar {
     update_label_position() {
         const bar = this.$bar,
             label = this.group.querySelector('.bar-label');
+
         if (label.getBBox().width > bar.getWidth()) {
             label.classList.add('big');
             label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
@@ -849,6 +906,7 @@ class Popup {
             this.pointer.style.top =
                 this.title.clientHeight / 2 -
                 this.pointer.getBoundingClientRect().height +
+                2 +
                 'px';
         }
 
@@ -1421,7 +1479,7 @@ class Gantt {
     bind_grid_click() {
         this.layers.grid.onclick = () => {
             this.unselect_all();
-            this.popup && this.popup.hide();
+            this.hide_popup();
         };
     }
 
@@ -1659,6 +1717,10 @@ class Gantt {
             this.popup = new Popup(this.popup_wrapper);
         }
         this.popup.show(options);
+    }
+
+    hide_popup() {
+        this.popup && this.popup.hide();
     }
 
     trigger_event(event, args) {

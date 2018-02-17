@@ -37,8 +37,8 @@ function getAnimationElement(
     attr,
     from,
     to,
-    dur = '0.3s',
-    begin = '0s'
+    dur = '0.4s',
+    begin = '0.1s'
 ) {
     const animEl = svgElement.querySelector('animate');
     if (animEl) {
@@ -57,11 +57,25 @@ function getAnimationElement(
         from,
         to,
         dur,
-        begin
+        begin,
+        calcMode: 'spline',
+        values: from + ';' + to,
+        keyTimes: '0; 1',
+        keySplines: cubic_bezier('ease-out')
     });
     svgElement.appendChild(animateElement);
 
     return svgElement;
+}
+
+function cubic_bezier(name) {
+    return {
+        ease: '.25 .1 .25 1',
+        linear: '0 0 1 1',
+        'ease-in': '.42 0 1 1',
+        'ease-out': '0 0 .58 1',
+        'ease-in-out': '.42 0 .58 1'
+    }[name];
 }
 
 $.on = (element, event, selector, callback) => {

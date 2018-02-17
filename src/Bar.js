@@ -1,5 +1,5 @@
 import date_utils from './date_utils';
-import { createSVG } from './svg_utils';
+import { $, createSVG, animateSVG } from './svg_utils';
 
 export default class Bar {
     constructor(gantt, task) {
@@ -85,6 +85,8 @@ export default class Bar {
             append_to: this.bar_group
         });
 
+        animateSVG(this.$bar, 'width', 0, this.width);
+
         if (this.invalid) {
             this.$bar.classList.add('bar-invalid');
         }
@@ -102,6 +104,8 @@ export default class Bar {
             class: 'bar-progress',
             append_to: this.bar_group
         });
+
+        animateSVG(this.$bar_progress, 'width', 0, this.progress_width);
     }
 
     draw_label() {
@@ -112,7 +116,8 @@ export default class Bar {
             class: 'bar-label',
             append_to: this.bar_group
         });
-        this.update_label_position();
+        // labels get BBox in the next tick
+        requestAnimationFrame(() => this.update_label_position());
     }
 
     draw_resize_handles() {
@@ -167,27 +172,35 @@ export default class Bar {
     bind() {
         if (this.invalid) return;
         this.setup_click_event();
-        this.show_details();
-        // this.bind_resize_progress();
     }
 
-    show_details() {
-        this.group.onclick = e => {
+    setup_click_event() {
+        $.on(this.group, 'click', e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
             }
 
-            const start_date = date_utils.format(this.task._start, 'MMM D');
-            const end_date = date_utils.format(this.task._end, 'MMM D');
-            const subtitle = start_date + ' - ' + end_date;
+            if (this.group.classList.contains('active')) {
+                this.gantt.trigger_event('click', [this.task]);
+            }
+            this.gantt.unselect_all();
+            this.group.classList.toggle('active');
 
-            this.gantt.show_popup({
-                target_element: this.$bar,
-                title: this.task.name,
-                subtitle: subtitle
-            });
-        };
+            this.show_popup();
+        });
+    }
+
+    show_popup() {
+        const start_date = date_utils.format(this.task._start, 'MMM D');
+        const end_date = date_utils.format(this.task._end, 'MMM D');
+        const subtitle = start_date + ' - ' + end_date;
+
+        this.gantt.show_popup({
+            target_element: this.$bar,
+            title: this.task.name,
+            subtitle: subtitle
+        });
     }
 
     update_bar_position({ x = null, width = null }) {
@@ -215,20 +228,6 @@ export default class Bar {
         this.update_progressbar_position();
         this.update_arrow_position();
         // this.update_details_position();
-    }
-
-    setup_click_event() {
-        this.group.onclick = () => {
-            if (this.action_completed) {
-                // just finished a move action, wait for a few seconds
-                return;
-            }
-            if (this.group.classList.contains('active')) {
-                this.gantt.trigger_event('click', [this.task]);
-            }
-            this.gantt.unselect_all();
-            this.group.classList.toggle('active');
-        };
     }
 
     date_changed() {
@@ -362,6 +361,7 @@ export default class Bar {
     update_label_position() {
         const bar = this.$bar,
             label = this.group.querySelector('.bar-label');
+
         if (label.getBBox().width > bar.getWidth()) {
             label.classList.add('big');
             label.setAttribute('x', bar.getX() + bar.getWidth() + 5);

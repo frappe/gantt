@@ -68,12 +68,16 @@
 .gantt .bar-wrapper {
   cursor: pointer; }
   .gantt .bar-wrapper:hover .bar {
-    stroke-width: 2; }
+    fill: #a9b5c1; }
+  .gantt .bar-wrapper:hover .bar-progress {
+    fill: #8a8aff; }
   .gantt .bar-wrapper:hover .handle {
     visibility: visible;
     opacity: 1; }
   .gantt .bar-wrapper.active .bar {
-    stroke-width: 2; }
+    fill: #a9b5c1; }
+  .gantt .bar-wrapper.active .bar-progress {
+    fill: #8a8aff; }
 
 .gantt .lower-text, .gantt .upper-text {
   font-size: 12px;

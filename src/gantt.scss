@@ -92,7 +92,11 @@ $handle-color: #ddd;
 
 		&:hover {
 			.bar {
-				stroke-width: 2;
+				fill: darken($bar-color, 5);
+			}
+
+			.bar-progress {
+				fill: darken($blue, 5);
 			}
 
 			.handle {
@@ -103,7 +107,11 @@ $handle-color: #ddd;
 
 		&.active {
 			.bar {
-				stroke-width: 2;
+				fill: darken($bar-color, 5);
+			}
+
+			.bar-progress {
+				fill: darken($blue, 5);
 			}
 		}
 	}

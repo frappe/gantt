@@ -566,7 +566,7 @@ export default class Gantt {
     bind_grid_click() {
         this.layers.grid.onclick = () => {
             this.unselect_all();
-            this.popup && this.popup.hide();
+            this.hide_popup();
         };
     }
 
@@ -804,6 +804,10 @@ export default class Gantt {
             this.popup = new Popup(this.popup_wrapper);
         }
         this.popup.show(options);
+    }
+
+    hide_popup() {
+        this.popup && this.popup.hide();
     }
 
     trigger_event(event, args) {

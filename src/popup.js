@@ -55,6 +55,7 @@ export default class Popup {
             this.pointer.style.top =
                 this.title.clientHeight / 2 -
                 this.pointer.getBoundingClientRect().height +
+                2 +
                 'px';
         }
 
