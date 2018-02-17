@@ -60,6 +60,7 @@
 		tasks[5].custom_class = "bar-milestone";
 
 		var gantt_chart = new Gantt(".gantt-target", tasks, {
+			bar_corner_radius: 5,
 			on_click: function (task) {
 				console.log(task);
 			},
