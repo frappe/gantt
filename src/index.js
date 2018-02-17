@@ -48,12 +48,8 @@ export default class Gantt {
             column_width: 30,
             step: 24,
             view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
-            bar: {
-                height: 20
-            },
-            arrow: {
-                curve: 5
-            },
+            bar_height: 20,
+            arrow_curve: 5,
             padding: 18,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
@@ -253,7 +249,7 @@ export default class Gantt {
         const grid_height =
             this.options.header_height +
             this.options.padding +
-            (this.options.bar.height + this.options.padding) *
+            (this.options.bar_height + this.options.padding) *
                 this.tasks.length;
 
         createSVG('rect', {
@@ -276,7 +272,7 @@ export default class Gantt {
         const lines_layer = createSVG('g', { append_to: this.layers.grid });
 
         const row_width = this.dates.length * this.options.column_width;
-        const row_height = this.options.bar.height + this.options.padding;
+        const row_height = this.options.bar_height + this.options.padding;
 
         let row_y = this.options.header_height + this.options.padding / 2;
 
@@ -299,7 +295,7 @@ export default class Gantt {
                 append_to: lines_layer
             });
 
-            row_y += this.options.bar.height + this.options.padding;
+            row_y += this.options.bar_height + this.options.padding;
         }
     }
 
@@ -320,7 +316,7 @@ export default class Gantt {
         let tick_x = 0;
         let tick_y = this.options.header_height + this.options.padding / 2;
         let tick_height =
-            (this.options.bar.height + this.options.padding) *
+            (this.options.bar_height + this.options.padding) *
             this.tasks.length;
 
         for (let date of this.dates) {
@@ -370,7 +366,7 @@ export default class Gantt {
 
             const width = this.options.column_width;
             const height =
-                (this.options.bar.height + this.options.padding) *
+                (this.options.bar_height + this.options.padding) *
                     this.tasks.length +
                 this.options.header_height +
                 this.options.padding / 2;

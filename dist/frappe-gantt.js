@@ -379,7 +379,7 @@ class Bar {
 
     prepare_values() {
         this.invalid = this.task.invalid;
-        this.height = this.gantt.options.bar.height;
+        this.height = this.gantt.options.bar_height;
         this.x = this.compute_x();
         this.y = this.compute_y();
         this.corner_radius = 3;
@@ -778,27 +778,27 @@ class Arrow {
 
         const start_y =
             this.gantt.options.header_height +
-            this.gantt.options.bar.height +
-            (this.gantt.options.padding + this.gantt.options.bar.height) *
+            this.gantt.options.bar_height +
+            (this.gantt.options.padding + this.gantt.options.bar_height) *
                 this.from_task.task._index +
             this.gantt.options.padding;
 
         const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
         const end_y =
             this.gantt.options.header_height +
-            this.gantt.options.bar.height / 2 +
-            (this.gantt.options.padding + this.gantt.options.bar.height) *
+            this.gantt.options.bar_height / 2 +
+            (this.gantt.options.padding + this.gantt.options.bar_height) *
                 this.to_task.task._index +
             this.gantt.options.padding;
 
         const from_is_below_to =
             this.from_task.task._index > this.to_task.task._index;
-        const curve = this.gantt.options.arrow.curve;
+        const curve = this.gantt.options.arrow_curve;
         const clockwise = from_is_below_to ? 1 : 0;
         const curve_y = from_is_below_to ? -curve : curve;
         const offset = from_is_below_to
-            ? end_y + this.gantt.options.arrow.curve
-            : end_y - this.gantt.options.arrow.curve;
+            ? end_y + this.gantt.options.arrow_curve
+            : end_y - this.gantt.options.arrow_curve;
 
         this.path = `
             M ${start_x} ${start_y}
@@ -961,12 +961,8 @@ class Gantt {
             column_width: 30,
             step: 24,
             view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
-            bar: {
-                height: 20
-            },
-            arrow: {
-                curve: 5
-            },
+            bar_height: 20,
+            arrow_curve: 5,
             padding: 18,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
@@ -1166,7 +1162,7 @@ class Gantt {
         const grid_height =
             this.options.header_height +
             this.options.padding +
-            (this.options.bar.height + this.options.padding) *
+            (this.options.bar_height + this.options.padding) *
                 this.tasks.length;
 
         createSVG('rect', {
@@ -1189,7 +1185,7 @@ class Gantt {
         const lines_layer = createSVG('g', { append_to: this.layers.grid });
 
         const row_width = this.dates.length * this.options.column_width;
-        const row_height = this.options.bar.height + this.options.padding;
+        const row_height = this.options.bar_height + this.options.padding;
 
         let row_y = this.options.header_height + this.options.padding / 2;
 
@@ -1212,7 +1208,7 @@ class Gantt {
                 append_to: lines_layer
             });
 
-            row_y += this.options.bar.height + this.options.padding;
+            row_y += this.options.bar_height + this.options.padding;
         }
     }
 
@@ -1233,7 +1229,7 @@ class Gantt {
         let tick_x = 0;
         let tick_y = this.options.header_height + this.options.padding / 2;
         let tick_height =
-            (this.options.bar.height + this.options.padding) *
+            (this.options.bar_height + this.options.padding) *
             this.tasks.length;
 
         for (let date of this.dates) {
@@ -1283,7 +1279,7 @@ class Gantt {
 
             const width = this.options.column_width;
             const height =
-                (this.options.bar.height + this.options.padding) *
+                (this.options.bar_height + this.options.padding) *
                     this.tasks.length +
                 this.options.header_height +
                 this.options.padding / 2;

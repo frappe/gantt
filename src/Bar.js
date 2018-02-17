@@ -22,7 +22,7 @@ export default class Bar {
 
     prepare_values() {
         this.invalid = this.task.invalid;
-        this.height = this.gantt.options.bar.height;
+        this.height = this.gantt.options.bar_height;
         this.x = this.compute_x();
         this.y = this.compute_y();
         this.corner_radius = 3;
