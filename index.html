@@ -20,16 +20,13 @@
 			fill: tomato;
 		}
 	</style>
-	<script src="node_modules/moment/min/moment.min.js"></script>
-	<script src="node_modules/snapsvg/dist/snap.svg-min.js"></script>
+	<link rel="stylesheet" href="dist/frappe-gantt.css" />
 	<script src="dist/frappe-gantt.js"></script>
 </head>
 <body>
 	<div class="container">
 		<h2>Interactive Gantt Chart entirely made in SVG!</h2>
-		<div class="gantt-container">
-			<svg id="gantt" width="400" height="600"></svg>
-		</div>
+		<div class="gantt-target"></div>
 	</div>
 	<script>
 		var names = [
@@ -62,7 +59,8 @@
 		tasks[5].dependencies = "Task 4"
 		tasks[5].custom_class = "bar-milestone";
 
-		var gantt_chart = Gantt("#gantt", tasks, {
+		var gantt_chart = new Gantt(".gantt-target", tasks, {
+			bar_corner_radius: 5,
 			on_click: function (task) {
 				console.log(task);
 			},
