@@ -47,8 +47,8 @@ If you want to contribute:
 
 1. Clone this repo.
 2. `cd` into project directory
-3. `npm install`
-4. `npm run dev`
+3. `yarn`
+4. `yarn run dev`
 
 License: MIT
 
