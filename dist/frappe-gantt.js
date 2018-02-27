@@ -610,7 +610,7 @@ class Bar {
 
     set_action_completed() {
         this.action_completed = true;
-        setTimeout(() => (this.action_completed = false), 2000);
+        setTimeout(() => (this.action_completed = false), 1000);
     }
 
     compute_start_end_date() {
