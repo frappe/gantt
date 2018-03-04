@@ -596,6 +596,8 @@ export default class Gantt {
                     is_dragging = true;
                 }
 
+                bar_wrapper.classList.add('active');
+
                 x_on_start = e.offsetX;
                 y_on_start = e.offsetY;
 
@@ -651,12 +653,17 @@ export default class Gantt {
         });
 
         document.addEventListener('mouseup', e => {
+            if (is_dragging || is_resizing_left || is_resizing_right) {
+                bars.forEach(bar => bar.group.classList.remove('active'));
+            }
+
             is_dragging = false;
             is_resizing_left = false;
             is_resizing_right = false;
         });
 
         $.on(this.$svg, 'mouseup', e => {
+            this.bar_being_dragged = null;
             bars.forEach(bar => {
                 const $bar = bar.$bar;
                 if (!$bar.finaldx) return;

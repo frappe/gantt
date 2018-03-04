@@ -549,6 +549,8 @@ class Bar {
     }
 
     show_popup() {
+        if (this.gantt.bar_being_dragged) return;
+
         const start_date = date_utils.format(this.task._start, 'MMM D');
         const end_date = date_utils.format(this.task._end, 'MMM D');
         const subtitle = start_date + ' - ' + end_date;
@@ -584,10 +586,6 @@ class Bar {
         this.update_handle_position();
         this.update_progressbar_position();
         this.update_arrow_position();
-
-        if (this.gantt.bar_being_dragged === this.task.id) {
-            this.show_popup();
-        }
     }
 
     date_changed() {
@@ -610,7 +608,7 @@ class Bar {
 
     set_action_completed() {
         this.action_completed = true;
-        setTimeout(() => (this.action_completed = false), 2000);
+        setTimeout(() => (this.action_completed = false), 1000);
     }
 
     compute_start_end_date() {
@@ -1507,6 +1505,8 @@ class Gantt {
                     is_dragging = true;
                 }
 
+                bar_wrapper.classList.add('active');
+
                 x_on_start = e.offsetX;
                 y_on_start = e.offsetY;
 
@@ -1562,12 +1562,17 @@ class Gantt {
         });
 
         document.addEventListener('mouseup', e => {
+            if (is_dragging || is_resizing_left || is_resizing_right) {
+                bars.forEach(bar => bar.group.classList.remove('active'));
+            }
+
             is_dragging = false;
             is_resizing_left = false;
             is_resizing_right = false;
         });
 
         $.on(this.$svg, 'mouseup', e => {
+            this.bar_being_dragged = null;
             bars.forEach(bar => {
                 const $bar = bar.$bar;
                 if (!$bar.finaldx) return;

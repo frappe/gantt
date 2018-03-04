@@ -192,6 +192,8 @@ export default class Bar {
     }
 
     show_popup() {
+        if (this.gantt.bar_being_dragged) return;
+
         const start_date = date_utils.format(this.task._start, 'MMM D');
         const end_date = date_utils.format(this.task._end, 'MMM D');
         const subtitle = start_date + ' - ' + end_date;
@@ -227,10 +229,6 @@ export default class Bar {
         this.update_handle_position();
         this.update_progressbar_position();
         this.update_arrow_position();
-
-        if (this.gantt.bar_being_dragged === this.task.id) {
-            this.show_popup();
-        }
     }
 
     date_changed() {

@@ -4,6 +4,7 @@
   "description": "A simple, modern, interactive gantt library for the web",
   "main": "src/index.js",
   "scripts": {
+    "start": "yarn run dev",
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "test": "jest",
