@@ -134,6 +134,7 @@ $handle-color: #ddd;
 
 .gantt-container {
 	position: relative;
+	overflow: auto;
 	font-size: 12px;
 
 	.popup-wrapper {
