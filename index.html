@@ -42,7 +42,7 @@
 			start.setDate(today.getDate() + name[1][0]);
 			end.setDate(today.getDate() + name[1][1]);
 			return {
-				start: start,
+				start: start, //"Hours View Mode = 2018-03-24 00:00:00"
 				end: end,
 				name: name[0],
 				id: "Task " + i,
@@ -70,6 +70,7 @@
 				console.log(mode);
 			}
 		});
+		//gantt_chart.change_view_mode('Hour')
 		console.log(gantt_chart);
 	</script>
 </body>

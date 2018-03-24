@@ -47,7 +47,7 @@ export default class Gantt {
             header_height: 50,
             column_width: 30,
             step: 24,
-            view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
+            view_modes: ['Hour', 'Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
             bar_height: 20,
             bar_corner_radius: 3,
             arrow_curve: 5,
@@ -143,7 +143,10 @@ export default class Gantt {
     update_view_scale(view_mode) {
         this.options.view_mode = view_mode;
 
-        if (view_mode === 'Day') {
+        if (view_mode === 'Hour') {
+            this.options.step = 24 / 24;
+            this.options.column_width = 38;
+        } else if (view_mode === 'Day') {
             this.options.step = 24;
             this.options.column_width = 38;
         } else if (view_mode === 'Half Day') {
@@ -180,7 +183,7 @@ export default class Gantt {
         }
 
         // add date padding on both sides
-        if (this.view_is(['Quarter Day', 'Half Day'])) {
+        if (this.view_is(['Hour' ,'Quarter Day', 'Half Day'])) {
             this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
             this.gantt_end = date_utils.add(this.gantt_end, 7, 'day');
         } else if (this.view_is('Month')) {
@@ -427,6 +430,7 @@ export default class Gantt {
             last_date = date_utils.add(date, 1, 'year');
         }
         const date_text = {
+            'Hour_lower': date_utils.format(date, 'HH'),
             'Quarter Day_lower': date_utils.format(date, 'HH'),
             'Half Day_lower': date_utils.format(date, 'HH'),
             Day_lower:
@@ -438,6 +442,12 @@ export default class Gantt {
                     ? date_utils.format(date, 'D MMM')
                     : date_utils.format(date, 'D'),
             Month_lower: date_utils.format(date, 'MMMM'),
+            'Hour_upper':
+                date.getDate() !== last_date.getDate()
+                    ? date.getMonth() !== last_date.getMonth()
+                      ? date_utils.format(date, 'D MMM')
+                      : date_utils.format(date, 'D')
+                    : '',
             'Quarter Day_upper':
                 date.getDate() !== last_date.getDate()
                     ? date_utils.format(date, 'D MMM')
@@ -469,6 +479,8 @@ export default class Gantt {
         };
 
         const x_pos = {
+            'Hour_lower': this.options.column_width * 2 / 2,
+            'Hour_upper': 0,
             'Quarter Day_lower': this.options.column_width * 4 / 2,
             'Quarter Day_upper': 0,
             'Half Day_lower': this.options.column_width * 2 / 2,
