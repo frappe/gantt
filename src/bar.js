@@ -260,13 +260,13 @@ export default class Bar {
         const new_start_date = date_utils.add(
             this.gantt.gantt_start,
             x_in_units * this.gantt.options.step,
-            'hours'
+            'hour'
         );
         const width_in_units = bar.getWidth() / this.gantt.options.column_width;
         const new_end_date = date_utils.add(
             new_start_date,
             width_in_units * this.gantt.options.step,
-            'hours'
+            'hour'
         );
         // lets say duration is 2 days
         // start_date = May 24 00:00:00
