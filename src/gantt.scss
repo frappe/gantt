@@ -1,14 +1,14 @@
-$bar-color: #b8c2cc;
-$bar-stroke: #8D99A6;
-$border-color: #e0e0e0;
-$light-bg: #f5f5f5;
-$light-border-color: #ebeff2;
-$light-yellow: #fcf8e3;
-$text-muted: #666;
-$text-light: #555;
-$text-color: #333;
-$blue: #a3a3ff;
-$handle-color: #ddd;
+$bar-color: #b8c2cc !default;
+$bar-stroke: #8D99A6 !default;
+$border-color: #e0e0e0 !default;
+$light-bg: #f5f5f5 !default;
+$light-border-color: #ebeff2 !default;
+$light-yellow: #fcf8e3 !default;
+$text-muted: #666 !default;
+$text-light: #555 !default;
+$text-color: #333 !default;
+$blue: #a3a3ff !default;
+$handle-color: #ddd !default;
 
 .gantt {
 	.grid-background {
