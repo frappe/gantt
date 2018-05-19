@@ -81,12 +81,20 @@ export default {
         };
 
         let str = format_string;
+        const formatted_values = [];
 
         Object.keys(format_map)
             .sort((a, b) => b.length - a.length) // big string first
             .forEach(key => {
-                str = str.replace(key, format_map[key]);
+                if (str.includes(key)) {
+                    str = str.replace(key, `$${formatted_values.length}`);
+                    formatted_values.push(format_map[key]);
+                }
             });
+
+        formatted_values.forEach((value, i) => {
+            str = str.replace(`$${i}`, value);
+        });
 
         return str;
     },
