@@ -581,44 +581,39 @@ export default class Gantt {
             return is_dragging || is_resizing_left || is_resizing_right;
         }
 
-        $.on(
-            this.layers.bar,
-            'mousedown',
-            '.bar-wrapper, .handle',
-            (e, element) => {
-                const bar_wrapper = $.closest('.bar-wrapper', element);
+        $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
+            const bar_wrapper = $.closest('.bar-wrapper', element);
 
-                if (element.classList.contains('left')) {
-                    is_resizing_left = true;
-                } else if (element.classList.contains('right')) {
-                    is_resizing_right = true;
-                } else if (element.classList.contains('bar-wrapper')) {
-                    is_dragging = true;
-                }
-
-                bar_wrapper.classList.add('active');
-
-                x_on_start = e.offsetX;
-                y_on_start = e.offsetY;
-
-                parent_bar_id = bar_wrapper.getAttribute('data-id');
-                const ids = [
-                    parent_bar_id,
-                    ...this.get_all_dependent_tasks(parent_bar_id)
-                ];
-                bars = ids.map(id => this.get_bar(id));
-
-                this.bar_being_dragged = parent_bar_id;
-
-                bars.forEach(bar => {
-                    const $bar = bar.$bar;
-                    $bar.ox = $bar.getX();
-                    $bar.oy = $bar.getY();
-                    $bar.owidth = $bar.getWidth();
-                    $bar.finaldx = 0;
-                });
+            if (element.classList.contains('left')) {
+                is_resizing_left = true;
+            } else if (element.classList.contains('right')) {
+                is_resizing_right = true;
+            } else if (element.classList.contains('bar-wrapper')) {
+                is_dragging = true;
             }
-        );
+
+            bar_wrapper.classList.add('active');
+
+            x_on_start = e.offsetX;
+            y_on_start = e.offsetY;
+
+            parent_bar_id = bar_wrapper.getAttribute('data-id');
+            const ids = [
+                parent_bar_id,
+                ...this.get_all_dependent_tasks(parent_bar_id)
+            ];
+            bars = ids.map(id => this.get_bar(id));
+
+            this.bar_being_dragged = parent_bar_id;
+
+            bars.forEach(bar => {
+                const $bar = bar.$bar;
+                $bar.ox = $bar.getX();
+                $bar.oy = $bar.getY();
+                $bar.owidth = $bar.getWidth();
+                $bar.finaldx = 0;
+            });
+        });
 
         $.on(this.$svg, 'mousemove', e => {
             if (!action_in_progress()) return;
