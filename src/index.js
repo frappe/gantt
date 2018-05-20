@@ -813,7 +813,10 @@ export default class Gantt {
 
     show_popup(options) {
         if (!this.popup) {
-            this.popup = new Popup(this.popup_wrapper);
+            this.popup = new Popup(
+                this.popup_wrapper,
+                this.options.custom_popup_html
+            );
         }
         this.popup.show(options);
     }

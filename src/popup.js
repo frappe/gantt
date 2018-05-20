@@ -1,6 +1,7 @@
 export default class Popup {
-    constructor(parent) {
+    constructor(parent, custom_html) {
         this.parent = parent;
+        this.custom_html = custom_html;
         this.make();
     }
 
@@ -27,11 +28,17 @@ export default class Popup {
         }
         const target_element = options.target_element;
 
-        // set data
-        this.title.innerHTML = options.title;
-        this.subtitle.innerHTML = options.subtitle;
-
-        this.parent.style.width = this.parent.clientWidth + 'px';
+        if (this.custom_html) {
+            let html = this.custom_html(options.task);
+            html += '<div class="pointer"></div>';
+            this.parent.innerHTML = html;
+            this.pointer = this.parent.querySelector('.pointer');
+        } else {
+            // set data
+            this.title.innerHTML = options.title;
+            this.subtitle.innerHTML = options.subtitle;
+            this.parent.style.width = this.parent.clientWidth + 'px';
+        }
 
         // set position
         let position_meta;
@@ -44,19 +51,11 @@ export default class Popup {
         if (options.position === 'left') {
             this.parent.style.left =
                 position_meta.x + (position_meta.width + 10) + 'px';
-            this.parent.style.top =
-                position_meta.y -
-                this.title.clientHeight / 2 +
-                position_meta.height / 2 +
-                'px';
+            this.parent.style.top = position_meta.y + 'px';
 
             this.pointer.style.transform = 'rotateZ(90deg)';
             this.pointer.style.left = '-7px';
-            this.pointer.style.top =
-                this.title.clientHeight / 2 -
-                this.pointer.getBoundingClientRect().height +
-                2 +
-                'px';
+            this.pointer.style.top = '2px';
         }
 
         // show

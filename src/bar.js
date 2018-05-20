@@ -205,7 +205,8 @@ export default class Bar {
         this.gantt.show_popup({
             target_element: this.$bar,
             title: this.task.name,
-            subtitle: subtitle
+            subtitle: subtitle,
+            task: this.task
         });
     }
 
