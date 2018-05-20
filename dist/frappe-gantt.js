@@ -84,12 +84,20 @@ var date_utils = {
         };
 
         let str = format_string;
+        const formatted_values = [];
 
         Object.keys(format_map)
             .sort((a, b) => b.length - a.length) // big string first
             .forEach(key => {
-                str = str.replace(key, format_map[key]);
+                if (str.includes(key)) {
+                    str = str.replace(key, `$${formatted_values.length}`);
+                    formatted_values.push(format_map[key]);
+                }
             });
+
+        formatted_values.forEach((value, i) => {
+            str = str.replace(`$${i}`, value);
+        });
 
         return str;
     },
@@ -384,7 +392,7 @@ class Bar {
         this.y = this.compute_y();
         this.corner_radius = this.gantt.options.bar_corner_radius;
         this.duration =
-            (date_utils.diff(this.task._end, this.task._start, 'hour') + 24) /
+            date_utils.diff(this.task._end, this.task._start, 'hour') /
             this.gantt.options.step;
         this.width = this.gantt.options.column_width * this.duration;
         this.progress_width =
@@ -532,15 +540,16 @@ class Bar {
     }
 
     setup_click_event() {
-        $.on(this.group, 'click', e => {
+        $.on(this.group, 'focus click', e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
             }
 
-            if (this.group.classList.contains('active')) {
+            if (e.type === 'click') {
                 this.gantt.trigger_event('click', [this.task]);
             }
+
             this.gantt.unselect_all();
             this.group.classList.toggle('active');
 
@@ -552,7 +561,10 @@ class Bar {
         if (this.gantt.bar_being_dragged) return;
 
         const start_date = date_utils.format(this.task._start, 'MMM D');
-        const end_date = date_utils.format(this.task._end, 'MMM D');
+        const end_date = date_utils.format(
+            date_utils.add(this.task._end, -1, 'second'),
+            'MMM D'
+        );
         const subtitle = start_date + ' - ' + end_date;
 
         this.gantt.show_popup({
@@ -589,14 +601,25 @@ class Bar {
     }
 
     date_changed() {
+        let changed = false;
         const { new_start_date, new_end_date } = this.compute_start_end_date();
-        this.task._start = new_start_date;
-        this.task._end = new_end_date;
+
+        if (Number(this.task._start) !== Number(new_start_date)) {
+            changed = true;
+            this.task._start = new_start_date;
+        }
+
+        if (Number(this.task._end) !== Number(new_end_date)) {
+            changed = true;
+            this.task._end = new_end_date;
+        }
+
+        if (!changed) return;
 
         this.gantt.trigger_event('date_change', [
             this.task,
             new_start_date,
-            new_end_date
+            date_utils.add(new_end_date, -1, 'second')
         ]);
     }
 
@@ -617,20 +640,15 @@ class Bar {
         const new_start_date = date_utils.add(
             this.gantt.gantt_start,
             x_in_units * this.gantt.options.step,
-            'hours'
+            'hour'
         );
         const width_in_units = bar.getWidth() / this.gantt.options.column_width;
         const new_end_date = date_utils.add(
             new_start_date,
             width_in_units * this.gantt.options.step,
-            'hours'
+            'hour'
         );
-        // lets say duration is 2 days
-        // start_date = May 24 00:00:00
-        // end_date = May 24 + 2 days = May 26 (incorrect)
-        // so subtract 1 second so that
-        // end_date = May 25 23:59:59
-        date_utils.add(new_end_date, -1, 'second');
+
         return { new_start_date, new_end_date };
     }
 
@@ -641,20 +659,16 @@ class Bar {
     }
 
     compute_x() {
-        let x =
-            date_utils.diff(this.task._start, this.gantt.gantt_start, 'hour') /
-            this.gantt.options.step *
-            this.gantt.options.column_width;
+        const { step, column_width } = this.gantt.options;
+        const task_start = this.task._start;
+        const gantt_start = this.gantt.gantt_start;
+
+        const diff = date_utils.diff(task_start, gantt_start, 'hour');
+        let x = diff / step * column_width;
 
         if (this.gantt.view_is('Month')) {
-            x =
-                date_utils.diff(
-                    this.task._start,
-                    this.gantt.gantt_start,
-                    'day'
-                ) *
-                this.gantt.options.column_width /
-                30;
+            const diff = date_utils.diff(task_start, gantt_start, 'day');
+            x = diff * column_width / 30;
         }
         return x;
     }
@@ -998,6 +1012,13 @@ class Gantt {
                 task._end = date_utils.add(task._start, 2, 'day');
             }
 
+            // if hours is not set, assume the last day is full day
+            // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
+            const task_end_values = date_utils.get_date_values(task._end);
+            if (task_end_values.slice(3).every(d => d === 0)) {
+                task._end = date_utils.add(task._end, 24, 'hour');
+            }
+
             // invalid flag
             if (!task.start || !task.end) {
                 task.invalid = true;
@@ -1087,6 +1108,9 @@ class Gantt {
                 this.gantt_end = task._end;
             }
         }
+
+        this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
+        this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
 
         // add date padding on both sides
         if (this.view_is(['Quarter Day', 'Half Day'])) {
@@ -1470,10 +1494,10 @@ class Gantt {
     }
 
     bind_grid_click() {
-        this.layers.grid.onclick = () => {
+        $.on(this.$svg, 'click', '.grid-row, .grid-header', () => {
             this.unselect_all();
             this.hide_popup();
-        };
+        });
     }
 
     bind_bar_events() {
@@ -1490,44 +1514,39 @@ class Gantt {
             return is_dragging || is_resizing_left || is_resizing_right;
         }
 
-        $.on(
-            this.layers.bar,
-            'mousedown',
-            '.bar-wrapper, .handle',
-            (e, element) => {
-                const bar_wrapper = $.closest('.bar-wrapper', element);
+        $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
+            const bar_wrapper = $.closest('.bar-wrapper', element);
 
-                if (element.classList.contains('left')) {
-                    is_resizing_left = true;
-                } else if (element.classList.contains('right')) {
-                    is_resizing_right = true;
-                } else if (element.classList.contains('bar-wrapper')) {
-                    is_dragging = true;
-                }
-
-                bar_wrapper.classList.add('active');
-
-                x_on_start = e.offsetX;
-                y_on_start = e.offsetY;
-
-                parent_bar_id = bar_wrapper.getAttribute('data-id');
-                const ids = [
-                    parent_bar_id,
-                    ...this.get_all_dependent_tasks(parent_bar_id)
-                ];
-                bars = ids.map(id => this.get_bar(id));
-
-                this.bar_being_dragged = parent_bar_id;
-
-                bars.forEach(bar => {
-                    const $bar = bar.$bar;
-                    $bar.ox = $bar.getX();
-                    $bar.oy = $bar.getY();
-                    $bar.owidth = $bar.getWidth();
-                    $bar.finaldx = 0;
-                });
+            if (element.classList.contains('left')) {
+                is_resizing_left = true;
+            } else if (element.classList.contains('right')) {
+                is_resizing_right = true;
+            } else if (element.classList.contains('bar-wrapper')) {
+                is_dragging = true;
             }
-        );
+
+            bar_wrapper.classList.add('active');
+
+            x_on_start = e.offsetX;
+            y_on_start = e.offsetY;
+
+            parent_bar_id = bar_wrapper.getAttribute('data-id');
+            const ids = [
+                parent_bar_id,
+                ...this.get_all_dependent_tasks(parent_bar_id)
+            ];
+            bars = ids.map(id => this.get_bar(id));
+
+            this.bar_being_dragged = parent_bar_id;
+
+            bars.forEach(bar => {
+                const $bar = bar.$bar;
+                $bar.ox = $bar.getX();
+                $bar.oy = $bar.getY();
+                $bar.owidth = $bar.getWidth();
+                $bar.finaldx = 0;
+            });
+        });
 
         $.on(this.$svg, 'mousemove', e => {
             if (!action_in_progress()) return;
