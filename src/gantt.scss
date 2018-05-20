@@ -89,6 +89,7 @@ $handle-color: #ddd !default;
 
 	.bar-wrapper {
 		cursor: pointer;
+		outline: none;
 
 		&:hover {
 			.bar {

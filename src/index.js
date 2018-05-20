@@ -89,6 +89,13 @@ export default class Gantt {
                 task._end = date_utils.add(task._start, 2, 'day');
             }
 
+            // if hours is not set, assume the last day is full day
+            // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
+            const task_end_values = date_utils.get_date_values(task._end);
+            if (task_end_values.slice(3).every(d => d === 0)) {
+                task._end = date_utils.add(task._end, 24, 'hour');
+            }
+
             // invalid flag
             if (!task.start || !task.end) {
                 task.invalid = true;
@@ -178,6 +185,9 @@ export default class Gantt {
                 this.gantt_end = task._end;
             }
         }
+
+        this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
+        this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
 
         // add date padding on both sides
         if (this.view_is(['Quarter Day', 'Half Day'])) {
@@ -561,10 +571,10 @@ export default class Gantt {
     }
 
     bind_grid_click() {
-        this.layers.grid.onclick = () => {
+        $.on(this.$svg, 'click', '.grid-row, .grid-header', () => {
             this.unselect_all();
             this.hide_popup();
-        };
+        });
     }
 
     bind_bar_events() {
