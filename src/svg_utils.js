@@ -19,15 +19,15 @@ export function createSVG(tag, attrs) {
     return elem;
 }
 
-export function animateSVG(svgElement, attr, from, to) {
+export function animateSVG(svgElement, attr, from, to, trigger_mode) {
     const animatedSvgElement = getAnimationElement(svgElement, attr, from, to);
 
     if (animatedSvgElement === svgElement) {
         // triggered 2nd time programmatically
         // trigger artificial click event
         const event = document.createEvent('HTMLEvents');
-        event.initEvent('click', true, true);
-        event.eventName = 'click';
+        event.initEvent(trigger_mode, true, true);
+        event.eventName = trigger_mode;
         animatedSvgElement.dispatchEvent(event);
     }
 }

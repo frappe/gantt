@@ -29,7 +29,6 @@ export default class Bar {
         this.duration =
             date_utils.diff(this.task._end, this.task._start, 'hour') /
             this.gantt.options.step;
-        
         this.width = this.gantt.options.column_width * this.duration;
         this.progress_width =
             this.gantt.options.column_width *
@@ -86,7 +85,7 @@ export default class Bar {
             append_to: this.bar_group
         });
 
-        animateSVG(this.$bar, 'width', 0, this.width);
+        animateSVG(this.$bar, 'width', 0, this.width, this.gantt.options.popup_trigger);
 
         if (this.invalid) {
             this.$bar.classList.add('bar-invalid');
@@ -106,7 +105,7 @@ export default class Bar {
             append_to: this.bar_group
         });
 
-        animateSVG(this.$bar_progress, 'width', 0, this.progress_width);
+        animateSVG(this.$bar_progress, 'width', 0, this.progress_width, this.gantt.options.popup_trigger);
     }
 
     draw_label() {
@@ -176,16 +175,14 @@ export default class Bar {
     }
 
     setup_click_event() {
-        $.on(this.group, 'focus click', e => {
+        $.on(this.group, this.gantt.options.popup_trigger, e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
             }
 
-            if (e.type === 'click') {
-                this.gantt.trigger_event('click', [this.task]);
-            }
-
+            this.gantt.trigger_event(this.gantt.options.popup_trigger, [this.task]);
+            
             this.gantt.unselect_all();
             this.group.classList.toggle('active');
 
