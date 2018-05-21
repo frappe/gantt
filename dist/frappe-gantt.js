@@ -253,15 +253,15 @@ function createSVG(tag, attrs) {
     return elem;
 }
 
-function animateSVG(svgElement, attr, from, to, trigger_mode) {
+function animateSVG(svgElement, attr, from, to) {
     const animatedSvgElement = getAnimationElement(svgElement, attr, from, to);
 
     if (animatedSvgElement === svgElement) {
         // triggered 2nd time programmatically
         // trigger artificial click event
         const event = document.createEvent('HTMLEvents');
-        event.initEvent(trigger_mode, true, true);
-        event.eventName = trigger_mode;
+        event.initEvent('click', true, true);
+        event.eventName = 'click';
         animatedSvgElement.dispatchEvent(event);
     }
 }
@@ -450,7 +450,7 @@ class Bar {
             append_to: this.bar_group
         });
 
-        animateSVG(this.$bar, 'width', 0, this.width, this.gantt.options.popup_trigger);
+        animateSVG(this.$bar, 'width', 0, this.width);
 
         if (this.invalid) {
             this.$bar.classList.add('bar-invalid');
@@ -470,7 +470,7 @@ class Bar {
             append_to: this.bar_group
         });
 
-        animateSVG(this.$bar_progress, 'width', 0, this.progress_width, this.gantt.options.popup_trigger);
+        animateSVG(this.$bar_progress, 'width', 0, this.progress_width);
     }
 
     draw_label() {
@@ -540,14 +540,16 @@ class Bar {
     }
 
     setup_click_event() {
-        $.on(this.group, this.gantt.options.popup_trigger, e => {
+        $.on(this.group, 'focus click', e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
             }
 
-            this.gantt.trigger_event(this.gantt.options.popup_trigger, [this.task]);
-            
+            if (e.type === 'click') {
+                this.gantt.trigger_event('click', [this.task]);
+            }
+
             this.gantt.unselect_all();
             this.group.classList.toggle('active');
 
@@ -568,8 +570,7 @@ class Bar {
         this.gantt.show_popup({
             target_element: this.$bar,
             title: this.task.name,
-            subtitle: subtitle,
-            task: this.task
+            subtitle: subtitle
         });
     }
 
@@ -859,9 +860,8 @@ class Arrow {
 }
 
 class Popup {
-    constructor(parent, custom_html) {
+    constructor(parent) {
         this.parent = parent;
-        this.custom_html = custom_html;
         this.make();
     }
 
@@ -888,17 +888,11 @@ class Popup {
         }
         const target_element = options.target_element;
 
-        if (this.custom_html) {
-            let html = this.custom_html(options.task);
-            html += '<div class="pointer"></div>';
-            this.parent.innerHTML = html;
-            this.pointer = this.parent.querySelector('.pointer');
-        } else {
-            // set data
-            this.title.innerHTML = options.title;
-            this.subtitle.innerHTML = options.subtitle;
-            this.parent.style.width = this.parent.clientWidth + 'px';
-        }
+        // set data
+        this.title.innerHTML = options.title;
+        this.subtitle.innerHTML = options.subtitle;
+
+        this.parent.style.width = this.parent.clientWidth + 'px';
 
         // set position
         let position_meta;
@@ -911,11 +905,19 @@ class Popup {
         if (options.position === 'left') {
             this.parent.style.left =
                 position_meta.x + (position_meta.width + 10) + 'px';
-            this.parent.style.top = position_meta.y + 'px';
+            this.parent.style.top =
+                position_meta.y -
+                this.title.clientHeight / 2 +
+                position_meta.height / 2 +
+                'px';
 
             this.pointer.style.transform = 'rotateZ(90deg)';
             this.pointer.style.left = '-7px';
-            this.pointer.style.top = '2px';
+            this.pointer.style.top =
+                this.title.clientHeight / 2 -
+                this.pointer.getBoundingClientRect().height +
+                2 +
+                'px';
         }
 
         // show
@@ -934,7 +936,6 @@ class Gantt {
         this.setup_tasks(tasks);
         // initialize with default view mode
         this.change_view_mode();
-        this.change_popup_mode();
         this.bind_events();
     }
 
@@ -976,7 +977,6 @@ class Gantt {
             padding: 18,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
-            popup_trigger: 'click',
             custom_popup_html: null
         };
         this.options = Object.assign({}, default_options, options);
@@ -1062,12 +1062,6 @@ class Gantt {
         this.change_view_mode();
     }
 
-    change_popup_mode(mode = this.options.popup_trigger){
-        this.options.popup_trigger = mode;
-        this.grid_event();
-        this.render();
-    }
-
     change_view_mode(mode = this.options.view_mode) {
         this.update_view_scale(mode);
         this.setup_dates();
@@ -1148,6 +1142,7 @@ class Gantt {
     }
 
     bind_events() {
+        this.bind_grid_click();
         this.bind_bar_events();
     }
 
@@ -1498,8 +1493,8 @@ class Gantt {
         parent_element.scrollLeft = scroll_pos;
     }
 
-    grid_event() {
-        $.on(this.$svg, this.options.popup_trigger, '.grid-row, .grid-header', () => {
+    bind_grid_click() {
+        $.on(this.$svg, 'click', '.grid-row, .grid-header', () => {
             this.unselect_all();
             this.hide_popup();
         });
@@ -1741,10 +1736,7 @@ class Gantt {
 
     show_popup(options) {
         if (!this.popup) {
-            this.popup = new Popup(
-                this.popup_wrapper,
-                this.options.custom_popup_html
-            );
+            this.popup = new Popup(this.popup_wrapper);
         }
         this.popup.show(options);
     }
