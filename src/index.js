@@ -13,7 +13,6 @@ export default class Gantt {
         this.setup_tasks(tasks);
         // initialize with default view mode
         this.change_view_mode();
-        this.change_popup_mode();
         this.bind_events();
     }
 
@@ -141,12 +140,6 @@ export default class Gantt {
         this.change_view_mode();
     }
 
-    change_popup_mode(mode = this.options.popup_trigger){
-        this.options.popup_trigger = mode;
-        this.grid_event();
-        this.render();
-    }
-
     change_view_mode(mode = this.options.view_mode) {
         this.update_view_scale(mode);
         this.setup_dates();
@@ -227,6 +220,7 @@ export default class Gantt {
     }
 
     bind_events() {
+        this.bind_grid_click();
         this.bind_bar_events();
     }
 
@@ -577,8 +571,8 @@ export default class Gantt {
         parent_element.scrollLeft = scroll_pos;
     }
 
-    grid_event() {
-        $.on(this.$svg, this.options.popup_trigger, '.grid-row, .grid-header', () => {
+    bind_grid_click() {
+        $.on(this.$svg, this.options.popup_trigger || 'click', '.grid-row, .grid-header', () => {
             this.unselect_all();
             this.hide_popup();
         });
