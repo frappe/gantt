@@ -572,7 +572,7 @@ export default class Gantt {
     }
 
     bind_grid_click() {
-        $.on(this.$svg, this.options.popup_trigger || 'click', '.grid-row, .grid-header', () => {
+        $.on(this.$svg, this.options.popup_trigger, '.grid-row, .grid-header', () => {
             this.unselect_all();
             this.hide_popup();
         });
