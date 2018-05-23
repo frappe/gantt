@@ -54,6 +54,7 @@ export default class Gantt {
             padding: 18,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
+            popup_trigger: 'click',
             custom_popup_html: null
         };
         this.options = Object.assign({}, default_options, options);
@@ -571,7 +572,7 @@ export default class Gantt {
     }
 
     bind_grid_click() {
-        $.on(this.$svg, 'click', '.grid-row, .grid-header', () => {
+        $.on(this.$svg, this.options.popup_trigger, '.grid-row, .grid-header', () => {
             this.unselect_all();
             this.hide_popup();
         });
