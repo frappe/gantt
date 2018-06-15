@@ -8,7 +8,7 @@ const dev = {
     output: {
         name: 'Gantt',
         file: 'dist/frappe-gantt.js',
-        format: 'iife'
+        format: 'umd'
     },
     plugins: [
         sass({
