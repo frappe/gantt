@@ -30,7 +30,9 @@
   },
   "homepage": "https://github.com/frappe/gantt",
   "devDependencies": {
+    "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
     "deepmerge": "^2.0.1",
     "eslint": "^4.17.0",
     "eslint-config-prettier": "^2.9.0",
@@ -38,6 +40,7 @@
     "jest": "^22.2.1",
     "prettier": "1.10.2",
     "rollup": "^0.55.3",
+    "rollup-plugin-babel": "^3.0.4",
     "rollup-plugin-sass": "^0.5.3",
     "rollup-plugin-uglify": "^3.0.0"
   },
