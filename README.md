@@ -32,6 +32,7 @@ And start hacking:
 var tasks = [
   {
     id: 'Task 1',
+    group_id: 'design',
     name: 'Redesign website',
     start: '2016-12-28',
     end: '2016-12-31',
@@ -57,7 +58,14 @@ var gantt = new Gantt("#gantt", tasks, {
     padding: 18,
     view_mode: 'Day',   
     date_format: 'YYYY-MM-DD',
-    custom_popup_html: null
+    custom_popup_html: null,
+    groups: [ 
+        {
+            'id': 'design', 
+            'name': 'Web Design',
+            'bar_class': 'bar-design-group'
+        }
+    ]
 });
 ```
 

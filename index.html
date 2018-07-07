@@ -12,9 +12,30 @@
 			width: 80%;
 			margin: 0 auto;
 		}
+		
+		/* custom task group classes */
+		.gantt .bar-design .bar {
+			fill: darkorchid;
+		}
+		.gantt .bar-design .bar-progress {
+			fill: darkmagenta;
+		}
+		.gantt .bar-development .bar {
+			fill: limegreen;
+		}
+		.gantt .bar-development .bar-progress {
+			fill: lime;
+		}
+		.gantt .bar-integration .bar {
+			fill: crimson;
+		}
+		.gantt .bar-integration .bar-progress {
+			fill: tomato;
+		}
+		
 		/* custom class */
 		.gantt .bar-milestone .bar {
-			fill: tomato;
+			fill: orangered;
 		}
 	</style>
 	<link rel="stylesheet" href="dist/frappe-gantt.css" />
@@ -32,6 +53,7 @@
 				end: '2018-10-08',
 				name: 'Redesign website',
 				id: "Task 0",
+				group_id: "design",
 				progress: 20
 			},
 			{
@@ -39,6 +61,7 @@
 				end: '2018-10-06',
 				name: 'Write new content',
 				id: "Task 1",
+				group_id: "development",
 				progress: 5,
 				dependencies: 'Task 0'
 			},
@@ -47,6 +70,7 @@
 				end: '2018-10-08',
 				name: 'Apply new styles',
 				id: "Task 2",
+				group_id: "development",
 				progress: 10,
 				dependencies: 'Task 1'
 			},
@@ -55,6 +79,7 @@
 				end: '2018-10-09',
 				name: 'Review',
 				id: "Task 3",
+				group_id: "integration",
 				progress: 5,
 				dependencies: 'Task 2'
 			},
@@ -63,6 +88,7 @@
 				end: '2018-10-10',
 				name: 'Deploy',
 				id: "Task 4",
+				group_id: "integration",
 				progress: 0,
 				dependencies: 'Task 2'
 			},
@@ -71,12 +97,30 @@
 				end: '2018-10-11',
 				name: 'Go Live!',
 				id: "Task 5",
+				group_id: "integration",
 				progress: 0,
 				dependencies: 'Task 4',
 				custom_class: 'bar-milestone'
 			},
 		]
 		var gantt_chart = new Gantt(".gantt-target", tasks, {
+			groups: [
+				{
+					id: 'design',
+					name: 'Web Design',
+					bar_class: 'bar-design'
+				},
+				{
+					id: 'development',
+					name: 'Development',
+					bar_class: 'bar-development'
+				},
+				{
+					id: 'integration',
+					name: 'Integration & Deployment',
+					bar_class: 'bar-integration'
+				}
+			],
 			on_click: function (task) {
 				console.log(task);
 			},
