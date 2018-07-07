@@ -34,9 +34,14 @@ export default class Bar {
             this.gantt.options.column_width *
                 this.duration *
                 (this.task.progress / 100) || 0;
+
         this.group = createSVG('g', {
-            class: 'bar-wrapper ' + (this.task.custom_class || ''),
-            'data-id': this.task.id
+            class:
+                'bar-wrapper ' +
+                (this.task._group ? `${this.task._group.bar_class} ` : '') +
+                (this.task.custom_class || ''),
+            'data-id': this.task.id,
+            'data-group-id': this.task.group_id
         });
         this.bar_group = createSVG('g', {
             class: 'bar-group',
@@ -184,7 +189,7 @@ export default class Bar {
             if (e.type === 'click') {
                 this.gantt.trigger_event('click', [this.task]);
             }
-            
+
             this.gantt.unselect_all();
             this.group.classList.toggle('active');
 
@@ -200,11 +205,14 @@ export default class Bar {
             date_utils.add(this.task._end, -1, 'second'),
             'MMM D'
         );
+
         const subtitle = start_date + ' - ' + end_date;
 
         this.gantt.show_popup({
             target_element: this.$bar,
-            title: this.task.name,
+            title:
+                `<b>${this.task.name}</b>` +
+                (this.task._group ? `<br>${this.task._group.name}` : ''),
             subtitle: subtitle,
             task: this.task
         });

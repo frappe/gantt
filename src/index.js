@@ -43,6 +43,12 @@ export default class Gantt {
     }
 
     setup_options(options) {
+        // convert groups array to a dictionary for faster lookups
+        options.groups = options.groups.reduce((dict, curr) => {
+            dict[curr.id] = curr;
+            return dict;
+        }, {});
+
         const default_options = {
             header_height: 50,
             column_width: 30,
@@ -55,7 +61,8 @@ export default class Gantt {
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
-            custom_popup_html: null
+            custom_popup_html: null,
+            groups: {}
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -117,6 +124,14 @@ export default class Gantt {
             // uids
             if (!task.id) {
                 task.id = generate_id(task);
+            }
+
+            // task group
+            if (
+                typeof task.group_id !== 'undefined' &&
+                this.options.groups.hasOwnProperty(task.group_id)
+            ) {
+                task._group = this.options.groups[task.group_id];
             }
 
             return task;
