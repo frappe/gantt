@@ -17,29 +17,50 @@ export default class Gantt {
     }
 
     setup_wrapper(element) {
+        let svg_element, wrapper_element;
+
+        // CSS Selector is passed
         if (typeof element === 'string') {
             element = document.querySelector(element);
         }
 
-        if (!(element instanceof HTMLElement)) {
-            throw new Error('Invalid argument passed for element');
+        // get the SVGElement
+        if (element instanceof HTMLElement) {
+            wrapper_element = element;
+            svg_element = element.querySelector('svg');
+        } else if (element instanceof SVGElement) {
+            svg_element = element;
+        } else {
+            throw new TypeError(
+                'Frappé Gantt only supports usage of a string CSS selector,' +
+                    " HTML DOM element or SVG DOM element for the 'element' parameter"
+            );
         }
 
-        // parent div element
+        // svg element
+        if (!svg_element) {
+            // create it
+            this.$svg = createSVG('svg', {
+                append_to: wrapper_element,
+                class: 'gantt'
+            });
+        } else {
+            this.$svg = svg_element;
+            this.$svg.classList.add('gantt');
+        }
+
+        // wrapper element
         this.$container = document.createElement('div');
         this.$container.classList.add('gantt-container');
-        element.appendChild(this.$container);
 
-        // parent svg element
-        this.$svg = createSVG('svg', {
-            append_to: this.$container,
-            class: 'gantt'
-        });
+        const parent_element = this.$svg.parentElement;
+        parent_element.appendChild(this.$container);
+        this.$container.appendChild(this.$svg);
 
         // popup wrapper
         this.popup_wrapper = document.createElement('div');
         this.popup_wrapper.classList.add('popup-wrapper');
-        this.$svg.parentElement.appendChild(this.popup_wrapper);
+        this.$container.appendChild(this.popup_wrapper);
     }
 
     setup_options(options) {
@@ -572,10 +593,15 @@ export default class Gantt {
     }
 
     bind_grid_click() {
-        $.on(this.$svg, this.options.popup_trigger, '.grid-row, .grid-header', () => {
-            this.unselect_all();
-            this.hide_popup();
-        });
+        $.on(
+            this.$svg,
+            this.options.popup_trigger,
+            '.grid-row, .grid-header',
+            () => {
+                this.unselect_all();
+                this.hide_popup();
+            }
+        );
     }
 
     bind_bar_events() {

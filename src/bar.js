@@ -184,7 +184,7 @@ export default class Bar {
             if (e.type === 'click') {
                 this.gantt.trigger_event('click', [this.task]);
             }
-            
+
             this.gantt.unselect_all();
             this.group.classList.toggle('active');
 
