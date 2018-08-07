@@ -262,6 +262,10 @@ export default class Bar {
         this.update_arrow_position();
     }
 
+    update_label_position_on_horizontal_scroll({ x }) {
+        console.log('X', x);
+    }
+
     date_changed() {
         let changed = false;
         const { new_start_date, new_end_date } = this.compute_start_end_date();
@@ -407,7 +411,12 @@ export default class Bar {
             }
         } else {
             label.classList.remove('big');
-            // label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+            if (img) {
+                img.setAttribute('x', bar.getX()  + 5 );
+                label.setAttribute('x', bar.getX() + 30);
+            } else {
+                label.setAttribute('x', bar.getX() + 5);
+            }
         }
     }
 
