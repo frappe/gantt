@@ -262,8 +262,9 @@ export default class Bar {
         this.update_arrow_position();
     }
 
-    update_label_position_on_horizontal_scroll({ x }) {
+    update_label_position_on_horizontal_scroll({ x, sx }) {
         
+        const container = document.querySelector('.gantt-container');
         const label = this.group.querySelector('.bar-label');
         const img = this.group.querySelector('.bar-img') || '';
 
@@ -272,15 +273,16 @@ export default class Bar {
         let newImgX = img && img.getX() + x || 0;
         let imgWidth = img && img.getBBox().width + 7 || 7;
         let labelEndX = newLabelX + label.getBBox().width + 7;
+        let viewportCentral = sx + container.clientWidth / 2;
 
         if (label.classList.contains('big')) return;
-
-        if (labelEndX < barWidthLimit && x > 0) {
+        
+        if (labelEndX < barWidthLimit && x > 0 && labelEndX < viewportCentral) {
             label.setAttribute('x', newLabelX );
             if (img) { 
                 img.setAttribute('x', newImgX);
             }
-        } else if ( (newLabelX - imgWidth)  > this.$bar.getX() && x < 0 ){
+        } else if ( (newLabelX - imgWidth)  > this.$bar.getX() && x < 0 && labelEndX > viewportCentral ){
             label.setAttribute('x', newLabelX );
             if (img) {
                 img.setAttribute('x', newImgX);

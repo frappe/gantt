@@ -680,9 +680,6 @@ export default class Gantt {
                 dx = e.currentTarget.scrollLeft - x_on_scroll_start;
             }
 
-            console.log('new', e.currentTarget.scrollLeft, 'old', x_on_scroll_start);
-            console.log('Dx:', dx);
-
             Array.prototype.forEach.call(elements, function(el, i){
                 ids.push(el.getAttribute('data-id'));
             });
@@ -691,7 +688,7 @@ export default class Gantt {
                 localBars = ids.map(id => this.get_bar(id));
             
                 localBars.forEach(bar => {
-                    bar.update_label_position_on_horizontal_scroll({ x: dx });
+                    bar.update_label_position_on_horizontal_scroll({ x: dx, sx: e.currentTarget.scrollLeft });
                 });
             }
             
