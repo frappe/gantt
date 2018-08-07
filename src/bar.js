@@ -70,6 +70,9 @@ export default class Bar {
         this.draw_bar();
         this.draw_progress_bar();
         this.draw_label();
+        if (this.task.img) {
+            this.draw_img();
+        }
         this.draw_resize_handles();
     }
 
@@ -110,7 +113,7 @@ export default class Bar {
 
     draw_label() {
         createSVG('text', {
-            x: this.x + this.width / 2,
+            x: this.x + 30,
             y: this.y + this.height / 2,
             innerHTML: this.task.name,
             class: 'bar-label',
@@ -118,6 +121,18 @@ export default class Bar {
         });
         // labels get BBox in the next tick
         requestAnimationFrame(() => this.update_label_position());
+    }
+
+    draw_img() {
+        createSVG('image', {
+            x: this.x + 10,
+            y: this.y + 2,
+            width: this.height - 5,
+            height: this.height - 5,
+            class: 'bar-img',
+            href: this.task.img,
+            append_to: this.bar_group
+        });
     }
 
     draw_resize_handles() {
@@ -375,7 +390,7 @@ export default class Bar {
             label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
         } else {
             label.classList.remove('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+            // label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
         }
     }
 

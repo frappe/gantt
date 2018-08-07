@@ -502,6 +502,9 @@ var Bar = function () {
             this.draw_bar();
             this.draw_progress_bar();
             this.draw_label();
+            if (this.task.img) {
+                this.draw_img();
+            }
             this.draw_resize_handles();
         }
     }, {
@@ -547,7 +550,7 @@ var Bar = function () {
             var _this = this;
 
             createSVG('text', {
-                x: this.x + this.width / 2,
+                x: this.x + 30,
                 y: this.y + this.height / 2,
                 innerHTML: this.task.name,
                 class: 'bar-label',
@@ -556,6 +559,19 @@ var Bar = function () {
             // labels get BBox in the next tick
             requestAnimationFrame(function () {
                 return _this.update_label_position();
+            });
+        }
+    }, {
+        key: 'draw_img',
+        value: function draw_img() {
+            createSVG('image', {
+                x: this.x + 10,
+                y: this.y + 2,
+                width: this.height - 5,
+                height: this.height - 5,
+                class: 'bar-img',
+                href: this.task.img,
+                append_to: this.bar_group
             });
         }
     }, {
@@ -805,7 +821,7 @@ var Bar = function () {
                 label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
             } else {
                 label.classList.remove('big');
-                label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+                // label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
             }
         }
     }, {
