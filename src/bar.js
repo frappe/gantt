@@ -394,11 +394,17 @@ export default class Bar {
 
     update_label_position() {
         const bar = this.$bar,
-            label = this.group.querySelector('.bar-label');
+            label = this.group.querySelector('.bar-label'),
+            img = this.group.querySelector('.bar-img');
 
         if (label.getBBox().width > bar.getWidth()) {
             label.classList.add('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+            if (img) {
+                img.setAttribute('x', bar.getX() + bar.getWidth() + 5 );
+                label.setAttribute('x', bar.getX() + bar.getWidth() + 22);
+            } else {
+                label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+            }
         } else {
             label.classList.remove('big');
             // label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
