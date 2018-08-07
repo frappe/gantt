@@ -29,7 +29,7 @@
 		var tasks = [
 			{
 				start: '2018-10-01',
-				end: '2018-10-08',
+				end: '2019-01-08',
 				name: 'Redesign website',
 				id: "Task 0",
 				progress: 20,
@@ -54,7 +54,7 @@
 			},
 			{
 				start: '2018-10-08',
-				end: '2018-10-09',
+				end: '2019-01-09',
 				name: 'Review',
 				id: "Task 3",
 				progress: 5,
@@ -75,7 +75,8 @@
 				id: "Task 5",
 				progress: 0,
 				dependencies: 'Task 4',
-				custom_class: 'bar-milestone'
+				custom_class: 'bar-milestone',
+				img: 'https://mdn.mozillademos.org/files/6457/mdn_logo_only_color.png'
 			},
 		]
 		var gantt_chart = new Gantt(".gantt-target", tasks, {

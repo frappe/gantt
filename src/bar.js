@@ -263,7 +263,31 @@ export default class Bar {
     }
 
     update_label_position_on_horizontal_scroll({ x }) {
-        console.log('X', x);
+        
+        const label = this.group.querySelector('.bar-label');
+        const img = this.group.querySelector('.bar-img') || '';
+
+        let barWidthLimit = this.$bar.getX() + this.$bar.getWidth();
+        let newLabelX = label.getX() + x;
+        let newImgX = img && img.getX() + x || 0;
+        let imgWidth = img && img.getBBox().width + 7 || 7;
+        let labelEndX = newLabelX + label.getBBox().width + 7;
+
+        if (label.classList.contains('big')) return;
+
+        if (labelEndX < barWidthLimit && x > 0) {
+            label.setAttribute('x', newLabelX );
+            if (img) { 
+                img.setAttribute('x', newImgX);
+            }
+        } else if ( (newLabelX - imgWidth)  > this.$bar.getX() && x < 0 ){
+            label.setAttribute('x', newLabelX );
+            if (img) {
+                img.setAttribute('x', newImgX);
+            }
+            
+        }
+        
     }
 
     date_changed() {
@@ -413,7 +437,7 @@ export default class Bar {
             label.classList.remove('big');
             if (img) {
                 img.setAttribute('x', bar.getX()  + 5 );
-                label.setAttribute('x', bar.getX() + 30);
+                label.setAttribute('x', bar.getX() + 25);
             } else {
                 label.setAttribute('x', bar.getX() + 5);
             }

@@ -581,6 +581,7 @@ export default class Gantt {
     bind_bar_events() {
         let is_dragging = false;
         let x_on_start = 0;
+        let x_on_scroll_start = 0;
         let y_on_start = 0;
         let is_resizing_left = false;
         let is_resizing_right = false;
@@ -667,6 +668,36 @@ export default class Gantt {
             is_resizing_left = false;
             is_resizing_right = false;
         });
+
+       $.on(this.$container, 'scroll', e => {
+
+            let elements = document.querySelectorAll('.bar-wrapper');
+            let localBars = [];
+            const ids = [];
+            let dx;
+            
+            if (x_on_scroll_start) {
+                dx = e.currentTarget.scrollLeft - x_on_scroll_start;
+            }
+
+            console.log('new', e.currentTarget.scrollLeft, 'old', x_on_scroll_start);
+            console.log('Dx:', dx);
+
+            Array.prototype.forEach.call(elements, function(el, i){
+                ids.push(el.getAttribute('data-id'));
+            });
+
+            if (dx) {
+                localBars = ids.map(id => this.get_bar(id));
+            
+                localBars.forEach(bar => {
+                    bar.update_label_position_on_horizontal_scroll({ x: dx });
+                });
+            }
+            
+            x_on_scroll_start = e.currentTarget.scrollLeft;
+
+       });
 
         $.on(this.$svg, 'mouseup', e => {
             this.bar_being_dragged = null;
