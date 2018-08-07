@@ -112,8 +112,16 @@ export default class Bar {
     }
 
     draw_label() {
+        let x_coord, y_coord;
+
+        if (this.task.img) {
+            x_coord = this.x + 30;
+        } else {
+            x_coord = this.x + 5;
+        }
+
         createSVG('text', {
-            x: this.x + 30,
+            x: x_coord,
             y: this.y + this.height / 2,
             innerHTML: this.task.name,
             class: 'bar-label',
@@ -124,11 +132,14 @@ export default class Bar {
     }
 
     draw_img() {
+        let x_offset = 10, y_offset = 2;
+        let img_size = this.height - 5;
+        
         createSVG('image', {
-            x: this.x + 10,
-            y: this.y + 2,
-            width: this.height - 5,
-            height: this.height - 5,
+            x: this.x + x_offset,
+            y: this.y + y_offset,
+            width: img_size,
+            height: img_size,
             class: 'bar-img',
             href: this.task.img,
             append_to: this.bar_group
