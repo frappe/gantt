@@ -39,20 +39,6 @@ const month_names = {
         'Декабрь'
     ]
 };
-// const month_names = [
-//     'January',
-//     'February',
-//     'March',
-//     'April',
-//     'May',
-//     'June',
-//     'July',
-//     'August',
-//     'September',
-//     'October',
-//     'November',
-//     'December'
-// ];
 
 var date_utils = {
     parse(date, date_separator = '-', time_separator = ':') {
