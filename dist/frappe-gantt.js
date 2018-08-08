@@ -708,6 +708,38 @@ var Bar = function () {
             this.update_arrow_position();
         }
     }, {
+        key: 'update_label_position_on_horizontal_scroll',
+        value: function update_label_position_on_horizontal_scroll(_ref2) {
+            var x = _ref2.x,
+                sx = _ref2.sx;
+
+
+            var container = document.querySelector('.gantt-container');
+            var label = this.group.querySelector('.bar-label');
+            var img = this.group.querySelector('.bar-img') || '';
+
+            var barWidthLimit = this.$bar.getX() + this.$bar.getWidth();
+            var newLabelX = label.getX() + x;
+            var newImgX = img && img.getX() + x || 0;
+            var imgWidth = img && img.getBBox().width + 7 || 7;
+            var labelEndX = newLabelX + label.getBBox().width + 7;
+            var viewportCentral = sx + container.clientWidth / 2;
+
+            if (label.classList.contains('big')) return;
+
+            if (labelEndX < barWidthLimit && x > 0 && labelEndX < viewportCentral) {
+                label.setAttribute('x', newLabelX);
+                if (img) {
+                    img.setAttribute('x', newImgX);
+                }
+            } else if (newLabelX - imgWidth > this.$bar.getX() && x < 0 && labelEndX > viewportCentral) {
+                label.setAttribute('x', newLabelX);
+                if (img) {
+                    img.setAttribute('x', newImgX);
+                }
+            }
+        }
+    }, {
         key: 'date_changed',
         value: function date_changed() {
             var changed = false;
@@ -826,14 +858,25 @@ var Bar = function () {
         key: 'update_label_position',
         value: function update_label_position() {
             var bar = this.$bar,
-                label = this.group.querySelector('.bar-label');
+                label = this.group.querySelector('.bar-label'),
+                img = this.group.querySelector('.bar-img');
 
             if (label.getBBox().width > bar.getWidth()) {
                 label.classList.add('big');
-                label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+                if (img) {
+                    img.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+                    label.setAttribute('x', bar.getX() + bar.getWidth() + 22);
+                } else {
+                    label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+                }
             } else {
                 label.classList.remove('big');
-                // label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+                if (img) {
+                    img.setAttribute('x', bar.getX() + 5);
+                    label.setAttribute('x', bar.getX() + 25);
+                } else {
+                    label.setAttribute('x', bar.getX() + 5);
+                }
             }
         }
     }, {
@@ -1773,6 +1816,7 @@ var Gantt = function () {
 
             var is_dragging = false;
             var x_on_start = 0;
+            var x_on_scroll_start = 0;
             var y_on_start = 0;
             var is_resizing_left = false;
             var is_resizing_right = false;
@@ -1859,6 +1903,34 @@ var Gantt = function () {
                 is_dragging = false;
                 is_resizing_left = false;
                 is_resizing_right = false;
+            });
+
+            $.on(this.$container, 'scroll', function (e) {
+
+                var elements = document.querySelectorAll('.bar-wrapper');
+                var localBars = [];
+                var ids = [];
+                var dx = void 0;
+
+                if (x_on_scroll_start) {
+                    dx = e.currentTarget.scrollLeft - x_on_scroll_start;
+                }
+
+                Array.prototype.forEach.call(elements, function (el, i) {
+                    ids.push(el.getAttribute('data-id'));
+                });
+
+                if (dx) {
+                    localBars = ids.map(function (id) {
+                        return _this6.get_bar(id);
+                    });
+
+                    localBars.forEach(function (bar) {
+                        bar.update_label_position_on_horizontal_scroll({ x: dx, sx: e.currentTarget.scrollLeft });
+                    });
+                }
+
+                x_on_scroll_start = e.currentTarget.scrollLeft;
             });
 
             $.on(this.$svg, 'mouseup', function (e) {
