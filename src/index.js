@@ -76,7 +76,8 @@ export default class Gantt {
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
-            custom_popup_html: null
+            custom_popup_html: null,
+            language: 'en'
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -469,43 +470,43 @@ export default class Gantt {
             last_date = date_utils.add(date, 1, 'year');
         }
         const date_text = {
-            'Quarter Day_lower': date_utils.format(date, 'HH'),
-            'Half Day_lower': date_utils.format(date, 'HH'),
+            'Quarter Day_lower': date_utils.format(date, 'HH', this.options.language),
+            'Half Day_lower': date_utils.format(date, 'HH', this.options.language),
             Day_lower:
                 date.getDate() !== last_date.getDate()
-                    ? date_utils.format(date, 'D')
+                    ? date_utils.format(date, 'D', this.options.language)
                     : '',
             Week_lower:
                 date.getMonth() !== last_date.getMonth()
-                    ? date_utils.format(date, 'D MMM')
-                    : date_utils.format(date, 'D'),
-            Month_lower: date_utils.format(date, 'MMMM'),
-            Year_lower: date_utils.format(date, 'YYYY'),
+                    ? date_utils.format(date, 'D MMM', this.options.language)
+                    : date_utils.format(date, 'D', this.options.language),
+            Month_lower: date_utils.format(date, 'MMMM', this.options.language),
+            Year_lower: date_utils.format(date, 'YYYY', this.options.language),
             'Quarter Day_upper':
                 date.getDate() !== last_date.getDate()
-                    ? date_utils.format(date, 'D MMM')
+                    ? date_utils.format(date, 'D MMM', this.options.language)
                     : '',
             'Half Day_upper':
                 date.getDate() !== last_date.getDate()
                     ? date.getMonth() !== last_date.getMonth()
-                      ? date_utils.format(date, 'D MMM')
-                      : date_utils.format(date, 'D')
+                      ? date_utils.format(date, 'D MMM', this.options.language)
+                      : date_utils.format(date, 'D', this.options.language)
                     : '',
             Day_upper:
                 date.getMonth() !== last_date.getMonth()
-                    ? date_utils.format(date, 'MMMM')
+                    ? date_utils.format(date, 'MMMM', this.options.language)
                     : '',
             Week_upper:
                 date.getMonth() !== last_date.getMonth()
-                    ? date_utils.format(date, 'MMMM')
+                    ? date_utils.format(date, 'MMMM', this.options.language)
                     : '',
             Month_upper:
                 date.getFullYear() !== last_date.getFullYear()
-                    ? date_utils.format(date, 'YYYY')
+                    ? date_utils.format(date, 'YYYY', this.options.language)
                     : '',
             Year_upper:
                 date.getFullYear() !== last_date.getFullYear()
-                    ? date_utils.format(date, 'YYYY')
+                    ? date_utils.format(date, 'YYYY', this.options.language)
                     : ''
         };
 
