@@ -52,7 +52,7 @@
   fill: #fff;
   dominant-baseline: central;
   font-size: 12px;
-  font-weight: lighter; }
+  font-weight: 500; }
   .gantt .bar-label.big {
     fill: #555;
     text-anchor: start; }
