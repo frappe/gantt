@@ -135,7 +135,33 @@ export default class Bar {
 
     draw_img() {
         let x_offset = 10, y_offset = 2;
-        
+        let defs, clipPath;
+
+        defs = createSVG('defs', {
+            append_to: this.bar_group
+        });
+
+        createSVG('rect', {
+            id: 'rect_' + this.task.id,
+            x: this.x + x_offset,
+            y: this.y + y_offset,
+            width: this.image_size,
+            height: this.image_size,
+            rx: '15',
+            class: 'img_mask',
+            append_to: defs
+        });
+
+        clipPath = createSVG('clipPath', {
+            id: 'clip_' + this.task.id,
+            append_to: defs
+        });
+
+        createSVG('use', {
+            href: '#rect_' + this.task.id,
+            append_to: clipPath
+        });
+
         createSVG('image', {
             x: this.x + x_offset,
             y: this.y + y_offset,
@@ -143,9 +169,11 @@ export default class Bar {
             height: this.image_size,
             class: 'bar-img',
             href: this.task.img,
+            clipPath: 'clip_' + this.task.id,
             append_to: this.bar_group
         });
     }
+
 
     draw_resize_handles() {
         if (this.invalid) return;
@@ -268,6 +296,7 @@ export default class Bar {
         const container = document.querySelector('.gantt-container');
         const label = this.group.querySelector('.bar-label');
         const img = this.group.querySelector('.bar-img') || '';
+        const img_mask = this.bar_group.querySelector('.img_mask') || '';
 
         let barWidthLimit = this.$bar.getX() + this.$bar.getWidth();
         let newLabelX = label.getX() + x;
@@ -282,11 +311,13 @@ export default class Bar {
             label.setAttribute('x', newLabelX );
             if (img) { 
                 img.setAttribute('x', newImgX);
+                img_mask.setAttribute('x', newImgX);
             }
         } else if ( (newLabelX - imgWidth)  > this.$bar.getX() && x < 0 && labelEndX > viewportCentral ){
             label.setAttribute('x', newLabelX );
             if (img) {
                 img.setAttribute('x', newImgX);
+                img_mask.setAttribute('x', newImgX);
             }
             
         }
@@ -424,9 +455,11 @@ export default class Bar {
     }
 
     update_label_position() {
+        const img_mask = this.bar_group.querySelector('.img_mask') || '';
         const bar = this.$bar,
             label = this.group.querySelector('.bar-label'),
             img = this.group.querySelector('.bar-img');
+        
         let padding = 5;
         let x_offset_label_img = this.image_size + 10;
 
@@ -434,6 +467,7 @@ export default class Bar {
             label.classList.add('big');
             if (img) {
                 img.setAttribute('x', bar.getX() + bar.getWidth() + padding );
+                img_mask.setAttribute('x', bar.getX() + bar.getWidth() + padding );
                 label.setAttribute('x', bar.getX() + bar.getWidth() + x_offset_label_img);
             } else {
                 label.setAttribute('x', bar.getX() + bar.getWidth() + padding);
@@ -443,6 +477,7 @@ export default class Bar {
             
             if (img) {
                 img.setAttribute('x', bar.getX()  + padding);
+                img_mask.setAttribute('x', bar.getX()  + padding);
                 label.setAttribute('x', bar.getX() + x_offset_label_img);
             } else {
                 label.setAttribute('x', bar.getX() + padding);

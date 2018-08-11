@@ -314,6 +314,8 @@ function createSVG(tag, attrs) {
             parent.appendChild(elem);
         } else if (attr === 'innerHTML') {
             elem.innerHTML = attrs.innerHTML;
+        } else if (attr === 'clipPath') {
+            elem.setAttribute('clip-path', 'url(#' + attrs[attr] + ')');
         } else {
             elem.setAttribute(attr, attrs[attr]);
         }
@@ -576,6 +578,33 @@ var Bar = function () {
         value: function draw_img() {
             var x_offset = 10,
                 y_offset = 2;
+            var defs = void 0,
+                clipPath = void 0;
+
+            defs = createSVG('defs', {
+                append_to: this.bar_group
+            });
+
+            createSVG('rect', {
+                id: 'rect_' + this.task.id,
+                x: this.x + x_offset,
+                y: this.y + y_offset,
+                width: this.image_size,
+                height: this.image_size,
+                rx: '15',
+                class: 'img_mask',
+                append_to: defs
+            });
+
+            clipPath = createSVG('clipPath', {
+                id: 'clip_' + this.task.id,
+                append_to: defs
+            });
+
+            createSVG('use', {
+                href: '#rect_' + this.task.id,
+                append_to: clipPath
+            });
 
             createSVG('image', {
                 x: this.x + x_offset,
@@ -584,6 +613,7 @@ var Bar = function () {
                 height: this.image_size,
                 class: 'bar-img',
                 href: this.task.img,
+                clipPath: 'clip_' + this.task.id,
                 append_to: this.bar_group
             });
         }
@@ -718,6 +748,7 @@ var Bar = function () {
             var container = document.querySelector('.gantt-container');
             var label = this.group.querySelector('.bar-label');
             var img = this.group.querySelector('.bar-img') || '';
+            var img_mask = this.bar_group.querySelector('.img_mask') || '';
 
             var barWidthLimit = this.$bar.getX() + this.$bar.getWidth();
             var newLabelX = label.getX() + x;
@@ -732,11 +763,13 @@ var Bar = function () {
                 label.setAttribute('x', newLabelX);
                 if (img) {
                     img.setAttribute('x', newImgX);
+                    img_mask.setAttribute('x', newImgX);
                 }
             } else if (newLabelX - imgWidth > this.$bar.getX() && x < 0 && labelEndX > viewportCentral) {
                 label.setAttribute('x', newLabelX);
                 if (img) {
                     img.setAttribute('x', newImgX);
+                    img_mask.setAttribute('x', newImgX);
                 }
             }
         }
@@ -858,9 +891,11 @@ var Bar = function () {
     }, {
         key: 'update_label_position',
         value: function update_label_position() {
+            var img_mask = this.bar_group.querySelector('.img_mask') || '';
             var bar = this.$bar,
                 label = this.group.querySelector('.bar-label'),
                 img = this.group.querySelector('.bar-img');
+
             var padding = 5;
             var x_offset_label_img = this.image_size + 10;
 
@@ -868,6 +903,7 @@ var Bar = function () {
                 label.classList.add('big');
                 if (img) {
                     img.setAttribute('x', bar.getX() + bar.getWidth() + padding);
+                    img_mask.setAttribute('x', bar.getX() + bar.getWidth() + padding);
                     label.setAttribute('x', bar.getX() + bar.getWidth() + x_offset_label_img);
                 } else {
                     label.setAttribute('x', bar.getX() + bar.getWidth() + padding);
@@ -877,6 +913,7 @@ var Bar = function () {
 
                 if (img) {
                     img.setAttribute('x', bar.getX() + padding);
+                    img_mask.setAttribute('x', bar.getX() + padding);
                     label.setAttribute('x', bar.getX() + x_offset_label_img);
                 } else {
                     label.setAttribute('x', bar.getX() + padding);
