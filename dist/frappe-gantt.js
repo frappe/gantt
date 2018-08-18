@@ -503,12 +503,20 @@ var Bar = function () {
         key: 'draw',
         value: function draw() {
             this.draw_bar();
-            this.draw_progress_bar();
-            this.draw_label();
-            if (this.task.img) {
-                this.draw_img();
+
+            if (this.gantt.options.progress) {
+                this.draw_progress_bar();
             }
-            this.draw_resize_handles();
+
+            this.draw_label();
+
+            if (this.task.thumbnail) {
+                this.draw_thumbnail();
+            }
+
+            if (this.gantt.options.resizing) {
+                this.draw_resize_handles();
+            }
         }
     }, {
         key: 'draw_bar',
