@@ -238,7 +238,7 @@ export default class Gantt {
 
     setup_layers() {
         this.layers = {};
-        const layers = ['grid', 'date', 'arrow', 'progress', 'bar', 'details'];
+        const layers = ['grid', 'arrow', 'progress', 'bar', 'details', 'date'];
         // make group layers
         for (let layer of layers) {
             this.layers[layer] = createSVG('g', {
@@ -320,7 +320,7 @@ export default class Gantt {
             width: header_width,
             height: header_height,
             class: 'grid-header',
-            append_to: this.layers.grid
+            append_to: this.layers.date // this.layers.grid
         });
     }
 
@@ -395,6 +395,7 @@ export default class Gantt {
     }
 
     make_dates() {
+
         for (let date of this.get_dates_to_draw()) {
             createSVG('text', {
                 x: date.lower_x,
@@ -676,6 +677,8 @@ export default class Gantt {
             const ids = [];
             let dx;
             
+            this.layers.date.setAttribute('transform', 'translate(0,'+ e.currentTarget.scrollTop +')');
+
             if (x_on_scroll_start) {
                 dx = e.currentTarget.scrollLeft - x_on_scroll_start;
             }

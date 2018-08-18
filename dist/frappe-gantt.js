@@ -1414,7 +1414,7 @@ var Gantt = function () {
         key: 'setup_layers',
         value: function setup_layers() {
             this.layers = {};
-            var layers = ['grid', 'date', 'arrow', 'progress', 'bar', 'details'];
+            var layers = ['grid', 'arrow', 'progress', 'bar', 'details', 'date'];
             // make group layers
             var _iteratorNormalCompletion4 = true;
             var _didIteratorError4 = false;
@@ -1538,7 +1538,7 @@ var Gantt = function () {
                 width: header_width,
                 height: header_height,
                 class: 'grid-header',
-                append_to: this.layers.grid
+                append_to: this.layers.date // this.layers.grid
             });
         }
     }, {
@@ -1626,6 +1626,7 @@ var Gantt = function () {
             var _iteratorError7 = undefined;
 
             try {
+
                 for (var _iterator7 = this.get_dates_to_draw()[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
                     var date = _step7.value;
 
@@ -1952,6 +1953,8 @@ var Gantt = function () {
                 var localBars = [];
                 var ids = [];
                 var dx = void 0;
+
+                _this6.layers.date.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
 
                 if (x_on_scroll_start) {
                     dx = e.currentTarget.scrollLeft - x_on_scroll_start;
