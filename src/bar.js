@@ -222,14 +222,14 @@ export default class Bar {
 
     get_progress_polygon_points() {
         const bar_progress = this.$bar_progress;
-        return [
+        return bar_progress && [
             bar_progress.getEndX() - 5,
             bar_progress.getY() + bar_progress.getHeight(),
             bar_progress.getEndX() + 5,
             bar_progress.getY() + bar_progress.getHeight(),
             bar_progress.getEndX(),
             bar_progress.getY() + bar_progress.getHeight() - 8.66
-        ];
+        ] || [];
     }
 
     bind() {
@@ -294,7 +294,11 @@ export default class Bar {
             this.update_attr(bar, 'width', width);
         }
         this.update_label_position();
-        this.update_handle_position();
+
+        if (this.gantt.options.resizing) {
+            this.update_handle_position();
+        } 
+
         this.update_progressbar_position();
         this.update_arrow_position();
     }
@@ -455,8 +459,8 @@ export default class Bar {
     }
 
     update_progressbar_position() {
-        this.$bar_progress.setAttribute('x', this.$bar.getX());
-        this.$bar_progress.setAttribute(
+        this.$bar_progress && this.$bar_progress.setAttribute('x', this.$bar.getX());
+        this.$bar_progress && this.$bar_progress.setAttribute(
             'width',
             this.$bar.getWidth() * (this.task.progress / 100)
         );

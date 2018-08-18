@@ -54,6 +54,7 @@ export default class Gantt {
             padding: 18,
             resizing: true,
             progress: true,
+            is_draggable: true,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
@@ -656,7 +657,7 @@ export default class Gantt {
                             width: $bar.owidth + $bar.finaldx
                         });
                     }
-                } else if (is_dragging) {
+                } else if (is_dragging && this.options.is_draggable) {
                     bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
                 }
             });

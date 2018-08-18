@@ -667,7 +667,7 @@ var Bar = function () {
         key: 'get_progress_polygon_points',
         value: function get_progress_polygon_points() {
             var bar_progress = this.$bar_progress;
-            return [bar_progress.getEndX() - 5, bar_progress.getY() + bar_progress.getHeight(), bar_progress.getEndX() + 5, bar_progress.getY() + bar_progress.getHeight(), bar_progress.getEndX(), bar_progress.getY() + bar_progress.getHeight() - 8.66];
+            return bar_progress && [bar_progress.getEndX() - 5, bar_progress.getY() + bar_progress.getHeight(), bar_progress.getEndX() + 5, bar_progress.getY() + bar_progress.getHeight(), bar_progress.getEndX(), bar_progress.getY() + bar_progress.getHeight() - 8.66] || [];
         }
     }, {
         key: 'bind',
@@ -742,7 +742,11 @@ var Bar = function () {
                 this.update_attr(bar, 'width', width);
             }
             this.update_label_position();
-            this.update_handle_position();
+
+            if (this.gantt.options.resizing) {
+                this.update_handle_position();
+            }
+
             this.update_progressbar_position();
             this.update_arrow_position();
         }
@@ -893,8 +897,8 @@ var Bar = function () {
     }, {
         key: 'update_progressbar_position',
         value: function update_progressbar_position() {
-            this.$bar_progress.setAttribute('x', this.$bar.getX());
-            this.$bar_progress.setAttribute('width', this.$bar.getWidth() * (this.task.progress / 100));
+            this.$bar_progress && this.$bar_progress.setAttribute('x', this.$bar.getX());
+            this.$bar_progress && this.$bar_progress.setAttribute('width', this.$bar.getWidth() * (this.task.progress / 100));
         }
     }, {
         key: 'update_label_position',
@@ -1162,6 +1166,7 @@ var Gantt = function () {
                 padding: 18,
                 resizing: true,
                 progress: true,
+                is_draggable: true,
                 view_mode: 'Day',
                 date_format: 'YYYY-MM-DD',
                 popup_trigger: 'click',
@@ -1939,7 +1944,7 @@ var Gantt = function () {
                                 width: $bar.owidth + $bar.finaldx
                             });
                         }
-                    } else if (is_dragging) {
+                    } else if (is_dragging && _this6.options.is_draggable) {
                         bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
                     }
                 });
