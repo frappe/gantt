@@ -52,6 +52,8 @@ export default class Gantt {
             bar_corner_radius: 3,
             arrow_curve: 5,
             padding: 18,
+            resizing: true,
+            progress: true,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
