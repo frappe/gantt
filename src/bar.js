@@ -69,12 +69,20 @@ export default class Bar {
 
     draw() {
         this.draw_bar();
-        this.draw_progress_bar();
-        this.draw_label();
-        if (this.task.img) {
-            this.draw_img();
+
+        if (this.gantt.options.progress) {
+            this.draw_progress_bar();
         }
-        this.draw_resize_handles();
+    
+        this.draw_label();
+
+        if (this.task.thumbnail) {
+            this.draw_thumbnail();
+        }
+
+        if (this.gantt.options.resizing) {
+            this.draw_resize_handles();
+        }
     }
 
     draw_bar() {
@@ -133,7 +141,7 @@ export default class Bar {
         requestAnimationFrame(() => this.update_label_position());
     }
 
-    draw_img() {
+    draw_thumbnail() {
         let x_offset = 10, y_offset = 2;
         let defs, clipPath;
 
@@ -168,7 +176,7 @@ export default class Bar {
             width: this.image_size,
             height: this.image_size,
             class: 'bar-img',
-            href: this.task.img,
+            href: this.task.thumbnail,
             clipPath: 'clip_' + this.task.id,
             append_to: this.bar_group
         });

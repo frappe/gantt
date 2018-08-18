@@ -574,8 +574,8 @@ var Bar = function () {
             });
         }
     }, {
-        key: 'draw_img',
-        value: function draw_img() {
+        key: 'draw_thumbnail',
+        value: function draw_thumbnail() {
             var x_offset = 10,
                 y_offset = 2;
             var defs = void 0,
@@ -612,7 +612,7 @@ var Bar = function () {
                 width: this.image_size,
                 height: this.image_size,
                 class: 'bar-img',
-                href: this.task.img,
+                href: this.task.thumbnail,
                 clipPath: 'clip_' + this.task.id,
                 append_to: this.bar_group
             });
