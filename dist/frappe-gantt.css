@@ -37,7 +37,7 @@
   transition: stroke-width .3s ease;
   user-select: none; }
 
-.gantt .bar-progress {
+.gantt .bar-progress-gantt {
   fill: #a3a3ff; }
 
 .gantt .bar-invalid {
@@ -69,14 +69,14 @@
   outline: none; }
   .gantt .bar-wrapper:hover .bar {
     fill: #a9b5c1; }
-  .gantt .bar-wrapper:hover .bar-progress {
+  .gantt .bar-wrapper:hover .bar-progress-gantt {
     fill: #8a8aff; }
   .gantt .bar-wrapper:hover .handle {
     visibility: visible;
     opacity: 1; }
   .gantt .bar-wrapper.active .bar {
     fill: #a9b5c1; }
-  .gantt .bar-wrapper.active .bar-progress {
+  .gantt .bar-wrapper.active .bar-progress-gantt {
     fill: #8a8aff; }
 
 .gantt .lower-text, .gantt .upper-text {

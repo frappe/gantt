@@ -549,7 +549,7 @@ var Bar = function () {
                 height: this.height,
                 rx: this.corner_radius,
                 ry: this.corner_radius,
-                class: 'bar-progress',
+                class: 'bar-progress-gantt',
                 append_to: this.bar_group
             });
 

@@ -53,7 +53,7 @@ $handle-color: #ddd !default;
 		transition: stroke-width .3s ease;
 		user-select: none;
 	}
-	.bar-progress {
+	.bar-progress-gantt {
 		fill: $blue;
 	}
 	.bar-invalid {
@@ -96,7 +96,7 @@ $handle-color: #ddd !default;
 				fill: darken($bar-color, 5);
 			}
 
-			.bar-progress {
+			.bar-progress-gantt {
 				fill: darken($blue, 5);
 			}
 
@@ -111,7 +111,7 @@ $handle-color: #ddd !default;
 				fill: darken($bar-color, 5);
 			}
 
-			.bar-progress {
+			.bar-progress-gantt {
 				fill: darken($blue, 5);
 			}
 		}
