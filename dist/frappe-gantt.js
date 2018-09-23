@@ -1016,7 +1016,14 @@ class Gantt {
             header_height: 50,
             column_width: 30,
             step: 24,
-            view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month', 'Year'],
+            view_modes: [
+                'Quarter Day',
+                'Half Day',
+                'Day',
+                'Week',
+                'Month',
+                'Year'
+            ],
             bar_height: 20,
             bar_corner_radius: 3,
             arrow_curve: 5,
@@ -1192,7 +1199,11 @@ class Gantt {
                 } else if (this.view_is('Month')) {
                     cur_date = date_utils.add(cur_date, 1, 'month');
                 } else {
-                    cur_date = date_utils.add(cur_date, this.options.step, 'hour');
+                    cur_date = date_utils.add(
+                        cur_date,
+                        this.options.step,
+                        'hour'
+                    );
                 }
             }
             this.dates.push(cur_date);
@@ -1418,8 +1429,16 @@ class Gantt {
             last_date = date_utils.add(date, 1, 'year');
         }
         const date_text = {
-            'Quarter Day_lower': date_utils.format(date, 'HH', this.options.language),
-            'Half Day_lower': date_utils.format(date, 'HH', this.options.language),
+            'Quarter Day_lower': date_utils.format(
+                date,
+                'HH',
+                this.options.language
+            ),
+            'Half Day_lower': date_utils.format(
+                date,
+                'HH',
+                this.options.language
+            ),
             Day_lower:
                 date.getDate() !== last_date.getDate()
                     ? date_utils.format(date, 'D', this.options.language)
