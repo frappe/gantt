@@ -41,7 +41,7 @@ const month_names = {
 };
 
 var date_utils = {
-    parse(date, date_separator = '-', time_separator = ':') {
+    parse(date, date_separator = '-', time_separator = /[.:]/) {
         if (date instanceof Date) {
             return date;
         }
@@ -60,6 +60,10 @@ var date_utils = {
             let vals = date_parts;
 
             if (time_parts && time_parts.length) {
+                if (time_parts.length == 4) {
+                    time_parts[3] = '0.' + time_parts[3];
+                    time_parts[3] = parseFloat(time_parts[3]) * 1000;
+                }
                 vals = vals.concat(time_parts);
             }
 
@@ -77,15 +81,19 @@ var date_utils = {
                 val = val + 1;
             }
 
+            if (i === 6) {
+                return padStart(val + '', 3, '0');
+            }
+
             return padStart(val + '', 2, '0');
         });
         const date_string = `${vals[0]}-${vals[1]}-${vals[2]}`;
-        const time_string = `${vals[3]}:${vals[4]}:${vals[5]}`;
+        const time_string = `${vals[3]}:${vals[4]}:${vals[5]}.${vals[6]}`;
 
         return date_string + (with_time ? ' ' + time_string : '');
     },
 
-    format(date, format_string = 'YYYY-MM-DD HH:mm:ss', lang = 'en') {
+    format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
         const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
         const format_map = {
             YYYY: values[0],
@@ -94,6 +102,7 @@ var date_utils = {
             HH: values[3],
             mm: values[4],
             ss: values[5],
+            SSS:values[6],
             D: values[2],
             MMMM: month_names[lang][+values[1]],
             MMM: month_names[lang][+values[1]]
