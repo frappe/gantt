@@ -68,7 +68,14 @@ export default class Gantt {
             header_height: 50,
             column_width: 30,
             step: 24,
-            view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
+            view_modes: [
+                'Quarter Day',
+                'Half Day',
+                'Day',
+                'Week',
+                'Month',
+                'Year'
+            ],
             bar_height: 20,
             bar_corner_radius: 3,
             arrow_curve: 5,
@@ -76,7 +83,8 @@ export default class Gantt {
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
-            custom_popup_html: null
+            custom_popup_html: null,
+            language: 'en'
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -187,6 +195,9 @@ export default class Gantt {
         } else if (view_mode === 'Month') {
             this.options.step = 24 * 30;
             this.options.column_width = 120;
+        } else if (view_mode === 'Year') {
+            this.options.step = 24 * 365;
+            this.options.column_width = 120;
         }
     }
 
@@ -218,6 +229,9 @@ export default class Gantt {
         } else if (this.view_is('Month')) {
             this.gantt_start = date_utils.start_of(this.gantt_start, 'year');
             this.gantt_end = date_utils.add(this.gantt_end, 1, 'year');
+        } else if (this.view_is('Year')) {
+            this.gantt_start = date_utils.add(this.gantt_start, -2, 'year');
+            this.gantt_end = date_utils.add(this.gantt_end, 2, 'year');
         } else {
             this.gantt_start = date_utils.add(this.gantt_start, -1, 'month');
             this.gantt_end = date_utils.add(this.gantt_end, 1, 'month');
@@ -232,9 +246,17 @@ export default class Gantt {
             if (!cur_date) {
                 cur_date = date_utils.clone(this.gantt_start);
             } else {
-                cur_date = this.view_is('Month')
-                    ? date_utils.add(cur_date, 1, 'month')
-                    : date_utils.add(cur_date, this.options.step, 'hour');
+                if (this.view_is('Year')) {
+                    cur_date = date_utils.add(cur_date, 1, 'year');
+                } else if (this.view_is('Month')) {
+                    cur_date = date_utils.add(cur_date, 1, 'month');
+                } else {
+                    cur_date = date_utils.add(
+                        cur_date,
+                        this.options.step,
+                        'hour'
+                    );
+                }
             }
             this.dates.push(cur_date);
         }
@@ -459,38 +481,51 @@ export default class Gantt {
             last_date = date_utils.add(date, 1, 'year');
         }
         const date_text = {
-            'Quarter Day_lower': date_utils.format(date, 'HH'),
-            'Half Day_lower': date_utils.format(date, 'HH'),
+            'Quarter Day_lower': date_utils.format(
+                date,
+                'HH',
+                this.options.language
+            ),
+            'Half Day_lower': date_utils.format(
+                date,
+                'HH',
+                this.options.language
+            ),
             Day_lower:
                 date.getDate() !== last_date.getDate()
-                    ? date_utils.format(date, 'D')
+                    ? date_utils.format(date, 'D', this.options.language)
                     : '',
             Week_lower:
                 date.getMonth() !== last_date.getMonth()
-                    ? date_utils.format(date, 'D MMM')
-                    : date_utils.format(date, 'D'),
-            Month_lower: date_utils.format(date, 'MMMM'),
+                    ? date_utils.format(date, 'D MMM', this.options.language)
+                    : date_utils.format(date, 'D', this.options.language),
+            Month_lower: date_utils.format(date, 'MMMM', this.options.language),
+            Year_lower: date_utils.format(date, 'YYYY', this.options.language),
             'Quarter Day_upper':
                 date.getDate() !== last_date.getDate()
-                    ? date_utils.format(date, 'D MMM')
+                    ? date_utils.format(date, 'D MMM', this.options.language)
                     : '',
             'Half Day_upper':
                 date.getDate() !== last_date.getDate()
                     ? date.getMonth() !== last_date.getMonth()
-                      ? date_utils.format(date, 'D MMM')
-                      : date_utils.format(date, 'D')
+                      ? date_utils.format(date, 'D MMM', this.options.language)
+                      : date_utils.format(date, 'D', this.options.language)
                     : '',
             Day_upper:
                 date.getMonth() !== last_date.getMonth()
-                    ? date_utils.format(date, 'MMMM')
+                    ? date_utils.format(date, 'MMMM', this.options.language)
                     : '',
             Week_upper:
                 date.getMonth() !== last_date.getMonth()
-                    ? date_utils.format(date, 'MMMM')
+                    ? date_utils.format(date, 'MMMM', this.options.language)
                     : '',
             Month_upper:
                 date.getFullYear() !== last_date.getFullYear()
-                    ? date_utils.format(date, 'YYYY')
+                    ? date_utils.format(date, 'YYYY', this.options.language)
+                    : '',
+            Year_upper:
+                date.getFullYear() !== last_date.getFullYear()
+                    ? date_utils.format(date, 'YYYY', this.options.language)
                     : ''
         };
 
@@ -510,7 +545,9 @@ export default class Gantt {
             Week_lower: 0,
             Week_upper: this.options.column_width * 4 / 2,
             Month_lower: this.options.column_width / 2,
-            Month_upper: this.options.column_width * 12 / 2
+            Month_upper: this.options.column_width * 12 / 2,
+            Year_lower: this.options.column_width / 2,
+            Year_upper: this.options.column_width * 30 / 2
         };
 
         return {
