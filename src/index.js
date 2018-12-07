@@ -799,8 +799,18 @@ export default class Gantt {
     get_all_dependent_tasks(task_id) {
         let out = [];
         let to_process = [task_id];
+
+        //counter for endless loop check
+        let counter = 0;
         while (to_process.length) {
+        	
             const deps = to_process.reduce((acc, curr) => {
+            	// break if the loop is endless
+                counter++;
+            	if(counter === 1000) {
+            		throw "Endless loop is occured, please check your task dependencies for recursion";
+            	}
+
                 acc = acc.concat(this.dependency_map[curr]);
                 return acc;
             }, []);
