@@ -37,6 +37,20 @@ const month_names = {
         'Октябрь',
         'Ноябрь',
         'Декабрь'
+    ],
+    ptBr: [
+        'Janeiro',
+        'Fevereiro',
+        'Março',
+        'Abril',
+        'Maio',
+        'Junho',
+        'Julho',
+        'Agosto',
+        'Setembro',
+        'Outubro',
+        'Novembro',
+        'Dezembro'
     ]
 };
 
@@ -95,6 +109,7 @@ var date_utils = {
 
     format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
         const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
+        const langData = Array.isArray(lang) ? lang : month_names[lang];
         const format_map = {
             YYYY: values[0],
             MM: padStart(+values[1] + 1, 2, 0),
@@ -104,8 +119,8 @@ var date_utils = {
             ss: values[5],
             SSS:values[6],
             D: values[2],
-            MMMM: month_names[lang][+values[1]],
-            MMM: month_names[lang][+values[1]]
+            MMMM: langData[+values[1]],
+            MMM: langData[+values[1]]
         };
 
         let str = format_string;
