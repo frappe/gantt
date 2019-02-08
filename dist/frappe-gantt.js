@@ -425,6 +425,11 @@ class Bar {
     }
 
     prepare_values() {
+    	// properties for click and doubleClick event
+		this.clickDelay = 500;
+		this.clicks = 0;
+		this.timer = null;
+    	
         this.invalid = this.task.invalid;
         this.height = this.gantt.options.bar_height;
         this.x = this.compute_x();
@@ -579,22 +584,34 @@ class Bar {
     }
 
     setup_click_event() {
-        $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, e => {
-            if (this.action_completed) {
+		$.on(this.group, this.gantt.options.popup_trigger, e => {
+			if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
             }
+			
+			this.clicks++;	
+			// if one click delay event to check if its a dobule click
+			if(this.clicks === 1) {
+				var bar = this;				
+				this.timer = setTimeout(function(){
+					// fire clickevent
+					bar.clicks = 0; 
+                    bar.show_popup();
+					bar.gantt.trigger_event('click', [this.task]);
+				}, this.clickDelay);
 
-            if (e.type === 'click') {
-                this.gantt.trigger_event('click', [this.task]);
-            }
-
-            this.gantt.unselect_all();
-            this.group.classList.toggle('active');
-
-            this.show_popup();
-        });
-    }
+			} else {
+				// fire doubleclick
+				this.clicks = 0;
+				clearTimeout(this.timer);
+				this.gantt.trigger_event('dblclick', [this.task]);
+			}
+		
+			this.gantt.unselect_all();
+			this.group.classList.toggle('active');   
+		});
+	}
 
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
