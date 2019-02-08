@@ -1630,8 +1630,8 @@ class Gantt {
 
             bar_wrapper.classList.add('active');
 
-            x_on_start = e.offsetX;
-            y_on_start = e.offsetY;
+            x_on_start = e.clientX;
+            y_on_start = e.clientY;
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
             const ids = [
@@ -1653,8 +1653,8 @@ class Gantt {
 
         $.on(this.$svg, 'mousemove', e => {
             if (!action_in_progress()) return;
-            const dx = e.offsetX - x_on_start;
-            const dy = e.offsetY - y_on_start;
+            const dx = e.clientX - x_on_start;
+            const dy = e.clientY - y_on_start;
 
             bars.forEach(bar => {
                 const $bar = bar.$bar;
@@ -1716,8 +1716,8 @@ class Gantt {
 
         $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
             is_resizing = true;
-            x_on_start = e.offsetX;
-            y_on_start = e.offsetY;
+            x_on_start = e.clientX;
+            y_on_start = e.clientY;
 
             const $bar_wrapper = $.closest('.bar-wrapper', handle);
             const id = $bar_wrapper.getAttribute('data-id');
@@ -1734,8 +1734,8 @@ class Gantt {
 
         $.on(this.$svg, 'mousemove', e => {
             if (!is_resizing) return;
-            let dx = e.offsetX - x_on_start;
-            let dy = e.offsetY - y_on_start;
+            let dx = e.clientX - x_on_start;
+            let dy = e.clientY - y_on_start;
 
             if (dx > $bar_progress.max_dx) {
                 dx = $bar_progress.max_dx;
