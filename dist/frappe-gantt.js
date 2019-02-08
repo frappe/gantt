@@ -598,7 +598,7 @@ class Bar {
 					// fire clickevent
 					bar.clicks = 0; 
                     bar.show_popup();
-					bar.gantt.trigger_event('click', [this.task]);
+					bar.gantt.trigger_event('click', [bar.task]);
 				}, this.clickDelay);
 
 			} else {
