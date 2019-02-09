@@ -82,6 +82,7 @@
 			},
 			on_dblclick: function (task) {
 				task.dependencies.push('Task 3');
+				gantt_chart.render();
 				console.log(task);
 			},
 			on_date_change: function(task, start, end) {

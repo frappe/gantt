@@ -28,8 +28,17 @@
 .gantt .arrow {
   fill: none;
   stroke: #666;
-  stroke-width: 1.4; }
+  stroke-width: 2.5; }
 
+
+.gantt .arrow .hover{
+   stroke-width: 4.5;
+  }
+  
+  #0_1{
+	  stroke: green;
+}
+  
 .gantt .bar {
   fill: #b8c2cc;
   stroke: #8D99A6;

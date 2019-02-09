@@ -272,9 +272,10 @@ function padStart(str, targetLength, padString) {
 }
 
 function $(expr, con) {
-    return typeof expr === 'string'
-        ? (con || document).querySelector(expr)
-        : expr || null;
+    //SJ TODO GET ORIGINAL CODE
+	return typeof expr === 'string' ? 
+    (con || document).querySelector(expr)
+    : expr || null;
 }
 
 function createSVG(tag, attrs) {
@@ -823,14 +824,16 @@ class Bar {
 
 class Arrow {
     constructor(gantt, from_task, to_task) {
-        this.gantt = gantt;
+        this.id = from_task.task._index + "_" + to_task.task._index;
+    	this.gantt = gantt;
         this.from_task = from_task;
         this.to_task = to_task;
 
         this.calculate_path();
         this.draw();
+        this.setup_eventListener();
     }
-
+    
     calculate_path() {
         let start_x =
             this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
@@ -901,10 +904,12 @@ class Arrow {
                 l -5 5`;
         }
     }
-
+    
     draw() {
         this.element = createSVG('path', {
             d: this.path,
+            id: this.id,
+            class: 'dummy',
             'data-from': this.from_task.task.id,
             'data-to': this.to_task.task.id
         });
@@ -913,6 +918,21 @@ class Arrow {
     update() {
         this.calculate_path();
         this.element.setAttribute('d', this.path);
+    }
+    
+    setup_eventListener(){
+        //SJ
+        $.on(this.element, 'click', e => {
+			this.element.remove();
+			
+		});
+        $.on(this.element, 'mouseenter', e => {
+        	this.element.classList.add('hover');
+		});
+        $.on(this.element, 'mouseleave', e => {
+			this.element.classList.remove('hover');
+		});
+        //ENDSJ
     }
 }
 
