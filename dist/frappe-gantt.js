@@ -272,10 +272,9 @@ function padStart(str, targetLength, padString) {
 }
 
 function $(expr, con) {
-    //SJ TODO GET ORIGINAL CODE
-	return typeof expr === 'string' ? 
-    (con || document).querySelector(expr)
-    : expr || null;
+    return typeof expr === 'string'
+        ? (con || document).querySelector(expr)
+        : expr || null;
 }
 
 function createSVG(tag, attrs) {
@@ -824,7 +823,6 @@ class Bar {
 
 class Arrow {
     constructor(gantt, from_task, to_task) {
-        this.id = from_task.task._index + "_" + to_task.task._index;
     	this.gantt = gantt;
         this.from_task = from_task;
         this.to_task = to_task;
@@ -908,8 +906,6 @@ class Arrow {
     draw() {
         this.element = createSVG('path', {
             d: this.path,
-            id: this.id,
-            class: 'dummy',
             'data-from': this.from_task.task.id,
             'data-to': this.to_task.task.id
         });
@@ -921,9 +917,9 @@ class Arrow {
     }
     
     setup_eventListener(){
-        //SJ
         $.on(this.element, 'click', e => {
-			this.element.remove();
+        	// TODO remove dependency from task
+        	this.element.remove();
 			
 		});
         $.on(this.element, 'mouseenter', e => {
@@ -932,7 +928,6 @@ class Arrow {
         $.on(this.element, 'mouseleave', e => {
 			this.element.classList.remove('hover');
 		});
-        //ENDSJ
     }
 }
 
