@@ -608,12 +608,11 @@ class Bar {
 				// fire doubleclick
 				this.clicks = 0;
 				clearTimeout(this.timer);
-				this.handle_double_click();
-//				this.gantt.trigger_event('dblclick', [this.task]);
+				if(this.gantt.options.enable_dependency_edit){
+					this.handle_double_click();
+				}
 			}
-		
 			this.gantt.unselect_all();
-			   
 		});
 	}
 
@@ -632,6 +631,7 @@ class Bar {
     		// check if tasks are already connected
     		if(!this.task.dependencies.includes(markedTask.id) && !markedTask.dependencies.includes(this.task.id) && this.task !== markedTask){
     			// TODO what happens if they start the same time
+    			
     			// check which task starts later
     			if(this.task._start.getTime() > markedTask._start.getTime()){
     				changedTask = this.task;
@@ -871,7 +871,9 @@ class Arrow {
 
         this.calculate_path();
         this.draw();
-        this.setup_eventListener();
+        if(this.gantt.options.enable_dependency_edit){
+        	this.setup_eventListener();	
+        }
     }
     
     calculate_path() {
@@ -1125,7 +1127,8 @@ class Gantt {
             language: 'en',
             enable_drag_edit : true,
         	enable_slide_edit : true,
-        	enable_progress_edit : true
+        	enable_progress_edit : true,
+        	enable_dependency_edit : true
         };
         this.options = Object.assign({}, default_options, options);
     }
