@@ -599,7 +599,8 @@ class Bar {
 				this.timer = setTimeout(function(){
 					// fire clickevent
 					bar.clicks = 0; 
-                    bar.show_popup();
+					bar.group.classList.toggle('active');
+					bar.show_popup();
 					bar.gantt.trigger_event('click', [bar.task]);
 				}, this.clickDelay);
 
@@ -607,14 +608,53 @@ class Bar {
 				// fire doubleclick
 				this.clicks = 0;
 				clearTimeout(this.timer);
-				this.gantt.trigger_event('dblclick', [this.task]);
+				this.handle_double_click();
+//				this.gantt.trigger_event('dblclick', [this.task]);
 			}
 		
 			this.gantt.unselect_all();
-			this.group.classList.toggle('active');   
+			   
 		});
 	}
 
+    handle_double_click(){
+    	// is the first dependency
+    	if(this.gantt.dependencyBar == null){
+    		// add css class for visualizing current selected bar
+    		this.group.classList.toggle('addArrow');
+    		
+    		this.gantt.dependencyBar = this;
+    	}else{
+    		// already marked a dependency
+    		var markedTask = this.gantt.dependencyBar.task;
+    		var changedTask;
+    		
+    		// check if tasks are already connected
+    		if(!this.task.dependencies.includes(markedTask.id) && !markedTask.dependencies.includes(this.task.id) && this.task !== markedTask){
+    			// TODO what happens if they start the same time
+    			// check which task starts later
+    			if(this.task._start.getTime() > markedTask._start.getTime()){
+    				changedTask = this.task;
+    				this.task.dependencies.push(markedTask.id);
+    			}else if(this.task._start.getTime() < markedTask._start.getTime()){
+    				changedTask = markedTask;
+    				markedTask.dependencies.push(this.task.id);
+    			}
+    		
+    			// fire dependencyAdded event
+    			this.gantt.trigger_event('dependency_added', [changedTask]);
+    	      	// recalculate dependency tree
+    			this.gantt.setup_dependencies();
+    			// redraw gantt
+    			this.gantt.render();
+    		}
+    		// remove class
+    		this.gantt.dependencyBar.group.classList.toggle('addArrow');
+    		// empty gantt variable
+			this.gantt.dependencyBar = null;
+    	}
+    }
+    
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
@@ -920,9 +960,11 @@ class Arrow {
     
     setup_eventListener(){
         $.on(this.element, 'click', e => {
-        	// TODO remove dependency from task
+        	var index = this.to_task.task.dependencies.indexOf(this.from_task.task.id);
+        	this.to_task.task.dependencies.splice(index, 1);
         	this.element.remove();
-			
+        	this.gantt.setup_dependencies();
+        	this.gantt.trigger_event('dependency_removed', [this.to_task]);
 		});
         $.on(this.element, 'mouseenter', e => {
         	this.element.classList.add('hover');
@@ -1634,6 +1676,10 @@ class Gantt {
             this.options.popup_trigger,
             '.grid-row, .grid-header',
             () => {
+            	if(this.dependencyBar != null){
+            		this.dependencyBar.group.classList.toggle('addArrow');
+            		this.dependencyBar = null;
+            	}
                 this.unselect_all();
                 this.hide_popup();
             }
@@ -1664,8 +1710,8 @@ class Gantt {
             } else if (element.classList.contains('bar-wrapper') && this.options.enable_drag_edit) {
                 is_dragging = true;
             }
-
-            bar_wrapper.classList.add('active');
+            
+             bar_wrapper.classList.add('active');
 
             x_on_start = e.clientX;
             y_on_start = e.clientY;
@@ -1740,7 +1786,6 @@ class Gantt {
             });
         });
         
-        // SJ30012019 enable_progress_edit EventHandler für Progress deaktivieren
         if(this.options.enable_progress_edit){
         	this.bind_bar_progress();
         }

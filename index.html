@@ -80,10 +80,11 @@
 			on_click: function (task) {
 				console.log(task);
 			},
-			on_dblclick: function (task) {
-				task.dependencies.push('Task 3');
-				gantt_chart.render();
-				console.log(task);
+			on_dependency_added: function (task) {
+				console.log("added dependency to: " + task);
+			},
+			on_dependency_removed: function (task) {
+				console.log("removed dependency from: " + task);
 			},
 			on_date_change: function(task, start, end) {
 				console.log(task, start, end);

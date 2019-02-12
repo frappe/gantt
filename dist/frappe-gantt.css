@@ -48,7 +48,7 @@
 
 .gantt .bar-progress {
   fill: #a3a3ff; }
-
+  
 .gantt .bar-invalid {
   fill: transparent;
   stroke: #8D99A6;
@@ -85,10 +85,14 @@
     visibility: visible;
     opacity: 1; }
   .gantt .bar-wrapper.active .bar {
-    fill: #a9b5c1; }
+    fill: #408080; }
+    
+      .gantt .bar-wrapper.addArrow .bar {
+    fill: #00ffff; }
+    
   .gantt .bar-wrapper.active .bar-progress {
     fill: #8a8aff; }
-
+  
 .gantt .lower-text, .gantt .upper-text {
   font-size: 12px;
   text-anchor: middle; }
