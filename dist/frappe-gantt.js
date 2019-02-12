@@ -534,35 +534,37 @@ class Bar {
 
         const bar = this.$bar;
         const handle_width = 8;
+        
+        if(this.gantt.options.enable_slide_edit){
+        	createSVG('rect', {
+        		x: bar.getX() + bar.getWidth() - 9,
+        		y: bar.getY() + 1,
+        		width: handle_width,
+        		height: this.height - 2,
+        		rx: this.corner_radius,
+        		ry: this.corner_radius,
+        		class: 'handle right',
+        		append_to: this.handle_group
+        	});
 
-        createSVG('rect', {
-            x: bar.getX() + bar.getWidth() - 9,
-            y: bar.getY() + 1,
-            width: handle_width,
-            height: this.height - 2,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
-            class: 'handle right',
-            append_to: this.handle_group
-        });
+        	createSVG('rect', {
+        		x: bar.getX() + 1,
+        		y: bar.getY() + 1,
+        		width: handle_width,
+        		height: this.height - 2,
+        		rx: this.corner_radius,
+        		ry: this.corner_radius,
+        		class: 'handle left',
+        		append_to: this.handle_group
+        	});
+        }
 
-        createSVG('rect', {
-            x: bar.getX() + 1,
-            y: bar.getY() + 1,
-            width: handle_width,
-            height: this.height - 2,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
-            class: 'handle left',
-            append_to: this.handle_group
-        });
-
-        if (this.task.progress && this.task.progress < 100) {
-            this.$handle_progress = createSVG('polygon', {
-                points: this.get_progress_polygon_points().join(','),
-                class: 'handle progress',
-                append_to: this.handle_group
-            });
+        if ((this.task.progress && this.task.progress < 100) && this.gantt.options.enable_progress_edit) {
+        	this.$handle_progress = createSVG('polygon', {
+        		points: this.get_progress_polygon_points().join(','),
+        		class: 'handle progress',
+        		append_to: this.handle_group
+        	});
         }
     }
 
@@ -1078,7 +1080,10 @@ class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            language: 'en'
+            language: 'en',
+            enable_drag_edit : true,
+        	enable_slide_edit : true,
+        	enable_progress_edit : true
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -1652,11 +1657,11 @@ class Gantt {
         $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
             const bar_wrapper = $.closest('.bar-wrapper', element);
 
-            if (element.classList.contains('left')) {
+            if (element.classList.contains('left') && this.options.enable_slide_edit) {
                 is_resizing_left = true;
-            } else if (element.classList.contains('right')) {
+            } else if (element.classList.contains('right') && this.options.enable_slide_edit) {
                 is_resizing_right = true;
-            } else if (element.classList.contains('bar-wrapper')) {
+            } else if (element.classList.contains('bar-wrapper') && this.options.enable_drag_edit) {
                 is_dragging = true;
             }
 
@@ -1734,8 +1739,11 @@ class Gantt {
                 bar.set_action_completed();
             });
         });
-
-        this.bind_bar_progress();
+        
+        // SJ30012019 enable_progress_edit EventHandler für Progress deaktivieren
+        if(this.options.enable_progress_edit){
+        	this.bind_bar_progress();
+        }
     }
 
     bind_bar_progress() {
