@@ -107,7 +107,12 @@ var date_utils = {
         return date_string + (with_time ? ' ' + time_string : '');
     },
 
-    format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
+    format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang) {
+    	// SJ add localization to format Date
+    	var localMonthNames = month_names[lang];
+    	if(localMonthNames == null)
+    		localMonthNames = month_names['en'];
+    	
         const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
         const format_map = {
             YYYY: values[0],
@@ -118,8 +123,8 @@ var date_utils = {
             ss: values[5],
             SSS:values[6],
             D: values[2],
-            MMMM: month_names[lang][+values[1]],
-            MMM: month_names[lang][+values[1]]
+            MMMM: localMonthNames[+values[1]],
+            MMM: localMonthNames[+values[1]]
         };
 
         let str = format_string;
@@ -648,10 +653,11 @@ class Bar {
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
-        const start_date = date_utils.format(this.task._start, 'MMM D');
+        const start_date = date_utils.format(this.task._start, 'MMM D', this.gantt.options.language);
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),
-            'MMM D'
+            'MMM D',
+            this.gantt.options.language
         );
         const subtitle = start_date + ' - ' + end_date;
 
