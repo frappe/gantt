@@ -123,7 +123,21 @@
       padding: 10px; }
     .gantt-container .popup-wrapper .subtitle {
       padding: 10px;
+      border-bottom: 3px solid #a3a3ff;
       color: #dfe2e5; }
+      
+          .gantt-container .popup-wrapper .action {
+      cursor: pointer;
+      padding: 10px;
+      color: #dfe2e5; }
+      
+                .gantt-container .popup-wrapper .action:hover {
+      cursor: pointer;
+      padding: 10px;
+      color: #cdd1d6; 
+          background: rgba(163, 163, 255, 0.4);}
+      
+      
     .gantt-container .popup-wrapper .pointer {
       position: absolute;
       height: 5px;

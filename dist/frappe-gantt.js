@@ -587,54 +587,42 @@ class Bar {
         this.setup_click_event();
     }
 
-    // SJ add dbl click event for adding dependencies
-	// TODO SJ remove double click, add action for dependencies in pop up window
     setup_click_event() {
-		$.on(this.group, this.gantt.options.popup_trigger, e => {
-			if (this.action_completed) {
+        $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, e => {
+            if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
             }
-			
-			this.clicks++;	
-			// if one click delay event to check if its a dobule click
-			if(this.clicks === 1) {
-				var bar = this;				
-				this.timer = setTimeout(function(){
-					// fire clickevent
-					bar.clicks = 0; 
-					bar.group.classList.toggle('active');
-					bar.show_popup();
-					bar.gantt.trigger_event('click', [bar.task]);
-				}, this.clickDelay);
 
-			} else {
-				// fire doubleclick
-				this.clicks = 0;
-				clearTimeout(this.timer);
-				this.handle_double_click();
-			}
-		
-			this.gantt.unselect_all();
-			   
-		});
-	}
+            if (e.type === 'click') {
+                this.gantt.trigger_event('click', [this.task]);
+            }
 
-    handle_double_click(){
-    	// is the first dependency
-    	if(this.gantt.dependencyBar == null){
-    		// add css class for visualizing current selected bar
-    		this.group.classList.toggle('addArrow');
-    		
-    		this.gantt.dependencyBar = this;
-    	}else{
+            this.gantt.unselect_all();
+            
+            // SJ add dependency by popup button
+            if(this.gantt.dependencyBar != null){
+            	this.add_dependency();
+            }else{
+                this.group.classList.toggle('active');
+                this.show_popup();
+            }
+
+        });
+    }
+
+    add_dependency(){
     		// already marked a dependency
     		var markedTask = this.gantt.dependencyBar.task;
+    		if(markedTask == null)
+    			return;
+    		
     		var changedTask;
     		
     		// check if tasks are already connected
     		if(!this.task.dependencies.includes(markedTask.id) && !markedTask.dependencies.includes(this.task.id) && this.task !== markedTask){
     			// TODO what happens if they start the same time
+    			
     			// check which task starts later
     			if(this.task._start.getTime() > markedTask._start.getTime()){
     				changedTask = this.task;
@@ -655,7 +643,6 @@ class Bar {
     		this.gantt.dependencyBar.group.classList.toggle('addArrow');
     		// empty gantt variable
 			this.gantt.dependencyBar = null;
-    	}
     }
     
     show_popup() {
@@ -984,9 +971,11 @@ class Arrow {
 }
 
 class Popup {
-    constructor(parent, custom_html) {
+    constructor(parent, custom_html, gantt) {
         this.parent = parent;
         this.custom_html = custom_html;
+        // SJ add gantt for dependency action
+        this.gantt = gantt;
         this.make();
     }
 
@@ -995,12 +984,15 @@ class Popup {
             <div class="title"></div>
             <div class="subtitle"></div>
             <div class="pointer"></div>
+            <div class="action"></div>
         `;
 
         this.hide();
 
         this.title = this.parent.querySelector('.title');
         this.subtitle = this.parent.querySelector('.subtitle');
+        // SJ add action to popup
+        this.action = this.parent.querySelector('.action');
         this.pointer = this.parent.querySelector('.pointer');
     }
 
@@ -1022,6 +1014,18 @@ class Popup {
             // set data
             this.title.innerHTML = options.title;
             this.subtitle.innerHTML = options.subtitle;
+            // SJ add action to popup
+            // TODO make text dynamic
+            this.action.innerHTML = 'Füge Abhängigkeit hinzu';
+            
+            var popup = this;
+            this.action.onclick = function() {
+            	var bar = popup.gantt.get_bar(options.task.id);
+            	bar.group.classList.toggle('addArrow');
+        		
+            	popup.gantt.dependencyBar = bar;
+            	popup.hide();
+            	};
             this.parent.style.width = this.parent.clientWidth + 'px';
         }
 
@@ -1947,7 +1951,8 @@ class Gantt {
         if (!this.popup) {
             this.popup = new Popup(
                 this.popup_wrapper,
-                this.options.custom_popup_html
+                this.options.custom_popup_html,
+                this
             );
         }
         this.popup.show(options);
