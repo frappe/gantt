@@ -535,6 +535,7 @@ class Bar {
         const bar = this.$bar;
         const handle_width = 8;
         
+        // SJ make changing todos optional
         if(this.gantt.options.enable_slide_edit){
         	createSVG('rect', {
         		x: bar.getX() + bar.getWidth() - 9,
@@ -558,7 +559,8 @@ class Bar {
         		append_to: this.handle_group
         	});
         }
-
+        
+        // SJ make changing progress optional
         if ((this.task.progress && this.task.progress < 100) && this.gantt.options.enable_progress_edit) {
         	this.$handle_progress = createSVG('polygon', {
         		points: this.get_progress_polygon_points().join(','),
@@ -585,6 +587,8 @@ class Bar {
         this.setup_click_event();
     }
 
+    // SJ add dbl click event for adding dependencies
+	// TODO SJ remove double click, add action for dependencies in pop up window
     setup_click_event() {
 		$.on(this.group, this.gantt.options.popup_trigger, e => {
 			if (this.action_completed) {
@@ -608,11 +612,11 @@ class Bar {
 				// fire doubleclick
 				this.clicks = 0;
 				clearTimeout(this.timer);
-				if(this.gantt.options.enable_dependency_edit){
-					this.handle_double_click();
-				}
+				this.handle_double_click();
 			}
+		
 			this.gantt.unselect_all();
+			   
 		});
 	}
 
@@ -631,12 +635,11 @@ class Bar {
     		// check if tasks are already connected
     		if(!this.task.dependencies.includes(markedTask.id) && !markedTask.dependencies.includes(this.task.id) && this.task !== markedTask){
     			// TODO what happens if they start the same time
-    			
     			// check which task starts later
     			if(this.task._start.getTime() > markedTask._start.getTime()){
     				changedTask = this.task;
     				this.task.dependencies.push(markedTask.id);
-    			}else if(this.task._start.getTime() < markedTask._start.getTime()){
+    			}else{
     				changedTask = markedTask;
     				markedTask.dependencies.push(this.task.id);
     			}
@@ -730,6 +733,8 @@ class Bar {
 
     set_action_completed() {
         this.action_completed = true;
+        var bar = this;
+        
         setTimeout(() => (this.action_completed = false), 1000);
     }
 
@@ -871,9 +876,8 @@ class Arrow {
 
         this.calculate_path();
         this.draw();
-        if(this.gantt.options.enable_dependency_edit){
-        	this.setup_eventListener();	
-        }
+        // SJ add event handling for Arrows
+        this.setup_eventListener();
     }
     
     calculate_path() {
@@ -960,13 +964,15 @@ class Arrow {
         this.element.setAttribute('d', this.path);
     }
     
+    // SJ add event handling for Arrows
     setup_eventListener(){
         $.on(this.element, 'click', e => {
+        	// SJ remove Arrow element, and delete dependency from task
         	var index = this.to_task.task.dependencies.indexOf(this.from_task.task.id);
         	this.to_task.task.dependencies.splice(index, 1);
         	this.element.remove();
         	this.gantt.setup_dependencies();
-        	this.gantt.trigger_event('dependency_removed', [this.to_task]);
+			
 		});
         $.on(this.element, 'mouseenter', e => {
         	this.element.classList.add('hover');
@@ -1125,10 +1131,10 @@ class Gantt {
             popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
+            // SJ make editing optional
             enable_drag_edit : true,
         	enable_slide_edit : true,
-        	enable_progress_edit : true,
-        	enable_dependency_edit : true
+        	enable_progress_edit : true
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -1706,6 +1712,7 @@ class Gantt {
         $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
             const bar_wrapper = $.closest('.bar-wrapper', element);
 
+            // SJ make changing and dragging todos optional
             if (element.classList.contains('left') && this.options.enable_slide_edit) {
                 is_resizing_left = true;
             } else if (element.classList.contains('right') && this.options.enable_slide_edit) {
@@ -1714,8 +1721,9 @@ class Gantt {
                 is_dragging = true;
             }
             
-             bar_wrapper.classList.add('active');
+            bar_wrapper.classList.add('active');
 
+            // SJ use clientX and Y offset doesn't work properly in firefox
             x_on_start = e.clientX;
             y_on_start = e.clientY;
 
@@ -1739,6 +1747,7 @@ class Gantt {
 
         $.on(this.$svg, 'mousemove', e => {
             if (!action_in_progress()) return;
+            // SJ use clientX and Y offset doesn't work properly in firefox
             const dx = e.clientX - x_on_start;
             const dy = e.clientY - y_on_start;
 
@@ -1784,11 +1793,14 @@ class Gantt {
             bars.forEach(bar => {
                 const $bar = bar.$bar;
                 if (!$bar.finaldx) return;
+                // SJ reset value, otherwise event fires multiple times
+                $bar.finaldx = 0;
                 bar.date_changed();
                 bar.set_action_completed();
             });
         });
         
+        // SJ make changing progress optional
         if(this.options.enable_progress_edit){
         	this.bind_bar_progress();
         }
@@ -1804,6 +1816,7 @@ class Gantt {
 
         $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
             is_resizing = true;
+            // SJ use clientX and Y offset doesn't work properly in firefox
             x_on_start = e.clientX;
             y_on_start = e.clientY;
 
@@ -1822,6 +1835,7 @@ class Gantt {
 
         $.on(this.$svg, 'mousemove', e => {
             if (!is_resizing) return;
+            // SJ use clientX and Y offset doesn't work properly in firefox
             let dx = e.clientX - x_on_start;
             let dy = e.clientY - y_on_start;
 
@@ -1841,6 +1855,10 @@ class Gantt {
         $.on(this.$svg, 'mouseup', () => {
             is_resizing = false;
             if (!($bar_progress && $bar_progress.finaldx)) return;
+            console.log("changed");
+            
+            // SJ reset value, otherwise event fires multiple times
+            $bar_progress.finaldx = 0;
             bar.progress_changed();
             bar.set_action_completed();
         });
