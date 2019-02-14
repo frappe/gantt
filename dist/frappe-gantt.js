@@ -872,7 +872,8 @@ class Arrow {
         this.calculate_path();
         this.draw();
         // SJ add event handling for Arrows
-        this.setup_eventListener();
+        if(this.gantt.options.enable_dependency_edit)
+        	this.setup_eventListener();
     }
     
     calculate_path() {
@@ -994,7 +995,7 @@ class Popup {
             <div class="pointer"></div>
             <div class="action"></div>
         `;
-
+        
         this.hide();
 
         this.title = this.parent.querySelector('.title');
@@ -1022,18 +1023,24 @@ class Popup {
             // set data
             this.title.innerHTML = options.title;
             this.subtitle.innerHTML = options.subtitle;
-            // SJ add action to popup
-            // TODO make text dynamic
-            this.action.innerHTML = 'Füge Abhängigkeit hinzu';
             
-            var popup = this;
-            this.action.onclick = function() {
-            	var bar = popup.gantt.get_bar(options.task.id);
-            	bar.group.classList.toggle('addArrow');
-        		
-            	popup.gantt.dependencyBar = bar;
-            	popup.hide();
-            	};
+            // SJ add action to popup
+            if(this.gantt.options.enable_dependency_edit){
+                // TODO make text dynamic
+                this.action.innerHTML = 'Füge Abhängigkeit hinzu';
+                
+                var popup = this;
+                this.action.onclick = function() {
+                	var bar = popup.gantt.get_bar(options.task.id);
+                	bar.group.classList.toggle('addArrow');
+            		
+                	popup.gantt.dependencyBar = bar;
+                	popup.hide();
+                	};
+            }else{
+            	this.action.remove();
+            }
+
             this.parent.style.width = this.parent.clientWidth + 'px';
         }
 
@@ -1146,7 +1153,8 @@ class Gantt {
             // SJ make editing optional
             enable_drag_edit : true,
         	enable_slide_edit : true,
-        	enable_progress_edit : true
+        	enable_progress_edit : true,
+        	enable_dependency_edit : true
         };
         this.options = Object.assign({}, default_options, options);
     }
