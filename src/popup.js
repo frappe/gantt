@@ -58,8 +58,8 @@ export default class Popup {
             }else{
             	this.action.remove();
             }
-
-            this.parent.style.width = this.parent.clientWidth + 'px';
+        	// SJ fix popup overlaying bars
+        	this.parent.style.display = 'block';
         }
 
         // set position
@@ -79,12 +79,10 @@ export default class Popup {
             this.pointer.style.left = '-7px';
             this.pointer.style.top = '2px';
         }
-
-        // show
-        this.parent.style.opacity = 1;
     }
 
     hide() {
-        this.parent.style.opacity = 0;
+    	// SJ fix popup overlaying bars
+    	this.parent.style.display = 'none';
     }
 }

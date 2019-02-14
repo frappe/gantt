@@ -995,7 +995,7 @@ class Popup {
             <div class="pointer"></div>
             <div class="action"></div>
         `;
-        
+
         this.hide();
 
         this.title = this.parent.querySelector('.title');
@@ -1023,11 +1023,10 @@ class Popup {
             // set data
             this.title.innerHTML = options.title;
             this.subtitle.innerHTML = options.subtitle;
-            
             // SJ add action to popup
             if(this.gantt.options.enable_dependency_edit){
                 // TODO make text dynamic
-                this.action.innerHTML = 'Füge Abhängigkeit hinzu';
+                this.action.innerHTML = 'add dependency';
                 
                 var popup = this;
                 this.action.onclick = function() {
@@ -1040,8 +1039,8 @@ class Popup {
             }else{
             	this.action.remove();
             }
-
-            this.parent.style.width = this.parent.clientWidth + 'px';
+        	// SJ fix popup overlaying bars
+        	this.parent.style.display = 'block';
         }
 
         // set position
@@ -1061,13 +1060,11 @@ class Popup {
             this.pointer.style.left = '-7px';
             this.pointer.style.top = '2px';
         }
-
-        // show
-        this.parent.style.opacity = 1;
     }
 
     hide() {
-        this.parent.style.opacity = 0;
+    	// SJ fix popup overlaying bars
+    	this.parent.style.display = 'none';
     }
 }
 
