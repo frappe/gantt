@@ -618,37 +618,45 @@ class Bar {
     }
 
     add_dependency(){
-    		// already marked a dependency
-    		var markedTask = this.gantt.dependencyBar.task;
-    		if(markedTask == null)
-    			return;
-    		
-    		var changedTask;
-    		
-    		// check if tasks are already connected
-    		if(!this.task.dependencies.includes(markedTask.id) && !markedTask.dependencies.includes(this.task.id) && this.task !== markedTask){
-    			// TODO what happens if they start the same time
-    			
-    			// check which task starts later
-    			if(this.task._start.getTime() > markedTask._start.getTime()){
-    				changedTask = this.task;
-    				this.task.dependencies.push(markedTask.id);
-    			}else{
-    				changedTask = markedTask;
-    				markedTask.dependencies.push(this.task.id);
-    			}
-    		
-    			// fire dependencyAdded event
-    			this.gantt.trigger_event('dependency_added', [changedTask]);
-    	      	// recalculate dependency tree
-    			this.gantt.setup_dependencies();
-    			// redraw gantt
-    			this.gantt.render();
-    		}
-    		// remove class
-    		this.gantt.dependencyBar.group.classList.toggle('addArrow');
-    		// empty gantt variable
-			this.gantt.dependencyBar = null;
+		// already marked a dependency
+		var markedTask = this.gantt.dependencyBar.task;
+		if(markedTask == null)
+			return;
+		
+		var changedTask;
+		
+		// check if tasks are already connected
+		if(!this.task.dependencies.includes(markedTask.id) && !markedTask.dependencies.includes(this.task.id) && this.task !== markedTask){
+			// same start date no dependency
+			if(this.task._start.getTime() === markedTask._start.getTime()){
+	    		this.release_marked_bar();
+				return;
+			}
+			
+			// check which task starts later
+			if(this.task._start.getTime() > markedTask._start.getTime()){
+				changedTask = this.task;
+				this.task.dependencies.push(markedTask.id);
+			}else{
+				changedTask = markedTask;
+				markedTask.dependencies.push(this.task.id);
+			}
+		
+			// fire dependencyAdded event
+			this.gantt.trigger_event('dependency_added', [changedTask]);
+	      	// recalculate dependency tree
+			this.gantt.setup_dependencies();
+			// redraw gantt
+			this.gantt.render();
+		}
+		this.release_marked_bar();
+    }
+
+    release_marked_bar(){
+    	// 	remove class
+    	this.gantt.dependencyBar.group.classList.toggle('addArrow');
+    	// empty gantt variable
+    	this.gantt.dependencyBar = null;
     }
     
     show_popup() {

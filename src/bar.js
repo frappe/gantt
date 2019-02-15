@@ -212,7 +212,11 @@ export default class Bar {
 		
 		// check if tasks are already connected
 		if(!this.task.dependencies.includes(markedTask.id) && !markedTask.dependencies.includes(this.task.id) && this.task !== markedTask){
-			// TODO what happens if they start the same time
+			// same start date no dependency
+			if(this.task._start.getTime() === markedTask._start.getTime()){
+	    		this.release_marked_bar();
+				return;
+			}
 			
 			// check which task starts later
 			if(this.task._start.getTime() > markedTask._start.getTime()){
@@ -230,12 +234,16 @@ export default class Bar {
 			// redraw gantt
 			this.gantt.render();
 		}
-		// remove class
-		this.gantt.dependencyBar.group.classList.toggle('addArrow');
-		// empty gantt variable
-		this.gantt.dependencyBar = null;
+		this.release_marked_bar();
     }
-    
+
+    release_marked_bar(){
+    	// remove class
+    	this.gantt.dependencyBar.group.classList.toggle('addArrow');
+    	// empty gantt variable
+    	this.gantt.dependencyBar = null;
+    }
+
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
