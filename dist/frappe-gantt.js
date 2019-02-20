@@ -977,7 +977,7 @@ class Arrow {
         	this.element.remove();
         	this.gantt.setup_dependencies();
 			// fire dependencyAdded event
-			this.gantt.trigger_event('dependency_removed', [changedTask]);
+			this.gantt.trigger_event('dependency_removed', [this.to_task.task]);
 		});
         $.on(this.element, 'mouseenter', e => {
         	this.element.classList.add('hover');
