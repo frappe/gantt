@@ -105,7 +105,8 @@ export default class Arrow {
         	this.to_task.task.dependencies.splice(index, 1);
         	this.element.remove();
         	this.gantt.setup_dependencies();
-			
+			// fire dependencyAdded event
+			this.gantt.trigger_event('dependency_removed', [changedTask]);
 		});
         $.on(this.element, 'mouseenter', e => {
         	this.element.classList.add('hover');
