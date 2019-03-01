@@ -48,6 +48,20 @@ const month_names = {
         'Outubro',
         'Novembro',
         'Dezembro'
+    ],
+    fr: [
+        'Janvier',
+        'Février',
+        'Mars',
+        'Avril',
+        'Mai',
+        'Juin',
+        'Juillet',
+        'Août',
+        'Septembre',
+        'Octobre',
+        'Novembre',
+        'Decembre'
     ]
 };
 
