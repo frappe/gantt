@@ -846,7 +846,8 @@ export default class Gantt {
     }
 
     unselect_all() {
-        [...this.$svg.querySelectorAll('.bar-wrapper')].forEach(el => {
+        Array.prototype.slice.call(this.$svg.querySelectorAll('.bar-wrapper'))
+            .forEach(el => {
             el.classList.remove('active');
         });
     }
