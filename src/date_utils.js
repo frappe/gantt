@@ -75,7 +75,7 @@ const month_names = {
         'Septembre',
         'Octobre',
         'Novembre',
-        'Decembre'
+        'Décembre'
     ]
 };
 
