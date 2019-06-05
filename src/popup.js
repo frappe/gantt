@@ -58,11 +58,13 @@ export default class Popup {
             }else{
             	this.action.remove();
             }
-        	// SJ fix popup overlaying bars
-        	this.parent.style.display = 'block';
+
         }
 
-        // set position
+    	// SJ fix popup overlaying bars
+    	this.parent.style.display = 'block';
+
+    	// set position
         let position_meta;
         if (target_element instanceof HTMLElement) {
             position_meta = target_element.getBoundingClientRect();

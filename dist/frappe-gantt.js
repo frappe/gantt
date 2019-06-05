@@ -1048,10 +1048,12 @@ class Popup {
             }else{
             	this.action.remove();
             }
-        	// SJ fix popup overlaying bars
-        	this.parent.style.display = 'block';
+
         }
 
+    	// SJ fix popup overlaying bars
+    	this.parent.style.display = 'block';
+    	
         // set position
         let position_meta;
         if (target_element instanceof HTMLElement) {
