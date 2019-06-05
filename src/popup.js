@@ -2,7 +2,7 @@ export default class Popup {
     constructor(parent, custom_html, gantt) {
         this.parent = parent;
         this.custom_html = custom_html;
-        // SJ add gantt for dependency action
+        //  add gantt for dependency action
         this.gantt = gantt;
         this.make();
     }
@@ -19,7 +19,7 @@ export default class Popup {
 
         this.title = this.parent.querySelector('.title');
         this.subtitle = this.parent.querySelector('.subtitle');
-        // SJ add action to popup
+        //  add action to popup
         this.action = this.parent.querySelector('.action');
         this.pointer = this.parent.querySelector('.pointer');
     }
@@ -42,7 +42,7 @@ export default class Popup {
             // set data
             this.title.innerHTML = options.title;
             this.subtitle.innerHTML = options.subtitle;
-            // SJ add action to popup
+            //  add action to popup
             if(this.gantt.options.enable_dependency_edit){
                 // TODO make text dynamic
                 this.action.innerHTML = 'add dependency';
@@ -61,7 +61,7 @@ export default class Popup {
 
         }
 
-    	// SJ fix popup overlaying bars
+    	//  fix popup overlaying bars
     	this.parent.style.display = 'block';
 
     	// set position
@@ -84,7 +84,7 @@ export default class Popup {
     }
 
     hide() {
-    	// SJ fix popup overlaying bars
+    	//  fix popup overlaying bars
     	this.parent.style.display = 'none';
     }
 }

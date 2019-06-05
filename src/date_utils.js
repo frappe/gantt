@@ -49,7 +49,7 @@ const month_names = {
         'Novembro',
         'Dezembro'
     ],    
-    // SJ add german localization
+    //  add german localization
     de: [
 		'Januar',
         'Februar',
@@ -120,7 +120,7 @@ export default {
     },
 
     format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang) {
-    	// SJ add localization to format Date
+    	//  add localization to format Date
     	var localMonthNames = month_names[lang];
     	if(localMonthNames == null)
     		localMonthNames = month_names['en'];

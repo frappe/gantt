@@ -126,7 +126,7 @@ export default class Bar {
         const bar = this.$bar;
         const handle_width = 8;
         
-        // SJ make changing todos optional
+        //  make changing todos optional
         if(this.gantt.options.enable_slide_edit){
         	createSVG('rect', {
         		x: bar.getX() + bar.getWidth() - 9,
@@ -151,7 +151,7 @@ export default class Bar {
         	});
         }
         
-        // SJ make changing progress optional
+        //  make changing progress optional
         if ((this.task.progress && this.task.progress < 100) && this.gantt.options.enable_progress_edit) {
         	this.$handle_progress = createSVG('polygon', {
         		points: this.get_progress_polygon_points().join(','),
@@ -191,7 +191,7 @@ export default class Bar {
 
             this.gantt.unselect_all();
             
-            // SJ add dependency by popup button
+            //  add dependency by popup button
             if(this.gantt.dependencyBar != null){
             	this.add_dependency();
             }else{
@@ -247,7 +247,7 @@ export default class Bar {
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
-        // SJ add localization to popup
+        //  add localization to popup
         const start_date = date_utils.format(this.task._start, 'MMM D', this.gantt.options.language);
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),
