@@ -260,7 +260,7 @@ export default class Bar {
             target_element: this.$bar,
             title: this.task.name,
             subtitle: subtitle,
-            task: this.task
+            task: this.task,
         });
     }
 

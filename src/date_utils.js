@@ -21,6 +21,20 @@ const month_names = {
         'November',
         'December'
     ],
+    es: [
+        'Enero',
+        'Febrero',
+        'Marzo',
+        'Abril',
+        'Mayo',
+        'Junio',
+        'Julio',
+        'Agosto',
+        'Septiembre',
+        'Octubre',
+        'Noviembre',
+        'Diciembre'
+    ],
     ru: [
         'Январь',
         'Февраль',
@@ -48,8 +62,9 @@ const month_names = {
         'Outubro',
         'Novembro',
         'Dezembro'
+
     ],    
-    //  add german localization
+
     de: [
 		'Januar',
         'Februar',
@@ -63,7 +78,21 @@ const month_names = {
         'Oktober',
         'November',
         'Dezember'
-	]
+    ],
+    fr: [
+        'Janvier',
+        'Février',
+        'Mars',
+        'Avril',
+        'Mai',
+        'Juin',
+        'Juillet',
+        'Août',
+        'Septembre',
+        'Octobre',
+        'Novembre',
+        'Décembre'
+    ]
 };
 
 export default {
