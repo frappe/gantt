@@ -100,6 +100,32 @@
 			language: 'en'
 		});
 		console.log(gantt_chart);
+
+		/* Function for labels to follow container */
+		const div = document.getElementsByClassName('gantt-container')[0];
+		div.onscroll = function() {
+			Array.from(document.getElementsByClassName('bar-label')).forEach(function(label_item) {
+
+				var barWidth = label_item.previousSibling.previousSibling.getWidth();
+				var barX = label_item.previousSibling.previousSibling.getX();
+
+				if (div.scrollLeft > label_item.getAttribute('initialPos')) { // If user scrolls LEFT past label position
+					label_item.setAttribute('x', div.scrollLeft+5);
+				} else if (div.scrollLeft + div.clientWidth - label_item.getBBox().width < label_item.getAttribute('initialPos')) { // If user scrolls RIGHT past label position
+					label_item.setAttribute('x', div.scrollLeft + div.clientWidth - label_item.getBBox().width -5 );
+				} else {
+					label_item.setAttribute('x', label_item.getAttribute('initialPos'));
+				}
+
+				if (barWidth > label_item.getBBox().width) {
+					if (label_item.getBBox().x < barX || label_item.getBBox().x + label_item.getBBox().width > barX + barWidth) { // If label is outside bounds of bar
+						label_item.classList.add('big');
+					} else {
+						label_item.classList.remove('big');
+					}
+				}
+			});
+		}
 	</script>
 </body>
 </html>

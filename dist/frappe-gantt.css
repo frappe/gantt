@@ -1,6 +1,10 @@
 .gantt .grid-background {
   fill: none; }
 
+.gantt-target {
+  width: 100%;
+}
+
 .gantt .grid-header {
   fill: #ffffff;
   stroke: #e0e0e0;
@@ -51,7 +55,7 @@
 .gantt .bar-label {
   fill: #fff;
   dominant-baseline: central;
-  text-anchor: middle;
+  text-anchor: start;
   font-size: 12px;
   font-weight: lighter; }
   .gantt .bar-label.big {
