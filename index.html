@@ -104,24 +104,24 @@
 		/* Function for labels to follow container */
 		const div = document.getElementsByClassName('gantt-container')[0];
 		div.onscroll = function() {
-			Array.from(document.getElementsByClassName('bar-label')).forEach(function(label_item) {
+			Array.from(document.getElementsByClassName('bar-label')).forEach(function(labelItem) {
 
-				var barWidth = label_item.previousSibling.previousSibling.getWidth();
-				var barX = label_item.previousSibling.previousSibling.getX();
+				var barWidth = labelItem.previousSibling.previousSibling.getWidth();
+				var barX = labelItem.previousSibling.previousSibling.getX();
 
-				if (div.scrollLeft > label_item.getAttribute('initialPos')) { // If user scrolls LEFT past label position
-					label_item.setAttribute('x', div.scrollLeft+5);
-				} else if (div.scrollLeft + div.clientWidth - label_item.getBBox().width < label_item.getAttribute('initialPos')) { // If user scrolls RIGHT past label position
-					label_item.setAttribute('x', div.scrollLeft + div.clientWidth - label_item.getBBox().width -5 );
+				if (div.scrollLeft > labelItem.getAttribute('data-initial-pos')) { // If user scrolls LEFT past label position
+					labelItem.setAttribute('x', div.scrollLeft+5);
+				} else if (div.scrollLeft + div.clientWidth - labelItem.getBBox().width < labelItem.getAttribute('data-initial-pos')) { // If user scrolls RIGHT past label position
+					labelItem.setAttribute('x', div.scrollLeft + div.clientWidth - labelItem.getBBox().width -5 );
 				} else {
-					label_item.setAttribute('x', label_item.getAttribute('initialPos'));
+					labelItem.setAttribute('x', labelItem.getAttribute('data-initial-pos'));
 				}
 
-				if (barWidth > label_item.getBBox().width) {
-					if (label_item.getBBox().x < barX || label_item.getBBox().x + label_item.getBBox().width > barX + barWidth) { // If label is outside bounds of bar
-						label_item.classList.add('big');
+				if (barWidth > labelItem.getBBox().width) {
+					if (labelItem.getBBox().x < barX || labelItem.getBBox().x + labelItem.getBBox().width > barX + barWidth) { // If label is outside bounds of bar
+						labelItem.classList.add('big');
 					} else {
-						label_item.classList.remove('big');
+						labelItem.classList.remove('big');
 					}
 				}
 			});

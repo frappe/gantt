@@ -1,10 +1,6 @@
 .gantt .grid-background {
   fill: none; }
 
-.gantt-target {
-  width: 100%;
-}
-
 .gantt .grid-header {
   fill: #ffffff;
   stroke: #e0e0e0;

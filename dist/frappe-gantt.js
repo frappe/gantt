@@ -768,13 +768,13 @@ class Bar {
             label.setAttribute('x', bar.getX() + bar.getWidth() / 2 + label.getBBox().width/2);
         }
         /* Check if labels off screen on load and make them follow container if they are */
-        label.setAttribute('initialPos', label.getBBox().x);
-        if (div.scrollLeft > label.getAttribute('initialPos')) {
+        label.setAttribute('data-initial-pos', label.getBBox().x);
+        if (div.scrollLeft > label.getAttribute('data-initial-pos')) {
             label.setAttribute('x', div.scrollLeft+5);
-        } else if (div.scrollLeft + div.clientWidth - label.getBBox().width < label.getAttribute('initialPos')) {
+        } else if (div.scrollLeft + div.clientWidth - label.getBBox().width < label.getAttribute('data-initial-pos')) {
             label.setAttribute('x', div.scrollLeft + div.clientWidth - label.getBBox().width-5);
         } else {
-            label.setAttribute('x', label.getAttribute('initialPos'));
+            label.setAttribute('x', label.getAttribute('data-initial-pos'));
         }
     }
 
