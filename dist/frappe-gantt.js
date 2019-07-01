@@ -24,6 +24,20 @@ const month_names = {
         'November',
         'December'
     ],
+    es: [
+        'Enero',
+        'Febrero',
+        'Marzo',
+        'Abril',
+        'Mayo',
+        'Junio',
+        'Julio',
+        'Agosto',
+        'Septiembre',
+        'Octubre',
+        'Noviembre',
+        'Diciembre'
+    ],
     ru: [
         'Январь',
         'Февраль',
@@ -37,6 +51,48 @@ const month_names = {
         'Октябрь',
         'Ноябрь',
         'Декабрь'
+    ],
+    ptBr: [
+        'Janeiro',
+        'Fevereiro',
+        'Março',
+        'Abril',
+        'Maio',
+        'Junho',
+        'Julho',
+        'Agosto',
+        'Setembro',
+        'Outubro',
+        'Novembro',
+        'Dezembro'
+    ],
+    fr: [
+        'Janvier',
+        'Février',
+        'Mars',
+        'Avril',
+        'Mai',
+        'Juin',
+        'Juillet',
+        'Août',
+        'Septembre',
+        'Octobre',
+        'Novembre',
+        'Décembre'
+    ],
+    ja: [
+        '1月',
+        '2月',
+        '3月',
+        '4月',
+        '5月',
+        '6月',
+        '7月',
+        '8月',
+        '9月',
+        '10月',
+        '11月',
+        '12月'
     ]
 };
 
@@ -102,7 +158,7 @@ var date_utils = {
             HH: values[3],
             mm: values[4],
             ss: values[5],
-            SSS:values[6],
+            SSS: values[6],
             D: values[2],
             MMMM: month_names[lang][+values[1]],
             MMM: month_names[lang][+values[1]]
@@ -403,6 +459,8 @@ class Bar {
         this.action_completed = false;
         this.gantt = gantt;
         this.task = task;
+        // progressが渡されなかった場合初期値は0とする
+        this.task.progress = this.task.progress || 0;
     }
 
     prepare() {
@@ -585,10 +643,15 @@ class Bar {
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
-        const start_date = date_utils.format(this.task._start, 'MMM D');
+        const start_date = date_utils.format(
+            this.task._start,
+            'MMM D',
+            this.gantt.options.language
+        );
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),
-            'MMM D'
+            'MMM D',
+            this.gantt.options.language
         );
         const subtitle = start_date + ' - ' + end_date;
 
@@ -1039,75 +1102,85 @@ class Gantt {
 
     setup_tasks(tasks) {
         // prepare tasks
-        this.tasks = tasks.map((task, i) => {
-            // convert to Date objects
-            task._start = date_utils.parse(task.start);
-            task._end = date_utils.parse(task.end);
+        // 1行がtaskを配列で受け取るように変更
+        this.tasks = tasks.map((rowTasks, i) => {
+            const allTask = rowTasks.map(task => {
+                // convert to Date objects
+                task._start = date_utils.parse(task.start);
+                task._end = date_utils.parse(task.end);
 
-            // make task invalid if duration too large
-            if (date_utils.diff(task._end, task._start, 'year') > 10) {
-                task.end = null;
-            }
-
-            // cache index
-            task._index = i;
-
-            // invalid dates
-            if (!task.start && !task.end) {
-                const today = date_utils.today();
-                task._start = today;
-                task._end = date_utils.add(today, 2, 'day');
-            }
-
-            if (!task.start && task.end) {
-                task._start = date_utils.add(task._end, -2, 'day');
-            }
-
-            if (task.start && !task.end) {
-                task._end = date_utils.add(task._start, 2, 'day');
-            }
-
-            // if hours is not set, assume the last day is full day
-            // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
-            const task_end_values = date_utils.get_date_values(task._end);
-            if (task_end_values.slice(3).every(d => d === 0)) {
-                task._end = date_utils.add(task._end, 24, 'hour');
-            }
-
-            // invalid flag
-            if (!task.start || !task.end) {
-                task.invalid = true;
-            }
-
-            // dependencies
-            if (typeof task.dependencies === 'string' || !task.dependencies) {
-                let deps = [];
-                if (task.dependencies) {
-                    deps = task.dependencies
-                        .split(',')
-                        .map(d => d.trim())
-                        .filter(d => d);
+                // make task invalid if duration too large
+                if (date_utils.diff(task._end, task._start, 'year') > 10) {
+                    task.end = null;
                 }
-                task.dependencies = deps;
-            }
 
-            // uids
-            if (!task.id) {
-                task.id = generate_id(task);
-            }
+                // cache index
+                task._index = i;
 
-            return task;
+                // invalid dates
+                if (!task.start && !task.end) {
+                    const today = date_utils.today();
+                    task._start = today;
+                    task._end = date_utils.add(today, 2, 'day');
+                }
+
+                if (!task.start && task.end) {
+                    task._start = date_utils.add(task._end, -2, 'day');
+                }
+
+                if (task.start && !task.end) {
+                    task._end = date_utils.add(task._start, 2, 'day');
+                }
+
+                // if hours is not set, assume the last day is full day
+                // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
+                const task_end_values = date_utils.get_date_values(task._end);
+                if (task_end_values.slice(3).every(d => d === 0)) {
+                    task._end = date_utils.add(task._end, 24, 'hour');
+                }
+
+                // invalid flag
+                if (!task.start || !task.end) {
+                    task.invalid = true;
+                }
+
+                // dependencies
+                if (
+                    typeof task.dependencies === 'string' ||
+                    !task.dependencies
+                ) {
+                    let deps = [];
+                    if (task.dependencies) {
+                        deps = task.dependencies
+                            .split(',')
+                            .map(d => d.trim())
+                            .filter(d => d);
+                    }
+                    task.dependencies = deps;
+                }
+
+                // uids
+                if (!task.id) {
+                    task.id = generate_id(task);
+                }
+
+                return task;
+            });
+            return allTask;
         });
 
         this.setup_dependencies();
     }
 
     setup_dependencies() {
+        // 1行がtaskを配列で受け取るように変更
         this.dependency_map = {};
-        for (let t of this.tasks) {
-            for (let d of t.dependencies) {
-                this.dependency_map[d] = this.dependency_map[d] || [];
-                this.dependency_map[d].push(t.id);
+        for (let rowTasks of this.tasks) {
+            for (let t of rowTasks) {
+                for (let d of t.dependencies) {
+                    this.dependency_map[d] = this.dependency_map[d] || [];
+                    this.dependency_map[d].push(t.id);
+                }
             }
         }
     }
@@ -1129,8 +1202,8 @@ class Gantt {
         this.options.view_mode = view_mode;
 
         if (view_mode === 'Day') {
+            // Dayの場合の列の幅の上書きを削除
             this.options.step = 24;
-            this.options.column_width = 38;
         } else if (view_mode === 'Half Day') {
             this.options.step = 24 / 2;
             this.options.column_width = 38;
@@ -1157,13 +1230,16 @@ class Gantt {
     setup_gantt_dates() {
         this.gantt_start = this.gantt_end = null;
 
-        for (let task of this.tasks) {
+        // 一行がtaskを配列で受け取るように変更
+        for (let rowTasks of this.tasks) {
             // set global start and end date
-            if (!this.gantt_start || task._start < this.gantt_start) {
-                this.gantt_start = task._start;
-            }
-            if (!this.gantt_end || task._end > this.gantt_end) {
-                this.gantt_end = task._end;
+            for (let task of rowTasks) {
+                if (!this.gantt_start || task._start < this.gantt_start) {
+                    this.gantt_start = task._start;
+                }
+                if (!this.gantt_end || task._end > this.gantt_end) {
+                    this.gantt_end = task._end;
+                }
             }
         }
 
@@ -1489,7 +1565,8 @@ class Gantt {
             'Half Day_lower': this.options.column_width * 2 / 2,
             'Half Day_upper': 0,
             Day_lower: this.options.column_width / 2,
-            Day_upper: this.options.column_width * 30 / 2,
+            // 月のテキストを1日目の上に表示させるように変更（Dayのみ）
+            Day_upper: this.options.column_width / 2,
             Week_lower: 0,
             Week_upper: this.options.column_width * 4 / 2,
             Month_lower: this.options.column_width / 2,
@@ -1509,31 +1586,41 @@ class Gantt {
     }
 
     make_bars() {
-        this.bars = this.tasks.map(task => {
-            const bar = new Bar(this, task);
-            this.layers.bar.appendChild(bar.group);
-            return bar;
-        });
+        const bars = [];
+        // 1行がtaskを配列で受け取るように変更
+        for (let rowTasks of this.tasks) {
+            for (let task of rowTasks) {
+                const bar = new Bar(this, task);
+                this.layers.bar.appendChild(bar.group);
+                bars.push(bar);
+            }
+        }
+
+        this.bars = bars;
     }
 
     make_arrows() {
         this.arrows = [];
-        for (let task of this.tasks) {
-            let arrows = [];
-            arrows = task.dependencies
-                .map(task_id => {
-                    const dependency = this.get_task(task_id);
-                    if (!dependency) return;
-                    const arrow = new Arrow(
-                        this,
-                        this.bars[dependency._index], // from_task
-                        this.bars[task._index] // to_task
-                    );
-                    this.layers.arrow.appendChild(arrow.element);
-                    return arrow;
-                })
-                .filter(Boolean); // filter falsy values
-            this.arrows = this.arrows.concat(arrows);
+
+        // 1行がtaskを配列で受け取るように変更
+        for (let rowTasks of this.tasks) {
+            for (let task of rowTasks) {
+                let arrows = [];
+                arrows = task.dependencies
+                    .map(task_id => {
+                        const dependency = this.get_task(task_id);
+                        if (!dependency) return;
+                        const arrow = new Arrow(
+                            this,
+                            this.bars[dependency._index], // from_task
+                            this.bars[task._index] // to_task
+                        );
+                        this.layers.arrow.appendChild(arrow.element);
+                        return arrow;
+                    })
+                    .filter(Boolean); // filter falsy values
+                this.arrows = this.arrows.concat(arrows);
+            }
         }
     }
 
@@ -1850,7 +1937,15 @@ class Gantt {
      * @memberof Gantt
      */
     get_oldest_starting_date() {
-        return this.tasks
+        // 全ての task を1つの配列にする
+        const allTask = [];
+        for (let rowTasks of this.tasks) {
+            for (let task of rowTasks) {
+                allTask.push(task);
+            }
+        }
+
+        return allTask
             .map(task => task._start)
             .reduce(
                 (prev_date, cur_date) =>
