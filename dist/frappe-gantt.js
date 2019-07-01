@@ -1119,7 +1119,7 @@ class Gantt {
 
     setup_tasks(tasks) {
         // prepare tasks
-        // 1行がtaskを配列で受け取るように変更
+        // 1行に対してtaskを配列で受け取るように変更
         this.tasks = tasks.map((rowTasks, i) => {
             const allTask = rowTasks.map(task => {
                 // convert to Date objects
@@ -1190,7 +1190,7 @@ class Gantt {
     }
 
     setup_dependencies() {
-        // 1行がtaskを配列で受け取るように変更
+        // 1行に対してtaskを配列で受け取るように変更
         this.dependency_map = {};
         for (let rowTasks of this.tasks) {
             for (let t of rowTasks) {
@@ -1219,7 +1219,7 @@ class Gantt {
         this.options.view_mode = view_mode;
 
         if (view_mode === 'Day') {
-            // Dayの場合の列の幅の上書きを削除
+            // Dayの場合の列の幅の上書きをしない
             this.options.step = 24;
         } else if (view_mode === 'Half Day') {
             this.options.step = 24 / 2;
@@ -1247,7 +1247,7 @@ class Gantt {
     setup_gantt_dates() {
         this.gantt_start = this.gantt_end = null;
 
-        // 一行がtaskを配列で受け取るように変更
+        // 1行に対してtaskを配列で受け取るように変更
         for (let rowTasks of this.tasks) {
             // set global start and end date
             for (let task of rowTasks) {
@@ -1358,7 +1358,7 @@ class Gantt {
         });
 
         $.attr(this.$svg, {
-            // 全体の高さをSVG内に収まるように変更
+            // 全体が高くなりすぎず、スクロールバーがはみ出ないように
             height: grid_height,
             width: '100%'
         });
@@ -1589,7 +1589,7 @@ class Gantt {
         };
 
         const base_pos = {
-            // 全てオプションで指定できるように変更
+            // header関連のスタイルをオプションで指定できるように
             x: i * this.options.column_width,
             lower_y: this.options.header_lower_text_height,
             upper_y: this.options.header_upper_text_height,
@@ -1610,7 +1610,7 @@ class Gantt {
             Month_upper: this.options.column_width * 12 / 2,
             Year_lower: this.options.column_width / 2,
             Year_upper: this.options.column_width * 30 / 2,
-            // 曜日を表示させるために追加
+            // headerに曜日を表示させるために追加
             Day_of_week: this.options.column_width / 2
         };
 
@@ -1630,7 +1630,7 @@ class Gantt {
 
     make_bars() {
         const bars = [];
-        // 1行がtaskを配列で受け取るように変更
+        // 1行に対してtaskを配列で受け取るように変更
         for (let rowTasks of this.tasks) {
             for (let task of rowTasks) {
                 const bar = new Bar(this, task);
@@ -1645,7 +1645,7 @@ class Gantt {
     make_arrows() {
         this.arrows = [];
 
-        // 1行がtaskを配列で受け取るように変更
+        // 1行に対してtaskを配列で受け取るように変更
         for (let rowTasks of this.tasks) {
             for (let task of rowTasks) {
                 let arrows = [];
