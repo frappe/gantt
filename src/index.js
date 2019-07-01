@@ -335,7 +335,8 @@ export default class Gantt {
         });
 
         $.attr(this.$svg, {
-            height: grid_height + this.options.padding + 100,
+            // 全体の高さをSVG内に収まるように変更
+            height: grid_height,
             width: '100%'
         });
     }
