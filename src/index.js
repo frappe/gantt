@@ -82,14 +82,13 @@ export default class Gantt {
             padding: 18,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
-            popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
             // header関連のスタイルを修正できるようにオプション用のパラメーターの追加
             header_padding: 10,
-            header_lower_text_height: 35,
-            header_upper_text_height: 20,
-            header_day_of_week_text_heaght: 50
+            header_lower_text_y: 35,
+            header_upper_text_y: 20,
+            header_day_of_week_text_y: 50
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -568,9 +567,9 @@ export default class Gantt {
         const base_pos = {
             // header関連のスタイルをオプションで指定できるように
             x: i * this.options.column_width,
-            lower_y: this.options.header_lower_text_height,
-            upper_y: this.options.header_upper_text_height,
-            day_of_week_y: this.options.header_day_of_week_text_heaght
+            lower_y: this.options.header_lower_text_y,
+            upper_y: this.options.header_upper_text_y,
+            day_of_week_y: this.options.header_day_of_week_text_y
         };
 
         const x_pos = {
