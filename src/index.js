@@ -84,7 +84,12 @@ export default class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            language: 'en'
+            language: 'en',
+            // header関連のスタイルを修正できるようにオプション用のパラメーターの追加
+            header_padding: 10,
+            header_lower_text_height: 35,
+            header_upper_text_height: 20,
+            header_day_of_week_text_heaght: 50
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -369,7 +374,8 @@ export default class Gantt {
 
     make_grid_header() {
         const header_width = this.dates.length * this.options.column_width;
-        const header_height = this.options.header_height + 10;
+        const header_height =
+            this.options.header_height + this.options.header_padding;
         createSVG('rect', {
             x: 0,
             y: 0,
@@ -476,6 +482,17 @@ export default class Gantt {
                     $upper_text.remove();
                 }
             }
+
+            // headerに曜日を表示するために追加
+            if (date.day_of_week_text) {
+                createSVG('text', {
+                    x: date.day_of_week_x,
+                    y: date.day_of_week_y,
+                    innerHTML: date.day_of_week_text,
+                    class: 'day-of-week-text',
+                    append_to: this.layers.date
+                });
+            }
         }
     }
 
@@ -539,13 +556,20 @@ export default class Gantt {
             Year_upper:
                 date.getFullYear() !== last_date.getFullYear()
                     ? date_utils.format(date, 'YYYY', this.options.language)
+                    : '',
+            // 曜日を表示させるために追加
+            Day_of_week:
+                date.getDate() !== last_date.getDate()
+                    ? date_utils.get_day_of_week(date, this.options.language)
                     : ''
         };
 
         const base_pos = {
+            // 全てオプションで指定できるように変更
             x: i * this.options.column_width,
-            lower_y: this.options.header_height,
-            upper_y: this.options.header_height - 25
+            lower_y: this.options.header_lower_text_height,
+            upper_y: this.options.header_upper_text_height,
+            day_of_week_y: this.options.header_day_of_week_text_heaght
         };
 
         const x_pos = {
@@ -561,16 +585,22 @@ export default class Gantt {
             Month_lower: this.options.column_width / 2,
             Month_upper: this.options.column_width * 12 / 2,
             Year_lower: this.options.column_width / 2,
-            Year_upper: this.options.column_width * 30 / 2
+            Year_upper: this.options.column_width * 30 / 2,
+            // 曜日を表示させるために追加
+            Day_of_week: this.options.column_width / 2
         };
 
         return {
             upper_text: date_text[`${this.options.view_mode}_upper`],
             lower_text: date_text[`${this.options.view_mode}_lower`],
+            day_of_week_text: date_text[`${this.options.view_mode}_of_week`],
             upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
             upper_y: base_pos.upper_y,
             lower_x: base_pos.x + x_pos[`${this.options.view_mode}_lower`],
-            lower_y: base_pos.lower_y
+            lower_y: base_pos.lower_y,
+            day_of_week_x:
+                base_pos.x + x_pos[`${this.options.view_mode}_of_week`],
+            day_of_week_y: base_pos.day_of_week_y
         };
     }
 

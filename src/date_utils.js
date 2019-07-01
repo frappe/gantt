@@ -93,6 +93,11 @@ const month_names = {
     ]
 };
 
+const day_of_week_names = {
+    en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sta'],
+    ja: ['(日)', '(月)', '(火)', '(水)', '(木)', '(金)', '(土)']
+};
+
 export default {
     parse(date, date_separator = '-', time_separator = /[.:]/) {
         if (date instanceof Date) {
@@ -291,6 +296,12 @@ export default {
             return 29;
         }
         return 28;
+    },
+
+    // Dateオブジェクトを受け取り曜日の文字を返す関数
+    get_day_of_week(date, lang = 'en') {
+        const dayOfWeek = date.getDay();
+        return day_of_week_names[lang][dayOfWeek];
     }
 };
 

@@ -96,6 +96,11 @@ const month_names = {
     ]
 };
 
+const day_of_week_names = {
+    en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sta'],
+    ja: ['(日)', '(月)', '(火)', '(水)', '(木)', '(金)', '(土)']
+};
+
 var date_utils = {
     parse(date, date_separator = '-', time_separator = /[.:]/) {
         if (date instanceof Date) {
@@ -294,6 +299,12 @@ var date_utils = {
             return 29;
         }
         return 28;
+    },
+
+    // Dateオブジェクトを受け取り曜日の文字を返す関数
+    get_day_of_week(date, lang = 'en') {
+        const dayOfWeek = date.getDay();
+        return day_of_week_names[lang][dayOfWeek];
     }
 };
 
@@ -825,7 +836,8 @@ class Bar {
 
         if (label.getBBox().width > bar.getWidth()) {
             label.classList.add('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+            // ガントバーのテキストの位置を先頭に変更
+            label.setAttribute('x', bar.getX());
         } else {
             label.classList.remove('big');
             label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
@@ -1095,7 +1107,12 @@ class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            language: 'en'
+            language: 'en',
+            // header関連のスタイルを修正できるようにオプション用のパラメーターの追加
+            header_padding: 10,
+            header_lower_text_height: 35,
+            header_upper_text_height: 20,
+            header_day_of_week_text_heaght: 50
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -1380,7 +1397,8 @@ class Gantt {
 
     make_grid_header() {
         const header_width = this.dates.length * this.options.column_width;
-        const header_height = this.options.header_height + 10;
+        const header_height =
+            this.options.header_height + this.options.header_padding;
         createSVG('rect', {
             x: 0,
             y: 0,
@@ -1487,6 +1505,17 @@ class Gantt {
                     $upper_text.remove();
                 }
             }
+
+            // headerに曜日を表示するために追加
+            if (date.day_of_week_text) {
+                createSVG('text', {
+                    x: date.day_of_week_x,
+                    y: date.day_of_week_y,
+                    innerHTML: date.day_of_week_text,
+                    class: 'day-of-week-text',
+                    append_to: this.layers.date
+                });
+            }
         }
     }
 
@@ -1550,13 +1579,20 @@ class Gantt {
             Year_upper:
                 date.getFullYear() !== last_date.getFullYear()
                     ? date_utils.format(date, 'YYYY', this.options.language)
+                    : '',
+            // 曜日を表示させるために追加
+            Day_of_week:
+                date.getDate() !== last_date.getDate()
+                    ? date_utils.get_day_of_week(date, this.options.language)
                     : ''
         };
 
         const base_pos = {
+            // 全てオプションで指定できるように変更
             x: i * this.options.column_width,
-            lower_y: this.options.header_height,
-            upper_y: this.options.header_height - 25
+            lower_y: this.options.header_lower_text_height,
+            upper_y: this.options.header_upper_text_height,
+            day_of_week_y: this.options.header_day_of_week_text_heaght
         };
 
         const x_pos = {
@@ -1572,16 +1608,22 @@ class Gantt {
             Month_lower: this.options.column_width / 2,
             Month_upper: this.options.column_width * 12 / 2,
             Year_lower: this.options.column_width / 2,
-            Year_upper: this.options.column_width * 30 / 2
+            Year_upper: this.options.column_width * 30 / 2,
+            // 曜日を表示させるために追加
+            Day_of_week: this.options.column_width / 2
         };
 
         return {
             upper_text: date_text[`${this.options.view_mode}_upper`],
             lower_text: date_text[`${this.options.view_mode}_lower`],
+            day_of_week_text: date_text[`${this.options.view_mode}_of_week`],
             upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
             upper_y: base_pos.upper_y,
             lower_x: base_pos.x + x_pos[`${this.options.view_mode}_lower`],
-            lower_y: base_pos.lower_y
+            lower_y: base_pos.lower_y,
+            day_of_week_x:
+                base_pos.x + x_pos[`${this.options.view_mode}_of_week`],
+            day_of_week_y: base_pos.day_of_week_y
         };
     }
 

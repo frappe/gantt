@@ -379,7 +379,8 @@ export default class Bar {
 
         if (label.getBBox().width > bar.getWidth()) {
             label.classList.add('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+            // ガントバーのテキストの位置を先頭に変更
+            label.setAttribute('x', bar.getX());
         } else {
             label.classList.remove('big');
             label.setAttribute('x', bar.getX() + bar.getWidth() / 2);

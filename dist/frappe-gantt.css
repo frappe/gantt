@@ -80,7 +80,7 @@
   .gantt .bar-wrapper.active .bar-progress {
     fill: #8a8aff; }
 
-.gantt .lower-text, .gantt .upper-text {
+.gantt .lower-text, .gantt .upper-text, .gantt .day-of-week-text {
   font-size: 12px;
   text-anchor: middle; }
 
