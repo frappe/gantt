@@ -24,20 +24,6 @@ const month_names = {
         'November',
         'December'
     ],
-    es: [
-        'Enero',
-        'Febrero',
-        'Marzo',
-        'Abril',
-        'Mayo',
-        'Junio',
-        'Julio',
-        'Agosto',
-        'Septiembre',
-        'Octubre',
-        'Noviembre',
-        'Diciembre'
-    ],
     ru: [
         'Январь',
         'Февраль',
@@ -51,54 +37,7 @@ const month_names = {
         'Октябрь',
         'Ноябрь',
         'Декабрь'
-    ],
-    ptBr: [
-        'Janeiro',
-        'Fevereiro',
-        'Março',
-        'Abril',
-        'Maio',
-        'Junho',
-        'Julho',
-        'Agosto',
-        'Setembro',
-        'Outubro',
-        'Novembro',
-        'Dezembro'
-    ],
-    fr: [
-        'Janvier',
-        'Février',
-        'Mars',
-        'Avril',
-        'Mai',
-        'Juin',
-        'Juillet',
-        'Août',
-        'Septembre',
-        'Octobre',
-        'Novembre',
-        'Décembre'
-    ],
-    ja: [
-        '1月',
-        '2月',
-        '3月',
-        '4月',
-        '5月',
-        '6月',
-        '7月',
-        '8月',
-        '9月',
-        '10月',
-        '11月',
-        '12月'
     ]
-};
-
-const day_of_week_names = {
-    en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sta'],
-    ja: ['(日)', '(月)', '(火)', '(水)', '(木)', '(金)', '(土)']
 };
 
 var date_utils = {
@@ -163,7 +102,7 @@ var date_utils = {
             HH: values[3],
             mm: values[4],
             ss: values[5],
-            SSS: values[6],
+            SSS:values[6],
             D: values[2],
             MMMM: month_names[lang][+values[1]],
             MMM: month_names[lang][+values[1]]
@@ -299,12 +238,6 @@ var date_utils = {
             return 29;
         }
         return 28;
-    },
-
-    // Dateオブジェクトを受け取り曜日の文字を返す関数
-    get_day_of_week(date, lang = 'en') {
-        const dayOfWeek = date.getDay();
-        return day_of_week_names[lang][dayOfWeek];
     }
 };
 
@@ -470,8 +403,6 @@ class Bar {
         this.action_completed = false;
         this.gantt = gantt;
         this.task = task;
-        // progressが渡されなかった場合初期値は0とする
-        this.task.progress = this.task.progress || 0;
     }
 
     prepare() {
@@ -654,15 +585,10 @@ class Bar {
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
-        const start_date = date_utils.format(
-            this.task._start,
-            'MMM D',
-            this.gantt.options.language
-        );
+        const start_date = date_utils.format(this.task._start, 'MMM D');
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),
-            'MMM D',
-            this.gantt.options.language
+            'MMM D'
         );
         const subtitle = start_date + ' - ' + end_date;
 
@@ -836,8 +762,7 @@ class Bar {
 
         if (label.getBBox().width > bar.getWidth()) {
             label.classList.add('big');
-            // ガントバーのテキストの位置を先頭に変更
-            label.setAttribute('x', bar.getX());
+            label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
         } else {
             label.classList.remove('big');
             label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
@@ -1107,97 +1032,82 @@ class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            language: 'en',
-            // header関連のスタイルを修正できるようにオプション用のパラメーターの追加
-            header_padding: 10,
-            header_lower_text_y: 35,
-            header_upper_text_y: 20,
-            header_day_of_week_text_y: 50
+            language: 'en'
         };
         this.options = Object.assign({}, default_options, options);
     }
 
     setup_tasks(tasks) {
         // prepare tasks
-        // 1行に対してtaskを配列で受け取るように変更
-        this.tasks = tasks.map((rowTasks, i) => {
-            const allTask = rowTasks.map(task => {
-                // convert to Date objects
-                task._start = date_utils.parse(task.start);
-                task._end = date_utils.parse(task.end);
+        this.tasks = tasks.map((task, i) => {
+            // convert to Date objects
+            task._start = date_utils.parse(task.start);
+            task._end = date_utils.parse(task.end);
 
-                // make task invalid if duration too large
-                if (date_utils.diff(task._end, task._start, 'year') > 10) {
-                    task.end = null;
+            // make task invalid if duration too large
+            if (date_utils.diff(task._end, task._start, 'year') > 10) {
+                task.end = null;
+            }
+
+            // cache index
+            task._index = i;
+
+            // invalid dates
+            if (!task.start && !task.end) {
+                const today = date_utils.today();
+                task._start = today;
+                task._end = date_utils.add(today, 2, 'day');
+            }
+
+            if (!task.start && task.end) {
+                task._start = date_utils.add(task._end, -2, 'day');
+            }
+
+            if (task.start && !task.end) {
+                task._end = date_utils.add(task._start, 2, 'day');
+            }
+
+            // if hours is not set, assume the last day is full day
+            // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
+            const task_end_values = date_utils.get_date_values(task._end);
+            if (task_end_values.slice(3).every(d => d === 0)) {
+                task._end = date_utils.add(task._end, 24, 'hour');
+            }
+
+            // invalid flag
+            if (!task.start || !task.end) {
+                task.invalid = true;
+            }
+
+            // dependencies
+            if (typeof task.dependencies === 'string' || !task.dependencies) {
+                let deps = [];
+                if (task.dependencies) {
+                    deps = task.dependencies
+                        .split(',')
+                        .map(d => d.trim())
+                        .filter(d => d);
                 }
+                task.dependencies = deps;
+            }
 
-                // cache index
-                task._index = i;
+            // uids
+            if (!task.id) {
+                task.id = generate_id(task);
+            }
 
-                // invalid dates
-                if (!task.start && !task.end) {
-                    const today = date_utils.today();
-                    task._start = today;
-                    task._end = date_utils.add(today, 2, 'day');
-                }
-
-                if (!task.start && task.end) {
-                    task._start = date_utils.add(task._end, -2, 'day');
-                }
-
-                if (task.start && !task.end) {
-                    task._end = date_utils.add(task._start, 2, 'day');
-                }
-
-                // if hours is not set, assume the last day is full day
-                // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
-                const task_end_values = date_utils.get_date_values(task._end);
-                if (task_end_values.slice(3).every(d => d === 0)) {
-                    task._end = date_utils.add(task._end, 24, 'hour');
-                }
-
-                // invalid flag
-                if (!task.start || !task.end) {
-                    task.invalid = true;
-                }
-
-                // dependencies
-                if (
-                    typeof task.dependencies === 'string' ||
-                    !task.dependencies
-                ) {
-                    let deps = [];
-                    if (task.dependencies) {
-                        deps = task.dependencies
-                            .split(',')
-                            .map(d => d.trim())
-                            .filter(d => d);
-                    }
-                    task.dependencies = deps;
-                }
-
-                // uids
-                if (!task.id) {
-                    task.id = generate_id(task);
-                }
-
-                return task;
-            });
-            return allTask;
+            return task;
         });
 
         this.setup_dependencies();
     }
 
     setup_dependencies() {
-        // 1行に対してtaskを配列で受け取るように変更
         this.dependency_map = {};
-        for (let rowTasks of this.tasks) {
-            for (let t of rowTasks) {
-                for (let d of t.dependencies) {
-                    this.dependency_map[d] = this.dependency_map[d] || [];
-                    this.dependency_map[d].push(t.id);
-                }
+        for (let t of this.tasks) {
+            for (let d of t.dependencies) {
+                this.dependency_map[d] = this.dependency_map[d] || [];
+                this.dependency_map[d].push(t.id);
             }
         }
     }
@@ -1219,8 +1129,8 @@ class Gantt {
         this.options.view_mode = view_mode;
 
         if (view_mode === 'Day') {
-            // Dayの場合の列の幅の上書きをしない
             this.options.step = 24;
+            this.options.column_width = 38;
         } else if (view_mode === 'Half Day') {
             this.options.step = 24 / 2;
             this.options.column_width = 38;
@@ -1247,16 +1157,13 @@ class Gantt {
     setup_gantt_dates() {
         this.gantt_start = this.gantt_end = null;
 
-        // 1行に対してtaskを配列で受け取るように変更
-        for (let rowTasks of this.tasks) {
+        for (let task of this.tasks) {
             // set global start and end date
-            for (let task of rowTasks) {
-                if (!this.gantt_start || task._start < this.gantt_start) {
-                    this.gantt_start = task._start;
-                }
-                if (!this.gantt_end || task._end > this.gantt_end) {
-                    this.gantt_end = task._end;
-                }
+            if (!this.gantt_start || task._start < this.gantt_start) {
+                this.gantt_start = task._start;
+            }
+            if (!this.gantt_end || task._end > this.gantt_end) {
+                this.gantt_end = task._end;
             }
         }
 
@@ -1358,8 +1265,7 @@ class Gantt {
         });
 
         $.attr(this.$svg, {
-            // 全体が高くなりすぎず、スクロールバーがはみ出ないように
-            height: grid_height,
+            height: grid_height + this.options.padding + 100,
             width: '100%'
         });
     }
@@ -1398,8 +1304,7 @@ class Gantt {
 
     make_grid_header() {
         const header_width = this.dates.length * this.options.column_width;
-        const header_height =
-            this.options.header_height + this.options.header_padding;
+        const header_height = this.options.header_height + 10;
         createSVG('rect', {
             x: 0,
             y: 0,
@@ -1506,17 +1411,6 @@ class Gantt {
                     $upper_text.remove();
                 }
             }
-
-            // headerに曜日を表示するために追加
-            if (date.day_of_week_text) {
-                createSVG('text', {
-                    x: date.day_of_week_x,
-                    y: date.day_of_week_y,
-                    innerHTML: date.day_of_week_text,
-                    class: 'day-of-week-text',
-                    append_to: this.layers.date
-                });
-            }
         }
     }
 
@@ -1580,20 +1474,13 @@ class Gantt {
             Year_upper:
                 date.getFullYear() !== last_date.getFullYear()
                     ? date_utils.format(date, 'YYYY', this.options.language)
-                    : '',
-            // 曜日を表示させるために追加
-            Day_of_week:
-                date.getDate() !== last_date.getDate()
-                    ? date_utils.get_day_of_week(date, this.options.language)
                     : ''
         };
 
         const base_pos = {
-            // header関連のスタイルをオプションで指定できるように
             x: i * this.options.column_width,
-            lower_y: this.options.header_lower_text_y,
-            upper_y: this.options.header_upper_text_y,
-            day_of_week_y: this.options.header_day_of_week_text_y
+            lower_y: this.options.header_height,
+            upper_y: this.options.header_height - 25
         };
 
         const x_pos = {
@@ -1602,68 +1489,51 @@ class Gantt {
             'Half Day_lower': this.options.column_width * 2 / 2,
             'Half Day_upper': 0,
             Day_lower: this.options.column_width / 2,
-            // 月のテキストを1日目の上に表示させるように変更（Dayのみ）
-            Day_upper: this.options.column_width / 2,
+            Day_upper: this.options.column_width * 30 / 2,
             Week_lower: 0,
             Week_upper: this.options.column_width * 4 / 2,
             Month_lower: this.options.column_width / 2,
             Month_upper: this.options.column_width * 12 / 2,
             Year_lower: this.options.column_width / 2,
-            Year_upper: this.options.column_width * 30 / 2,
-            // headerに曜日を表示させるために追加
-            Day_of_week: this.options.column_width / 2
+            Year_upper: this.options.column_width * 30 / 2
         };
 
         return {
             upper_text: date_text[`${this.options.view_mode}_upper`],
             lower_text: date_text[`${this.options.view_mode}_lower`],
-            day_of_week_text: date_text[`${this.options.view_mode}_of_week`],
             upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
             upper_y: base_pos.upper_y,
             lower_x: base_pos.x + x_pos[`${this.options.view_mode}_lower`],
-            lower_y: base_pos.lower_y,
-            day_of_week_x:
-                base_pos.x + x_pos[`${this.options.view_mode}_of_week`],
-            day_of_week_y: base_pos.day_of_week_y
+            lower_y: base_pos.lower_y
         };
     }
 
     make_bars() {
-        const bars = [];
-        // 1行に対してtaskを配列で受け取るように変更
-        for (let rowTasks of this.tasks) {
-            for (let task of rowTasks) {
-                const bar = new Bar(this, task);
-                this.layers.bar.appendChild(bar.group);
-                bars.push(bar);
-            }
-        }
-
-        this.bars = bars;
+        this.bars = this.tasks.map(task => {
+            const bar = new Bar(this, task);
+            this.layers.bar.appendChild(bar.group);
+            return bar;
+        });
     }
 
     make_arrows() {
         this.arrows = [];
-
-        // 1行に対してtaskを配列で受け取るように変更
-        for (let rowTasks of this.tasks) {
-            for (let task of rowTasks) {
-                let arrows = [];
-                arrows = task.dependencies
-                    .map(task_id => {
-                        const dependency = this.get_task(task_id);
-                        if (!dependency) return;
-                        const arrow = new Arrow(
-                            this,
-                            this.bars[dependency._index], // from_task
-                            this.bars[task._index] // to_task
-                        );
-                        this.layers.arrow.appendChild(arrow.element);
-                        return arrow;
-                    })
-                    .filter(Boolean); // filter falsy values
-                this.arrows = this.arrows.concat(arrows);
-            }
+        for (let task of this.tasks) {
+            let arrows = [];
+            arrows = task.dependencies
+                .map(task_id => {
+                    const dependency = this.get_task(task_id);
+                    if (!dependency) return;
+                    const arrow = new Arrow(
+                        this,
+                        this.bars[dependency._index], // from_task
+                        this.bars[task._index] // to_task
+                    );
+                    this.layers.arrow.appendChild(arrow.element);
+                    return arrow;
+                })
+                .filter(Boolean); // filter falsy values
+            this.arrows = this.arrows.concat(arrows);
         }
     }
 
@@ -1980,15 +1850,7 @@ class Gantt {
      * @memberof Gantt
      */
     get_oldest_starting_date() {
-        // 全ての task を1つの配列にする
-        const allTask = [];
-        for (let rowTasks of this.tasks) {
-            for (let task of rowTasks) {
-                allTask.push(task);
-            }
-        }
-
-        return allTask
+        return this.tasks
             .map(task => task._start)
             .reduce(
                 (prev_date, cur_date) =>
