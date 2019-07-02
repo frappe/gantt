@@ -2,6 +2,14 @@
 
 ## Install
 
+`yarn install`
+
+## Getting Start
+
+`make start`
+
+Web サーバが起動する訳ではないので、更新の度に `make start` を実行する必要があります。
+
 ## Usage
 
 ```js
@@ -26,7 +34,7 @@ const tasks = [
             start: '2019-06-20',
             end: '2019-06-23',
             name: 'Task 2',
-            id: 'Task 2',
+            id: 'Task 2'
         }
     ],
     [
@@ -37,10 +45,8 @@ const tasks = [
             id: 'Task 3',
             progress: 10
         }
-    ],
-]
-
+    ]
+];
 ```
 
 ## License
-
