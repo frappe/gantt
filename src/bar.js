@@ -13,6 +13,8 @@ export default class Bar {
         this.action_completed = false;
         this.gantt = gantt;
         this.task = task;
+        // progressが渡されなかった場合初期値は0とする
+        this.task.progress = this.task.progress || 0;
     }
 
     prepare() {
@@ -195,7 +197,11 @@ export default class Bar {
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
-        const start_date = date_utils.format(this.task._start, 'MMM D', this.gantt.options.language);
+        const start_date = date_utils.format(
+            this.task._start,
+            'MMM D',
+            this.gantt.options.language
+        );
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),
             'MMM D',
@@ -207,7 +213,7 @@ export default class Bar {
             target_element: this.$bar,
             title: this.task.name,
             subtitle: subtitle,
-            task: this.task,
+            task: this.task
         });
     }
 
@@ -373,7 +379,8 @@ export default class Bar {
 
         if (label.getBBox().width > bar.getWidth()) {
             label.classList.add('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+            // ガントバーのテキストの位置を先頭に変更
+            label.setAttribute('x', bar.getX());
         } else {
             label.classList.remove('big');
             label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
