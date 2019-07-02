@@ -1105,7 +1105,7 @@ class Gantt {
             padding: 18,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
-            popup_trigger: 'contextmenu',
+            popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
             // header関連のスタイルを修正できるようにオプション用のパラメーターの追加
