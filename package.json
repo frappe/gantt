@@ -1,19 +1,20 @@
 {
-  "name": "frappe-gantt",
-  "version": "0.3.0",
+  "name": "@gemcook/gantt",
+  "version": "0.1.0",
   "description": "A simple, modern, interactive gantt library for the web",
-  "main": "src/index.js",
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "start": "yarn run dev",
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "prettier": "prettier es6 --write \"{src/*,tests/*,rollup.config}.js\""
+    "test:watch": "jest --watch"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/frappe/gantt.git"
+    "url": "https://github.com/gemcook/gantt.git"
   },
   "keywords": [
     "gantt",
@@ -23,25 +24,20 @@
     "interactive gantt",
     "project management"
   ],
-  "author": "Faris Ansari",
+  "author": "Gemcook Engineers <engineers@gemcook.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/frappe/gantt/issues"
-  },
-  "homepage": "https://github.com/frappe/gantt",
   "devDependencies": {
     "babel-preset-env": "^1.6.1",
-    "deepmerge": "^2.0.1",
     "eslint": "^4.17.0",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.6.0",
+    "fs-extra": "^8.1.0",
     "jest": "^22.2.1",
+    "node-sass": "^4.12.0",
     "prettier": "1.10.2",
-    "rollup": "^0.55.3",
-    "rollup-plugin-sass": "^0.5.3",
-    "rollup-plugin-uglify": "^3.0.0"
-  },
-  "eslintIgnore": [
-    "dist"
-  ]
+    "rollup": "^1.16.4",
+    "rollup-plugin-commonjs": "^10.0.1",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-postcss": "^2.0.3"
+  }
 }

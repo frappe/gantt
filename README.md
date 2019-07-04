@@ -1,16 +1,14 @@
-# gemcook/Frappe-Gantt
+# @gemcook/gantt
 
-## Install
-
-`yarn install`
 
 ## Getting Start
 
-`make start`
 
-Web サーバが起動する訳ではないので、更新の度に `make start` を実行する必要があります。
+`yarn add @gemcook/gantt`
+
 
 ## Usage
+
 
 ```js
 const tasks = [
@@ -49,4 +47,27 @@ const tasks = [
 ];
 ```
 
+
+## Contributing
+
+
+### Install
+
+
+`yarn`
+
+
+### Running
+
+
+`make start`
+
+
+- Web サーバが起動する訳ではないので、更新の度に `make start` を実行する必要があります
+
+
 ## License
+
+
+[MIT](https://github.com/gemcook/gantt/blob/release/LICENSE)
+
