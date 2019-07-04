@@ -69,5 +69,5 @@ const tasks = [
 ## License
 
 
-[MIT](https://github.com/gemcook/gantt/blob/b-245/LICENSE)
+[MIT](https://github.com/gemcook/gantt/blob/release/LICENSE)
 
