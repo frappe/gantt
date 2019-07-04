@@ -18,7 +18,8 @@ export default [
                 include: 'node_modules/**'
             }),
             postcss({
-                extensions: ['.css', '.scss']
+                extensions: ['.css', '.scss'],
+                extract: 'lib/styles/index.css'
             }),
             {
                 name: 'move styles to lib',

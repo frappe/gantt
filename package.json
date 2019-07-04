@@ -9,12 +9,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "start": "yarn run dev",
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "prettier": "prettier es6 --write \"{src/*,tests/*,rollup.config}.js\""
+    "test:watch": "jest --watch"
   },
   "repository": {
     "type": "git",
