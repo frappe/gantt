@@ -1,6 +1,6 @@
 {
   "name": "@gemcook/gantt",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "A simple, modern, interactive gantt library for the web",
   "main": "lib/index.js",
   "files": [
@@ -9,6 +9,7 @@
     "LICENSE"
   ],
   "scripts": {
+    "prepublishOnly": "make build",
     "test": "jest",
     "test:watch": "jest --watch"
   },
