@@ -1,8 +1,13 @@
 {
-  "name": "frappe-gantt",
-  "version": "0.3.0",
+  "name": "@gemcook/gantt",
+  "version": "0.1.0",
   "description": "A simple, modern, interactive gantt library for the web",
-  "main": "src/index.js",
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "start": "yarn run dev",
     "build": "rollup -c",
@@ -13,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/frappe/gantt.git"
+    "url": "https://github.com/gemcook/gantt.git"
   },
   "keywords": [
     "gantt",
@@ -23,12 +28,8 @@
     "interactive gantt",
     "project management"
   ],
-  "author": "Faris Ansari",
+  "author": "Gemcook Engineers <engineers@gemcook.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/frappe/gantt/issues"
-  },
-  "homepage": "https://github.com/frappe/gantt",
   "devDependencies": {
     "babel-preset-env": "^1.6.1",
     "eslint": "^4.17.0",
@@ -42,8 +43,5 @@
     "rollup-plugin-commonjs": "^10.0.1",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-postcss": "^2.0.3"
-  },
-  "eslintIgnore": [
-    "dist"
-  ]
+  }
 }
