@@ -4,7 +4,25 @@
 ## Getting Start
 
 
+### Install
+
+
 `yarn add @gemcook/gantt`
+
+
+### Import
+
+
+**JavaScript**
+
+
+`import Gantt from '@gemcook/gantt';`
+
+
+**SCSS**
+
+
+`@import '~@gemcook/gantt/lib/styles/index';`
 
 
 ## Usage
