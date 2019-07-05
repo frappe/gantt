@@ -302,6 +302,18 @@ export default {
     get_day_of_week(date, lang = 'en') {
         const dayOfWeek = date.getDay();
         return day_of_week_names[lang][dayOfWeek];
+    },
+
+    // 受け取ったDateが日曜日ならtrueを返す
+    is_sunday(date) {
+        const dayOfWeek = date.getDay();
+        return dayOfWeek === 0;
+    },
+
+    // 受け取ったDateが土曜日ならfalseを返す
+    is_staday(date) {
+        const dayOfWeek = date.getDay();
+        return dayOfWeek === 6;
     }
 };
 
