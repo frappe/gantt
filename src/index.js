@@ -430,6 +430,7 @@ export default class Gantt {
         }
     }
 
+    // 縦のハイライトを追加する
     make_grid_highlights() {
         // highlight today's date
         if (this.view_is('Day')) {
@@ -445,6 +446,37 @@ export default class Gantt {
                     this.tasks.length +
                 this.options.header_height +
                 this.options.padding / 2;
+
+            // dateの配列を回し、土曜日・日曜日だった場合背景に色を付ける
+            for (let date of this.dates) {
+                // ガント全体から、x軸の位置を取得する
+                const x =
+                    date_utils.diff(date, this.gantt_start, 'hour') /
+                    this.options.step *
+                    this.options.column_width;
+
+                if (date_utils.is_staday(date)) {
+                    createSVG('rect', {
+                        x,
+                        y,
+                        width,
+                        height,
+                        class: 'staday-highlight',
+                        append_to: this.layers.grid
+                    });
+                }
+
+                if (date_utils.is_sunday(date)) {
+                    createSVG('rect', {
+                        x,
+                        y,
+                        width,
+                        height,
+                        class: 'sunday-highlight',
+                        append_to: this.layers.grid
+                    });
+                }
+            }
 
             createSVG('rect', {
                 x,

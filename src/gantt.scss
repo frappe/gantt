@@ -39,6 +39,16 @@ $handle-color: #ddd !default;
 		fill: $light-yellow;
 		opacity: 0.5;
 	}
+	
+	.staday-highlight {
+		fill: $handle-color;
+		opacity: 0.3;
+	}
+
+	.sunday-highlight {
+		fill: $handle-color;
+		opacity: 0.3;
+	}
 
 	.arrow {
 		fill: none;
