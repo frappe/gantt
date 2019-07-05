@@ -300,20 +300,20 @@ export default {
 
     // Dateオブジェクトを受け取り曜日の文字を返す関数
     get_day_of_week(date, lang = 'en') {
-        const dayOfWeek = date.getDay();
-        return day_of_week_names[lang][dayOfWeek];
+        const day_of_week = date.getDay();
+        return day_of_week_names[lang][day_of_week];
     },
 
     // 受け取ったDateが日曜日ならtrueを返す
     is_sunday(date) {
-        const dayOfWeek = date.getDay();
-        return dayOfWeek === 0;
+        const day_of_week = date.getDay();
+        return day_of_week === 0;
     },
 
     // 受け取ったDateが土曜日ならfalseを返す
     is_staday(date) {
-        const dayOfWeek = date.getDay();
-        return dayOfWeek === 6;
+        const day_of_week = date.getDay();
+        return day_of_week === 6;
     }
 };
 
