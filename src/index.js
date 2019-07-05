@@ -449,6 +449,7 @@ export default class Gantt {
 
             // dateの配列を回し、土曜日・日曜日だった場合背景に色を付ける
             for (let date of this.dates) {
+                // ガント全体から、x軸の位置を取得する
                 const x =
                     date_utils.diff(date, this.gantt_start, 'hour') /
                     this.options.step *
