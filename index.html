@@ -75,6 +75,13 @@
 				dependencies: 'Task 4',
 				custom_class: 'bar-milestone'
 			},
+			{
+				start: '2014-01-05',
+				end: '2019-10-12',
+				name: 'Long term task',
+				id: "Task 6",
+				progress: 0
+			}
 		]
 		var gantt_chart = new Gantt(".gantt-target", tasks, {
 			on_click: function (task) {
@@ -88,7 +95,9 @@
 			},
 			on_view_change: function(mode) {
 				console.log(mode);
-			}
+			},
+			view_mode: 'Month',
+			language: 'en'
 		});
 		console.log(gantt_chart);
 	</script>
