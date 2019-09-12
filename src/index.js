@@ -56,7 +56,7 @@ export default class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            enable_popup: true,
+            disable_popup: false,
             fixed_label_location: false
         };
         this.options = Object.assign({}, default_options, options);
@@ -815,7 +815,7 @@ export default class Gantt {
     }
 
     show_popup(options) {
-		if(this.options.enable_popup){
+		if(this.options.disable_popup){
 			if (!this.popup) {
 				this.popup = new Popup(
 					this.popup_wrapper,
