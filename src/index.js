@@ -815,7 +815,7 @@ export default class Gantt {
     }
 
     show_popup(options) {
-		if(this.options.disable_popup){
+		if(!this.options.disable_popup){
 			if (!this.popup) {
 				this.popup = new Popup(
 					this.popup_wrapper,
