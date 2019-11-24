@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://github.com/frappe/design/blob/master/logos/gantt-logo.svg" height="128">
+    <img src="https://github.com/frappe/design/blob/master/logos/logo-2019/frappe-gantt-logo.png" height="128">
     <h2>Frappe Gantt</h2>
     <p align="center">
         <p>A simple, interactive, modern gantt chart library for the web</p>
