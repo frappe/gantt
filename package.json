@@ -1,5 +1,5 @@
 {
-  "name": "frappe-gantt",
+  "name": "frappe-gantt-armarr",
   "version": "0.3.0",
   "description": "A simple, modern, interactive gantt library for the web",
   "main": "src/index.js",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/frappe/gantt.git"
+    "url": "https://github.com/Armarr/gantt.git"
   },
   "keywords": [
     "gantt",
@@ -28,7 +28,7 @@
   "bugs": {
     "url": "https://github.com/frappe/gantt/issues"
   },
-  "homepage": "https://github.com/frappe/gantt",
+  "homepage": "https://github.com/Armarr/gantt",
   "devDependencies": {
     "babel-preset-env": "^1.6.1",
     "deepmerge": "^2.0.1",
