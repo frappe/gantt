@@ -62,6 +62,22 @@ const month_names = {
         'Outubro',
         'Novembro',
         'Dezembro'
+
+    ],    
+
+    de: [
+		'Januar',
+        'Februar',
+        'März',
+        'April',
+        'Mai',
+        'Juni',
+        'Juli',
+        'August',
+        'September',
+        'Oktober',
+        'November',
+        'Dezember'
     ],
     fr: [
         'Janvier',
@@ -132,7 +148,12 @@ export default {
         return date_string + (with_time ? ' ' + time_string : '');
     },
 
-    format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
+    format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang) {
+    	//  add localization to format Date
+    	var localMonthNames = month_names[lang];
+    	if(localMonthNames == null)
+    		localMonthNames = month_names['en'];
+    	
         const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
         const format_map = {
             YYYY: values[0],
@@ -143,8 +164,8 @@ export default {
             ss: values[5],
             SSS:values[6],
             D: values[2],
-            MMMM: month_names[lang][+values[1]],
-            MMM: month_names[lang][+values[1]]
+            MMMM: localMonthNames[+values[1]],
+            MMM: localMonthNames[+values[1]]
         };
 
         let str = format_string;

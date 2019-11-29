@@ -125,35 +125,39 @@ export default class Bar {
 
         const bar = this.$bar;
         const handle_width = 8;
+        
+        //  make changing todos optional
+        if(this.gantt.options.enable_slide_edit){
+        	createSVG('rect', {
+        		x: bar.getX() + bar.getWidth() - 9,
+        		y: bar.getY() + 1,
+        		width: handle_width,
+        		height: this.height - 2,
+        		rx: this.corner_radius,
+        		ry: this.corner_radius,
+        		class: 'handle right',
+        		append_to: this.handle_group
+        	});
 
-        createSVG('rect', {
-            x: bar.getX() + bar.getWidth() - 9,
-            y: bar.getY() + 1,
-            width: handle_width,
-            height: this.height - 2,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
-            class: 'handle right',
-            append_to: this.handle_group
-        });
-
-        createSVG('rect', {
-            x: bar.getX() + 1,
-            y: bar.getY() + 1,
-            width: handle_width,
-            height: this.height - 2,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
-            class: 'handle left',
-            append_to: this.handle_group
-        });
-
-        if (this.task.progress && this.task.progress < 100) {
-            this.$handle_progress = createSVG('polygon', {
-                points: this.get_progress_polygon_points().join(','),
-                class: 'handle progress',
-                append_to: this.handle_group
-            });
+        	createSVG('rect', {
+        		x: bar.getX() + 1,
+        		y: bar.getY() + 1,
+        		width: handle_width,
+        		height: this.height - 2,
+        		rx: this.corner_radius,
+        		ry: this.corner_radius,
+        		class: 'handle left',
+        		append_to: this.handle_group
+        	});
+        }
+        
+        //  make changing progress optional
+        if ((this.task.progress && this.task.progress < 100) && this.gantt.options.enable_progress_edit) {
+        	this.$handle_progress = createSVG('polygon', {
+        		points: this.get_progress_polygon_points().join(','),
+        		class: 'handle progress',
+        		append_to: this.handle_group
+        	});
         }
     }
 
@@ -186,15 +190,64 @@ export default class Bar {
             }
 
             this.gantt.unselect_all();
-            this.group.classList.toggle('active');
+            
+            //  add dependency by popup button
+            if(this.gantt.dependencyBar != null){
+            	this.add_dependency();
+            }else{
+                this.group.classList.toggle('active');
+                this.show_popup();
+            }
 
-            this.show_popup();
         });
+    }
+
+    add_dependency(){
+		// already marked a dependency
+		var markedTask = this.gantt.dependencyBar.task;
+		if(markedTask == null)
+			return;
+		
+		var changedTask;
+		
+		// check if tasks are already connected
+		if(!this.task.dependencies.includes(markedTask.id) && !markedTask.dependencies.includes(this.task.id) && this.task !== markedTask){
+			// same start date no dependency
+			if(this.task._start.getTime() === markedTask._start.getTime()){
+	    		this.release_marked_bar();
+				return;
+			}
+			
+			// check which task starts later
+			if(this.task._start.getTime() > markedTask._start.getTime()){
+				changedTask = this.task;
+				this.task.dependencies.push(markedTask.id);
+			}else{
+				changedTask = markedTask;
+				markedTask.dependencies.push(this.task.id);
+			}
+		
+			// fire dependencyAdded event
+			this.gantt.trigger_event('dependency_added', [changedTask]);
+	      	// recalculate dependency tree
+			this.gantt.setup_dependencies();
+			// redraw gantt
+			this.gantt.render();
+		}
+		this.release_marked_bar();
+    }
+
+    release_marked_bar(){
+    	// remove class
+    	this.gantt.dependencyBar.group.classList.toggle('addArrow');
+    	// empty gantt variable
+    	this.gantt.dependencyBar = null;
     }
 
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
+        //  add localization to popup
         const start_date = date_utils.format(this.task._start, 'MMM D', this.gantt.options.language);
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),

@@ -1,119 +1,149 @@
 .gantt .grid-background {
-  fill: none; }
-
+  fill: none;
+}
 .gantt .grid-header {
   fill: #ffffff;
   stroke: #e0e0e0;
-  stroke-width: 1.4; }
-
+  stroke-width: 1.4;
+}
 .gantt .grid-row {
-  fill: #ffffff; }
-
+  fill: #ffffff;
+}
 .gantt .grid-row:nth-child(even) {
-  fill: #f5f5f5; }
-
+  fill: #f5f5f5;
+}
 .gantt .row-line {
-  stroke: #ebeff2; }
-
+  stroke: #ebeff2;
+}
 .gantt .tick {
   stroke: #e0e0e0;
-  stroke-width: 0.2; }
-  .gantt .tick.thick {
-    stroke-width: 0.4; }
-
+  stroke-width: 0.2;
+}
+.gantt .tick.thick {
+  stroke-width: 0.4;
+}
 .gantt .today-highlight {
   fill: #fcf8e3;
-  opacity: 0.5; }
-
+  opacity: 0.5;
+}
 .gantt .arrow {
   fill: none;
   stroke: #666;
-  stroke-width: 1.4; }
-
+  stroke-width: 1.4;
+}
+.gantt .arrow .hover {
+  stroke-width: 4;
+}
 .gantt .bar {
   fill: #b8c2cc;
   stroke: #8D99A6;
   stroke-width: 0;
-  transition: stroke-width .3s ease;
-  user-select: none; }
-
+  transition: stroke-width 0.3s ease;
+  user-select: none;
+}
 .gantt .bar-progress {
-  fill: #a3a3ff; }
-
+  fill: #2369b5;
+}
 .gantt .bar-invalid {
   fill: transparent;
   stroke: #8D99A6;
   stroke-width: 1;
-  stroke-dasharray: 5; }
-  .gantt .bar-invalid ~ .bar-label {
-    fill: #555; }
-
+  stroke-dasharray: 5;
+}
+.gantt .bar-invalid ~ .bar-label {
+  fill: #555;
+}
 .gantt .bar-label {
   fill: #fff;
   dominant-baseline: central;
   text-anchor: middle;
   font-size: 12px;
-  font-weight: lighter; }
-  .gantt .bar-label.big {
-    fill: #555;
-    text-anchor: start; }
-
+  font-weight: lighter;
+}
+.gantt .bar-label.big {
+  fill: #555;
+  text-anchor: start;
+}
 .gantt .handle {
   fill: #ddd;
   cursor: ew-resize;
   opacity: 0;
   visibility: hidden;
-  transition: opacity .3s ease; }
-
+  transition: opacity 0.3s ease;
+}
 .gantt .bar-wrapper {
   cursor: pointer;
-  outline: none; }
-  .gantt .bar-wrapper:hover .bar {
-    fill: #a9b5c1; }
-  .gantt .bar-wrapper:hover .bar-progress {
-    fill: #8a8aff; }
-  .gantt .bar-wrapper:hover .handle {
-    visibility: visible;
-    opacity: 1; }
-  .gantt .bar-wrapper.active .bar {
-    fill: #a9b5c1; }
-  .gantt .bar-wrapper.active .bar-progress {
-    fill: #8a8aff; }
-
+  outline: none;
+}
+.gantt .bar-wrapper:hover .bar {
+  fill: #a9b5c1;
+}
+.gantt .bar-wrapper:hover .bar-progress {
+  fill: #1f5da0;
+}
+.gantt .bar-wrapper:hover .handle {
+  visibility: visible;
+  opacity: 1;
+}
+.gantt .bar-wrapper.addArrow .bar {
+  stroke-width: 4px;
+}
+.gantt .bar-wrapper.active .bar {
+  fill: #a9b5c1;
+}
+.gantt .bar-wrapper.active .bar-progress {
+  fill: #1f5da0;
+}
 .gantt .lower-text, .gantt .upper-text {
   font-size: 12px;
-  text-anchor: middle; }
-
+  text-anchor: middle;
+}
 .gantt .upper-text {
-  fill: #555; }
-
+  fill: #555;
+}
 .gantt .lower-text {
-  fill: #333; }
-
+  fill: #333;
+}
 .gantt .hide {
-  display: none; }
+  display: none;
+}
 
 .gantt-container {
   position: relative;
   overflow: auto;
-  font-size: 12px; }
-  .gantt-container .popup-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 0;
-    color: #959da5;
-    border-radius: 3px; }
-    .gantt-container .popup-wrapper .title {
-      border-bottom: 3px solid #a3a3ff;
-      padding: 10px; }
-    .gantt-container .popup-wrapper .subtitle {
-      padding: 10px;
-      color: #dfe2e5; }
-    .gantt-container .popup-wrapper .pointer {
-      position: absolute;
-      height: 5px;
-      margin: 0 0 0 -5px;
-      border: 5px solid transparent;
-      border-top-color: rgba(0, 0, 0, 0.8); }
+  font-size: 12px;
+}
+.gantt-container .popup-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 0;
+  color: #959da5;
+  border-radius: 3px;
+}
+.gantt-container .popup-wrapper .title {
+  border-bottom: 3px solid #2369b5;
+  padding: 10px;
+}
+.gantt-container .popup-wrapper .subtitle {
+  padding: 10px;
+  color: #dfe2e5;
+}
+.gantt-container .popup-wrapper .action {
+  color: #dfe2e5;
+  border-top: 3px solid #2369b5;
+  padding: 10px;
+  background: rgba(35, 105, 181, 0.6);
+  cursor: pointer;
+}
+.gantt-container .popup-wrapper .action:hover {
+  background: rgba(35, 105, 181, 0.8);
+}
+.gantt-container .popup-wrapper .pointer {
+  position: absolute;
+  height: 5px;
+  margin: 0 0 0 -5px;
+  border: 5px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.8);
+}
