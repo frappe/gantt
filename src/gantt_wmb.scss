@@ -7,7 +7,7 @@ $light-yellow: #fcf8e3 !default;
 $text-muted: #666 !default;
 $text-light: #555 !default;
 $text-color: #333 !default;
-$blue: #a3a3ff !default;
+$blue: #2369b5 !default;
 $handle-color: #ddd !default;
 
 .gantt {
@@ -171,11 +171,11 @@ $handle-color: #ddd !default;
 		color: #dfe2e5;
 			border-top: 3px solid $blue;
 			padding: 10px;
-			background:rgba(163, 163, 255, 0.6);
+			background:rgba(35,105,181, 0.6);
 			cursor: pointer;
 			
 			&:hover{
-			background:rgba(163, 163, 255, 0.8);	
+			background: rgba(35,105,181, 0.8);	
 			}
 		}
 		

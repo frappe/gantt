@@ -69,6 +69,7 @@ export default class Gantt {
             column_width: 30,
             step: 24,
             view_modes: [
+                'Hour',
                 'Quarter Day',
                 'Half Day',
                 'Day',
@@ -84,7 +85,12 @@ export default class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            language: 'en'
+            disable_popup: false,
+            fixed_label_location: false,
+            language: 'en',
+            enable_drag_edit : true,
+        	enable_slide_edit : true,
+        	enable_progress_edit : true
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -179,8 +185,10 @@ export default class Gantt {
 
     update_view_scale(view_mode) {
         this.options.view_mode = view_mode;
-
-        if (view_mode === 'Day') {
+        if (view_mode === 'Hour') {
+            this.options.step = 24 / 24;
+            this.options.column_width = 38;
+        } else if (view_mode === 'Day') {
             this.options.step = 24;
             this.options.column_width = 38;
         } else if (view_mode === 'Half Day') {
@@ -223,7 +231,7 @@ export default class Gantt {
         this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
 
         // add date padding on both sides
-        if (this.view_is(['Quarter Day', 'Half Day'])) {
+        if (this.view_is(['Hour', 'Quarter Day', 'Half Day'])) {
             this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
             this.gantt_end = date_utils.add(this.gantt_end, 7, 'day');
         } else if (this.view_is('Month')) {
@@ -481,6 +489,11 @@ export default class Gantt {
             last_date = date_utils.add(date, 1, 'year');
         }
         const date_text = {
+            Hour_lower: date_utils.format(
+                date, 
+                'HH', 
+                this.options.language
+            ),
             'Quarter Day_lower': date_utils.format(
                 date,
                 'HH',
@@ -501,6 +514,10 @@ export default class Gantt {
                     : date_utils.format(date, 'D', this.options.language),
             Month_lower: date_utils.format(date, 'MMMM', this.options.language),
             Year_lower: date_utils.format(date, 'YYYY', this.options.language),
+            Hour_upper:
+                date.getDate() !== last_date.getDate()
+                    ? date_utils.format(date, 'D MMM', this.options.language)
+                    : '',
             'Quarter Day_upper':
                 date.getDate() !== last_date.getDate()
                     ? date_utils.format(date, 'D MMM', this.options.language)
@@ -536,10 +553,12 @@ export default class Gantt {
         };
 
         const x_pos = {
-            'Quarter Day_lower': this.options.column_width * 4 / 2,
-            'Quarter Day_upper': 0,
-            'Half Day_lower': this.options.column_width * 2 / 2,
-            'Half Day_upper': 0,
+            Hour_lower: 0,
+            Hour_upper: this.options.column_width * 24 / 2,
+            'Quarter Day_lower': 0,
+            'Quarter Day_upper': this.options.column_width * 4 / 2,
+            'Half Day_lower': 0,
+            'Half Day_upper': this.options.column_width * 2 / 2,
             Day_lower: this.options.column_width / 2,
             Day_upper: this.options.column_width * 30 / 2,
             Week_lower: 0,
@@ -635,6 +654,10 @@ export default class Gantt {
             this.options.popup_trigger,
             '.grid-row, .grid-header',
             () => {
+            	if(this.dependencyBar != null){
+            		this.dependencyBar.group.classList.toggle('addArrow');
+            		this.dependencyBar = null;
+            	}
                 this.unselect_all();
                 this.hide_popup();
             }
@@ -658,18 +681,20 @@ export default class Gantt {
         $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
             const bar_wrapper = $.closest('.bar-wrapper', element);
 
-            if (element.classList.contains('left')) {
+            // SJ make changing and dragging todos optional
+            if (element.classList.contains('left') && this.options.enable_slide_edit) {
                 is_resizing_left = true;
-            } else if (element.classList.contains('right')) {
+            } else if (element.classList.contains('right') && this.options.enable_slide_edit) {
                 is_resizing_right = true;
-            } else if (element.classList.contains('bar-wrapper')) {
+            } else if (element.classList.contains('bar-wrapper') && this.options.enable_drag_edit) {
                 is_dragging = true;
             }
-
+            
             bar_wrapper.classList.add('active');
 
-            x_on_start = e.offsetX;
-            y_on_start = e.offsetY;
+            // SJ use clientX and Y offset doesn't work properly in firefox
+            x_on_start = e.clientX;
+            y_on_start = e.clientY;
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
             const ids = [
@@ -691,8 +716,9 @@ export default class Gantt {
 
         $.on(this.$svg, 'mousemove', e => {
             if (!action_in_progress()) return;
-            const dx = e.offsetX - x_on_start;
-            const dy = e.offsetY - y_on_start;
+            // SJ use clientX and Y offset doesn't work properly in firefox
+            const dx = e.clientX - x_on_start;
+            const dy = e.clientY - y_on_start;
 
             bars.forEach(bar => {
                 const $bar = bar.$bar;
@@ -736,12 +762,17 @@ export default class Gantt {
             bars.forEach(bar => {
                 const $bar = bar.$bar;
                 if (!$bar.finaldx) return;
+                // SJ reset value, otherwise event fires multiple times
+                $bar.finaldx = 0;
                 bar.date_changed();
                 bar.set_action_completed();
             });
         });
-
-        this.bind_bar_progress();
+        
+        // SJ make changing progress optional
+        if(this.options.enable_progress_edit){
+        	this.bind_bar_progress();
+        }
     }
 
     bind_bar_progress() {
@@ -754,8 +785,9 @@ export default class Gantt {
 
         $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
             is_resizing = true;
-            x_on_start = e.offsetX;
-            y_on_start = e.offsetY;
+            // SJ use clientX and Y offset doesn't work properly in firefox
+            x_on_start = e.clientX;
+            y_on_start = e.clientY;
 
             const $bar_wrapper = $.closest('.bar-wrapper', handle);
             const id = $bar_wrapper.getAttribute('data-id');
@@ -772,8 +804,9 @@ export default class Gantt {
 
         $.on(this.$svg, 'mousemove', e => {
             if (!is_resizing) return;
-            let dx = e.offsetX - x_on_start;
-            let dy = e.offsetY - y_on_start;
+            // SJ use clientX and Y offset doesn't work properly in firefox
+            let dx = e.clientX - x_on_start;
+            let dy = e.clientY - y_on_start;
 
             if (dx > $bar_progress.max_dx) {
                 dx = $bar_progress.max_dx;
@@ -791,6 +824,10 @@ export default class Gantt {
         $.on(this.$svg, 'mouseup', () => {
             is_resizing = false;
             if (!($bar_progress && $bar_progress.finaldx)) return;
+            console.log("changed");
+            
+            // SJ reset value, otherwise event fires multiple times
+            $bar_progress.finaldx = 0;
             bar.progress_changed();
             bar.set_action_completed();
         });
@@ -876,13 +913,16 @@ export default class Gantt {
     }
 
     show_popup(options) {
-        if (!this.popup) {
-            this.popup = new Popup(
-                this.popup_wrapper,
-                this.options.custom_popup_html
-            );
-        }
-        this.popup.show(options);
+		if(!this.options.disable_popup){
+            if (!this.popup) {
+                this.popup = new Popup(
+                    this.popup_wrapper,
+                    this.options.custom_popup_html,
+                    this
+                );
+            }
+            this.popup.show(options);
+		}
     }
 
     hide_popup() {
