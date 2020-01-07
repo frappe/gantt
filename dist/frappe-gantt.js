@@ -24,7 +24,7 @@ const month_names = {
         'November',
         'December'
     ],
-    ja: [
+    jp: [
         '1月',
         '2月',
         '3月',
