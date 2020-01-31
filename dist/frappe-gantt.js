@@ -1549,7 +1549,7 @@ class Gantt {
                     : '',
             Week_upper:
                 date.getMonth() !== last_date.getMonth()
-                    ? date_utils.format(date, 'MMMM', this.options.language)
+                    ? date_utils.format(date, `MMMM${(i < 5 || date.getMonth() === 0) ? ' YYYY' : ''}`, this.options.language)
                     : '',
             Month_upper:
                 date.getFullYear() !== last_date.getFullYear()
