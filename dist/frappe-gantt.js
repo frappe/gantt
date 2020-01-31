@@ -24,6 +24,20 @@ const month_names = {
         'November',
         'December'
     ],
+    es: [
+        'Enero',
+        'Febrero',
+        'Marzo',
+        'Abril',
+        'Mayo',
+        'Junio',
+        'Julio',
+        'Agosto',
+        'Septiembre',
+        'Octubre',
+        'Noviembre',
+        'Diciembre'
+    ],
     ru: [
         'Январь',
         'Февраль',
@@ -37,6 +51,48 @@ const month_names = {
         'Октябрь',
         'Ноябрь',
         'Декабрь'
+    ],
+    ptBr: [
+        'Janeiro',
+        'Fevereiro',
+        'Março',
+        'Abril',
+        'Maio',
+        'Junho',
+        'Julho',
+        'Agosto',
+        'Setembro',
+        'Outubro',
+        'Novembro',
+        'Dezembro'
+    ],
+    fr: [
+        'Janvier',
+        'Février',
+        'Mars',
+        'Avril',
+        'Mai',
+        'Juin',
+        'Juillet',
+        'Août',
+        'Septembre',
+        'Octobre',
+        'Novembre',
+        'Décembre'
+    ],
+    tr: [
+        'Ocak',
+        'Şubat',
+        'Mart',
+        'Nisan',
+        'Mayıs',
+        'Haziran',
+        'Temmuz',
+        'Ağustos',
+        'Eylül',
+        'Ekim',
+        'Kasım',
+        'Aralık'
     ]
 };
 
@@ -585,10 +641,11 @@ class Bar {
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
-        const start_date = date_utils.format(this.task._start, 'MMM D');
+        const start_date = date_utils.format(this.task._start, 'MMM D', this.gantt.options.language);
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),
-            'MMM D'
+            'MMM D',
+            this.gantt.options.language
         );
         const subtitle = start_date + ' - ' + end_date;
 
@@ -596,7 +653,7 @@ class Bar {
             target_element: this.$bar,
             title: this.task.name,
             subtitle: subtitle,
-            task: this.task
+            task: this.task,
         });
     }
 
@@ -1170,19 +1227,34 @@ class Gantt {
         this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
         this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
 
+        const padding_start = typeof this.options.padding_start === 'undefined' ? this.default_padding() : this.options.padding_start;
+        const padding_end = typeof this.options.padding_end === 'undefined' ? this.default_padding() : this.options.padding_end;
+
         // add date padding on both sides
-        if (this.view_is(['Quarter Day', 'Half Day'])) {
-            this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
-            this.gantt_end = date_utils.add(this.gantt_end, 7, 'day');
+        if (this.view_is(['Quarter Day', 'Half Day', 'Day'])) {
+            this.gantt_start = date_utils.add(this.gantt_start, -padding_start, 'day');
+            this.gantt_end = date_utils.add(this.gantt_end, padding_end, 'day');
+        } else if (this.view_is('Week')) {
+            this.gantt_start = date_utils.add(this.gantt_start, -(padding_start * 7), 'day');
+            this.gantt_end = date_utils.add(this.gantt_end, (padding_end * 7), 'day');
         } else if (this.view_is('Month')) {
-            this.gantt_start = date_utils.start_of(this.gantt_start, 'year');
-            this.gantt_end = date_utils.add(this.gantt_end, 1, 'year');
+            this.gantt_start = date_utils.add(this.gantt_start, -padding_start, 'month');
+            this.gantt_end = date_utils.add(this.gantt_end, padding_end, 'month');
         } else if (this.view_is('Year')) {
-            this.gantt_start = date_utils.add(this.gantt_start, -2, 'year');
-            this.gantt_end = date_utils.add(this.gantt_end, 2, 'year');
-        } else {
-            this.gantt_start = date_utils.add(this.gantt_start, -1, 'month');
-            this.gantt_end = date_utils.add(this.gantt_end, 1, 'month');
+            this.gantt_start = date_utils.add(this.gantt_start, -padding_start, 'year');
+            this.gantt_end = date_utils.add(this.gantt_end, padding_end, 'year');
+        }
+    }
+
+    default_padding() {
+        if (this.view_is(['Quarter Day', 'Half Day', 'Day'])) {
+            return 7;
+        } else if (this.view_is('Week')) {
+            return 4;
+        } else if (this.view_is('Month')) {
+            return 6;
+        } else if (this.view_is('Year')) {
+            return 2;
         }
     }
 
