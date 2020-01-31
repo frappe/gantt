@@ -1488,15 +1488,27 @@ class Gantt {
 
     get_dates_to_draw() {
         let last_date = null;
+        const monthPerYears = {};
+        
+        if (this.options.view_mode === 'Month') {
+            this.dates.forEach(date => {
+                if (monthPerYears[date.getFullYear()]) {
+                    monthPerYears[date.getFullYear()] += 1;
+                } else {
+                    monthPerYears[date.getFullYear()] = 1;
+                }
+            });
+        }
+
         const dates = this.dates.map((date, i) => {
-            const d = this.get_date_info(date, last_date, i);
+            const d = this.get_date_info(date, last_date, i, monthPerYears);
             last_date = date;
             return d;
         });
         return dates;
     }
 
-    get_date_info(date, last_date, i) {
+    get_date_info(date, last_date, i, monthPerYears) {
         if (!last_date) {
             last_date = date_utils.add(date, 1, 'year');
         }
@@ -1565,7 +1577,7 @@ class Gantt {
             Week_lower: 0,
             Week_upper: this.options.column_width * 4 / 2,
             Month_lower: this.options.column_width / 2,
-            Month_upper: this.options.column_width * 12 / 2,
+            Month_upper: this.options.column_width * (monthPerYears[date.getFullYear()]) / 2,
             Year_lower: this.options.column_width / 2,
             Year_upper: this.options.column_width * 30 / 2
         };
