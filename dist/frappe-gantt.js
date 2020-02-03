@@ -1337,8 +1337,8 @@ class Gantt {
         });
 
         $.attr(this.$svg, {
-            height: grid_height + this.options.padding + 100,
-            width: '100%'
+            height: grid_height,
+            width: grid_width
         });
     }
 
@@ -1633,13 +1633,10 @@ class Gantt {
     }
 
     set_width() {
-        const cur_width = this.$svg.getBoundingClientRect().width;
         const actual_width = this.$svg
             .querySelector('.grid .grid-row')
             .getAttribute('width');
-        if (cur_width < actual_width) {
-            this.$svg.setAttribute('width', actual_width);
-        }
+        this.$svg.setAttribute('width', actual_width);
     }
 
     set_scroll_position() {

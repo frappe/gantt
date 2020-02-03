@@ -222,22 +222,56 @@ export default class Gantt {
         this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
         this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
 
-        const padding_start = typeof this.options.padding_start === 'undefined' ? this.default_padding() : this.options.padding_start
-        const padding_end = typeof this.options.padding_end === 'undefined' ? this.default_padding() : this.options.padding_end
+        const padding_start =
+            typeof this.options.padding_start === 'undefined'
+                ? this.default_padding()
+                : this.options.padding_start;
+        const padding_end =
+            typeof this.options.padding_end === 'undefined'
+                ? this.default_padding()
+                : this.options.padding_end;
 
         // add date padding on both sides
         if (this.view_is(['Quarter Day', 'Half Day', 'Day'])) {
-            this.gantt_start = date_utils.add(this.gantt_start, -padding_start, 'day');
+            this.gantt_start = date_utils.add(
+                this.gantt_start,
+                -padding_start,
+                'day'
+            );
             this.gantt_end = date_utils.add(this.gantt_end, padding_end, 'day');
         } else if (this.view_is('Week')) {
-            this.gantt_start = date_utils.add(this.gantt_start, -(padding_start * 7), 'day');
-            this.gantt_end = date_utils.add(this.gantt_end, (padding_end * 7), 'day');
+            this.gantt_start = date_utils.add(
+                this.gantt_start,
+                -(padding_start * 7),
+                'day'
+            );
+            this.gantt_end = date_utils.add(
+                this.gantt_end,
+                padding_end * 7,
+                'day'
+            );
         } else if (this.view_is('Month')) {
-            this.gantt_start = date_utils.add(this.gantt_start, -padding_start, 'month');
-            this.gantt_end = date_utils.add(this.gantt_end, padding_end, 'month');
+            this.gantt_start = date_utils.add(
+                this.gantt_start,
+                -padding_start,
+                'month'
+            );
+            this.gantt_end = date_utils.add(
+                this.gantt_end,
+                padding_end,
+                'month'
+            );
         } else if (this.view_is('Year')) {
-            this.gantt_start = date_utils.add(this.gantt_start, -padding_start, 'year');
-            this.gantt_end = date_utils.add(this.gantt_end, padding_end, 'year');
+            this.gantt_start = date_utils.add(
+                this.gantt_start,
+                -padding_start,
+                'year'
+            );
+            this.gantt_end = date_utils.add(
+                this.gantt_end,
+                padding_end,
+                'year'
+            );
         }
     }
 
@@ -332,8 +366,8 @@ export default class Gantt {
         });
 
         $.attr(this.$svg, {
-            height: grid_height + this.options.padding + 100,
-            width: '100%'
+            height: grid_height,
+            width: grid_width
         });
     }
 
@@ -483,16 +517,16 @@ export default class Gantt {
 
     get_dates_to_draw() {
         let last_date = null;
-        const monthPerYears = {}
-        
+        const monthPerYears = {};
+
         if (this.options.view_mode === 'Month') {
             this.dates.forEach(date => {
                 if (monthPerYears[date.getFullYear()]) {
-                    monthPerYears[date.getFullYear()] += 1
+                    monthPerYears[date.getFullYear()] += 1;
                 } else {
-                    monthPerYears[date.getFullYear()] = 1
+                    monthPerYears[date.getFullYear()] = 1;
                 }
-            })
+            });
         }
 
         const dates = this.dates.map((date, i) => {
@@ -544,7 +578,13 @@ export default class Gantt {
                     : '',
             Week_upper:
                 date.getMonth() !== last_date.getMonth()
-                    ? date_utils.format(date, `MMMM${(i < 5 || date.getMonth() === 0) ? ' YYYY' : ''}`, this.options.language)
+                    ? date_utils.format(
+                          date,
+                          `MMMM${
+                              i < 5 || date.getMonth() === 0 ? ' YYYY' : ''
+                          }`,
+                          this.options.language
+                      )
                     : '',
             Month_upper:
                 date.getFullYear() !== last_date.getFullYear()
@@ -572,7 +612,10 @@ export default class Gantt {
             Week_lower: 0,
             Week_upper: this.options.column_width * 4 / 2,
             Month_lower: this.options.column_width / 2,
-            Month_upper: this.options.column_width * (monthPerYears[date.getFullYear()]) / 2,
+            Month_upper:
+                this.options.column_width *
+                monthPerYears[date.getFullYear()] /
+                2,
             Year_lower: this.options.column_width / 2,
             Year_upper: this.options.column_width * 30 / 2
         };
@@ -628,13 +671,10 @@ export default class Gantt {
     }
 
     set_width() {
-        const cur_width = this.$svg.getBoundingClientRect().width;
         const actual_width = this.$svg
             .querySelector('.grid .grid-row')
             .getAttribute('width');
-        if (cur_width < actual_width) {
-            this.$svg.setAttribute('width', actual_width);
-        }
+        this.$svg.setAttribute('width', actual_width);
     }
 
     set_scroll_position() {
