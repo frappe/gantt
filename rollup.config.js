@@ -1,6 +1,7 @@
 import sass from 'rollup-plugin-sass';
-import { terser } from 'rollup-plugin-terser';
+import { uglify } from 'rollup-plugin-uglify';
 import merge from 'deepmerge';
+import babel from 'rollup-plugin-babel';
 
 const dev = {
     input: 'src/index.js',
@@ -15,11 +16,14 @@ const dev = {
         })
     ]
 };
+const babelConfig = {
+    exclude: 'node_modules/**'
+};
 const prod = merge(dev, {
     output: {
         file: 'dist/frappe-gantt.min.js'
     },
-    plugins: [terser()]
+    plugins: [babel(), uglify()]
 });
 
 export default [dev, prod];

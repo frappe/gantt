@@ -391,7 +391,10 @@ export default class Gantt {
                 tick_class += ' thick';
             }
             // thick ticks for quarters
-            if (this.view_is(VIEW_MODE.MONTH) && (date.getMonth() + 1) % 3 === 0) {
+            if (
+                this.view_is(VIEW_MODE.MONTH) &&
+                (date.getMonth() + 1) % 3 === 0
+            ) {
                 tick_class += ' thick';
             }
 
@@ -403,8 +406,8 @@ export default class Gantt {
 
             if (this.view_is(VIEW_MODE.MONTH)) {
                 tick_x +=
-                    date_utils.get_days_in_month(date) *
-                    this.options.column_width /
+                    (date_utils.get_days_in_month(date) *
+                        this.options.column_width) /
                     30;
             } else {
                 tick_x += this.options.column_width;
@@ -416,8 +419,8 @@ export default class Gantt {
         // highlight today's date
         if (this.view_is(VIEW_MODE.DAY)) {
             const x =
-                date_utils.diff(date_utils.today(), this.gantt_start, 'hour') /
-                this.options.step *
+                (date_utils.diff(date_utils.today(), this.gantt_start, 'hour') /
+                    this.options.step) *
                 this.options.column_width;
             const y = 0;
 
@@ -510,8 +513,12 @@ export default class Gantt {
             'Half Day_upper':
                 date.getDate() !== last_date.getDate()
                     ? date.getMonth() !== last_date.getMonth()
-                      ? date_utils.format(date, 'D MMM', this.options.language)
-                      : date_utils.format(date, 'D', this.options.language)
+                        ? date_utils.format(
+                              date,
+                              'D MMM',
+                              this.options.language
+                          )
+                        : date_utils.format(date, 'D', this.options.language)
                     : '',
             Day_upper:
                 date.getMonth() !== last_date.getMonth()
@@ -538,18 +545,18 @@ export default class Gantt {
         };
 
         const x_pos = {
-            'Quarter Day_lower': this.options.column_width * 4 / 2,
+            'Quarter Day_lower': (this.options.column_width * 4) / 2,
             'Quarter Day_upper': 0,
-            'Half Day_lower': this.options.column_width * 2 / 2,
+            'Half Day_lower': (this.options.column_width * 2) / 2,
             'Half Day_upper': 0,
             Day_lower: this.options.column_width / 2,
-            Day_upper: this.options.column_width * 30 / 2,
+            Day_upper: (this.options.column_width * 30) / 2,
             Week_lower: 0,
-            Week_upper: this.options.column_width * 4 / 2,
+            Week_upper: (this.options.column_width * 4) / 2,
             Month_lower: this.options.column_width / 2,
-            Month_upper: this.options.column_width * 12 / 2,
+            Month_upper: (this.options.column_width * 12) / 2,
             Year_lower: this.options.column_width / 2,
-            Year_upper: this.options.column_width * 30 / 2
+            Year_upper: (this.options.column_width * 30) / 2
         };
 
         return {
@@ -623,8 +630,7 @@ export default class Gantt {
         );
 
         const scroll_pos =
-            hours_before_first_task /
-                this.options.step *
+            (hours_before_first_task / this.options.step) *
                 this.options.column_width -
             this.options.column_width;
 
@@ -906,9 +912,8 @@ export default class Gantt {
     get_oldest_starting_date() {
         return this.tasks
             .map(task => task._start)
-            .reduce(
-                (prev_date, cur_date) =>
-                    cur_date <= prev_date ? cur_date : prev_date
+            .reduce((prev_date, cur_date) =>
+                cur_date <= prev_date ? cur_date : prev_date
             );
     }
 

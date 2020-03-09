@@ -195,7 +195,11 @@ export default class Bar {
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
-        const start_date = date_utils.format(this.task._start, 'MMM D', this.gantt.options.language);
+        const start_date = date_utils.format(
+            this.task._start,
+            'MMM D',
+            this.gantt.options.language
+        );
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),
             'MMM D',
@@ -207,7 +211,7 @@ export default class Bar {
             target_element: this.$bar,
             title: this.task.name,
             subtitle: subtitle,
-            task: this.task,
+            task: this.task
         });
     }
 
@@ -291,7 +295,7 @@ export default class Bar {
 
     compute_progress() {
         const progress =
-            this.$bar_progress.getWidth() / this.$bar.getWidth() * 100;
+            (this.$bar_progress.getWidth() / this.$bar.getWidth()) * 100;
         return parseInt(progress, 10);
     }
 
@@ -301,11 +305,11 @@ export default class Bar {
         const gantt_start = this.gantt.gantt_start;
 
         const diff = date_utils.diff(task_start, gantt_start, 'hour');
-        let x = diff / step * column_width;
+        let x = (diff / step) * column_width;
 
         if (this.gantt.view_is('Month')) {
             const diff = date_utils.diff(task_start, gantt_start, 'day');
-            x = diff * column_width / 30;
+            x = (diff * column_width) / 30;
         }
         return x;
     }

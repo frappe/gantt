@@ -172,7 +172,7 @@ var Gantt = (function () {
                 HH: values[3],
                 mm: values[4],
                 ss: values[5],
-                SSS:values[6],
+                SSS: values[6],
                 D: values[2],
                 MMMM: month_names[lang][+values[1]],
                 MMM: month_names[lang][+values[1]]
@@ -655,7 +655,11 @@ var Gantt = (function () {
         show_popup() {
             if (this.gantt.bar_being_dragged) return;
 
-            const start_date = date_utils.format(this.task._start, 'MMM D', this.gantt.options.language);
+            const start_date = date_utils.format(
+                this.task._start,
+                'MMM D',
+                this.gantt.options.language
+            );
             const end_date = date_utils.format(
                 date_utils.add(this.task._end, -1, 'second'),
                 'MMM D',
@@ -667,7 +671,7 @@ var Gantt = (function () {
                 target_element: this.$bar,
                 title: this.task.name,
                 subtitle: subtitle,
-                task: this.task,
+                task: this.task
             });
         }
 
@@ -751,7 +755,7 @@ var Gantt = (function () {
 
         compute_progress() {
             const progress =
-                this.$bar_progress.getWidth() / this.$bar.getWidth() * 100;
+                (this.$bar_progress.getWidth() / this.$bar.getWidth()) * 100;
             return parseInt(progress, 10);
         }
 
@@ -761,11 +765,11 @@ var Gantt = (function () {
             const gantt_start = this.gantt.gantt_start;
 
             const diff = date_utils.diff(task_start, gantt_start, 'hour');
-            let x = diff / step * column_width;
+            let x = (diff / step) * column_width;
 
             if (this.gantt.view_is('Month')) {
                 const diff = date_utils.diff(task_start, gantt_start, 'day');
-                x = diff * column_width / 30;
+                x = (diff * column_width) / 30;
             }
             return x;
         }
@@ -1410,7 +1414,10 @@ var Gantt = (function () {
                     tick_class += ' thick';
                 }
                 // thick ticks for quarters
-                if (this.view_is(VIEW_MODE.MONTH) && (date.getMonth() + 1) % 3 === 0) {
+                if (
+                    this.view_is(VIEW_MODE.MONTH) &&
+                    (date.getMonth() + 1) % 3 === 0
+                ) {
                     tick_class += ' thick';
                 }
 
@@ -1422,8 +1429,8 @@ var Gantt = (function () {
 
                 if (this.view_is(VIEW_MODE.MONTH)) {
                     tick_x +=
-                        date_utils.get_days_in_month(date) *
-                        this.options.column_width /
+                        (date_utils.get_days_in_month(date) *
+                            this.options.column_width) /
                         30;
                 } else {
                     tick_x += this.options.column_width;
@@ -1435,8 +1442,8 @@ var Gantt = (function () {
             // highlight today's date
             if (this.view_is(VIEW_MODE.DAY)) {
                 const x =
-                    date_utils.diff(date_utils.today(), this.gantt_start, 'hour') /
-                    this.options.step *
+                    (date_utils.diff(date_utils.today(), this.gantt_start, 'hour') /
+                        this.options.step) *
                     this.options.column_width;
                 const y = 0;
 
@@ -1529,8 +1536,12 @@ var Gantt = (function () {
                 'Half Day_upper':
                     date.getDate() !== last_date.getDate()
                         ? date.getMonth() !== last_date.getMonth()
-                          ? date_utils.format(date, 'D MMM', this.options.language)
-                          : date_utils.format(date, 'D', this.options.language)
+                            ? date_utils.format(
+                                  date,
+                                  'D MMM',
+                                  this.options.language
+                              )
+                            : date_utils.format(date, 'D', this.options.language)
                         : '',
                 Day_upper:
                     date.getMonth() !== last_date.getMonth()
@@ -1557,18 +1568,18 @@ var Gantt = (function () {
             };
 
             const x_pos = {
-                'Quarter Day_lower': this.options.column_width * 4 / 2,
+                'Quarter Day_lower': (this.options.column_width * 4) / 2,
                 'Quarter Day_upper': 0,
-                'Half Day_lower': this.options.column_width * 2 / 2,
+                'Half Day_lower': (this.options.column_width * 2) / 2,
                 'Half Day_upper': 0,
                 Day_lower: this.options.column_width / 2,
-                Day_upper: this.options.column_width * 30 / 2,
+                Day_upper: (this.options.column_width * 30) / 2,
                 Week_lower: 0,
-                Week_upper: this.options.column_width * 4 / 2,
+                Week_upper: (this.options.column_width * 4) / 2,
                 Month_lower: this.options.column_width / 2,
-                Month_upper: this.options.column_width * 12 / 2,
+                Month_upper: (this.options.column_width * 12) / 2,
                 Year_lower: this.options.column_width / 2,
-                Year_upper: this.options.column_width * 30 / 2
+                Year_upper: (this.options.column_width * 30) / 2
             };
 
             return {
@@ -1642,8 +1653,7 @@ var Gantt = (function () {
             );
 
             const scroll_pos =
-                hours_before_first_task /
-                    this.options.step *
+                (hours_before_first_task / this.options.step) *
                     this.options.column_width -
                 this.options.column_width;
 
@@ -1925,9 +1935,8 @@ var Gantt = (function () {
         get_oldest_starting_date() {
             return this.tasks
                 .map(task => task._start)
-                .reduce(
-                    (prev_date, cur_date) =>
-                        cur_date <= prev_date ? cur_date : prev_date
+                .reduce((prev_date, cur_date) =>
+                    cur_date <= prev_date ? cur_date : prev_date
                 );
         }
 
