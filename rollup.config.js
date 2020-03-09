@@ -16,9 +16,6 @@ const dev = {
         })
     ]
 };
-const babelConfig = {
-    exclude: 'node_modules/**'
-};
 const prod = merge(dev, {
     output: {
         file: 'dist/frappe-gantt.min.js'
