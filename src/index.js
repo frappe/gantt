@@ -6,6 +6,10 @@ import Popup from './popup';
 
 import './gantt.scss';
 
+/**
+ * Enum for view modes.
+ * @enum {string}
+ */
 const VIEW_MODE = {
     QUARTER_DAY: 'Quarter Day',
     HALF_DAY: 'Half Day',
@@ -16,6 +20,12 @@ const VIEW_MODE = {
 };
 
 export default class Gantt {
+    /**
+     * Instantiates a new Gantt object.
+     * @param {string|HTMLElement|SVGElement} wrapper Element or selector where the Gantt will be in.
+     * @param {FrappeGanttTask[]} tasks The tasks inside the Gantt.
+     * @param {FrappeGanttOptions} options Options to initialize.
+     */
     constructor(wrapper, tasks, options) {
         this.setup_wrapper(wrapper);
         this.setup_options(options);
@@ -25,6 +35,10 @@ export default class Gantt {
         this.bind_events();
     }
 
+    /**
+     * Sets up the wrapper.
+     * @param {string|HTMLElement|SVGElement} element Element or selector.
+     */
     setup_wrapper(element) {
         let svg_element, wrapper_element;
 
@@ -72,7 +86,14 @@ export default class Gantt {
         this.$container.appendChild(this.popup_wrapper);
     }
 
+    /**
+     * Sets up the options.
+     * @param {FrappeGanttOptions} options
+     */
     setup_options(options) {
+        /**
+         * @type {FrappeGanttOptions}
+         */
         const default_options = {
             header_height: 50,
             column_width: 30,
@@ -88,9 +109,15 @@ export default class Gantt {
             custom_popup_html: null,
             language: 'en'
         };
+
+        /** @type {FrappeGanttOptions} */
         this.options = Object.assign({}, default_options, options);
     }
 
+    /**
+     * Sets up the tasks.
+     * @param {FrappeGanttTask[]} tasks
+     */
     setup_tasks(tasks) {
         // prepare tasks
         this.tasks = tasks.map((task, i) => {
@@ -156,6 +183,9 @@ export default class Gantt {
         this.setup_dependencies();
     }
 
+    /**
+     * Sets up dependencies.
+     */
     setup_dependencies() {
         this.dependency_map = {};
         for (let t of this.tasks) {
@@ -166,11 +196,19 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Refresh the tasks.
+     * @param {FrappeGanttTask[]} tasks Tasks to be cofigured.
+     */
     refresh(tasks) {
         this.setup_tasks(tasks);
         this.change_view_mode();
     }
 
+    /**
+     * Change the view mode.
+     * @param {VIEW_MODE} [mode]
+     */
     change_view_mode(mode = this.options.view_mode) {
         this.update_view_scale(mode);
         this.setup_dates();
@@ -179,6 +217,10 @@ export default class Gantt {
         this.trigger_event('view_change', [mode]);
     }
 
+    /**
+     * Updates the view scale according to a view mode.
+     * @param {VIEW_MODE} view_mode
+     */
     update_view_scale(view_mode) {
         this.options.view_mode = view_mode;
 
@@ -203,11 +245,17 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Sets up the dates.
+     */
     setup_dates() {
         this.setup_gantt_dates();
         this.setup_date_values();
     }
 
+    /**
+     * Sets up the Gantt dates.
+     */
     setup_gantt_dates() {
         this.gantt_start = this.gantt_end = null;
 
@@ -240,6 +288,9 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Sets up the date values.
+     */
     setup_date_values() {
         this.dates = [];
         let cur_date = null;
@@ -264,11 +315,17 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Binds the events.
+     */
     bind_events() {
         this.bind_grid_click();
         this.bind_bar_events();
     }
 
+    /**
+     * Renders the Gantt chart.
+     */
     render() {
         this.clear();
         this.setup_layers();
@@ -281,6 +338,9 @@ export default class Gantt {
         this.set_scroll_position();
     }
 
+    /**
+     * Sets up the chart layers.
+     */
     setup_layers() {
         this.layers = {};
         const layers = ['grid', 'date', 'arrow', 'progress', 'bar', 'details'];
@@ -293,6 +353,9 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Makes the grid.
+     */
     make_grid() {
         this.make_grid_background();
         this.make_grid_rows();
@@ -301,6 +364,9 @@ export default class Gantt {
         this.make_grid_highlights();
     }
 
+    /**
+     * Makes the grid background.
+     */
     make_grid_background() {
         const grid_width = this.dates.length * this.options.column_width;
         const grid_height =
@@ -324,6 +390,9 @@ export default class Gantt {
         });
     }
 
+    /**
+     * Makes the grid rows.
+     */
     make_grid_rows() {
         const rows_layer = createSVG('g', { append_to: this.layers.grid });
         const lines_layer = createSVG('g', { append_to: this.layers.grid });
@@ -356,6 +425,9 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Makes the grid header.
+     */
     make_grid_header() {
         const header_width = this.dates.length * this.options.column_width;
         const header_height = this.options.header_height + 10;
@@ -369,6 +441,9 @@ export default class Gantt {
         });
     }
 
+    /**
+     * Makes the grid ticks.
+     */
     make_grid_ticks() {
         let tick_x = 0;
         let tick_y = this.options.header_height + this.options.padding / 2;
@@ -415,6 +490,9 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Makes the grid highlights.
+     */
     make_grid_highlights() {
         // highlight today's date
         if (this.view_is(VIEW_MODE.DAY)) {
@@ -442,6 +520,9 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Makes the dates.
+     */
     make_dates() {
         for (let date of this.get_dates_to_draw()) {
             createSVG('text', {
@@ -471,6 +552,9 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Gets the date info of each date.
+     */
     get_dates_to_draw() {
         let last_date = null;
         const dates = this.dates.map((date, i) => {
@@ -481,6 +565,12 @@ export default class Gantt {
         return dates;
     }
 
+    /**
+     * Gets the date info.
+     * @param {Date} date
+     * @param {Date} [last_date]
+     * @param {number} i
+     */
     get_date_info(date, last_date, i) {
         if (!last_date) {
             last_date = date_utils.add(date, 1, 'year');
@@ -569,6 +659,9 @@ export default class Gantt {
         };
     }
 
+    /**
+     * Makes the bars.
+     */
     make_bars() {
         this.bars = this.tasks.map(task => {
             const bar = new Bar(this, task);
@@ -577,6 +670,9 @@ export default class Gantt {
         });
     }
 
+    /**
+     * Makes the arrows.
+     */
     make_arrows() {
         this.arrows = [];
         for (let task of this.tasks) {
@@ -598,6 +694,9 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Gets the arrows from the bars.
+     */
     map_arrows_on_bars() {
         for (let bar of this.bars) {
             bar.arrows = this.arrows.filter(arrow => {
@@ -609,6 +708,9 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Sets the width.
+     */
     set_width() {
         const cur_width = this.$svg.getBoundingClientRect().width;
         const actual_width = this.$svg
@@ -619,6 +721,9 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Sets the scroll position.
+     */
     set_scroll_position() {
         const parent_element = this.$svg.parentElement;
         if (!parent_element) return;
@@ -637,6 +742,9 @@ export default class Gantt {
         parent_element.scrollLeft = scroll_pos;
     }
 
+    /**
+     * Binds the grid click.
+     */
     bind_grid_click() {
         $.on(
             this.$svg,
@@ -649,6 +757,9 @@ export default class Gantt {
         );
     }
 
+    /**
+     * Binds the bar events.
+     */
     bind_bar_events() {
         let is_dragging = false;
         let x_on_start = 0;
@@ -752,6 +863,9 @@ export default class Gantt {
         this.bind_bar_progress();
     }
 
+    /**
+     * Binds the progress bar.
+     */
     bind_bar_progress() {
         let x_on_start = 0;
         let y_on_start = 0;
@@ -804,6 +918,10 @@ export default class Gantt {
         });
     }
 
+    /**
+     * Gets the tasks which depends on the one referenced by task_id.
+     * @param {string} task_id
+     */
     get_all_dependent_tasks(task_id) {
         let out = [];
         let to_process = [task_id];
@@ -820,6 +938,10 @@ export default class Gantt {
         return out.filter(Boolean);
     }
 
+    /**
+     * Gets the snap position.
+     * @param {number} dx
+     */
     get_snap_position(dx) {
         let odx = dx,
             rem,
@@ -853,12 +975,19 @@ export default class Gantt {
         return position;
     }
 
+    /**
+     * Unselects all.
+     */
     unselect_all() {
         [...this.$svg.querySelectorAll('.bar-wrapper')].forEach(el => {
             el.classList.remove('active');
         });
     }
 
+    /**
+     * Checks if the current view mode is the one(s) passed by parameter.
+     * @param {VIEW_MODE|VIEW_MODE[]} modes
+     */
     view_is(modes) {
         if (typeof modes === 'string') {
             return this.options.view_mode === modes;
@@ -871,18 +1000,30 @@ export default class Gantt {
         return false;
     }
 
+    /**
+     * Gets a task b y its ID.
+     * @param {string} id
+     */
     get_task(id) {
         return this.tasks.find(task => {
             return task.id === id;
         });
     }
 
+    /**
+     * Gets a bar by its ID.
+     * @param {string} id
+     */
     get_bar(id) {
         return this.bars.find(bar => {
             return bar.task.id === id;
         });
     }
 
+    /**
+     * Shows the popup.
+     * @param {FrappeGanttOptions} options
+     */
     show_popup(options) {
         if (!this.popup) {
             this.popup = new Popup(
@@ -893,10 +1034,18 @@ export default class Gantt {
         this.popup.show(options);
     }
 
+    /**
+     * Hides the popup.
+     */
     hide_popup() {
         this.popup && this.popup.hide();
     }
 
+    /**
+     * Triggers an event.
+     * @param {string} event
+     * @param {*} args
+     */
     trigger_event(event, args) {
         if (this.options['on_' + event]) {
             this.options['on_' + event].apply(null, args);
@@ -906,7 +1055,7 @@ export default class Gantt {
     /**
      * Gets the oldest starting date from the list of tasks
      *
-     * @returns Date
+     * @returns {Date}
      * @memberof Gantt
      */
     get_oldest_starting_date() {
@@ -929,6 +1078,10 @@ export default class Gantt {
 
 Gantt.VIEW_MODE = VIEW_MODE;
 
+/**
+ * Generates an ID for the task.
+ * @param {FrappeGanttTask} task
+ */
 function generate_id(task) {
     return (
         task.name +
@@ -938,3 +1091,51 @@ function generate_id(task) {
             .slice(2, 12)
     );
 }
+
+/**
+ * A task to be used in the Gantt.
+ * @typedef {object} FrappeGanttTask
+ * @property {string} id
+ * @property {string} name
+ * @property {Date} start
+ * @property {Date} end
+ * @property {number} progress
+ * @property {boolean} invalid
+ * @property {string} dependencies Comma separated dependencies.
+ */
+
+/**
+ * Options object to be passed into the Gantt initializer.
+ * @typedef {object} FrappeGanttOptions
+ * @property {number} header_height
+ * @property {number} column_width
+ * @property {number} step
+ * @property {VIEW_MODE[]} view_modes
+ * @property {number} bar_height
+ * @property {number} bar_corner_radius
+ * @property {number} arrow_curve
+ * @property {number} padding
+ * @property {VIEW_MODE} view_mode
+ * @property {string} date_format
+ * @property {string} popup_trigger
+ * @property {string} custom_popup_html
+ * @property {string} language
+ */
+
+/**
+ * @typedef FrappeGanttDateInfo
+ * @property {string} upper_text
+ * @property {string} lower_text
+ * @property {number} upper_x
+ * @property {number} upper_y
+ * @property {number} lower_x
+ * @property {number} lower_y
+ */
+/*
+            upper_text: date_text[`${this.options.view_mode}_upper`],
+            lower_text: date_text[`${this.options.view_mode}_lower`],
+            upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
+            upper_y: base_pos.upper_y,
+            lower_x: base_pos.x + x_pos[`${this.options.view_mode}_lower`],
+            lower_y: base_pos.lower_y
+*/

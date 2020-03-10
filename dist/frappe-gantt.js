@@ -111,6 +111,12 @@ var Gantt = (function () {
     };
 
     var date_utils = {
+        /**
+         * 
+         * @param {Date} date 
+         * @param {string} [date_separator]
+         * @param {RegExp} [time_separator]
+         */
         parse(date, date_separator = '-', time_separator = /[.:]/) {
             if (date instanceof Date) {
                 return date;
@@ -141,6 +147,11 @@ var Gantt = (function () {
             }
         },
 
+        /**
+         * 
+         * @param {Date} date 
+         * @param {boolean} [with_time=false]
+         */
         to_string(date, with_time = false) {
             if (!(date instanceof Date)) {
                 throw new TypeError('Invalid argument type');
@@ -163,6 +174,12 @@ var Gantt = (function () {
             return date_string + (with_time ? ' ' + time_string : '');
         },
 
+        /**
+         * 
+         * @param {Date} date 
+         * @param {string} format_string 
+         * @param {string} lang 
+         */
         format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
             const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
             const format_map = {
@@ -197,6 +214,12 @@ var Gantt = (function () {
             return str;
         },
 
+        /**
+         * 
+         * @param {Date} date_a 
+         * @param {Date} date_b 
+         * @param {string} scale 
+         */
         diff(date_a, date_b, scale = DAY) {
             let milliseconds, seconds, hours, minutes, days, months, years;
 
@@ -234,6 +257,12 @@ var Gantt = (function () {
             return new Date();
         },
 
+        /**
+         * 
+         * @param {Date} date 
+         * @param {number} qty 
+         * @param {string} scale 
+         */
         add(date, qty, scale) {
             qty = parseInt(qty, 10);
             const vals = [
@@ -248,6 +277,11 @@ var Gantt = (function () {
             return new Date(...vals);
         },
 
+        /**
+         * 
+         * @param {Date} date 
+         * @param {string} scale 
+         */
         start_of(date, scale) {
             const scores = {
                 [YEAR]: 6,
@@ -277,10 +311,19 @@ var Gantt = (function () {
             return new Date(...vals);
         },
 
+        /**
+         * 
+         * @param {Date} date 
+         */
         clone(date) {
             return new Date(...this.get_date_values(date));
         },
 
+        /**
+         * 
+         * @param {Date} date 
+         * @returns {number[]} Year, month, day, hour, minute, second.
+         */
         get_date_values(date) {
             return [
                 date.getFullYear(),
@@ -293,6 +336,10 @@ var Gantt = (function () {
             ];
         },
 
+        /**
+         * 
+         * @param {Date} date 
+         */
         get_days_in_month(date) {
             const no_of_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -312,6 +359,12 @@ var Gantt = (function () {
     };
 
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
+    /**
+     * 
+     * @param {string} str 
+     * @param {number} targetLength 
+     * @param {string} padString 
+     */
     function padStart(str, targetLength, padString) {
         str = str + '';
         targetLength = targetLength >> 0;
@@ -1029,6 +1082,10 @@ var Gantt = (function () {
         }
     }
 
+    /**
+     * Enum for view modes.
+     * @enum {string}
+     */
     const VIEW_MODE = {
         QUARTER_DAY: 'Quarter Day',
         HALF_DAY: 'Half Day',
@@ -1039,6 +1096,12 @@ var Gantt = (function () {
     };
 
     class Gantt {
+        /**
+         * 
+         * @param {string|HTMLElement|SVGElement} wrapper 
+         * @param {FrappeGanttTask[]} tasks 
+         * @param {FrappeGanttOptions} options 
+         */
         constructor(wrapper, tasks, options) {
             this.setup_wrapper(wrapper);
             this.setup_options(options);
@@ -1048,6 +1111,10 @@ var Gantt = (function () {
             this.bind_events();
         }
 
+        /**
+         * Sets up the wrapper.
+         * @param {string|HTMLElement|SVGElement} element Element or selector.
+         */
         setup_wrapper(element) {
             let svg_element, wrapper_element;
 
@@ -1095,7 +1162,14 @@ var Gantt = (function () {
             this.$container.appendChild(this.popup_wrapper);
         }
 
+        /**
+         * Sets up the options.
+         * @param {FrappeGanttOptions} options 
+         */
         setup_options(options) {
+            /**
+             * @type {FrappeGanttOptions}
+             */
             const default_options = {
                 header_height: 50,
                 column_width: 30,
@@ -1111,9 +1185,15 @@ var Gantt = (function () {
                 custom_popup_html: null,
                 language: 'en'
             };
+
+            /** @type {FrappeGanttOptions} */
             this.options = Object.assign({}, default_options, options);
         }
 
+        /**
+         * Sets up the tasks.
+         * @param {FrappeGanttTask[]} tasks 
+         */
         setup_tasks(tasks) {
             // prepare tasks
             this.tasks = tasks.map((task, i) => {
@@ -1189,11 +1269,19 @@ var Gantt = (function () {
             }
         }
 
+        /**
+         * 
+         * @param {FrappeGanttTask[]} tasks 
+         */
         refresh(tasks) {
             this.setup_tasks(tasks);
             this.change_view_mode();
         }
 
+        /**
+         * 
+         * @param {VIEW_MODE} [mode]
+         */
         change_view_mode(mode = this.options.view_mode) {
             this.update_view_scale(mode);
             this.setup_dates();
@@ -1202,6 +1290,10 @@ var Gantt = (function () {
             this.trigger_event('view_change', [mode]);
         }
 
+        /**
+         * 
+         * @param {VIEW_MODE} view_mode 
+         */
         update_view_scale(view_mode) {
             this.options.view_mode = view_mode;
 
@@ -1504,6 +1596,12 @@ var Gantt = (function () {
             return dates;
         }
 
+        /**
+         * 
+         * @param {Date} date 
+         * @param {Date} last_date 
+         * @param {number} i 
+         */
         get_date_info(date, last_date, i) {
             if (!last_date) {
                 last_date = date_utils.add(date, 1, 'year');
@@ -1827,6 +1925,10 @@ var Gantt = (function () {
             });
         }
 
+        /**
+         * 
+         * @param {string} task_id 
+         */
         get_all_dependent_tasks(task_id) {
             let out = [];
             let to_process = [task_id];
@@ -1843,6 +1945,10 @@ var Gantt = (function () {
             return out.filter(Boolean);
         }
 
+        /**
+         * 
+         * @param {number} dx 
+         */
         get_snap_position(dx) {
             let odx = dx,
                 rem,
@@ -1882,6 +1988,10 @@ var Gantt = (function () {
             });
         }
 
+        /**
+         * 
+         * @param {VIEW_MODE|VIEW_MODE[]} modes 
+         */
         view_is(modes) {
             if (typeof modes === 'string') {
                 return this.options.view_mode === modes;
@@ -1894,18 +2004,30 @@ var Gantt = (function () {
             return false;
         }
 
+        /**
+         * 
+         * @param {string} id 
+         */
         get_task(id) {
             return this.tasks.find(task => {
                 return task.id === id;
             });
         }
 
+        /**
+         * 
+         * @param {string} id 
+         */
         get_bar(id) {
             return this.bars.find(bar => {
                 return bar.task.id === id;
             });
         }
 
+        /**
+         * 
+         * @param {FrappeGanttOptions} options 
+         */
         show_popup(options) {
             if (!this.popup) {
                 this.popup = new Popup(
@@ -1920,6 +2042,11 @@ var Gantt = (function () {
             this.popup && this.popup.hide();
         }
 
+        /**
+         * 
+         * @param {string} event 
+         * @param {*} args 
+         */
         trigger_event(event, args) {
             if (this.options['on_' + event]) {
                 this.options['on_' + event].apply(null, args);
@@ -1929,7 +2056,7 @@ var Gantt = (function () {
         /**
          * Gets the oldest starting date from the list of tasks
          *
-         * @returns Date
+         * @returns {Date}
          * @memberof Gantt
          */
         get_oldest_starting_date() {
@@ -1952,6 +2079,10 @@ var Gantt = (function () {
 
     Gantt.VIEW_MODE = VIEW_MODE;
 
+    /**
+     * 
+     * @param {FrappeGanttTask} task 
+     */
     function generate_id(task) {
         return (
             task.name +
@@ -1961,6 +2092,37 @@ var Gantt = (function () {
                 .slice(2, 12)
         );
     }
+
+
+    /**
+     * A task to be used in the Gantt.
+     * @typedef {object} FrappeGanttTask
+     * @property {string} id
+     * @property {string} name
+     * @property {Date} start
+     * @property {Date} end
+     * @property {number} progress
+     * @property {boolean} invalid
+     * @property {string} dependencies Comma separated dependencies.
+     */
+
+    /**
+     * Options object to be passed into the Gantt initializer.
+     * @typedef {object} FrappeGanttOptions
+     * @property {number} header_height
+     * @property {number} column_width
+     * @property {number} step
+     * @property {VIEW_MODE[]} view_modes
+     * @property {number} bar_height
+     * @property {number} bar_corner_radius
+     * @property {number} arrow_curve
+     * @property {number} padding
+     * @property {VIEW_MODE} view_mode
+     * @property {string} date_format
+     * @property {string} popup_trigger
+     * @property {string} custom_popup_html
+     * @property {string} language
+     */
 
     return Gantt;
 

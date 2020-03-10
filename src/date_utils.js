@@ -108,6 +108,12 @@ const month_names = {
 };
 
 export default {
+    /**
+     *
+     * @param {Date} date
+     * @param {string} [date_separator]
+     * @param {RegExp} [time_separator]
+     */
     parse(date, date_separator = '-', time_separator = /[.:]/) {
         if (date instanceof Date) {
             return date;
@@ -138,6 +144,11 @@ export default {
         }
     },
 
+    /**
+     *
+     * @param {Date} date
+     * @param {boolean} [with_time=false]
+     */
     to_string(date, with_time = false) {
         if (!(date instanceof Date)) {
             throw new TypeError('Invalid argument type');
@@ -160,6 +171,12 @@ export default {
         return date_string + (with_time ? ' ' + time_string : '');
     },
 
+    /**
+     *
+     * @param {Date} date
+     * @param {string} format_string
+     * @param {string} lang
+     */
     format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
         const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
         const format_map = {
@@ -194,6 +211,12 @@ export default {
         return str;
     },
 
+    /**
+     *
+     * @param {Date} date_a
+     * @param {Date} date_b
+     * @param {string} scale
+     */
     diff(date_a, date_b, scale = DAY) {
         let milliseconds, seconds, hours, minutes, days, months, years;
 
@@ -231,6 +254,12 @@ export default {
         return new Date();
     },
 
+    /**
+     *
+     * @param {Date} date
+     * @param {number} qty
+     * @param {string} scale
+     */
     add(date, qty, scale) {
         qty = parseInt(qty, 10);
         const vals = [
@@ -245,6 +274,11 @@ export default {
         return new Date(...vals);
     },
 
+    /**
+     *
+     * @param {Date} date
+     * @param {string} scale
+     */
     start_of(date, scale) {
         const scores = {
             [YEAR]: 6,
@@ -274,10 +308,19 @@ export default {
         return new Date(...vals);
     },
 
+    /**
+     *
+     * @param {Date} date
+     */
     clone(date) {
         return new Date(...this.get_date_values(date));
     },
 
+    /**
+     *
+     * @param {Date} date
+     * @returns {number[]} Year, month, day, hour, minute, second.
+     */
     get_date_values(date) {
         return [
             date.getFullYear(),
@@ -290,6 +333,10 @@ export default {
         ];
     },
 
+    /**
+     *
+     * @param {Date} date
+     */
     get_days_in_month(date) {
         const no_of_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -309,6 +356,12 @@ export default {
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
+/**
+ *
+ * @param {string} str
+ * @param {number} targetLength
+ * @param {string} padString
+ */
 function padStart(str, targetLength, padString) {
     str = str + '';
     targetLength = targetLength >> 0;
