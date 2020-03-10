@@ -122,5 +122,3 @@ test('format', () => {
     const date = date_utils.parse('2016-02-29 16:08:34.3');
     expect(date_utils.format(date)).toBe('2016-02-29 16:08:34.300');
 });
-
-
