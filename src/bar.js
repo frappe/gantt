@@ -127,7 +127,7 @@ export default class Bar {
         const handle_width = 8;
         
         //  make changing todos optional
-        if(this.gantt.options.enable_slide_edit){
+        if(this.gantt.options.allow_resizing){
         	createSVG('rect', {
         		x: bar.getX() + bar.getWidth() - 9,
         		y: bar.getY() + 1,
@@ -152,7 +152,7 @@ export default class Bar {
         }
         
         //  make changing progress optional
-        if ((this.task.progress && this.task.progress < 100) && this.gantt.options.enable_progress_edit) {
+        if ((this.task.progress && this.task.progress < 100) && this.gantt.options.allow_progress_editing) {
         	this.$handle_progress = createSVG('polygon', {
         		points: this.get_progress_polygon_points().join(','),
         		class: 'handle progress',

@@ -85,9 +85,9 @@ export default class Gantt {
             popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
-            enable_drag_edit : true,
-        	enable_slide_edit : true,
-        	enable_progress_edit : true,
+            allow_dragging : true,
+            allow_resizing : true,
+            allow_progress_editing : true,
         	allow_dependency_editing : true
         };
         this.options = Object.assign({}, default_options, options);
@@ -667,11 +667,11 @@ export default class Gantt {
             const bar_wrapper = $.closest('.bar-wrapper', element);
 
             // SJ make changing and dragging todos optional
-            if (element.classList.contains('left') && this.options.enable_slide_edit) {
+            if (element.classList.contains('left') && this.options.allow_resizing) {
                 is_resizing_left = true;
-            } else if (element.classList.contains('right') && this.options.enable_slide_edit) {
+            } else if (element.classList.contains('right') && this.options.allow_resizing) {
                 is_resizing_right = true;
-            } else if (element.classList.contains('bar-wrapper') && this.options.enable_drag_edit) {
+            } else if (element.classList.contains('bar-wrapper') && this.options.allow_dragging) {
                 is_dragging = true;
             }
             
@@ -755,7 +755,7 @@ export default class Gantt {
         });
         
         // SJ make changing progress optional
-        if(this.options.enable_progress_edit){
+        if(this.options.allow_progress_editing){
         	this.bind_bar_progress();
         }
     }

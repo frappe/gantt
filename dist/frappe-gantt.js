@@ -542,7 +542,7 @@ class Bar {
         const handle_width = 8;
         
         //  make changing todos optional
-        if(this.gantt.options.enable_slide_edit){
+        if(this.gantt.options.allow_resizing){
         	createSVG('rect', {
         		x: bar.getX() + bar.getWidth() - 9,
         		y: bar.getY() + 1,
@@ -567,7 +567,7 @@ class Bar {
         }
         
         //  make changing progress optional
-        if ((this.task.progress && this.task.progress < 100) && this.gantt.options.enable_progress_edit) {
+        if ((this.task.progress && this.task.progress < 100) && this.gantt.options.allow_progress_editing) {
         	this.$handle_progress = createSVG('polygon', {
         		points: this.get_progress_polygon_points().join(','),
         		class: 'handle progress',
@@ -1158,9 +1158,9 @@ class Gantt {
             popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
-            enable_drag_edit : true,
-        	enable_slide_edit : true,
-        	enable_progress_edit : true,
+            allow_dragging : true,
+            allow_resizing : true,
+            allow_progress_editing : true,
         	allow_dependency_editing : true
         };
         this.options = Object.assign({}, default_options, options);
@@ -1740,11 +1740,11 @@ class Gantt {
             const bar_wrapper = $.closest('.bar-wrapper', element);
 
             //  make changing and dragging todos optional
-            if (element.classList.contains('left') && this.options.enable_slide_edit) {
+            if (element.classList.contains('left') && this.options.allow_resizing) {
                 is_resizing_left = true;
-            } else if (element.classList.contains('right') && this.options.enable_slide_edit) {
+            } else if (element.classList.contains('right') && this.options.allow_resizing) {
                 is_resizing_right = true;
-            } else if (element.classList.contains('bar-wrapper') && this.options.enable_drag_edit) {
+            } else if (element.classList.contains('bar-wrapper') && this.options.allow_dragging) {
                 is_dragging = true;
             }
             
@@ -1828,7 +1828,7 @@ class Gantt {
         });
         
         //  make changing progress optional
-        if(this.options.enable_progress_edit){
+        if(this.options.allow_progress_editing){
         	this.bind_bar_progress();
         }
     }
