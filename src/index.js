@@ -640,7 +640,7 @@ export default class Gantt {
             '.grid-row, .grid-header',
             () => {
             	if(this.dependency_bar != null){
-            		this.dependency_bar.group.classList.toggle('addArrow');
+            		this.dependency_bar.group.classList.toggle('selected-for-dependency');
             		this.dependency_bar = null;
             	}
                 this.unselect_all();

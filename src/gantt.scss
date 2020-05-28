@@ -110,7 +110,7 @@ $handle-color: #ddd !default;
 			}
 		}
 		
-		&.addArrow{
+		&.selected-for-dependency{
 			.bar{
 				stroke-width: 4px;
 			}

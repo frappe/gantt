@@ -85,7 +85,7 @@
   visibility: visible;
   opacity: 1;
 }
-.gantt .bar-wrapper.addArrow .bar {
+.gantt .bar-wrapper.selected-for-dependency .bar {
   stroke-width: 4px;
 }
 .gantt .bar-wrapper.active .bar {

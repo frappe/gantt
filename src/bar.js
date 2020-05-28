@@ -204,27 +204,28 @@ export default class Bar {
 
     add_dependency(){
 		// already marked a dependency
-		var markedTask = this.gantt.dependency_bar.task;
-		if(markedTask == null)
+		var selected_bar = this.gantt.dependency_bar.task;
+		if(selected_bar === null){
 			return;
+		}
 		
 		var changedTask;
 		
 		// check if tasks are already connected
-		if(!this.task.dependencies.includes(markedTask.id) && !markedTask.dependencies.includes(this.task.id) && this.task !== markedTask){
+		if(!this.task.dependencies.includes(selected_bar.id) && !selected_bar.dependencies.includes(this.task.id) && this.task !== selected_bar){
 			// same start date no dependency
-			if(this.task._start.getTime() === markedTask._start.getTime()){
+			if(this.task._start.getTime() === selected_bar._start.getTime()){
 	    		this.release_marked_bar();
 				return;
 			}
 			
 			// check which task starts later
-			if(this.task._start.getTime() > markedTask._start.getTime()){
+			if(this.task._start.getTime() > selected_bar._start.getTime()){
 				changedTask = this.task;
-				this.task.dependencies.push(markedTask.id);
+				this.task.dependencies.push(selected_bar.id);
 			}else{
-				changedTask = markedTask;
-				markedTask.dependencies.push(this.task.id);
+				changedTask = selected_bar;
+				selected_bar.dependencies.push(this.task.id);
 			}
 		
 			// fire dependencyAdded event
@@ -238,8 +239,13 @@ export default class Bar {
     }
 
     release_marked_bar(){
+    	
+    	if(this.gantt.dependency_bar === null){
+    		return;
+    	}
+    	
     	// remove class
-    	this.gantt.dependency_bar.group.classList.toggle('addArrow');
+    	this.gantt.dependency_bar.group.classList.toggle('selected-for-dependency');
     	// empty gantt variable
     	this.gantt.dependency_bar = null;
     }

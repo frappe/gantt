@@ -50,7 +50,7 @@ export default class Popup {
                 var popup = this;
                 this.action.onclick = function() {
                 	var bar = popup.gantt.get_bar(options.task.id);
-                	bar.group.classList.toggle('addArrow');
+                	bar.group.classList.toggle('selected-for-dependency');
             		
                 	popup.gantt.dependency_bar = bar;
                 	popup.hide();
