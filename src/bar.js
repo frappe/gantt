@@ -228,7 +228,7 @@ export default class Bar {
 			}
 		
 			// fire dependencyAdded event
-			this.gantt.trigger_event('dependency_added', [changedTask]);
+			this.gantt.trigger_event('dependency_add', [changedTask]);
 	      	// recalculate dependency tree
 			this.gantt.setup_dependencies();
 			// redraw gantt
