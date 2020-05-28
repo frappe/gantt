@@ -1,8 +1,8 @@
-import { createSVG } from './svg_utils';
+import { $, createSVG } from './svg_utils';
 
 export default class Arrow {
     constructor(gantt, from_task, to_task) {
-    	this.gantt = gantt;
+        this.gantt = gantt;
         this.from_task = from_task;
         this.to_task = to_task;
 
@@ -10,7 +10,7 @@ export default class Arrow {
         this.draw();
         //  add event handling for Arrows
         if(this.gantt.options.allow_dependency_editing)
-        	this.setup_eventListener();
+            this.setup_dependency_editing();
     }
     
     calculate_path() {
@@ -98,21 +98,21 @@ export default class Arrow {
     }
     
     //  add event handling for Arrows
-    setup_eventListener(){
+    setup_dependency_editing(){
         $.on(this.element, 'click', e => {
-        	//  remove Arrow element, and delete dependency from task
-        	var index = this.to_task.task.dependencies.indexOf(this.from_task.task.id);
-        	this.to_task.task.dependencies.splice(index, 1);
-        	this.element.remove();
-        	this.gantt.setup_dependencies();
-			// fire dependencyAdded event
-			this.gantt.trigger_event('dependency_remove', [this.to_task.task]);
-		});
+            //  remove Arrow element, and delete dependency from task
+            var index = this.to_task.task.dependencies.indexOf(this.from_task.task.id);
+            this.to_task.task.dependencies.splice(index, 1);
+            this.element.remove();
+            this.gantt.setup_dependencies();
+            // fire dependencyAdded event
+            this.gantt.trigger_event('dependency_remove', [this.to_task.task]);
+        });
         $.on(this.element, 'mouseenter', e => {
-        	this.element.classList.add('hover');
-		});
+            this.element.classList.add('hover');
+        });
         $.on(this.element, 'mouseleave', e => {
-			this.element.classList.remove('hover');
-		});
+            this.element.classList.remove('hover');
+        });
     }
 }
