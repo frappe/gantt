@@ -639,9 +639,9 @@ export default class Gantt {
             this.options.popup_trigger,
             '.grid-row, .grid-header',
             () => {
-            	if(this.dependencyBar != null){
-            		this.dependencyBar.group.classList.toggle('addArrow');
-            		this.dependencyBar = null;
+            	if(this.dependency_bar != null){
+            		this.dependency_bar.group.classList.toggle('addArrow');
+            		this.dependency_bar = null;
             	}
                 this.unselect_all();
                 this.hide_popup();

@@ -52,7 +52,7 @@ export default class Popup {
                 	var bar = popup.gantt.get_bar(options.task.id);
                 	bar.group.classList.toggle('addArrow');
             		
-                	popup.gantt.dependencyBar = bar;
+                	popup.gantt.dependency_bar = bar;
                 	popup.hide();
                 	};
             }else{

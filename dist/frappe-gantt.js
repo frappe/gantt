@@ -607,7 +607,7 @@ class Bar {
             this.gantt.unselect_all();
             
             //  add dependency by popup button
-            if(this.gantt.dependencyBar != null){
+            if(this.gantt.dependency_bar != null){
                 this.add_dependency();
             }else{
                 this.group.classList.toggle('active');
@@ -619,7 +619,7 @@ class Bar {
 
     add_dependency(){
         // already marked a dependency
-        var markedTask = this.gantt.dependencyBar.task;
+        var markedTask = this.gantt.dependency_bar.task;
         if(markedTask == null)
             return;
         
@@ -654,9 +654,9 @@ class Bar {
 
     release_marked_bar(){
         //     remove class
-        this.gantt.dependencyBar.group.classList.toggle('addArrow');
+        this.gantt.dependency_bar.group.classList.toggle('addArrow');
         // empty gantt variable
-        this.gantt.dependencyBar = null;
+        this.gantt.dependency_bar = null;
     }
     
     show_popup() {
@@ -1043,7 +1043,7 @@ class Popup {
                     var bar = popup.gantt.get_bar(options.task.id);
                     bar.group.classList.toggle('addArrow');
                     
-                    popup.gantt.dependencyBar = bar;
+                    popup.gantt.dependency_bar = bar;
                     popup.hide();
                     };
             }else{
@@ -1713,9 +1713,9 @@ class Gantt {
             this.options.popup_trigger,
             '.grid-row, .grid-header',
             () => {
-                if(this.dependencyBar != null){
-                    this.dependencyBar.group.classList.toggle('addArrow');
-                    this.dependencyBar = null;
+                if(this.dependency_bar != null){
+                    this.dependency_bar.group.classList.toggle('addArrow');
+                    this.dependency_bar = null;
                 }
                 this.unselect_all();
                 this.hide_popup();

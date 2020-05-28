@@ -192,7 +192,7 @@ export default class Bar {
             this.gantt.unselect_all();
             
             //  add dependency by popup button
-            if(this.gantt.dependencyBar != null){
+            if(this.gantt.dependency_bar != null){
             	this.add_dependency();
             }else{
                 this.group.classList.toggle('active');
@@ -204,7 +204,7 @@ export default class Bar {
 
     add_dependency(){
 		// already marked a dependency
-		var markedTask = this.gantt.dependencyBar.task;
+		var markedTask = this.gantt.dependency_bar.task;
 		if(markedTask == null)
 			return;
 		
@@ -239,9 +239,9 @@ export default class Bar {
 
     release_marked_bar(){
     	// remove class
-    	this.gantt.dependencyBar.group.classList.toggle('addArrow');
+    	this.gantt.dependency_bar.group.classList.toggle('addArrow');
     	// empty gantt variable
-    	this.gantt.dependencyBar = null;
+    	this.gantt.dependency_bar = null;
     }
 
     show_popup() {
