@@ -130,15 +130,15 @@
   padding: 10px;
   color: #dfe2e5;
 }
-.gantt-container .popup-wrapper .action {
+.gantt-container .popup-wrapper .add-dependency-action {
   color: #dfe2e5;
-  border-top: 3px solid #2369b5;
-  padding: 10px;
-  background: rgba(35, 105, 181, 0.6);
+  text-decoration: underline; 
+  border-top: 2px solid #2369b5;
+  padding: 5px;
   cursor: pointer;
 }
-.gantt-container .popup-wrapper .action:hover {
-  background: rgba(35, 105, 181, 0.8);
+.gantt-container .popup-wrapper .add-dependency-action:hover {
+ color: #a3a3ff;
 }
 .gantt-container .popup-wrapper .pointer {
   position: absolute;

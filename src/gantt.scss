@@ -167,15 +167,15 @@ $handle-color: #ddd !default;
 			color: #dfe2e5;
 		}
 
-		.action{
-		color: #dfe2e5;
+		.add-dependency-action{
+			color: #dfe2e5;
+			text-decoration: underline; 
 			border-top: 3px solid $blue;
-			padding: 10px;
-			background:rgba(163, 163, 255, 0.6);
+			padding: 5px;
 			cursor: pointer;
 			
 			&:hover{
-			background:rgba(163, 163, 255, 0.8);	
+				color: #a3a3ff;
 			}
 		}
 		

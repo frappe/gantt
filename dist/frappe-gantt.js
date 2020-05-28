@@ -1002,15 +1002,14 @@ class Popup {
             <div class="title"></div>
             <div class="subtitle"></div>
             <div class="pointer"></div>
-            <div class="action"></div>
+            <div class="add-dependency-action"></div>
         `;
 
         this.hide();
 
         this.title = this.parent.querySelector('.title');
         this.subtitle = this.parent.querySelector('.subtitle');
-        //  add action to popup
-        this.action = this.parent.querySelector('.action');
+        this.action = this.parent.querySelector('.add-dependency-action');
         this.pointer = this.parent.querySelector('.pointer');
     }
 
@@ -1028,29 +1027,34 @@ class Popup {
             html += '<div class="pointer"></div>';
             this.parent.innerHTML = html;
             this.pointer = this.parent.querySelector('.pointer');
+            this.action = this.parent.querySelector('.add-dependency-action');
         } else {
             // set data
             this.title.innerHTML = options.title;
             this.subtitle.innerHTML = options.subtitle;
-            //  add action to popup
-            if(this.gantt.options.allow_dependency_editing){
-                // TODO make text dynamic
-                this.action.textContent = 'Add Dependency';
-                
-                var popup = this;
-                this.action.onclick = function() {
-                    var bar = popup.gantt.get_bar(options.task.id);
-                    bar.group.classList.toggle('selected-for-dependency');
-                    
-                    popup.gantt.dependency_bar = bar;
-                    popup.hide();
-                    };
-            }else{
-                this.action.remove();
-            }
-
         }
 
+        //  add action to popup
+        if(this.gantt.options.allow_dependency_editing){
+            if(this.custom_html === null){
+            	this.action.textContent = 'Add Dependency';
+            }
+            
+            var popup = this;
+            
+            // add eventlistener to action button
+            this.action.onclick = function() {
+                var bar = popup.gantt.get_bar(options.task.id);
+                bar.group.classList.toggle('selected-for-dependency');
+                
+                popup.gantt.dependency_bar = bar;
+                popup.hide();
+            };
+            
+        }else{
+            this.action.remove();
+        }
+            
         //  fix popup overlaying bars
         this.parent.style.display = 'block';
         
