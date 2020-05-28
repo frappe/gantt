@@ -99,7 +99,7 @@ export default class Arrow {
     
     //  add event handling for Arrows
     setup_dependency_editing(){
-        $.on(this.element, 'click', e => {
+        $.on(this.element, 'dblclick', e => {
             //  remove Arrow element, and delete dependency from task
             var index = this.to_task.task.dependencies.indexOf(this.from_task.task.id);
             this.to_task.task.dependencies.splice(index, 1);
