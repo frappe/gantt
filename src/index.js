@@ -809,7 +809,6 @@ export default class Gantt {
         $.on(this.$svg, 'mouseup', () => {
             is_resizing = false;
             if (!($bar_progress && $bar_progress.finaldx)) return;
-            console.log("changed");
             
             // SJ reset value, otherwise event fires multiple times
             $bar_progress.finaldx = 0;
