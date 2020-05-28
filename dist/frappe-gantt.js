@@ -880,7 +880,7 @@ class Arrow {
         this.calculate_path();
         this.draw();
         //  add event handling for Arrows
-        if(this.gantt.options.enable_dependency_edit)
+        if(this.gantt.options.allow_dependency_editing)
         	this.setup_eventListener();
     }
     
@@ -1033,7 +1033,7 @@ class Popup {
             this.title.innerHTML = options.title;
             this.subtitle.innerHTML = options.subtitle;
             //  add action to popup
-            if(this.gantt.options.enable_dependency_edit){
+            if(this.gantt.options.allow_dependency_editing){
                 // TODO make text dynamic
                 this.action.innerHTML = 'add dependency';
                 
@@ -1158,11 +1158,10 @@ class Gantt {
             popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
-            //  make editing optional
             enable_drag_edit : true,
         	enable_slide_edit : true,
         	enable_progress_edit : true,
-        	enable_dependency_edit : true
+        	allow_dependency_editing : true
         };
         this.options = Object.assign({}, default_options, options);
     }

@@ -43,7 +43,7 @@ export default class Popup {
             this.title.innerHTML = options.title;
             this.subtitle.innerHTML = options.subtitle;
             //  add action to popup
-            if(this.gantt.options.enable_dependency_edit){
+            if(this.gantt.options.allow_dependency_editing){
                 // TODO make text dynamic
                 this.action.innerHTML = 'add dependency';
                 

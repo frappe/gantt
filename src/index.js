@@ -85,10 +85,10 @@ export default class Gantt {
             popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
-            // SJ make editing optional
             enable_drag_edit : true,
         	enable_slide_edit : true,
-        	enable_progress_edit : true
+        	enable_progress_edit : true,
+        	allow_dependency_editing : true
         };
         this.options = Object.assign({}, default_options, options);
     }

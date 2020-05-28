@@ -9,7 +9,7 @@ export default class Arrow {
         this.calculate_path();
         this.draw();
         //  add event handling for Arrows
-        if(this.gantt.options.enable_dependency_edit)
+        if(this.gantt.options.allow_dependency_editing)
         	this.setup_eventListener();
     }
     
