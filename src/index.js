@@ -666,7 +666,7 @@ export default class Gantt {
         $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
             const bar_wrapper = $.closest('.bar-wrapper', element);
 
-            // SJ make changing and dragging todos optional
+            // make changing and dragging todos optional
             if (element.classList.contains('left') && this.options.allow_resizing) {
                 is_resizing_left = true;
             } else if (element.classList.contains('right') && this.options.allow_resizing) {
@@ -677,7 +677,7 @@ export default class Gantt {
             
             bar_wrapper.classList.add('active');
 
-            // SJ use clientX and Y offset doesn't work properly in firefox
+            // use clientX and Y offset doesn't work properly in firefox
             x_on_start = e.clientX;
             y_on_start = e.clientY;
 
@@ -701,7 +701,7 @@ export default class Gantt {
 
         $.on(this.$svg, 'mousemove', e => {
             if (!action_in_progress()) return;
-            // SJ use clientX and Y offset doesn't work properly in firefox
+            // use clientX and Y offset doesn't work properly in firefox
             const dx = e.clientX - x_on_start;
             const dy = e.clientY - y_on_start;
 
@@ -747,14 +747,14 @@ export default class Gantt {
             bars.forEach(bar => {
                 const $bar = bar.$bar;
                 if (!$bar.finaldx) return;
-                // SJ reset value, otherwise event fires multiple times
+                // reset value, otherwise event fires multiple times
                 $bar.finaldx = 0;
                 bar.date_changed();
                 bar.set_action_completed();
             });
         });
         
-        // SJ make changing progress optional
+        // make changing progress optional
         if(this.options.allow_progress_editing){
         	this.bind_bar_progress();
         }
@@ -770,7 +770,7 @@ export default class Gantt {
 
         $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
             is_resizing = true;
-            // SJ use clientX and Y offset doesn't work properly in firefox
+            // use clientX and Y offset doesn't work properly in firefox
             x_on_start = e.clientX;
             y_on_start = e.clientY;
 
@@ -789,7 +789,7 @@ export default class Gantt {
 
         $.on(this.$svg, 'mousemove', e => {
             if (!is_resizing) return;
-            // SJ use clientX and Y offset doesn't work properly in firefox
+            // use clientX and Y offset doesn't work properly in firefox
             let dx = e.clientX - x_on_start;
             let dy = e.clientY - y_on_start;
 
@@ -810,7 +810,7 @@ export default class Gantt {
             is_resizing = false;
             if (!($bar_progress && $bar_progress.finaldx)) return;
             
-            // SJ reset value, otherwise event fires multiple times
+            // reset value, otherwise event fires multiple times
             $bar_progress.finaldx = 0;
             bar.progress_changed();
             bar.set_action_completed();
