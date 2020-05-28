@@ -1035,7 +1035,7 @@ class Popup {
             //  add action to popup
             if(this.gantt.options.allow_dependency_editing){
                 // TODO make text dynamic
-                this.action.innerHTML = 'add dependency';
+                this.action.textContent = 'Add Dependency';
                 
                 var popup = this;
                 this.action.onclick = function() {
@@ -1882,7 +1882,6 @@ class Gantt {
         $.on(this.$svg, 'mouseup', () => {
             is_resizing = false;
             if (!($bar_progress && $bar_progress.finaldx)) return;
-            console.log("changed");
             
             //  reset value, otherwise event fires multiple times
             $bar_progress.finaldx = 0;
