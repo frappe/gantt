@@ -200,6 +200,15 @@ export default class Bar {
             }
 
         });
+        
+        $.on(this.group, 'dblclick', e => {
+            if (this.action_completed) {
+                // just finished a move action, wait for a few seconds
+                return;
+            }
+
+            this.gantt.trigger_event('click', [this.task]);
+        });
     }
 
     add_dependency(){

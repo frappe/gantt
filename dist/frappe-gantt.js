@@ -38,7 +38,6 @@ const month_names = {
         'Ноябрь',
         'Декабрь'
     ],
-    //  add german localization
     de: [
         'Januar',
         'Februar',
@@ -52,6 +51,62 @@ const month_names = {
         'Oktober',
         'November',
         'Dezember'
+    ],
+    ptBr: [
+        'Janeiro',
+        'Fevereiro',
+        'Março',
+        'Abril',
+        'Maio',
+        'Junho',
+        'Julho',
+        'Agosto',
+        'Setembro',
+        'Outubro',
+        'Novembro',
+        'Dezembro'
+    ],
+    fr: [
+        'Janvier',
+        'Février',
+        'Mars',
+        'Avril',
+        'Mai',
+        'Juin',
+        'Juillet',
+        'Août',
+        'Septembre',
+        'Octobre',
+        'Novembre',
+        'Décembre'
+    ],
+    tr: [
+        'Ocak',
+        'Şubat',
+        'Mart',
+        'Nisan',
+        'Mayıs',
+        'Haziran',
+        'Temmuz',
+        'Ağustos',
+        'Eylül',
+        'Ekim',
+        'Kasım',
+        'Aralık'
+    ],
+    zh: [
+        '一月',
+        '二月',
+        '三月',
+        '四月',
+        '五月',
+        '六月',
+        '七月',
+        '八月',
+        '九月',
+        '十月',
+        '十一月',
+        '十二月'
     ]
 };
 
@@ -609,6 +664,15 @@ class Bar {
 	                this.show_popup();
 	            }
 
+	        });
+	        
+	        $.on(this.group, 'dblclick', e => {
+	            if (this.action_completed) {
+	                // just finished a move action, wait for a few seconds
+	                return;
+	            }
+
+	            this.gantt.trigger_event('click', [this.task]);
 	        });
 	    }
 
