@@ -125,35 +125,39 @@ export default class Bar {
 
         const bar = this.$bar;
         const handle_width = 8;
+        
+        //  make changing todos optional
+        if(this.gantt.options.allow_resizing){
+        	createSVG('rect', {
+        		x: bar.getX() + bar.getWidth() - 9,
+        		y: bar.getY() + 1,
+        		width: handle_width,
+        		height: this.height - 2,
+        		rx: this.corner_radius,
+        		ry: this.corner_radius,
+        		class: 'handle right',
+        		append_to: this.handle_group
+        	});
 
-        createSVG('rect', {
-            x: bar.getX() + bar.getWidth() - 9,
-            y: bar.getY() + 1,
-            width: handle_width,
-            height: this.height - 2,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
-            class: 'handle right',
-            append_to: this.handle_group
-        });
-
-        createSVG('rect', {
-            x: bar.getX() + 1,
-            y: bar.getY() + 1,
-            width: handle_width,
-            height: this.height - 2,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
-            class: 'handle left',
-            append_to: this.handle_group
-        });
-
-        if (this.task.progress && this.task.progress < 100) {
-            this.$handle_progress = createSVG('polygon', {
-                points: this.get_progress_polygon_points().join(','),
-                class: 'handle progress',
-                append_to: this.handle_group
-            });
+        	createSVG('rect', {
+        		x: bar.getX() + 1,
+        		y: bar.getY() + 1,
+        		width: handle_width,
+        		height: this.height - 2,
+        		rx: this.corner_radius,
+        		ry: this.corner_radius,
+        		class: 'handle left',
+        		append_to: this.handle_group
+        	});
+        }
+        
+        //  make changing progress optional
+        if ((this.task.progress && this.task.progress < 100) && this.gantt.options.allow_progress_editing) {
+        	this.$handle_progress = createSVG('polygon', {
+        		points: this.get_progress_polygon_points().join(','),
+        		class: 'handle progress',
+        		append_to: this.handle_group
+        	});
         }
     }
 
@@ -183,9 +187,19 @@ export default class Bar {
 
             this.show_popup();
             this.gantt.unselect_all();
+
+            
+            //  add dependency by popup button
+            if(this.gantt.dependency_bar != null){
+            	this.add_dependency();
+            }else{
+                this.group.classList.toggle('active');
+                this.show_popup();
+            }
+
             this.group.classList.add('active');
         });
-
+        
         $.on(this.group, 'dblclick', e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
@@ -196,9 +210,58 @@ export default class Bar {
         });
     }
 
+    add_dependency(){
+		// already marked a dependency
+		var selected_bar = this.gantt.dependency_bar.task;
+		if(selected_bar === null){
+			return;
+		}
+		
+		var changedTask;
+		
+		// check if tasks are already connected
+		if(!this.task.dependencies.includes(selected_bar.id) && !selected_bar.dependencies.includes(this.task.id) && this.task !== selected_bar){
+			// same start date no dependency
+			if(this.task._start.getTime() === selected_bar._start.getTime()){
+	    		this.release_marked_bar();
+				return;
+			}
+			
+			// check which task starts later
+			if(this.task._start.getTime() > selected_bar._start.getTime()){
+				changedTask = this.task;
+				this.task.dependencies.push(selected_bar.id);
+			}else{
+				changedTask = selected_bar;
+				selected_bar.dependencies.push(this.task.id);
+			}
+		
+			// fire dependencyAdded event
+			this.gantt.trigger_event('dependency_add', [changedTask]);
+	      	// recalculate dependency tree
+			this.gantt.setup_dependencies();
+			// redraw gantt
+			this.gantt.render();
+		}
+		this.release_marked_bar();
+    }
+
+    release_marked_bar(){
+    	
+    	if(this.gantt.dependency_bar === null){
+    		return;
+    	}
+    	
+    	// remove class
+    	this.gantt.dependency_bar.group.classList.toggle('selected-for-dependency');
+    	// empty gantt variable
+    	this.gantt.dependency_bar = null;
+    }
+
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
+        //  add localization to popup
         const start_date = date_utils.format(this.task._start, 'MMM D', this.gantt.options.language);
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),

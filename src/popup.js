@@ -1,7 +1,9 @@
 export default class Popup {
-    constructor(parent, custom_html) {
+    constructor(parent, custom_html, gantt) {
         this.parent = parent;
         this.custom_html = custom_html;
+        //  add gantt for dependency action
+        this.gantt = gantt;
         this.make();
     }
 
@@ -10,12 +12,14 @@ export default class Popup {
             <div class="title"></div>
             <div class="subtitle"></div>
             <div class="pointer"></div>
+            <div class="add-dependency-action"></div>
         `;
 
         this.hide();
 
         this.title = this.parent.querySelector('.title');
         this.subtitle = this.parent.querySelector('.subtitle');
+        this.action = this.parent.querySelector('.add-dependency-action');
         this.pointer = this.parent.querySelector('.pointer');
     }
 
@@ -33,13 +37,38 @@ export default class Popup {
             html += '<div class="pointer"></div>';
             this.parent.innerHTML = html;
             this.pointer = this.parent.querySelector('.pointer');
+            this.action = this.parent.querySelector('.add-dependency-action');
         } else {
             // set data
             this.title.innerHTML = options.title;
             this.subtitle.innerHTML = options.subtitle;
-            this.parent.style.width = this.parent.clientWidth + 'px';
         }
 
+        //  add action to popup
+        if(this.gantt.options.allow_dependency_editing){
+            if(this.custom_html === null){
+            	// TODO translate
+            	this.action.textContent = 'Add Dependency';
+            }
+            
+            var popup = this;
+            
+            // add eventlistener to action button
+            this.action.onclick = function() {
+                var bar = popup.gantt.get_bar(options.task.id);
+                bar.group.classList.toggle('selected-for-dependency');
+                
+                popup.gantt.dependency_bar = bar;
+                popup.hide();
+            };
+            
+        }else{
+            this.action.remove();
+        }
+            
+        //  fix popup overlaying bars
+        this.parent.style.display = 'block';
+        
         // set position
         let position_meta;
         if (target_element instanceof HTMLElement) {
@@ -57,12 +86,10 @@ export default class Popup {
             this.pointer.style.left = '-7px';
             this.pointer.style.top = '2px';
         }
-
-        // show
-        this.parent.style.opacity = 1;
     }
 
     hide() {
-        this.parent.style.opacity = 0;
+    	//  fix popup overlaying bars
+    	this.parent.style.display = 'none';
     }
 }

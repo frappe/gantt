@@ -1,4 +1,4 @@
-import { createSVG } from './svg_utils';
+import { $, createSVG } from './svg_utils';
 
 export default class Arrow {
     constructor(gantt, from_task, to_task) {
@@ -8,8 +8,11 @@ export default class Arrow {
 
         this.calculate_path();
         this.draw();
+        //  add event handling for Arrows
+        if(this.gantt.options.allow_dependency_editing)
+            this.setup_dependency_editing();
     }
-
+    
     calculate_path() {
         let start_x =
             this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
@@ -80,7 +83,7 @@ export default class Arrow {
                 l -5 5`;
         }
     }
-
+    
     draw() {
         this.element = createSVG('path', {
             d: this.path,
@@ -92,5 +95,24 @@ export default class Arrow {
     update() {
         this.calculate_path();
         this.element.setAttribute('d', this.path);
+    }
+    
+    //  add event handling for Arrows
+    setup_dependency_editing(){
+        $.on(this.element, 'dblclick', e => {
+            //  remove Arrow element, and delete dependency from task
+            var index = this.to_task.task.dependencies.indexOf(this.from_task.task.id);
+            this.to_task.task.dependencies.splice(index, 1);
+            this.element.remove();
+            this.gantt.setup_dependencies();
+            // fire dependencyAdded event
+            this.gantt.trigger_event('dependency_remove', [this.to_task.task]);
+        });
+        $.on(this.element, 'mouseenter', e => {
+            this.element.classList.add('hover');
+        });
+        $.on(this.element, 'mouseleave', e => {
+            this.element.classList.remove('hover');
+        });
     }
 }

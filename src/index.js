@@ -86,7 +86,11 @@ export default class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            language: 'en'
+            language: 'en',
+            allow_dragging : true,
+            allow_resizing : true,
+            allow_progress_editing : true,
+        	allow_dependency_editing : true
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -637,6 +641,10 @@ export default class Gantt {
             this.options.popup_trigger,
             '.grid-row, .grid-header',
             () => {
+            	if(this.dependency_bar != null){
+            		this.dependency_bar.group.classList.toggle('selected-for-dependency');
+            		this.dependency_bar = null;
+            	}
                 this.unselect_all();
                 this.hide_popup();
             }
@@ -660,18 +668,20 @@ export default class Gantt {
         $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
             const bar_wrapper = $.closest('.bar-wrapper', element);
 
-            if (element.classList.contains('left')) {
+            // make changing and dragging todos optional
+            if (element.classList.contains('left') && this.options.allow_resizing) {
                 is_resizing_left = true;
-            } else if (element.classList.contains('right')) {
+            } else if (element.classList.contains('right') && this.options.allow_resizing) {
                 is_resizing_right = true;
-            } else if (element.classList.contains('bar-wrapper')) {
+            } else if (element.classList.contains('bar-wrapper') && this.options.allow_dragging) {
                 is_dragging = true;
             }
-
+            
             bar_wrapper.classList.add('active');
 
-            x_on_start = e.offsetX;
-            y_on_start = e.offsetY;
+            // use clientX and Y offset doesn't work properly in firefox
+            x_on_start = e.clientX;
+            y_on_start = e.clientY;
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
             const ids = [
@@ -693,8 +703,9 @@ export default class Gantt {
 
         $.on(this.$svg, 'mousemove', e => {
             if (!action_in_progress()) return;
-            const dx = e.offsetX - x_on_start;
-            const dy = e.offsetY - y_on_start;
+            // use clientX and Y offset doesn't work properly in firefox
+            const dx = e.clientX - x_on_start;
+            const dy = e.clientY - y_on_start;
 
             bars.forEach(bar => {
                 const $bar = bar.$bar;
@@ -738,12 +749,17 @@ export default class Gantt {
             bars.forEach(bar => {
                 const $bar = bar.$bar;
                 if (!$bar.finaldx) return;
+                // reset value, otherwise event fires multiple times
+                $bar.finaldx = 0;
                 bar.date_changed();
                 bar.set_action_completed();
             });
         });
-
-        this.bind_bar_progress();
+        
+        // make changing progress optional
+        if(this.options.allow_progress_editing){
+        	this.bind_bar_progress();
+        }
     }
 
     bind_bar_progress() {
@@ -756,8 +772,9 @@ export default class Gantt {
 
         $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
             is_resizing = true;
-            x_on_start = e.offsetX;
-            y_on_start = e.offsetY;
+            // use clientX and Y offset doesn't work properly in firefox
+            x_on_start = e.clientX;
+            y_on_start = e.clientY;
 
             const $bar_wrapper = $.closest('.bar-wrapper', handle);
             const id = $bar_wrapper.getAttribute('data-id');
@@ -774,8 +791,9 @@ export default class Gantt {
 
         $.on(this.$svg, 'mousemove', e => {
             if (!is_resizing) return;
-            let dx = e.offsetX - x_on_start;
-            let dy = e.offsetY - y_on_start;
+            // use clientX and Y offset doesn't work properly in firefox
+            let dx = e.clientX - x_on_start;
+            let dy = e.clientY - y_on_start;
 
             if (dx > $bar_progress.max_dx) {
                 dx = $bar_progress.max_dx;
@@ -793,6 +811,9 @@ export default class Gantt {
         $.on(this.$svg, 'mouseup', () => {
             is_resizing = false;
             if (!($bar_progress && $bar_progress.finaldx)) return;
+            
+            // reset value, otherwise event fires multiple times
+            $bar_progress.finaldx = 0;
             bar.progress_changed();
             bar.set_action_completed();
         });
@@ -881,7 +902,8 @@ export default class Gantt {
         if (!this.popup) {
             this.popup = new Popup(
                 this.popup_wrapper,
-                this.options.custom_popup_html
+                this.options.custom_popup_html,
+                this
             );
         }
         this.popup.show(options);

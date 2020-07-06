@@ -44,6 +44,10 @@ $handle-color: #ddd !default;
 		fill: none;
 		stroke: $text-muted;
 		stroke-width: 1.4;
+		
+		.hover{
+		stroke-width: 2.4;
+		}
 	}
 
 	.bar {
@@ -105,7 +109,13 @@ $handle-color: #ddd !default;
 				opacity: 1;
 			}
 		}
-
+		
+		&.selected-for-dependency{
+			.bar{
+				stroke-width: 4px;
+			}
+		}
+		
 		&.active {
 			.bar {
 				fill: darken($bar-color, 5);
@@ -157,6 +167,18 @@ $handle-color: #ddd !default;
 			color: #dfe2e5;
 		}
 
+		.add-dependency-action{
+			color: #dfe2e5;
+			text-decoration: underline; 
+			border-top: 3px solid $blue;
+			padding: 10px;
+			cursor: pointer;
+			
+			&:hover{
+				color: #a3a3ff;
+			}
+		}
+		
 		.pointer {
 			position: absolute;
 			height: 5px;
