@@ -21,7 +21,7 @@ const month_names = {
         'November',
         'December'
     ],
-	nl: [
+    nl: [
         'Januari',
         'Februari',
         'Maart',
