@@ -544,7 +544,9 @@ class Bar {
         this.draw_bar();
         this.draw_progress_bar();
         this.draw_label();
-        this.draw_resize_handles();
+        if (!this.gantt.options.readonly) {
+            this.draw_resize_handles();
+        }
     }
 
     draw_bar() {
@@ -1123,7 +1125,8 @@ class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            language: 'en'
+            language: 'en',
+            readonly: false
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -1303,7 +1306,10 @@ class Gantt {
 
     bind_events() {
         this.bind_grid_click();
-        this.bind_bar_events();
+		
+        if (!this.options.readonly) {
+            this.bind_bar_events();
+        }
     }
 
     render() {
