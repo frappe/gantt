@@ -651,13 +651,40 @@ class Bar {
     }
 
     setup_click_event() {
-        $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, e => {
+        if (this.gantt.options.popup_trigger) {
+            $.on(this.group, this.gantt.options.popup_trigger, e => {
+                if (this.action_completed) {
+                    // just finished a move action, wait for a few seconds
+                    return;
+                }
+
+                this.show_popup();
+                this.gantt.unselect_all();
+                this.group.classList.add('active');
+            });
+        }
+
+        $.on(this.group, 'keydown', e => {
+            if (e.code != 'Space' && e.code != 'Enter') {
+                return;
+            }
+
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
             }
 
             this.show_popup();
+            this.gantt.unselect_all();
+            this.group.classList.add('active');
+        });
+
+        $.on(this.group, 'focus', e => {
+            if (this.action_completed) {
+                // just finished a move action, wait for a few seconds
+                return;
+            }
+
             this.gantt.unselect_all();
             this.group.classList.add('active');
         });
@@ -1512,7 +1539,7 @@ class Gantt {
     }
 
     get_dates_to_draw() {
-        let last_date = null;
+        let last_date = new Date();
         const dates = this.dates.map((date, i) => {
             const d = this.get_date_info(date, last_date, i);
             last_date = date;
@@ -1547,7 +1574,7 @@ class Gantt {
             Month_lower: date_utils.format(date, 'MMMM', this.options.language),
             Year_lower: date_utils.format(date, 'YYYY', this.options.language),
             'Quarter Day_upper':
-                (i == 0 || date.getDate() !== last_date.getDate())
+                date.getDate() !== last_date.getDate()
                     ? date_utils.format(date, 'D MMM', this.options.language)
                     : '',
             'Half Day_upper':

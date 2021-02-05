@@ -473,7 +473,7 @@ export default class Gantt {
     }
 
     get_dates_to_draw() {
-        let last_date = null;
+        let last_date = new Date();
         const dates = this.dates.map((date, i) => {
             const d = this.get_date_info(date, last_date, i);
             last_date = date;
@@ -508,7 +508,7 @@ export default class Gantt {
             Month_lower: date_utils.format(date, 'MMMM', this.options.language),
             Year_lower: date_utils.format(date, 'YYYY', this.options.language),
             'Quarter Day_upper':
-                (i == 0 || date.getDate() !== last_date.getDate())
+                date.getDate() !== last_date.getDate()
                     ? date_utils.format(date, 'D MMM', this.options.language)
                     : '',
             'Half Day_upper':
