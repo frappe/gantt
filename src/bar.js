@@ -70,7 +70,9 @@ export default class Bar {
         this.draw_bar();
         this.draw_progress_bar();
         this.draw_label();
-        this.draw_resize_handles();
+        if (!this.gantt.options.readonly) {
+            this.draw_resize_handles();
+        }
     }
 
     draw_bar() {
@@ -175,13 +177,40 @@ export default class Bar {
     }
 
     setup_click_event() {
-        $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, e => {
+        if (this.gantt.options.popup_trigger) {
+            $.on(this.group, this.gantt.options.popup_trigger, e => {
+                if (this.action_completed) {
+                    // just finished a move action, wait for a few seconds
+                    return;
+                }
+
+                this.show_popup();
+                this.gantt.unselect_all();
+                this.group.classList.add('active');
+            });
+        }
+
+        $.on(this.group, 'keydown', e => {
+            if (e.code != 'Space' && e.code != 'Enter') {
+                return;
+            }
+
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
             }
 
             this.show_popup();
+            this.gantt.unselect_all();
+            this.group.classList.add('active');
+        });
+
+        $.on(this.group, 'focus', e => {
+            if (this.action_completed) {
+                // just finished a move action, wait for a few seconds
+                return;
+            }
+
             this.gantt.unselect_all();
             this.group.classList.add('active');
         });

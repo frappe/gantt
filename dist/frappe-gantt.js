@@ -24,6 +24,20 @@ const month_names = {
         'November',
         'December'
     ],
+    nl: [
+        'Januari',
+        'Februari',
+        'Maart',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Augustus',
+        'September',
+        'Oktober',
+        'November',
+        'December'
+    ],
     es: [
         'Enero',
         'Febrero',
@@ -530,7 +544,9 @@ class Bar {
         this.draw_bar();
         this.draw_progress_bar();
         this.draw_label();
-        this.draw_resize_handles();
+        if (!this.gantt.options.readonly) {
+            this.draw_resize_handles();
+        }
     }
 
     draw_bar() {
@@ -635,13 +651,40 @@ class Bar {
     }
 
     setup_click_event() {
-        $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, e => {
+        if (this.gantt.options.popup_trigger) {
+            $.on(this.group, this.gantt.options.popup_trigger, e => {
+                if (this.action_completed) {
+                    // just finished a move action, wait for a few seconds
+                    return;
+                }
+
+                this.show_popup();
+                this.gantt.unselect_all();
+                this.group.classList.add('active');
+            });
+        }
+
+        $.on(this.group, 'keydown', e => {
+            if (e.code != 'Space' && e.code != 'Enter') {
+                return;
+            }
+
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
             }
 
             this.show_popup();
+            this.gantt.unselect_all();
+            this.group.classList.add('active');
+        });
+
+        $.on(this.group, 'focus', e => {
+            if (this.action_completed) {
+                // just finished a move action, wait for a few seconds
+                return;
+            }
+
             this.gantt.unselect_all();
             this.group.classList.add('active');
         });
@@ -1109,7 +1152,8 @@ class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            language: 'en'
+            language: 'en',
+            readonly: false
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -1249,8 +1293,8 @@ class Gantt {
 
         // add date padding on both sides
         if (this.view_is([VIEW_MODE.QUARTER_DAY, VIEW_MODE.HALF_DAY])) {
-            this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
-            this.gantt_end = date_utils.add(this.gantt_end, 7, 'day');
+            this.gantt_start = date_utils.add(this.gantt_start, -2, 'day');
+            this.gantt_end = date_utils.add(this.gantt_end, 2, 'day');
         } else if (this.view_is(VIEW_MODE.MONTH)) {
             this.gantt_start = date_utils.start_of(this.gantt_start, 'year');
             this.gantt_end = date_utils.add(this.gantt_end, 1, 'year');
@@ -1289,7 +1333,10 @@ class Gantt {
 
     bind_events() {
         this.bind_grid_click();
-        this.bind_bar_events();
+		
+        if (!this.options.readonly) {
+            this.bind_bar_events();
+        }
     }
 
     render() {
@@ -1492,7 +1539,7 @@ class Gantt {
     }
 
     get_dates_to_draw() {
-        let last_date = null;
+        let last_date = new Date();
         const dates = this.dates.map((date, i) => {
             const d = this.get_date_info(date, last_date, i);
             last_date = date;
@@ -1561,10 +1608,10 @@ class Gantt {
         };
 
         const x_pos = {
-            'Quarter Day_lower': this.options.column_width * 4 / 2,
-            'Quarter Day_upper': 0,
-            'Half Day_lower': this.options.column_width * 2 / 2,
-            'Half Day_upper': 0,
+            'Quarter Day_lower': 0,
+            'Quarter Day_upper': this.options.column_width * 4 / 2,
+            'Half Day_lower': 0,
+            'Half Day_upper': this.options.column_width * 2 / 2,
             Day_lower: this.options.column_width / 2,
             Day_upper: this.options.column_width * 30 / 2,
             Week_lower: 0,

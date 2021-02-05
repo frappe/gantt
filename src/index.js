@@ -86,7 +86,8 @@ export default class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            language: 'en'
+            language: 'en',
+            readonly: false
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -226,8 +227,8 @@ export default class Gantt {
 
         // add date padding on both sides
         if (this.view_is([VIEW_MODE.QUARTER_DAY, VIEW_MODE.HALF_DAY])) {
-            this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
-            this.gantt_end = date_utils.add(this.gantt_end, 7, 'day');
+            this.gantt_start = date_utils.add(this.gantt_start, -2, 'day');
+            this.gantt_end = date_utils.add(this.gantt_end, 2, 'day');
         } else if (this.view_is(VIEW_MODE.MONTH)) {
             this.gantt_start = date_utils.start_of(this.gantt_start, 'year');
             this.gantt_end = date_utils.add(this.gantt_end, 1, 'year');
@@ -266,7 +267,10 @@ export default class Gantt {
 
     bind_events() {
         this.bind_grid_click();
-        this.bind_bar_events();
+		
+        if (!this.options.readonly) {
+            this.bind_bar_events();
+        }
     }
 
     render() {
@@ -469,7 +473,7 @@ export default class Gantt {
     }
 
     get_dates_to_draw() {
-        let last_date = null;
+        let last_date = new Date();
         const dates = this.dates.map((date, i) => {
             const d = this.get_date_info(date, last_date, i);
             last_date = date;
@@ -538,10 +542,10 @@ export default class Gantt {
         };
 
         const x_pos = {
-            'Quarter Day_lower': this.options.column_width * 4 / 2,
-            'Quarter Day_upper': 0,
-            'Half Day_lower': this.options.column_width * 2 / 2,
-            'Half Day_upper': 0,
+            'Quarter Day_lower': 0,
+            'Quarter Day_upper': this.options.column_width * 4 / 2,
+            'Half Day_lower': 0,
+            'Half Day_upper': this.options.column_width * 2 / 2,
             Day_lower: this.options.column_width / 2,
             Day_upper: this.options.column_width * 30 / 2,
             Week_lower: 0,
