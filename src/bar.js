@@ -186,7 +186,7 @@ export default class Bar {
             this.group.classList.add('active');
         });
 
-        $.on(this.group, 'dblclick', e => {
+        $.on(this.group, 'click', e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
