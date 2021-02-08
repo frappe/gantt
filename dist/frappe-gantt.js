@@ -576,6 +576,19 @@ class Bar {
             class: 'bar-label',
             append_to: this.bar_group
         });
+        if (this.task.image) {
+            createSVG('foreignObject', {
+                x: this.x + this.width / 2,
+                y: this.y,
+                height: this.height,
+                width: this.height,
+                innerHTML: '<img src="' + this.task.image + '" style="border-radius: 50%;" height="' +
+                    this.height + '">',
+                class: 'bar-label-img',
+                append_to: this.bar_group
+            });
+        }
+
         // labels get BBox in the next tick
         requestAnimationFrame(() => this.update_label_position());
     }
@@ -646,7 +659,7 @@ class Bar {
             this.group.classList.add('active');
         });
 
-        $.on(this.group, 'dblclick', e => {
+        $.on(this.group, 'click', e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
@@ -833,14 +846,27 @@ class Bar {
 
     update_label_position() {
         const bar = this.$bar,
-            label = this.group.querySelector('.bar-label');
-
-        if (label.getBBox().width > bar.getWidth()) {
-            label.classList.add('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+            label = this.group.querySelector('.bar-label'),
+            label_img = this.group.querySelector('.bar-label-img');
+        if (label_img) {
+            if (label.getBBox().width / 2 + label_img.getBBox().width > bar.getWidth() / 2) {
+                label.classList.add('big');
+                label.setAttribute('x', bar.getX() + bar.getWidth() + 7 + label_img.getBBox().width);
+                label_img.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+            } else {
+                label.classList.remove('big');
+                label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+                var offset = Math.ceil((label.getBBox().width / 2) + label_img.getBBox().width);
+                label_img.setAttribute('x', bar.getX() + bar.getWidth() / 2 - offset);
+            }
         } else {
-            label.classList.remove('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+            if (label.getBBox().width > bar.getWidth()) {
+                label.classList.add('big');
+                label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+            } else {
+                label.classList.remove('big');
+                label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+            }
         }
     }
 
