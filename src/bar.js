@@ -116,6 +116,19 @@ export default class Bar {
             class: 'bar-label',
             append_to: this.bar_group
         });
+        if (this.task.image) {
+            createSVG('foreignObject', {
+                x: this.x + this.width / 2,
+                y: this.y,
+                height: this.height,
+                width: this.height,
+                innerHTML: '<img src="' + this.task.image + '" style="border-radius: 50%;" height="' +
+                    this.height + '">',
+                class: 'bar-label-img',
+                append_to: this.bar_group
+            });
+        }
+
         // labels get BBox in the next tick
         requestAnimationFrame(() => this.update_label_position());
     }
