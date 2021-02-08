@@ -386,14 +386,27 @@ export default class Bar {
 
     update_label_position() {
         const bar = this.$bar,
-            label = this.group.querySelector('.bar-label');
-
-        if (label.getBBox().width > bar.getWidth()) {
-            label.classList.add('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+            label = this.group.querySelector('.bar-label'),
+            label_img = this.group.querySelector('.bar-label-img');
+        if (label_img) {
+            if (label.getBBox().width / 2 + label_img.getBBox().width > bar.getWidth() / 2) {
+                label.classList.add('big');
+                label.setAttribute('x', bar.getX() + bar.getWidth() + 7 + label_img.getBBox().width);
+                label_img.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+            } else {
+                label.classList.remove('big');
+                label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+                var offset = Math.ceil((label.getBBox().width / 2) + label_img.getBBox().width)
+                label_img.setAttribute('x', bar.getX() + bar.getWidth() / 2 - offset);
+            }
         } else {
-            label.classList.remove('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+            if (label.getBBox().width > bar.getWidth()) {
+                label.classList.add('big');
+                label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+            } else {
+                label.classList.remove('big');
+                label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+            }
         }
     }
 
