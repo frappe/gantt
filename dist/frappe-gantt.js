@@ -582,7 +582,7 @@ class Bar {
                 y: this.y,
                 height: this.height,
                 width: this.height,
-                innerHTML: '<img src="' + this.task.image + '" style="border-radius: 50%;" height="' +
+                innerHTML: '<img src="' + this.task.image + '" style="border-radius: 50%; pointer-events: none;" height="' +
                     this.height + '">',
                 class: 'bar-label-img',
                 append_to: this.bar_group
