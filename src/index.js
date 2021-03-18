@@ -166,9 +166,9 @@ export default class Gantt {
         }
     }
 
-    refresh(tasks) {
+    refresh(tasks, updateScroll = false) {
         this.setup_tasks(tasks);
-        this.change_view_mode(undefined, false);
+        this.change_view_mode(undefined, updateScroll);
     }
 
     change_view_mode(mode = this.options.view_mode, updateScroll = true) {
