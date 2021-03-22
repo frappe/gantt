@@ -30,9 +30,13 @@ export default class Popup {
 
         if (this.custom_html) {
             let html = this.custom_html(options.task);
+            const empty = !html;
             html += '<div class="pointer"></div>';
             this.parent.innerHTML = html;
             this.pointer = this.parent.querySelector('.pointer');
+            if (empty) {
+                this.pointer.style.display = 'none';
+            }
         } else {
             // set data
             this.title.innerHTML = options.title;
