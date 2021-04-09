@@ -32,6 +32,14 @@ export function animateSVG(svgElement, attr, from, to) {
     }
 }
 
+export function screenYtoSVGUnits(val, svg) {
+    let pt = svg.createSVGPoint();
+    pt.x = 0;
+    pt.y = val;
+    pt = pt.matrixTransform(svg.getCTM().inverse());
+    return pt.y;
+}
+
 function getAnimationElement(
     svgElement,
     attr,

@@ -1,5 +1,5 @@
 import date_utils from './date_utils';
-import { $, createSVG } from './svg_utils';
+import { $, createSVG, screenYtoSVGUnits } from './svg_utils';
 import Bar from './bar';
 import Arrow from './arrow';
 import Popup from './popup';
@@ -72,6 +72,14 @@ export default class Gantt {
         this.$container.appendChild(this.popup_wrapper);
     }
 
+    update_sticky_header_position() {
+        const y = screenYtoSVGUnits(this.$container.scrollTop, this.$svg);
+        const dateGrid = this.$svg.getElementsByClassName('date')[0];
+        dateGrid.setAttribute('transform', `translate(0, ${y})`);
+        const gridHeader = this.$svg.getElementsByClassName('grid-header')[0];
+        gridHeader.setAttribute('y', y);
+    }
+
     setup_options(options) {
         const default_options = {
             header_height: 50,
@@ -86,7 +94,8 @@ export default class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            language: 'en'
+            language: 'en',
+            sticky_header: false
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -267,6 +276,7 @@ export default class Gantt {
     bind_events() {
         this.bind_grid_click();
         this.bind_bar_events();
+        this.bind_sticky_header();
     }
 
     render(updateScroll = true) {
@@ -285,11 +295,14 @@ export default class Gantt {
         } else {
             parent_element.scrollLeft = currentScroll;
         }
+        if (this.options.sticky_header) {
+            this.update_sticky_header_position();
+        }
     }
 
     setup_layers() {
         this.layers = {};
-        const layers = ['grid', 'date', 'arrow', 'progress', 'bar', 'details'];
+        const layers = ['grid', 'arrow', 'progress', 'bar', 'details', 'header', 'date'];
         // make group layers
         for (let layer of layers) {
             this.layers[layer] = createSVG('g', {
@@ -371,7 +384,7 @@ export default class Gantt {
             width: header_width,
             height: header_height,
             class: 'grid-header',
-            append_to: this.layers.grid
+            append_to: this.layers.header
         });
     }
 
@@ -397,7 +410,10 @@ export default class Gantt {
                 tick_class += ' thick';
             }
             // thick ticks for quarters
-            if (this.view_is(VIEW_MODE.MONTH) && (date.getMonth() + 1) % 3 === 0) {
+            if (
+                this.view_is(VIEW_MODE.MONTH) &&
+                (date.getMonth() + 1) % 3 === 0
+            ) {
                 tick_class += ' thick';
             }
 
@@ -647,6 +663,15 @@ export default class Gantt {
                 this.hide_popup();
             }
         );
+    }
+
+    bind_sticky_header() {
+        if (this.options.sticky_header) {
+            this.$container.addEventListener(
+                'scroll',
+                this.update_sticky_header_position.bind(this)
+            );
+        }
     }
 
     bind_bar_events() {
