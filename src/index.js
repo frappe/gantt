@@ -295,6 +295,9 @@ export default class Gantt {
         } else {
             parent_element.scrollLeft = currentScroll;
         }
+        if (this.options.sticky_header) {
+            this.update_sticky_header_position();
+        }
     }
 
     setup_layers() {
