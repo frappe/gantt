@@ -1,5 +1,5 @@
 import date_utils from './date_utils';
-import { $, createSVG } from './svg_utils';
+import { $, createSVG, screenYtoSVGUnits } from './svg_utils';
 import Bar from './bar';
 import Arrow from './arrow';
 import Popup from './popup';
@@ -73,7 +73,11 @@ export default class Gantt {
     }
 
     update_sticky_header_position() {
-
+        const y = screenYtoSVGUnits(this.$container.scrollTop, this.$svg);
+        const dateGrid = this.$svg.getElementsByClassName('date')[0];
+        dateGrid.setAttribute('transform', `translate(0, ${y})`);
+        const gridHeader = this.$svg.getElementsByClassName('grid-header')[0];
+        gridHeader.setAttribute('y', y);
     }
 
     setup_options(options) {
