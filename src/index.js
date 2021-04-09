@@ -72,6 +72,10 @@ export default class Gantt {
         this.$container.appendChild(this.popup_wrapper);
     }
 
+    update_sticky_header_position() {
+
+    }
+
     setup_options(options) {
         const default_options = {
             header_height: 50,
@@ -268,6 +272,7 @@ export default class Gantt {
     bind_events() {
         this.bind_grid_click();
         this.bind_bar_events();
+        this.bind_sticky_header();
     }
 
     render(updateScroll = true) {
@@ -648,6 +653,15 @@ export default class Gantt {
                 this.hide_popup();
             }
         );
+    }
+
+    bind_sticky_header() {
+        if (this.options.sticky_header) {
+            this.$container.addEventListener(
+                'scroll',
+                this.update_sticky_header_position
+            );
+        }
     }
 
     bind_bar_events() {
