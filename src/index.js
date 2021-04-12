@@ -302,7 +302,15 @@ export default class Gantt {
 
     setup_layers() {
         this.layers = {};
-        const layers = ['grid', 'arrow', 'progress', 'bar', 'details', 'header', 'date'];
+        const layers = [
+            'grid',
+            'arrow',
+            'progress',
+            'bar',
+            'details',
+            'header',
+            'date'
+        ];
         // make group layers
         for (let layer of layers) {
             this.layers[layer] = createSVG('g', {
@@ -436,29 +444,48 @@ export default class Gantt {
 
     make_grid_highlights() {
         // highlight today's date
-        if (this.view_is(VIEW_MODE.DAY)) {
-            const x =
-                date_utils.diff(date_utils.today(), this.gantt_start, 'hour') /
-                this.options.step *
-                this.options.column_width;
-            const y = 0;
+        const today = date_utils.today();
+        const getOffset = {
+            [VIEW_MODE.DAY]: () =>
+                date_utils.diff(today, this.gantt_start, 'hour'),
+            [VIEW_MODE.HALF_DAY]: () =>
+                date_utils.diff(today, this.gantt_start, 'hour'),
+            [VIEW_MODE.QUARTER_DAY]: () =>
+                date_utils.diff(today, this.gantt_start, 'hour'),
+            [VIEW_MODE.WEEK]: () =>
+                date_utils.diff(
+                    date_utils.start_of(today, 'week'),
+                    this.gantt_start,
+                    'hour'
+                ),
+            [VIEW_MODE.MONTH]: () =>
+                date_utils.diff(
+                    date_utils.start_of(today, 'month'),
+                    this.gantt_start,
+                    'hour'
+                )
+        };
 
-            const width = this.options.column_width;
-            const height =
-                (this.options.bar_height + this.options.padding) *
-                    this.tasks.length +
-                this.options.header_height +
-                this.options.padding / 2;
+        const offset = getOffset[this.options.view_mode]();
 
-            createSVG('rect', {
-                x,
-                y,
-                width,
-                height,
-                class: 'today-highlight',
-                append_to: this.layers.grid
-            });
-        }
+        const x = offset / this.options.step * this.options.column_width;
+        const y = 0;
+
+        const width = this.options.column_width;
+        const height =
+            (this.options.bar_height + this.options.padding) *
+                this.tasks.length +
+            this.options.header_height +
+            this.options.padding / 2;
+
+        createSVG('rect', {
+            x,
+            y,
+            width,
+            height,
+            class: 'today-highlight',
+            append_to: this.layers.grid
+        });
     }
 
     make_dates() {
