@@ -755,6 +755,7 @@ export default class Gantt {
             const dy = e.offsetY - y_on_start;
 
             bars.forEach(bar => {
+                if (bar.task.invalid) return;
                 const $bar = bar.$bar;
                 $bar.finaldx = this.get_snap_position(dx);
 
