@@ -978,6 +978,19 @@ export default class Gantt {
     clear() {
         this.$svg.innerHTML = '';
     }
+
+    /**
+     * Scroll until today appears in view
+     *
+     * @memberof Gantt
+     */
+    focus_on_today() {
+        try {
+            this.$svg.getElementsByClassName('today-highlight')[0].scrollIntoView()
+        } catch (err) {
+
+        }
+    }
 }
 
 Gantt.VIEW_MODE = VIEW_MODE;
