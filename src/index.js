@@ -95,7 +95,8 @@ export default class Gantt {
             popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
-            sticky_header: false
+            sticky_header: false,
+            can_click_ghost_task: false,
         };
         this.options = Object.assign({}, default_options, options);
     }
