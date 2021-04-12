@@ -12,6 +12,7 @@ declare class Gantt {
 
   change_view_mode(mode: Gantt.viewMode): void;
   refresh(tasks: Gantt.Task[], updateScroll: boolean): void;
+  focus_on_today(): void;
 }
 
 declare namespace Gantt {
