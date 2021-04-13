@@ -50,6 +50,7 @@ declare namespace Gantt {
     on_progress_change?: (task: EnrichedTask, progress: number) => void;
     on_view_change?: (mode: viewMode) => void;
     sticky_header: boolean;
+    can_click_ghost_task: boolean;
   }
 
   type viewMode = 'Quarter Day' | 'Half Day' | 'Day' | 'Week' | 'Month';

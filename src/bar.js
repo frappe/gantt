@@ -170,7 +170,7 @@ export default class Bar {
     }
 
     bind() {
-        if (this.invalid) return;
+        if (this.invalid && !this.gantt.options.can_click_ghost_task) return;
         this.setup_click_event();
     }
 
