@@ -96,7 +96,7 @@ export default class Gantt {
             custom_popup_html: null,
             language: 'en',
             sticky_header: false,
-            can_click_ghost_task: false,
+            can_click_ghost_task: false
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -988,13 +988,13 @@ export default class Gantt {
      */
     focus_on_today() {
         try {
-            this.$svg.getElementsByClassName('today-highlight')[0].scrollIntoView({
-                behavior: "smooth",
-                inline: "center"
-            })
-        } catch (err) {
-
-        }
+            this.$svg
+                .getElementsByClassName('today-highlight')[0]
+                .scrollIntoView({
+                    behavior: 'smooth',
+                    inline: 'center'
+                });
+        } catch (err) {}
     }
 }
 
