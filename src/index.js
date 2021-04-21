@@ -988,7 +988,10 @@ export default class Gantt {
      */
     focus_on_today() {
         try {
-            this.$svg.getElementsByClassName('today-highlight')[0].scrollIntoView()
+            this.$svg.getElementsByClassName('today-highlight')[0].scrollIntoView({
+                behavior: "smooth",
+                inline: "center"
+            })
         } catch (err) {
 
         }
