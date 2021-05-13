@@ -91,6 +91,10 @@ export default class Gantt {
         this.options = Object.assign({}, default_options, options);
     }
 
+    /**
+     * Set x._start, x._end, x._index for each task
+     * May set x.id, x.invalid, x.dependencies
+     */
     setup_tasks(tasks) {
         // prepare tasks
         this.tasks = tasks.map((task, i) => {
@@ -156,6 +160,9 @@ export default class Gantt {
         this.setup_dependencies();
     }
 
+    /**
+     * Set this.dependency_map
+     */
     setup_dependencies() {
         this.dependency_map = {};
         for (let t of this.tasks) {
@@ -179,7 +186,11 @@ export default class Gantt {
         this.trigger_event('view_change', [mode]);
     }
 
-    update_view_scale(view_mode) {
+    /**
+     * Set this.options.view_mode, this.options.step and this.options.column_width
+     * according to view_mode
+     */
+     update_view_scale(view_mode) {
         this.options.view_mode = view_mode;
 
         if (view_mode === VIEW_MODE.DAY) {
@@ -208,7 +219,10 @@ export default class Gantt {
         this.setup_date_values();
     }
 
-    setup_gantt_dates() {
+    /**
+     * Set this.gantt_start and this.gantt_end
+     */
+     setup_gantt_dates() {
         this.gantt_start = this.gantt_end = null;
 
         for (let task of this.tasks) {
@@ -240,6 +254,9 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Set this.dates
+     */
     setup_date_values() {
         this.dates = [];
         let cur_date = null;
@@ -439,6 +456,9 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Render month names, day numbers, hours on diagram
+     */
     make_dates() {
         for (let date of this.get_dates_to_draw()) {
             createSVG('text', {
@@ -562,6 +582,9 @@ export default class Gantt {
         };
     }
 
+    /**
+     * Render task bars on diagram
+     */
     make_bars() {
         this.bars = this.tasks.map(task => {
             const bar = new Bar(this, task);
@@ -570,7 +593,10 @@ export default class Gantt {
         });
     }
 
-    make_arrows() {
+    /**
+     * Render dependency arrows on diagram
+     */
+     make_arrows() {
         this.arrows = [];
         for (let task of this.tasks) {
             let arrows = [];
@@ -602,6 +628,9 @@ export default class Gantt {
         }
     }
 
+    /**
+     * Set svg rect. Scrollbars will appears.
+     */
     set_width() {
         const cur_width = this.$svg.getBoundingClientRect().width;
         const actual_width = this.$svg
