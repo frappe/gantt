@@ -175,18 +175,20 @@ export default class Bar {
     }
 
     setup_click_event() {
+        const disallow_popup = this.gantt.options.disallow_popup;
         $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
             }
-
-            this.show_popup();
+            if(!disallow_popup) {
+                this.show_popup();
+            }
             this.gantt.unselect_all();
             this.group.classList.add('active');
         });
-
-        $.on(this.group, 'dblclick', e => {
+        const click_event = disallow_popup ? 'click' : 'dblclick';
+        $.on(this.group, click_event, e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
