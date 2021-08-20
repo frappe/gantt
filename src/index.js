@@ -86,7 +86,8 @@ export default class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            language: 'en'
+            language: 'en',
+            margin_bottom: 100
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -319,7 +320,7 @@ export default class Gantt {
         });
 
         $.attr(this.$svg, {
-            height: grid_height + this.options.padding + 100,
+            height: grid_height + this.options.padding + this.options.margin_bottom,
             width: '100%'
         });
     }
