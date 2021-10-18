@@ -776,6 +776,10 @@ export default class Gantt {
                         bar.update_bar_position({
                             width: $bar.owidth + $bar.finaldx
                         });
+                    } else {
+                        bar.update_bar_position({
+                            x: $bar.ox + $bar.finaldx
+                        });
                     }
                 } else if (is_dragging) {
                     bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
