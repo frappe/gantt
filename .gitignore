@@ -29,3 +29,6 @@ node_modules
 .DS_Store
 
 gh-pages
+
+# JetBrains IDE data directory
+.idea

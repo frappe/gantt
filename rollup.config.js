@@ -1,5 +1,5 @@
 import sass from 'rollup-plugin-sass';
-import uglify from 'rollup-plugin-uglify';
+import { terser } from 'rollup-plugin-terser';
 import merge from 'deepmerge';
 
 const dev = {
@@ -7,19 +7,19 @@ const dev = {
     output: {
         name: 'Gantt',
         file: 'dist/frappe-gantt.js',
-        format: 'iife'
+        format: 'iife',
     },
     plugins: [
         sass({
-            output: 'dist/frappe-gantt.css'
-        })
-    ]
+            output: 'dist/frappe-gantt.css',
+        }),
+    ],
 };
 const prod = merge(dev, {
     output: {
-        file: 'dist/frappe-gantt.min.js'
+        file: 'dist/frappe-gantt.min.js',
     },
-    plugins: [uglify()]
+    plugins: [terser()],
 });
 
 export default [dev, prod];
