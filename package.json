@@ -2,7 +2,7 @@
   "name": "frappe-gantt",
   "version": "0.5.1",
   "description": "A simple, modern, interactive gantt library for the web",
-  "main": "src/index.js",
+  "main": "src/index.ts",
   "scripts": {
     "start": "yarn run dev",
     "build": "rollup -c",
@@ -30,16 +30,21 @@
   },
   "homepage": "https://github.com/frappe/gantt",
   "devDependencies": {
+    "@rollup/plugin-typescript": "^8.3.0",
+    "@typescript-eslint/eslint-plugin": "^4.29.3",
+    "@typescript-eslint/parser": "^4.29.3",
     "babel-preset-env": "^1.7.0",
     "deepmerge": "^4.2.2",
-    "eslint": "^8.0.1",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^4.0.0",
+    "eslint": "^7.2.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-airbnb-typescript": "^14.0.1",
+    "eslint-plugin-import": "^2.22.1",
     "jest": "^27.3.1",
-    "prettier": "2.4.1",
     "rollup": "^2.58.0",
     "rollup-plugin-sass": "^1.2.9",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup-plugin-terser": "^7.0.2",
+    "tslib": "^2.3.1",
+    "typescript": "^4.4.4"
   },
   "eslintIgnore": [
     "dist"
