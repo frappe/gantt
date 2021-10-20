@@ -1243,6 +1243,10 @@ class Gantt {
                 this.gantt_end = task._end;
             }
         }
+        if(!this.gantt_start)
+            this.gantt_start = new Date();
+        if(!this.gantt_end)
+            this.gantt_end = new Date();
 
         this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
         this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
