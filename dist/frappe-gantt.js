@@ -1627,9 +1627,9 @@ class Gantt {
 
     set_width() {
         const cur_width = this.$svg.getBoundingClientRect().width;
-        const actual_width = this.$svg
+        const actual_width = this.$svg.querySelector('.grid .grid-row') ? this.$svg
             .querySelector('.grid .grid-row')
-            .getAttribute('width');
+            .getAttribute('width') : 0;
         if (cur_width < actual_width) {
             this.$svg.setAttribute('width', actual_width);
         }
@@ -1927,6 +1927,8 @@ class Gantt {
      * @memberof Gantt
      */
     get_oldest_starting_date() {
+        if(this.tasks.length == 0)
+            return this.gantt_start;
         return this.tasks
             .map(task => task._start)
             .reduce(
