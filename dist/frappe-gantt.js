@@ -1896,7 +1896,7 @@ class Gantt {
 
     get_bar(id) {
         return this.bars.find(bar => {
-            return bar.task.id === id;
+            return bar.task.id === paseInt(id);
         });
     }
 
