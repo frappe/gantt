@@ -6,7 +6,9 @@ const MINUTE = 'minute';
 const SECOND = 'second';
 const MILLISECOND = 'millisecond';
 
-const monthNames = {
+type Language = 'ptBr' | 'ru' | 'en' | 'fr' | 'es' | 'tr' | 'zh';
+
+const monthNames: Record<Language, string[]> = {
   en: [
     'January',
     'February',
@@ -107,6 +109,25 @@ const monthNames = {
   ],
 };
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
+function padStart(
+  maybeStr: string | number | never[],
+  targetLength: number,
+  padString: string | number,
+): string {
+  const str = `${maybeStr}`;
+  let truncatedLength = Math.trunc(targetLength);
+  let paddedString = String(typeof padString !== 'undefined' ? padString : ' ');
+  if (str.length > truncatedLength) {
+    return String(str);
+  }
+  truncatedLength -= str.length;
+  if (targetLength > paddedString.length) {
+    paddedString += paddedString.repeat(truncatedLength / paddedString.length);
+  }
+  return paddedString.slice(0, truncatedLength) + String(str);
+}
+
 export default {
   parse(date: String | Date, date_separator: string = '-', time_separator: RegExp = /[.:]/): Date | null {
     if (date instanceof Date) {
@@ -138,13 +159,14 @@ export default {
     return null;
   },
 
-  to_string(date, with_time = false) {
+  to_string(date: Date, with_time = false): string {
     if (!(date instanceof Date)) {
       throw new TypeError('Invalid argument type');
     }
     const vals = this.get_date_values(date).map((val, i) => {
       if (i === 1) {
         // add 1 for month
+        // eslint-disable-next-line no-param-reassign
         val += 1;
       }
 
@@ -154,15 +176,21 @@ export default {
 
       return padStart(`${val}`, 2, '0');
     });
-    const date_string = `${vals[0]}-${vals[1]}-${vals[2]}`;
-    const time_string = `${vals[3]}:${vals[4]}:${vals[5]}.${vals[6]}`;
+    const dateString = `${vals[0]}-${vals[1]}-${vals[2]}`;
+    const timeString = `${vals[3]}:${vals[4]}:${vals[5]}.${vals[6]}`;
 
-    return date_string + (with_time ? ` ${time_string}` : '');
+    return dateString + (with_time ? ` ${timeString}` : '');
   },
 
-  format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
+  format(
+    date: Date, format_string: string = 'YYYY-MM-DD HH:mm:ss.SSS', lang: Language = 'en',
+  ): string {
+    if (!Object.keys(monthNames).includes(lang)) {
+      throw new Error('Invalid Language');
+    }
+
     const values = this.get_date_values(date).map((d) => padStart(d, 2, 0));
-    const format_map = {
+    const formatMap: Record<string, string> = {
       YYYY: values[0],
       MM: padStart(+values[1] + 1, 2, 0),
       DD: values[2],
@@ -176,37 +204,35 @@ export default {
     };
 
     let str = format_string;
-    const formatted_values = [];
+    const formattedValues: string[] = [];
 
-    Object.keys(format_map)
+    Object.keys(formatMap)
       .sort((a, b) => b.length - a.length) // big string first
       .forEach((key) => {
         if (str.includes(key)) {
-          str = str.replace(key, `$${formatted_values.length}`);
-          formatted_values.push(format_map[key]);
+          str = str.replace(key, `$${formattedValues.length}`);
+          formattedValues.push(formatMap[key]);
         }
       });
 
-    formatted_values.forEach((value, i) => {
+    formattedValues.forEach((value, i) => {
       str = str.replace(`$${i}`, value);
     });
 
     return str;
   },
 
-  diff(date_a, date_b, scale = DAY) {
-    let milliseconds; let seconds; let hours; let minutes; let days; let months; let
-      years;
-
-    milliseconds = date_a - date_b;
-    seconds = milliseconds / 1000;
-    minutes = seconds / 60;
-    hours = minutes / 60;
-    days = hours / 24;
-    months = days / 30;
-    years = months / 12;
+  diff(dateA: number, dateB: number, scale = DAY): number {
+    const milliseconds = dateA - dateB;
+    const seconds = milliseconds / 1000;
+    const minutes = seconds / 60;
+    const hours = minutes / 60;
+    const days = hours / 24;
+    const months = days / 30;
+    const years = months / 12;
 
     if (!scale.endsWith('s')) {
+      // eslint-disable-next-line no-param-reassign
       scale += 's';
     }
 
@@ -223,31 +249,34 @@ export default {
     );
   },
 
-  today() {
+  today(): Date {
     const vals = this.get_date_values(new Date()).slice(0, 3);
+    // @ts-ignore
     return new Date(...vals);
   },
 
-  now() {
+  now(): Date {
     return new Date();
   },
 
-  add(date, qty, scale) {
-    qty = parseInt(qty, 10);
+  add(date: Date, qty: string | number, scale: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' | 'millisecond'): Date {
+    const numQty = typeof qty === 'string' ? parseInt(qty, 10) : qty;
+
     const vals = [
-      date.getFullYear() + (scale === YEAR ? qty : 0),
-      date.getMonth() + (scale === MONTH ? qty : 0),
-      date.getDate() + (scale === DAY ? qty : 0),
-      date.getHours() + (scale === HOUR ? qty : 0),
-      date.getMinutes() + (scale === MINUTE ? qty : 0),
-      date.getSeconds() + (scale === SECOND ? qty : 0),
-      date.getMilliseconds() + (scale === MILLISECOND ? qty : 0),
+      date.getFullYear() + (scale === YEAR ? numQty : 0),
+      date.getMonth() + (scale === MONTH ? numQty : 0),
+      date.getDate() + (scale === DAY ? numQty : 0),
+      date.getHours() + (scale === HOUR ? numQty : 0),
+      date.getMinutes() + (scale === MINUTE ? numQty : 0),
+      date.getSeconds() + (scale === SECOND ? numQty : 0),
+      date.getMilliseconds() + (scale === MILLISECOND ? numQty : 0),
     ];
+    // @ts-ignore
     return new Date(...vals);
   },
 
-  start_of(date, scale) {
-    const scores = {
+  start_of(date: Date, scale: string): Date {
+    const scores: Record<string, number> = {
       [YEAR]: 6,
       [MONTH]: 5,
       [DAY]: 4,
@@ -257,29 +286,31 @@ export default {
       [MILLISECOND]: 0,
     };
 
-    function should_reset(_scale) {
-      const max_score = scores[scale];
-      return scores[_scale] <= max_score;
+    function shouldReset(newScale: string): boolean {
+      const maxScore = scores[scale];
+      return scores[newScale] <= maxScore;
     }
 
     const vals = [
       date.getFullYear(),
-      should_reset(YEAR) ? 0 : date.getMonth(),
-      should_reset(MONTH) ? 1 : date.getDate(),
-      should_reset(DAY) ? 0 : date.getHours(),
-      should_reset(HOUR) ? 0 : date.getMinutes(),
-      should_reset(MINUTE) ? 0 : date.getSeconds(),
-      should_reset(SECOND) ? 0 : date.getMilliseconds(),
+      shouldReset(YEAR) ? 0 : date.getMonth(),
+      shouldReset(MONTH) ? 1 : date.getDate(),
+      shouldReset(DAY) ? 0 : date.getHours(),
+      shouldReset(HOUR) ? 0 : date.getMinutes(),
+      shouldReset(MINUTE) ? 0 : date.getSeconds(),
+      shouldReset(SECOND) ? 0 : date.getMilliseconds(),
     ];
 
+    // @ts-ignore
     return new Date(...vals);
   },
 
-  clone(date) {
+  clone(date: Date): Date {
+    // @ts-ignore
     return new Date(...this.get_date_values(date));
   },
 
-  get_date_values(date) {
+  get_date_values(date: Date): number[] {
     return [
       date.getFullYear(),
       date.getMonth(),
@@ -291,35 +322,20 @@ export default {
     ];
   },
 
-  get_days_in_month(date) {
-    const no_of_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  get_days_in_month(date: Date): number {
+    const numDays: number[] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
     const month = date.getMonth();
 
     if (month !== 1) {
-      return no_of_days[month];
+      return numDays[month];
     }
 
     // Feb
     const year = date.getFullYear();
-    if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
+    if ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) {
       return 29;
     }
     return 28;
   },
 };
-
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
-function padStart(str, targetLength, padString) {
-  str += '';
-  targetLength >>= 0;
-  padString = String(typeof padString !== 'undefined' ? padString : ' ');
-  if (str.length > targetLength) {
-    return String(str);
-  }
-  targetLength -= str.length;
-  if (targetLength > padString.length) {
-    padString += padString.repeat(targetLength / padString.length);
-  }
-  return padString.slice(0, targetLength) + String(str);
-}

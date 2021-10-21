@@ -1,4 +1,4 @@
-import { createSVG } from './svg_utils';
+import { createSVG } from './svgUtils';
 
 export default class Arrow {
   constructor(gantt: this, from_task: any, to_task: any) {
