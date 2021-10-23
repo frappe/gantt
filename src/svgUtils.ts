@@ -5,9 +5,11 @@ export function $(expr: string | Element, con?: Element): Element {
 }
 
 $.on = (
-  element: Element, event: keyof ElementEventMap, selector: never, callback?: never,
+  element: Element, event: string,
+  selector: string | ((e: Event)=>void),
+  callback?: (e: Event)=>void,
 ): void => {
-  if (!callback) {
+  if (typeof selector === 'function') {
     // eslint-disable-next-line no-param-reassign
     callback = selector;
     $.bind(element, event, callback);
@@ -17,13 +19,13 @@ $.on = (
 };
 
 $.off = (
-  element: Element, event: keyof ElementEventMap, handler: (this: Element, event: Event)=>void,
+  element: Element, event: string, handler: (this: Element, event: Event) => void,
 ): void => {
   element.removeEventListener(event, handler);
 };
 
 $.bind = (
-  element: Element, event: string, callback: (this: Element, ev: unknown) => unknown,
+  element: Element, event: string, callback: (this: Element, ev: Event) => void,
 ): void => {
   event.split(/\s+/).forEach((e) => {
     element.addEventListener(e, callback);
@@ -31,7 +33,7 @@ $.bind = (
 };
 
 $.delegate = (
-  element: Element, event: keyof ElementEventMap, selector: never,
+  element: Element, event: string, selector: string,
   callback: (arg0: never, arg1: never, arg2: never) => void,
 ): void => {
   // eslint-disable-next-line func-names
@@ -41,6 +43,7 @@ $.delegate = (
     if (delegatedTarget) {
       // @ts-ignore
       e.delegatedTarget = delegatedTarget;
+      // @ts-ignore
       callback.call(this, e, delegatedTarget);
     }
   });
@@ -56,7 +59,9 @@ $.closest = (selector: string, element: Element): Element => {
   return $.closest(selector, element.parentElement);
 };
 
-$.attr = (element: Element, attr: Record<string, never> | string, value?: never): string | null => {
+$.attr = (
+  element: Element, attr: Record<string, string | number> | string, value?: string | number,
+): string | null => {
   if (!value && typeof attr === 'string') {
     return element.getAttribute(attr);
   }
@@ -68,12 +73,22 @@ $.attr = (element: Element, attr: Record<string, never> | string, value?: never)
     return null;
   }
 
-  element.setAttribute(attr, value);
+  element.setAttribute(attr, value as string);
   return null;
 };
 
-export type CreateSVGAttrs = Record<string, string | HTMLElement>
-& { append_to?: HTMLElement };
+function cubicBezier(name: 'ease' | 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out'): string {
+  return {
+    ease: '.25 .1 .25 1',
+    linear: '0 0 1 1',
+    'ease-in': '.42 0 1 1',
+    'ease-out': '0 0 .58 1',
+    'ease-in-out': '.42 0 .58 1',
+  }[name];
+}
+
+export type CreateSVGAttrs = Record<string, string | number | Element>
+& { append_to?: Element };
 
 export function createSVG(tag: string, attrs: CreateSVGAttrs): SVGElement {
   const elem = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -93,24 +108,11 @@ export function createSVG(tag: string, attrs: CreateSVGAttrs): SVGElement {
   return elem;
 }
 
-export function animateSVG(svgElement: SVGElement, attr: string, from: number, to: any): void {
-  const animatedSvgElement = getAnimationElement(svgElement, attr, from, to);
-
-  if (animatedSvgElement === svgElement) {
-    // triggered 2nd time programmatically
-    // trigger artificial click event
-    const event = document.createEvent('HTMLEvents');
-    event.initEvent('click', true, true);
-    event.eventName = 'click';
-    animatedSvgElement.dispatchEvent(event);
-  }
-}
-
 function getAnimationElement(
   svgElement: SVGElement,
   attr: string,
   from: number,
-  to: never,
+  to: number,
   dur = '0.4s',
   begin = '0.1s',
 ): SVGElement {
@@ -135,19 +137,27 @@ function getAnimationElement(
     calcMode: 'spline',
     values: `${from};${to}`,
     keyTimes: '0; 1',
-    keySplines: cubic_bezier('ease-out'),
+    keySplines: cubicBezier('ease-out'),
   });
   svgElement.appendChild(animateElement);
 
   return svgElement;
 }
 
-function cubic_bezier(name) {
-  return {
-    ease: '.25 .1 .25 1',
-    linear: '0 0 1 1',
-    'ease-in': '.42 0 1 1',
-    'ease-out': '0 0 .58 1',
-    'ease-in-out': '.42 0 .58 1',
-  }[name];
+export function animateSVG(svgElement: SVGElement, attr: string, from: number, to: number): void {
+  const animatedSvgElement = getAnimationElement(svgElement, attr, from, to);
+
+  if (animatedSvgElement === svgElement) {
+    // triggered 2nd time programmatically
+    // trigger artificial click event
+    const event = new MouseEvent('click', {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+    });
+    // const event = document.createEvent('HTMLEvents') as MouseEvent;
+    // event.initEvent('click', true, true);
+    // event.eventName = 'click';
+    animatedSvgElement.dispatchEvent(event);
+  }
 }

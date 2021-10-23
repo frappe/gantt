@@ -1,11 +1,32 @@
+import { ResolvedTask } from './index';
+
+export interface PopupOptions {
+  subtitle: string;
+  task: ResolvedTask;
+  title: string;
+  position?: string;
+  targetElement: SVGGraphicsElement;
+
+}
+
 export default class Popup {
-  constructor(parent, custom_html) {
+  private parent: HTMLDivElement;
+
+  private readonly customHtml: (task: ResolvedTask)=>string;
+
+  private title: HTMLElement;
+
+  private subtitle: HTMLElement;
+
+  private pointer: HTMLElement;
+
+  constructor(parent: HTMLDivElement, custom_html: (task: ResolvedTask)=>string) {
     this.parent = parent;
-    this.custom_html = custom_html;
+    this.customHtml = custom_html;
     this.make();
   }
 
-  make() {
+  make(): void {
     this.parent.innerHTML = `
             <div class="title"></div>
             <div class="subtitle"></div>
@@ -19,17 +40,18 @@ export default class Popup {
     this.pointer = this.parent.querySelector('.pointer');
   }
 
-  show(options) {
-    if (!options.target_element) {
-      throw new Error('target_element is required to show popup');
+  show(options: PopupOptions): void {
+    if (!options.targetElement) {
+      throw new Error('targetElement is required to show popup');
     }
     if (!options.position) {
+      // eslint-disable-next-line no-param-reassign
       options.position = 'left';
     }
-    const { target_element } = options;
+    const { targetElement } = options;
 
-    if (this.custom_html) {
-      let html = this.custom_html(options.task);
+    if (this.customHtml) {
+      let html = this.customHtml(options.task);
       html += '<div class="pointer"></div>';
       this.parent.innerHTML = html;
       this.pointer = this.parent.querySelector('.pointer');
@@ -41,16 +63,16 @@ export default class Popup {
     }
 
     // set position
-    let position_meta;
-    if (target_element instanceof HTMLElement) {
-      position_meta = target_element.getBoundingClientRect();
-    } else if (target_element instanceof SVGElement) {
-      position_meta = options.target_element.getBBox();
+    let positionMeta;
+    if (targetElement instanceof HTMLElement) {
+      positionMeta = targetElement.getBoundingClientRect();
+    } else if (targetElement instanceof SVGElement) {
+      positionMeta = options.targetElement.getBBox();
     }
 
     if (options.position === 'left') {
-      this.parent.style.left = `${position_meta.x + (position_meta.width + 10)}px`;
-      this.parent.style.top = `${position_meta.y}px`;
+      this.parent.style.left = `${positionMeta.x + (positionMeta.width + 10)}px`;
+      this.parent.style.top = `${positionMeta.y}px`;
 
       this.pointer.style.transform = 'rotateZ(90deg)';
       this.pointer.style.left = '-7px';
@@ -58,10 +80,10 @@ export default class Popup {
     }
 
     // show
-    this.parent.style.opacity = 1;
+    this.parent.style.opacity = String(1);
   }
 
-  hide() {
-    this.parent.style.opacity = 0;
+  hide(): void {
+    this.parent.style.opacity = String(0);
   }
 }

@@ -6,7 +6,7 @@ const MINUTE = 'minute';
 const SECOND = 'second';
 const MILLISECOND = 'millisecond';
 
-type Language = 'ptBr' | 'ru' | 'en' | 'fr' | 'es' | 'tr' | 'zh';
+export type Language = 'ptBr' | 'ru' | 'en' | 'fr' | 'es' | 'tr' | 'zh';
 
 const monthNames: Record<Language, string[]> = {
   en: [
@@ -222,8 +222,8 @@ export default {
     return str;
   },
 
-  diff(dateA: number, dateB: number, scale = DAY): number {
-    const milliseconds = dateA - dateB;
+  diff(dateA: number | Date, dateB: number | Date, scale = DAY): number {
+    const milliseconds = Number(dateA) - Number(dateB);
     const seconds = milliseconds / 1000;
     const minutes = seconds / 60;
     const hours = minutes / 60;

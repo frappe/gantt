@@ -1,39 +1,78 @@
+import Gantt, { ResolvedTask } from '.';
 import date_utils from './dateUtils';
 import { $, createSVG, animateSVG } from './svgUtils';
+import Arrow from './arrow';
 
 export default class Bar {
-  constructor(gantt, task) {
+  private action_completed: boolean;
+
+  private gantt: Gantt;
+
+  task: ResolvedTask;
+
+  private invalid: boolean;
+
+  private height: number;
+
+  private x: number;
+
+  private y: number;
+
+  private corner_radius: number;
+
+  private duration: number;
+
+  private width: number;
+
+  private progress_width: number;
+
+  private group: SVGElement;
+
+  private bar_group: SVGElement;
+
+  private handle_group: SVGElement;
+
+  $bar: SVGElement;
+
+  private $bar_progress: SVGElement;
+
+  // @ts-ignore
+  private $handle_progress: SVGElement;
+
+  private arrows: Arrow[];
+
+  constructor(gantt: Gantt, task: ResolvedTask) {
     this.set_defaults(gantt, task);
     this.prepare();
     this.draw();
     this.bind();
   }
 
-  set_defaults(gantt, task) {
+  set_defaults(gantt: Gantt, task: ResolvedTask): void {
     this.action_completed = false;
     this.gantt = gantt;
     this.task = task;
   }
 
-  prepare() {
+  prepare(): void {
     this.prepare_values();
     this.prepare_helpers();
   }
 
-  prepare_values() {
+  prepare_values(): void {
     this.invalid = this.task.invalid;
-    this.height = this.gantt.options.bar_height;
+    this.height = this.gantt.options.barHeight;
     this.x = this.compute_x();
     this.y = this.compute_y();
-    this.corner_radius = this.gantt.options.bar_corner_radius;
-    this.duration = date_utils.diff(this.task._end, this.task._start, 'hour')
-            / this.gantt.options.step;
-    this.width = this.gantt.options.column_width * this.duration;
-    this.progress_width = this.gantt.options.column_width
-                * this.duration
-                * (this.task.progress / 100) || 0;
+    this.corner_radius = this.gantt.options.barCornerRadius;
+    this.duration = date_utils.diff(this.task.endResolved, this.task.startResolved, 'hour')
+        / this.gantt.options.step;
+    this.width = this.gantt.options.columnWidth * this.duration;
+    this.progress_width = this.gantt.options.columnWidth
+        * this.duration
+        * (this.task.progress / 100) || 0;
     this.group = createSVG('g', {
-      class: `bar-wrapper ${this.task.custom_class || ''}`,
+      class: `bar-wrapper ${this.task.customClass || ''}`,
       'data-id': this.task.id,
     });
     this.bar_group = createSVG('g', {
@@ -46,32 +85,34 @@ export default class Bar {
     });
   }
 
-  prepare_helpers() {
-    SVGElement.prototype.getX = function () {
+  prepare_helpers = (): void => {
+    /* eslint-disable func-names */
+    SVGElement.prototype.getX = function (): number {
       return +this.getAttribute('x');
     };
-    SVGElement.prototype.getY = function () {
+    SVGElement.prototype.getY = function (): number {
       return +this.getAttribute('y');
     };
-    SVGElement.prototype.getWidth = function () {
+    SVGElement.prototype.getWidth = function (): number {
       return +this.getAttribute('width');
     };
-    SVGElement.prototype.getHeight = function () {
+    SVGElement.prototype.getHeight = function (): number {
       return +this.getAttribute('height');
     };
-    SVGElement.prototype.getEndX = function () {
+    SVGElement.prototype.getEndX = function (): number {
       return this.getX() + this.getWidth();
     };
-  }
+    /* eslint-enable func-names */
+  };
 
-  draw() {
+  draw(): void {
     this.draw_bar();
     this.draw_progress_bar();
     this.draw_label();
     this.draw_resize_handles();
   }
 
-  draw_bar() {
+  draw_bar(): void {
     this.$bar = createSVG('rect', {
       x: this.x,
       y: this.y,
@@ -90,7 +131,7 @@ export default class Bar {
     }
   }
 
-  draw_progress_bar() {
+  draw_progress_bar(): void {
     if (this.invalid) return;
     this.$bar_progress = createSVG('rect', {
       x: this.x,
@@ -106,7 +147,7 @@ export default class Bar {
     animateSVG(this.$bar_progress, 'width', 0, this.progress_width);
   }
 
-  draw_label() {
+  draw_label(): void {
     createSVG('text', {
       x: this.x + this.width / 2,
       y: this.y + this.height / 2,
@@ -118,16 +159,16 @@ export default class Bar {
     requestAnimationFrame(() => this.update_label_position());
   }
 
-  draw_resize_handles() {
+  draw_resize_handles(): void {
     if (this.invalid) return;
 
     const bar = this.$bar;
-    const handle_width = 8;
+    const handleWidth = 8;
 
     createSVG('rect', {
       x: bar.getX() + bar.getWidth() - 9,
       y: bar.getY() + 1,
-      width: handle_width,
+      width: handleWidth,
       height: this.height - 2,
       rx: this.corner_radius,
       ry: this.corner_radius,
@@ -138,7 +179,7 @@ export default class Bar {
     createSVG('rect', {
       x: bar.getX() + 1,
       y: bar.getY() + 1,
-      width: handle_width,
+      width: handleWidth,
       height: this.height - 2,
       rx: this.corner_radius,
       ry: this.corner_radius,
@@ -155,25 +196,25 @@ export default class Bar {
     }
   }
 
-  get_progress_polygon_points() {
-    const bar_progress = this.$bar_progress;
+  get_progress_polygon_points(): number[] {
+    const barProgress = this.$bar_progress;
     return [
-      bar_progress.getEndX() - 5,
-      bar_progress.getY() + bar_progress.getHeight(),
-      bar_progress.getEndX() + 5,
-      bar_progress.getY() + bar_progress.getHeight(),
-      bar_progress.getEndX(),
-      bar_progress.getY() + bar_progress.getHeight() - 8.66,
+      barProgress.getEndX() - 5,
+      barProgress.getY() + barProgress.getHeight(),
+      barProgress.getEndX() + 5,
+      barProgress.getY() + barProgress.getHeight(),
+      barProgress.getEndX(),
+      barProgress.getY() + barProgress.getHeight() - 8.66,
     ];
   }
 
-  bind() {
+  bind(): void {
     if (this.invalid) return;
     this.setup_click_event();
   }
 
-  setup_click_event() {
-    $.on(this.group, `focus ${this.gantt.options.popup_trigger}`, (e) => {
+  setup_click_event(): void {
+    $.on(this.group, `focus ${this.gantt.options.popupTrigger}`, () => {
       if (this.action_completed) {
         // just finished a move action, wait for a few seconds
         return;
@@ -184,7 +225,7 @@ export default class Bar {
       this.group.classList.add('active');
     });
 
-    $.on(this.group, 'dblclick', (e) => {
+    $.on(this.group, 'dblclick', () => {
       if (this.action_completed) {
         // just finished a move action, wait for a few seconds
         return;
@@ -194,16 +235,16 @@ export default class Bar {
     });
   }
 
-  show_popup() {
+  show_popup(): void {
     if (this.gantt.bar_being_dragged) return;
 
-    const start_date = date_utils.format(this.task._start, 'MMM D', this.gantt.options.language);
-    const end_date = date_utils.format(
-      date_utils.add(this.task._end, -1, 'second'),
+    const startDate = date_utils.format(this.task.startResolved, 'MMM D', this.gantt.options.language);
+    const endDate = date_utils.format(
+      date_utils.add(this.task.endResolved, -1, 'second'),
       'MMM D',
       this.gantt.options.language,
     );
-    const subtitle = `${start_date} - ${end_date}`;
+    const subtitle = `${startDate} - ${endDate}`;
 
     this.gantt.show_popup({
       target_element: this.$bar,
@@ -213,20 +254,21 @@ export default class Bar {
     });
   }
 
-  update_bar_position({ x = null, width = null }) {
+  update_bar_position({ x = null, width = null }: { x: number, width: number }): void {
     const bar = this.$bar;
     if (x) {
       // get all x values of parent task
       const xs = this.task.dependencies.map((dep) => this.gantt.get_bar(dep).$bar.getX());
       // child task must not go before parent
-      const valid_x = xs.reduce((prev, curr) => x >= curr, x);
-      if (!valid_x) {
+      const validX = xs.reduce((_prev, curr) => x >= curr, x);
+      if (!validX) {
+        // eslint-disable-next-line no-param-reassign
         width = null;
         return;
       }
       this.update_attr(bar, 'x', x);
     }
-    if (width && width >= this.gantt.options.column_width) {
+    if (width && width >= this.gantt.options.columnWidth) {
       this.update_attr(bar, 'width', width);
     }
     this.update_label_position();
@@ -235,167 +277,169 @@ export default class Bar {
     this.update_arrow_position();
   }
 
-  date_changed() {
+  date_changed(): void {
     let changed = false;
-    const { new_start_date, new_end_date } = this.compute_start_end_date();
+    const { newStartDate, newEndDate } = this.compute_start_end_date();
 
-    if (Number(this.task._start) !== Number(new_start_date)) {
+    if (Number(this.task.startResolved) !== Number(newStartDate)) {
       changed = true;
-      this.task._start = new_start_date;
+      this.task.startResolved = newStartDate;
     }
 
-    if (Number(this.task._end) !== Number(new_end_date)) {
+    if (Number(this.task.endResolved) !== Number(newEndDate)) {
       changed = true;
-      this.task._end = new_end_date;
+      this.task.endResolved = newEndDate;
     }
 
     if (!changed) return;
 
     this.gantt.trigger_event('date_change', [
       this.task,
-      new_start_date,
-      date_utils.add(new_end_date, -1, 'second'),
+      newStartDate,
+      date_utils.add(newEndDate, -1, 'second'),
     ]);
   }
 
-  progress_changed() {
-    const new_progress = this.compute_progress();
-    this.task.progress = new_progress;
-    this.gantt.trigger_event('progress_change', [this.task, new_progress]);
+  progress_changed(): void {
+    const newProgress = this.compute_progress();
+    this.task.progress = newProgress;
+    this.gantt.trigger_event('progress_change', [this.task, newProgress]);
   }
 
-  set_action_completed() {
+  set_action_completed(): void {
     this.action_completed = true;
-    setTimeout(() => (this.action_completed = false), 1000);
+    setTimeout(() => { this.action_completed = false; }, 1000);
   }
 
-  compute_start_end_date() {
+  compute_start_end_date(): { newStartDate: Date, newEndDate: Date } {
     const bar = this.$bar;
-    const x_in_units = bar.getX() / this.gantt.options.column_width;
-    const new_start_date = date_utils.add(
-      this.gantt.gantt_start,
-      x_in_units * this.gantt.options.step,
+    const xInUnits = bar.getX() / this.gantt.options.columnWidth;
+    const newStartDate = date_utils.add(
+      this.gantt.ganttStart,
+      xInUnits * this.gantt.options.step,
       'hour',
     );
-    const width_in_units = bar.getWidth() / this.gantt.options.column_width;
-    const new_end_date = date_utils.add(
-      new_start_date,
-      width_in_units * this.gantt.options.step,
+    const widthInUnits = bar.getWidth() / this.gantt.options.columnWidth;
+    const newEndDate = date_utils.add(
+      newStartDate,
+      widthInUnits * this.gantt.options.step,
       'hour',
     );
 
-    return { new_start_date, new_end_date };
+    return { newStartDate, newEndDate };
   }
 
-  compute_progress() {
-    const progress = this.$bar_progress.getWidth() / this.$bar.getWidth() * 100;
-    return parseInt(progress, 10);
+  compute_progress(): number {
+    const progress = (this.$bar_progress.getWidth() / this.$bar.getWidth()) * 100;
+    return parseInt(String(progress), 10);
   }
 
-  compute_x() {
-    const { step, column_width } = this.gantt.options;
-    const task_start = this.task._start;
-    const { gantt_start } = this.gantt;
+  compute_x(): number {
+    const { step, columnWidth } = this.gantt.options;
+    const taskStart = this.task.startResolved;
+    const { ganttStart } = this.gantt;
 
-    const diff = date_utils.diff(task_start, gantt_start, 'hour');
-    let x = diff / step * column_width;
+    let diff = date_utils.diff(taskStart, ganttStart, 'hour');
+    let x = (diff / step) * columnWidth;
 
     if (this.gantt.view_is('Month')) {
-      const diff = date_utils.diff(task_start, gantt_start, 'day');
-      x = diff * column_width / 30;
+      diff = date_utils.diff(taskStart, ganttStart, 'day');
+      x = (diff * columnWidth) / 30;
     }
     return x;
   }
 
-  compute_y() {
+  compute_y(): number {
     return (
-      this.gantt.options.header_height
+      this.gantt.options.headerHeight
             + this.gantt.options.padding
-            + this.task._index * (this.height + this.gantt.options.padding)
+            + this.task.indexResolved * (this.height + this.gantt.options.padding)
     );
   }
 
-  get_snap_position(dx) {
+  get_snap_position(dx: number): number {
     const odx = dx;
     let rem;
     let position;
 
     if (this.gantt.view_is('Week')) {
-      rem = dx % (this.gantt.options.column_width / 7);
+      rem = dx % (this.gantt.options.columnWidth / 7);
       position = odx
                 - rem
-                + (rem < this.gantt.options.column_width / 14
+                + (rem < this.gantt.options.columnWidth / 14
                   ? 0
-                  : this.gantt.options.column_width / 7);
+                  : this.gantt.options.columnWidth / 7);
     } else if (this.gantt.view_is('Month')) {
-      rem = dx % (this.gantt.options.column_width / 30);
+      rem = dx % (this.gantt.options.columnWidth / 30);
       position = odx
                 - rem
-                + (rem < this.gantt.options.column_width / 60
+                + (rem < this.gantt.options.columnWidth / 60
                   ? 0
-                  : this.gantt.options.column_width / 30);
+                  : this.gantt.options.columnWidth / 30);
     } else {
-      rem = dx % this.gantt.options.column_width;
+      rem = dx % this.gantt.options.columnWidth;
       position = odx
                 - rem
-                + (rem < this.gantt.options.column_width / 2
+                + (rem < this.gantt.options.columnWidth / 2
                   ? 0
-                  : this.gantt.options.column_width);
+                  : this.gantt.options.columnWidth);
     }
     return position;
   }
 
-  update_attr(element, attr, value) {
-    value = +value;
-    if (!isNaN(value)) {
-      element.setAttribute(attr, value);
+  update_attr = (element: Element, attr: string, value: number | string): Element => {
+    const numValue = Number(value);
+    if (!Number.isNaN(numValue)) {
+      element.setAttribute(attr, String(value));
     }
     return element;
-  }
+  };
 
-  update_progressbar_position() {
-    this.$bar_progress.setAttribute('x', this.$bar.getX());
+  update_progressbar_position(): void {
+    this.$bar_progress.setAttribute('x', String(this.$bar.getX()));
     this.$bar_progress.setAttribute(
       'width',
-      this.$bar.getWidth() * (this.task.progress / 100),
+      String(this.$bar.getWidth() * (this.task.progress / 100)),
     );
   }
 
-  update_label_position() {
+  update_label_position(): void {
     const bar = this.$bar;
-    const label = this.group.querySelector('.bar-label');
+    const label = this.group.querySelector('.bar-label') as SVGGraphicsElement;
 
     if (label.getBBox().width > bar.getWidth()) {
       label.classList.add('big');
-      label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+      label.setAttribute('x', String(bar.getX() + bar.getWidth() + 5));
     } else {
       label.classList.remove('big');
-      label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+      label.setAttribute('x', String(bar.getX() + bar.getWidth() / 2));
     }
   }
 
-  update_handle_position() {
+  update_handle_position(): void {
     const bar = this.$bar;
     this.handle_group
       .querySelector('.handle.left')
-      .setAttribute('x', bar.getX() + 1);
+      .setAttribute('x', String(bar.getX() + 1));
     this.handle_group
       .querySelector('.handle.right')
-      .setAttribute('x', bar.getEndX() - 9);
+      .setAttribute('x', String(bar.getEndX() - 9));
     const handle = this.group.querySelector('.handle.progress');
-    handle
-            && handle.setAttribute('points', this.get_progress_polygon_points());
+    if (handle) handle.setAttribute('points', this.get_progress_polygon_points().join(','));
   }
 
-  update_arrow_position() {
+  update_arrow_position(): void {
     this.arrows = this.arrows || [];
-    for (const arrow of this.arrows) {
+    this.arrows.forEach((arrow) => {
       arrow.update();
-    }
+    });
   }
 }
 
-function isFunction(functionToCheck) {
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// noinspection JSUnusedLocalSymbols
+// @ts-ignore
+function isFunction(functionToCheck: unknown): boolean {
   const getType = {};
   return (
     functionToCheck
