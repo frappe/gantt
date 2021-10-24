@@ -1000,7 +1000,7 @@ var Gantt = (function () {
         setup_tasks(tasks) {
             // prepare tasks
             this.tasks = tasks.map((task, i) => {
-                let dependencies = [];
+                let dependencies;
                 // dependencies
                 if (typeof task.dependencies === 'string') {
                     dependencies = task.dependencies
@@ -1010,6 +1010,9 @@ var Gantt = (function () {
                 }
                 else if (dependencies) {
                     dependencies = task.dependencies;
+                }
+                else {
+                    dependencies = [];
                 }
                 const resolvedTask = Object.assign(Object.assign({}, task), { startResolved: dateUtils.parse(task.start), endResolved: dateUtils.parse(task.end), indexResolved: i, dependencies });
                 // make task invalid if duration too large

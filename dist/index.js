@@ -94,7 +94,7 @@ export default class Gantt {
     setup_tasks(tasks) {
         // prepare tasks
         this.tasks = tasks.map((task, i) => {
-            let dependencies = [];
+            let dependencies;
             // dependencies
             if (typeof task.dependencies === 'string') {
                 dependencies = task.dependencies
@@ -104,6 +104,9 @@ export default class Gantt {
             }
             else if (dependencies) {
                 dependencies = task.dependencies;
+            }
+            else {
+                dependencies = [];
             }
             const resolvedTask = Object.assign(Object.assign({}, task), { startResolved: dateUtils.parse(task.start), endResolved: dateUtils.parse(task.end), indexResolved: i, dependencies });
             // make task invalid if duration too large

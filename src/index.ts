@@ -196,7 +196,7 @@ export default class Gantt {
   setup_tasks(tasks: Task[]): void {
     // prepare tasks
     this.tasks = tasks.map((task, i): ResolvedTask => {
-      let dependencies: string[] = [];
+      let dependencies: string[];
 
       // dependencies
       if (typeof task.dependencies === 'string') {
@@ -206,6 +206,8 @@ export default class Gantt {
           .filter((d) => d);
       } else if (dependencies) {
         dependencies = task.dependencies;
+      } else {
+        dependencies = [];
       }
 
       const resolvedTask: ResolvedTask = {
