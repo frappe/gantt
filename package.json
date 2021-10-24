@@ -2,7 +2,8 @@
   "name": "frappe-gantt",
   "version": "0.5.1",
   "description": "A simple, modern, interactive gantt library for the web",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "start": "yarn run dev",
     "build": "tsc && rollup -c",

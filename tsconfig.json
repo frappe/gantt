@@ -14,7 +14,9 @@
     "noUnusedParameters": true,
     "allowSyntheticDefaultImports": false,
     "allowUnreachableCode": false,
-    "allowUnusedLabels": false
+    "allowUnusedLabels": false,
+    "declaration": true,
+    "outDir": "dist"
   },
   "include": [
     "src",
