@@ -32,9 +32,3 @@ gh-pages
 
 # JetBrains IDE data directory
 .idea
-
-dist/*
-!/dist/frappe-gantt.css
-!/dist/frappe-gantt.js
-!/dist/frappe-gantt.js.map
-!/dist/frappe-gantt.min.js

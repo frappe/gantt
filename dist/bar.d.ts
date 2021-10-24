@@ -1,0 +1,56 @@
+import Gantt, { ResolvedTask } from '.';
+import Arrow from './arrow';
+export default class Bar {
+    private action_completed;
+    private gantt;
+    task: ResolvedTask;
+    private invalid;
+    private height;
+    private x;
+    private y;
+    private corner_radius;
+    private duration;
+    private width;
+    private progress_width;
+    group: SVGElement;
+    private bar_group;
+    private handle_group;
+    $bar: SVGElement;
+    $barProgress: SVGElement;
+    $handleProgress: SVGElement;
+    arrows: Arrow[];
+    constructor(gantt: Gantt, task: ResolvedTask);
+    set_defaults(gantt: Gantt, task: ResolvedTask): void;
+    prepare(): void;
+    prepare_values(): void;
+    prepare_helpers: () => void;
+    draw(): void;
+    draw_bar(): void;
+    draw_progress_bar(): void;
+    draw_label(): void;
+    draw_resize_handles(): void;
+    get_progress_polygon_points(): number[];
+    bind(): void;
+    setup_click_event(): void;
+    show_popup(): void;
+    update_bar_position({ x, width }: {
+        x?: number | null;
+        width?: number | null;
+    }): void;
+    date_changed(): void;
+    progress_changed(): void;
+    set_action_completed(): void;
+    compute_start_end_date(): {
+        newStartDate: Date;
+        newEndDate: Date;
+    };
+    compute_progress(): number;
+    compute_x(): number;
+    compute_y(): number;
+    get_snap_position(dx: number): number;
+    update_attr: (element: Element, attr: string, value: number | string) => Element;
+    update_progressbar_position(): void;
+    update_label_position(): void;
+    update_handle_position(): void;
+    update_arrow_position(): void;
+}
