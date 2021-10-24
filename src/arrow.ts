@@ -5,13 +5,13 @@ import Bar from './bar';
 export default class Arrow {
   private gantt: Gantt;
 
-  private fromTask: Bar;
+  fromTask: Bar;
 
-  private toTask: Bar;
+  toTask: Bar;
 
   private path: string;
 
-  private element: SVGElement;
+  element: SVGElement;
 
   constructor(gantt: Gantt, from_task: Bar, to_task: Bar) {
     this.gantt = gantt;

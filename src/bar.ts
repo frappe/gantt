@@ -26,7 +26,7 @@ export default class Bar {
 
   private progress_width: number;
 
-  private group: SVGElement;
+  group: SVGElement;
 
   private bar_group: SVGElement;
 
@@ -34,12 +34,12 @@ export default class Bar {
 
   $bar: SVGElement;
 
-  private $bar_progress: SVGElement;
+  $barProgress: SVGElement;
 
   // @ts-ignore
-  private $handle_progress: SVGElement;
+  $handleProgress: SVGElement;
 
-  private arrows: Arrow[];
+  arrows: Arrow[];
 
   constructor(gantt: Gantt, task: ResolvedTask) {
     this.set_defaults(gantt, task);
@@ -133,7 +133,7 @@ export default class Bar {
 
   draw_progress_bar(): void {
     if (this.invalid) return;
-    this.$bar_progress = createSVG('rect', {
+    this.$barProgress = createSVG('rect', {
       x: this.x,
       y: this.y,
       width: this.progress_width,
@@ -144,7 +144,7 @@ export default class Bar {
       append_to: this.bar_group,
     });
 
-    animateSVG(this.$bar_progress, 'width', 0, this.progress_width);
+    animateSVG(this.$barProgress, 'width', 0, this.progress_width);
   }
 
   draw_label(): void {
@@ -188,7 +188,7 @@ export default class Bar {
     });
 
     if (this.task.progress && this.task.progress < 100) {
-      this.$handle_progress = createSVG('polygon', {
+      this.$handleProgress = createSVG('polygon', {
         points: this.get_progress_polygon_points().join(','),
         class: 'handle progress',
         append_to: this.handle_group,
@@ -197,7 +197,7 @@ export default class Bar {
   }
 
   get_progress_polygon_points(): number[] {
-    const barProgress = this.$bar_progress;
+    const barProgress = this.$barProgress;
     return [
       barProgress.getEndX() - 5,
       barProgress.getY() + barProgress.getHeight(),
@@ -247,19 +247,22 @@ export default class Bar {
     const subtitle = `${startDate} - ${endDate}`;
 
     this.gantt.show_popup({
-      target_element: this.$bar,
+      // @ts-ignore
+      targetElement: this.$bar,
       title: this.task.name,
       subtitle,
       task: this.task,
     });
   }
 
-  update_bar_position({ x = null, width = null }: { x: number, width: number }): void {
+  update_bar_position({ x = null, width = null }:
+  { x?: number | null, width?: number | null }): void {
     const bar = this.$bar;
     if (x) {
       // get all x values of parent task
       const xs = this.task.dependencies.map((dep) => this.gantt.get_bar(dep).$bar.getX());
       // child task must not go before parent
+      // @ts-ignore
       const validX = xs.reduce((_prev, curr) => x >= curr, x);
       if (!validX) {
         // eslint-disable-next-line no-param-reassign
@@ -330,7 +333,7 @@ export default class Bar {
   }
 
   compute_progress(): number {
-    const progress = (this.$bar_progress.getWidth() / this.$bar.getWidth()) * 100;
+    const progress = (this.$barProgress.getWidth() / this.$bar.getWidth()) * 100;
     return parseInt(String(progress), 10);
   }
 
@@ -396,8 +399,8 @@ export default class Bar {
   };
 
   update_progressbar_position(): void {
-    this.$bar_progress.setAttribute('x', String(this.$bar.getX()));
-    this.$bar_progress.setAttribute(
+    this.$barProgress.setAttribute('x', String(this.$bar.getX()));
+    this.$barProgress.setAttribute(
       'width',
       String(this.$bar.getWidth() * (this.task.progress / 100)),
     );

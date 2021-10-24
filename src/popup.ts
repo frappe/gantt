@@ -12,7 +12,7 @@ export interface PopupOptions {
 export default class Popup {
   private parent: HTMLDivElement;
 
-  private readonly customHtml: (task: ResolvedTask)=>string;
+  private readonly customHtml: ((task: ResolvedTask)=>string) | string;
 
   private title: HTMLElement;
 
@@ -20,7 +20,7 @@ export default class Popup {
 
   private pointer: HTMLElement;
 
-  constructor(parent: HTMLDivElement, custom_html: (task: ResolvedTask)=>string) {
+  constructor(parent: HTMLDivElement, custom_html: ((task: ResolvedTask)=>string) | string) {
     this.parent = parent;
     this.customHtml = custom_html;
     this.make();
@@ -51,7 +51,12 @@ export default class Popup {
     const { targetElement } = options;
 
     if (this.customHtml) {
-      let html = this.customHtml(options.task);
+      let html;
+      if (typeof this.customHtml === 'string') {
+        html = this.customHtml;
+      } else {
+        html = this.customHtml(options.task);
+      }
       html += '<div class="pointer"></div>';
       this.parent.innerHTML = html;
       this.pointer = this.parent.querySelector('.pointer');

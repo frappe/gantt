@@ -9,9 +9,10 @@ const dev = {
     name: 'Gantt',
     file: 'dist/frappe-gantt.js',
     format: 'iife',
-    sourcemap: !!process.env.ROLLUP_WATCH,
+    sourcemap: true,
   },
   plugins: [
+    typescript(),
     sass({
       output: 'dist/frappe-gantt.css',
     }),
@@ -20,8 +21,9 @@ const dev = {
 const prod = merge(dev, {
   output: {
     file: 'dist/frappe-gantt.min.js',
+    sourcemap: false,
   },
-  plugins: [typescript(), terser()],
+  plugins: [terser()],
 });
 
 export default [dev, prod];

@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es5",
+    "module": "es2015",
+    "target": "es2015",
+    "lib": ["ES2015", "DOM"],
     "sourceMap": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
@@ -12,7 +13,8 @@
     "noUnusedParameters": true,
     "allowSyntheticDefaultImports": false,
     "allowUnreachableCode": false,
-    "allowUnusedLabels": false
+    "allowUnusedLabels": false,
+    "rootDir": "src"
   },
   "include": [
     "src",

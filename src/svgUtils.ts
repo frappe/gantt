@@ -6,10 +6,10 @@ export function $(expr: string | Element, con?: Element): Element {
 
 $.on = (
   element: Element, event: string,
-  selector: string | ((e: Event)=>void),
-  callback?: (e: Event)=>void,
+  selector: string | EventListenerOrEventListenerObject,
+  callback?: EventListenerOrEventListenerObject,
 ): void => {
-  if (typeof selector === 'function') {
+  if (typeof selector === 'function' || typeof selector === 'object') {
     // eslint-disable-next-line no-param-reassign
     callback = selector;
     $.bind(element, event, callback);
@@ -19,13 +19,13 @@ $.on = (
 };
 
 $.off = (
-  element: Element, event: string, handler: (this: Element, event: Event) => void,
+  element: Element, event: string, handler: EventListenerOrEventListenerObject,
 ): void => {
   element.removeEventListener(event, handler);
 };
 
 $.bind = (
-  element: Element, event: string, callback: (this: Element, ev: Event) => void,
+  element: Element, event: string, callback: EventListenerOrEventListenerObject,
 ): void => {
   event.split(/\s+/).forEach((e) => {
     element.addEventListener(e, callback);
@@ -34,7 +34,7 @@ $.bind = (
 
 $.delegate = (
   element: Element, event: string, selector: string,
-  callback: (arg0: never, arg1: never, arg2: never) => void,
+  callback: EventListenerOrEventListenerObject,
 ): void => {
   // eslint-disable-next-line func-names
   element.addEventListener(event, function (e: Event) {

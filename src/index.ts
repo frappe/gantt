@@ -2,11 +2,11 @@ import dateUtils, { Language } from './dateUtils';
 import { $, createSVG } from './svgUtils';
 import Bar from './bar';
 import Arrow from './arrow';
-import Popup from './popup';
+import Popup, { PopupOptions } from './popup';
 
 import './gantt.scss';
 
-export interface Task {
+interface Task {
   id: string,
   name: string,
   start: string | Date,
@@ -69,6 +69,12 @@ function generateId(task: ResolvedTask): string {
 }
 
 interface DateInfo {
+  upper_y: string | number | Element;
+  upper_x: string | number | Element;
+  upper_text: string | number | Element;
+  lower_text: string | number | Element;
+  lower_y: string | number | Element;
+  lower_x: string | number | Element;
 }
 
 export default class Gantt {
@@ -82,7 +88,7 @@ export default class Gantt {
 
   private tasks: ResolvedTask[];
 
-  private dependencyMap: Record<string, unknown[]>;
+  private dependencyMap: Record<string, string[]>;
 
   public ganttStart: null | Date;
 
@@ -90,9 +96,17 @@ export default class Gantt {
 
   private dates: Date[];
 
-  public bar_being_dragged?: Bar;
+  public bar_being_dragged?: string;
 
   private layers: Record<string, SVGElement>;
+
+  private bars: Bar[];
+
+  private arrows: Arrow[];
+
+  private popup: Popup;
+
+  static VIEW_MODE: { QUARTER_DAY: 'Quarter Day'; HALF_DAY: 'Half Day'; DAY: 'Day'; WEEK: 'Week'; MONTH: 'Month'; YEAR: 'Year' };
 
   constructor(
     wrapper: string | HTMLElement | SVGElement | unknown,
@@ -567,12 +581,11 @@ export default class Gantt {
 
   get_dates_to_draw(): DateInfo[] {
     let lastDate: Date = null;
-    const dates = this.dates.map((date, i) => {
+    return this.dates.map((date, i) => {
       const d = this.get_date_info(date, lastDate, i);
       lastDate = date;
       return d;
     });
-    return dates;
   }
 
   get_date_info(date: Date, lastDate: Date, i: number): DateInfo {
@@ -606,6 +619,7 @@ export default class Gantt {
                   ? dateUtils.format(date, 'D MMM', this.options.language)
                   : '',
       'Half Day_upper':
+      // eslint-disable-next-line no-nested-ternary
                 date.getDate() !== lastDate.getDate()
                   ? date.getMonth() !== lastDate.getMonth()
                     ? dateUtils.format(date, 'D MMM', this.options.language)
@@ -660,7 +674,7 @@ export default class Gantt {
     };
   }
 
-  make_bars() {
+  make_bars(): void {
     this.bars = this.tasks.map((task) => {
       const bar = new Bar(this, task);
       this.layers.bar.appendChild(bar.group);
@@ -668,65 +682,63 @@ export default class Gantt {
     });
   }
 
-  make_arrows() {
+  make_arrows(): void {
     this.arrows = [];
-    for (const task of this.tasks) {
-      let arrows = [];
-      arrows = task.dependencies
+    this.tasks.forEach((task) => {
+      const arrows = task.dependencies
         .map((task_id) => {
           const dependency = this.get_task(task_id);
-          if (!dependency) return;
+          if (!dependency) return null;
           const arrow = new Arrow(
             this,
-            this.bars[dependency._index], // from_task
-            this.bars[task._index], // to_task
+            this.bars[dependency.indexResolved], // from_task
+            this.bars[task.indexResolved], // to_task
           );
           this.layers.arrow.appendChild(arrow.element);
           return arrow;
         })
         .filter(Boolean); // filter falsy values
       this.arrows = this.arrows.concat(arrows);
-    }
+    });
   }
 
-  map_arrows_on_bars() {
-    for (const bar of this.bars) {
+  map_arrows_on_bars(): void {
+    this.bars.forEach((bar) => {
+      // eslint-disable-next-line no-param-reassign
       bar.arrows = this.arrows.filter((arrow) => (
-        arrow.from_task.task.id === bar.task.id
-                || arrow.to_task.task.id === bar.task.id
+        arrow.fromTask.task.id === bar.task.id
+                || arrow.toTask.task.id === bar.task.id
       ));
-    }
+    });
   }
 
-  set_width() {
-    const cur_width = this.$svg.getBoundingClientRect().width;
-    const actual_width = this.$svg
+  set_width(): void {
+    const currentWidth = this.$svg.getBoundingClientRect().width;
+    const actualWidth = this.$svg
       .querySelector('.grid .grid-row')
       .getAttribute('width');
-    if (cur_width < actual_width) {
-      this.$svg.setAttribute('width', actual_width);
+    if (currentWidth < Number(actualWidth)) {
+      this.$svg.setAttribute('width', actualWidth);
     }
   }
 
-  set_scroll_position() {
-    const parent_element = this.$svg.parentElement;
-    if (!parent_element) return;
+  set_scroll_position(): void {
+    const { parentElement } = this.$svg;
+    if (!parentElement) return;
 
-    const hours_before_first_task = dateUtils.diff(
+    const hoursBeforeFirstTask = dateUtils.diff(
       this.get_oldest_starting_date(),
       this.ganttStart,
       'hour',
     );
 
-    const scroll_pos = hours_before_first_task
-            / this.options.step
-            * this.options.columnWidth
-            - this.options.columnWidth;
-
-    parent_element.scrollLeft = scroll_pos;
+    parentElement.scrollLeft = (hoursBeforeFirstTask
+        / this.options.step)
+        * this.options.columnWidth
+        - this.options.columnWidth;
   }
 
-  bind_grid_click() {
+  bind_grid_click(): void {
     $.on(
       this.$svg,
       this.options.popupTrigger,
@@ -738,44 +750,43 @@ export default class Gantt {
     );
   }
 
-  bind_bar_events() {
-    let is_dragging = false;
-    let x_on_start = 0;
-    let y_on_start = 0;
-    let is_resizing_left = false;
-    let is_resizing_right = false;
-    let parent_bar_id = null;
-    let bars = []; // instanceof Bar
+  bind_bar_events(): void {
+    let isDragging = false;
+    let xOnStart = 0;
+    let isResizingLeft = false;
+    let isResizingRight = false;
+    let parentBarId: string | Bar = null;
+    let bars: Bar[] = []; // instanceof Bar
     this.bar_being_dragged = null;
 
-    function action_in_progress() {
-      return is_dragging || is_resizing_left || is_resizing_right;
+    function actionInProgress(): boolean {
+      return isDragging || isResizingLeft || isResizingRight;
     }
 
+    // @ts-ignore Weird sorcery. I don't touch it and it keeps working.
     $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
-      const bar_wrapper = $.closest('.bar-wrapper', element);
+      const barWrapper = $.closest('.bar-wrapper', element);
 
       if (element.classList.contains('left')) {
-        is_resizing_left = true;
+        isResizingLeft = true;
       } else if (element.classList.contains('right')) {
-        is_resizing_right = true;
+        isResizingRight = true;
       } else if (element.classList.contains('bar-wrapper')) {
-        is_dragging = true;
+        isDragging = true;
       }
 
-      bar_wrapper.classList.add('active');
+      barWrapper.classList.add('active');
 
-      x_on_start = e.offsetX;
-      y_on_start = e.offsetY;
+      xOnStart = e.offsetX;
 
-      parent_bar_id = bar_wrapper.getAttribute('data-id');
+      parentBarId = barWrapper.getAttribute('data-id');
       const ids = [
-        parent_bar_id,
-        ...this.get_all_dependent_tasks(parent_bar_id),
+        parentBarId,
+        ...this.get_all_dependent_tasks(parentBarId),
       ];
       bars = ids.map((id) => this.get_bar(id));
 
-      this.bar_being_dragged = parent_bar_id;
+      this.bar_being_dragged = parentBarId;
 
       bars.forEach((bar) => {
         const { $bar } = bar;
@@ -786,17 +797,16 @@ export default class Gantt {
       });
     });
 
-    $.on(this.$svg, 'mousemove', (e) => {
-      if (!action_in_progress()) return;
-      const dx = e.offsetX - x_on_start;
-      const dy = e.offsetY - y_on_start;
+    $.on(this.$svg, 'mousemove', (e: MouseEvent) => {
+      if (!actionInProgress()) return;
+      const dx = e.offsetX - xOnStart;
 
       bars.forEach((bar) => {
         const { $bar } = bar;
         $bar.finaldx = this.get_snap_position(dx);
 
-        if (is_resizing_left) {
-          if (parent_bar_id === bar.task.id) {
+        if (isResizingLeft) {
+          if (parentBarId === bar.task.id) {
             bar.update_bar_position({
               x: $bar.ox + $bar.finaldx,
               width: $bar.owidth - $bar.finaldx,
@@ -806,29 +816,29 @@ export default class Gantt {
               x: $bar.ox + $bar.finaldx,
             });
           }
-        } else if (is_resizing_right) {
-          if (parent_bar_id === bar.task.id) {
+        } else if (isResizingRight) {
+          if (parentBarId === bar.task.id) {
             bar.update_bar_position({
               width: $bar.owidth + $bar.finaldx,
             });
           }
-        } else if (is_dragging) {
+        } else if (isDragging) {
           bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
         }
       });
     });
 
-    document.addEventListener('mouseup', (e) => {
-      if (is_dragging || is_resizing_left || is_resizing_right) {
+    document.addEventListener('mouseup', () => {
+      if (isDragging || isResizingLeft || isResizingRight) {
         bars.forEach((bar) => bar.group.classList.remove('active'));
       }
 
-      is_dragging = false;
-      is_resizing_left = false;
-      is_resizing_right = false;
+      isDragging = false;
+      isResizingLeft = false;
+      isResizingRight = false;
     });
 
-    $.on(this.$svg, 'mouseup', (e) => {
+    $.on(this.$svg, 'mouseup', () => {
       this.bar_being_dragged = null;
       bars.forEach((bar) => {
         const { $bar } = bar;
@@ -841,75 +851,70 @@ export default class Gantt {
     this.bind_bar_progress();
   }
 
-  bind_bar_progress() {
-    let x_on_start = 0;
-    let y_on_start = 0;
-    let is_resizing = null;
-    let bar = null;
-    let $bar_progress = null;
+  bind_bar_progress(): void {
+    let xOnStart = 0;
+    let isResizing: boolean = null;
+    let bar: Bar = null;
+    let $barProgress: SVGElement = null;
     let $bar = null;
 
+    // @ts-ignore sorcery.
     $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
-      is_resizing = true;
-      x_on_start = e.offsetX;
-      y_on_start = e.offsetY;
+      isResizing = true;
+      xOnStart = e.offsetX;
 
-      const $bar_wrapper = $.closest('.bar-wrapper', handle);
-      const id = $bar_wrapper.getAttribute('data-id');
+      const $barWrapper = $.closest('.bar-wrapper', handle);
+      const id = $barWrapper.getAttribute('data-id');
       bar = this.get_bar(id);
 
-      $bar_progress = bar.$bar_progress;
+      $barProgress = bar.$barProgress;
       $bar = bar.$bar;
 
-      $bar_progress.finaldx = 0;
-      $bar_progress.owidth = $bar_progress.getWidth();
-      $bar_progress.min_dx = -$bar_progress.getWidth();
-      $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
+      $barProgress.finaldx = 0;
+      $barProgress.owidth = $barProgress.getWidth();
+      $barProgress.min_dx = -$barProgress.getWidth();
+      $barProgress.max_dx = $bar.getWidth() - $barProgress.getWidth();
     });
 
-    $.on(this.$svg, 'mousemove', (e) => {
-      if (!is_resizing) return;
-      let dx = e.offsetX - x_on_start;
-      const dy = e.offsetY - y_on_start;
+    $.on(this.$svg, 'mousemove', (e: MouseEvent) => {
+      if (!isResizing) return;
+      let dx = e.offsetX - xOnStart;
 
-      if (dx > $bar_progress.max_dx) {
-        dx = $bar_progress.max_dx;
+      if (dx > $barProgress.max_dx) {
+        dx = $barProgress.max_dx;
       }
-      if (dx < $bar_progress.min_dx) {
-        dx = $bar_progress.min_dx;
+      if (dx < $barProgress.min_dx) {
+        dx = $barProgress.min_dx;
       }
 
-      const $handle = bar.$handle_progress;
-      $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
-      $.attr($handle, 'points', bar.get_progress_polygon_points());
-      $bar_progress.finaldx = dx;
+      const $handle = bar.$handleProgress;
+      $.attr($barProgress, 'width', $barProgress.owidth + dx);
+      $.attr($handle, 'points', String(bar.get_progress_polygon_points()));
+      $barProgress.finaldx = dx;
     });
 
     $.on(this.$svg, 'mouseup', () => {
-      is_resizing = false;
-      if (!($bar_progress && $bar_progress.finaldx)) return;
+      isResizing = false;
+      if (!($barProgress && $barProgress.finaldx)) return;
       bar.progress_changed();
       bar.set_action_completed();
     });
   }
 
-  get_all_dependent_tasks(task_id) {
-    let out = [];
-    let to_process = [task_id];
-    while (to_process.length) {
-      const deps = to_process.reduce((acc, curr) => {
-        acc = acc.concat(this.dependencyMap[curr]);
-        return acc;
-      }, []);
-
+  get_all_dependent_tasks(task_id: string): string[] {
+    let out: string[] = [];
+    let toProcess = [task_id];
+    while (toProcess.length) {
+      const deps = toProcess.reduce((acc, curr) => acc.concat(this.dependencyMap[curr]), []);
       out = out.concat(deps);
-      to_process = deps.filter((d) => !to_process.includes(d));
+      // eslint-disable-next-line @typescript-eslint/no-loop-func
+      toProcess = deps.filter((d) => !toProcess.includes(d));
     }
 
     return out.filter(Boolean);
   }
 
-  get_snap_position(dx) {
+  get_snap_position(dx: number): number {
     const odx = dx;
     let rem;
     let position;
@@ -939,13 +944,13 @@ export default class Gantt {
     return position;
   }
 
-  unselect_all() {
-    [...this.$svg.querySelectorAll('.bar-wrapper')].forEach((el) => {
+  unselect_all(): void {
+    Array.from(this.$svg.querySelectorAll('.bar-wrapper')).forEach((el) => {
       el.classList.remove('active');
     });
   }
 
-  view_is(modes) {
+  view_is(modes: ViewMode | ViewMode[]): boolean {
     if (typeof modes === 'string') {
       return this.options.viewMode === modes;
     }
@@ -957,15 +962,15 @@ export default class Gantt {
     return false;
   }
 
-  get_task(id) {
+  get_task(id: string): ResolvedTask {
     return this.tasks.find((task) => task.id === id);
   }
 
-  get_bar(id) {
+  get_bar(id: string): Bar {
     return this.bars.find((bar) => bar.task.id === id);
   }
 
-  show_popup(options) {
+  show_popup(options: PopupOptions): void {
     if (!this.popup) {
       this.popup = new Popup(
         this.popupWrapper,
@@ -975,14 +980,13 @@ export default class Gantt {
     this.popup.show(options);
   }
 
-  hide_popup() {
-    this.popup && this.popup.hide();
+  hide_popup(): void {
+    if (this.popup) this.popup.hide();
   }
 
-  trigger_event(event, args) {
-    if (this.options[`on_${event}`]) {
-      this.options[`on_${event}`].apply(null, args);
-    }
+  trigger_event(event: string, args: unknown): void {
+    // @ts-ignore
+    this.options[`on_${event}`]?.apply(null, args);
   }
 
   /**
@@ -991,9 +995,9 @@ export default class Gantt {
      * @returns Date
      * @memberof Gantt
      */
-  get_oldest_starting_date() {
+  get_oldest_starting_date(): Date {
     return this.tasks
-      .map((task) => task._start)
+      .map((task) => task.startResolved)
       .reduce(
         (prev_date, cur_date) => (cur_date <= prev_date ? cur_date : prev_date),
       );
@@ -1004,7 +1008,7 @@ export default class Gantt {
      *
      * @memberof Gantt
      */
-  clear() {
+  clear(): void {
     this.$svg.innerHTML = '';
   }
 }
