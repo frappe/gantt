@@ -1,10 +1,9 @@
 import sass from 'rollup-plugin-sass';
 import { terser } from 'rollup-plugin-terser';
-import typescript from '@rollup/plugin-typescript';
 import merge from 'deepmerge';
 
 const dev = {
-  input: 'src/index.ts',
+  input: 'src/index.js',
   output: {
     name: 'Gantt',
     file: 'dist/frappe-gantt.js',
@@ -12,7 +11,6 @@ const dev = {
     sourcemap: true,
   },
   plugins: [
-    typescript(),
     sass({
       output: 'dist/frappe-gantt.css',
     }),

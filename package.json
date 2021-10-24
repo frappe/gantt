@@ -2,11 +2,11 @@
   "name": "frappe-gantt",
   "version": "0.5.1",
   "description": "A simple, modern, interactive gantt library for the web",
-  "main": "dist/frappe-gantt.js",
+  "main": "src/index.js",
   "scripts": {
     "start": "yarn run dev",
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
+    "build": "tsc && rollup -c",
+    "dev": "concurrently \"rollup -c -w\" \"tsc --watch\"",
     "test": "jest",
     "test:watch": "jest --watch",
     "prettier": "prettier es6 --write \"{src/*,tests/*,rollup.config}.js\""
@@ -34,6 +34,7 @@
     "@typescript-eslint/eslint-plugin": "^4.29.3",
     "@typescript-eslint/parser": "^4.29.3",
     "babel-preset-env": "^1.7.0",
+    "concurrently": "^6.3.0",
     "deepmerge": "^4.2.2",
     "eslint": "^7.2.0",
     "eslint-config-airbnb-base": "^14.2.1",

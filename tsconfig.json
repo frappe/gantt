@@ -14,8 +14,7 @@
     "noUnusedParameters": true,
     "allowSyntheticDefaultImports": false,
     "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "rootDir": "src"
+    "allowUnusedLabels": false
   },
   "include": [
     "src",
