@@ -4,7 +4,8 @@ import Bar from './bar';
 import Arrow from './arrow';
 import Popup, { PopupOptions } from './popup';
 
-import './gantt.scss';
+// eslint-disable-next-line import/no-useless-path-segments
+import '../src/gantt.scss';
 
 interface Task {
   id: string,

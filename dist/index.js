@@ -3,7 +3,8 @@ import { $, createSVG } from './svgUtils';
 import Bar from './bar';
 import Arrow from './arrow';
 import Popup from './popup';
-import './gantt.scss';
+// eslint-disable-next-line import/no-useless-path-segments
+import '../src/gantt.scss';
 const VIEW_MODE = {
     QUARTER_DAY: 'Quarter Day',
     HALF_DAY: 'Half Day',

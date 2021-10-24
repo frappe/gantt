@@ -1,7 +1,7 @@
 import { Language } from './dateUtils';
 import Bar from './bar';
 import { PopupOptions } from './popup';
-import './gantt.scss';
+import '../src/gantt.scss';
 interface Task {
     id: string;
     name: string;
