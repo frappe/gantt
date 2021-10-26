@@ -159,11 +159,11 @@ export default {
     return null;
   },
 
-  to_string(date: Date, with_time = false): string {
+  toString(date: Date, with_time = false): string {
     if (!(date instanceof Date)) {
       throw new TypeError('Invalid argument type');
     }
-    const vals = this.get_date_values(date).map((val, i) => {
+    const vals = this.getDateValues(date).map((val, i) => {
       if (i === 1) {
         // add 1 for month
         // eslint-disable-next-line no-param-reassign
@@ -189,7 +189,7 @@ export default {
       throw new Error('Invalid Language');
     }
 
-    const values = this.get_date_values(date).map((d) => padStart(d, 2, 0));
+    const values = this.getDateValues(date).map((d) => padStart(d, 2, 0));
     const formatMap: Record<string, string> = {
       YYYY: values[0],
       MM: padStart(+values[1] + 1, 2, 0),
@@ -250,7 +250,7 @@ export default {
   },
 
   today(): Date {
-    const vals = this.get_date_values(new Date()).slice(0, 3);
+    const vals = this.getDateValues(new Date()).slice(0, 3);
     // @ts-ignore
     return new Date(...vals);
   },
@@ -275,7 +275,7 @@ export default {
     return new Date(...vals);
   },
 
-  start_of(date: Date, scale: string): Date {
+  startOf(date: Date, scale: string): Date {
     const scores: Record<string, number> = {
       [YEAR]: 6,
       [MONTH]: 5,
@@ -307,10 +307,10 @@ export default {
 
   clone(date: Date): Date {
     // @ts-ignore
-    return new Date(...this.get_date_values(date));
+    return new Date(...this.getDateValues(date));
   },
 
-  get_date_values(date: Date): number[] {
+  getDateValues(date: Date): number[] {
     return [
       date.getFullYear(),
       date.getMonth(),
@@ -322,7 +322,7 @@ export default {
     ];
   },
 
-  get_days_in_month(date: Date): number {
+  getDaysInMonth(date: Date): number {
     const numDays: number[] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
     const month = date.getMonth();

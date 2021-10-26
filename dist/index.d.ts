@@ -33,6 +33,10 @@ export interface Options {
     customPopupHtml?: string | null;
     popupTrigger: string;
     language: Language;
+    onClick?: (task: ResolvedTask) => void;
+    onDateChange?: (task: ResolvedTask, startDate: Date, endDate: Date) => void;
+    onProgressChange?: (task: ResolvedTask, progress: number) => void;
+    onViewChange?: (mode: ViewMode) => void;
 }
 interface DateInfo {
     upper_y: string | number | Element;
@@ -66,52 +70,52 @@ export default class Gantt {
         YEAR: 'Year';
     };
     constructor(wrapper: string | HTMLElement | SVGElement | unknown, tasks: Task[], options: Options);
-    setup_wrapper(elementReference: string | HTMLElement | SVGElement | unknown): void;
-    setup_options(options: Options): void;
-    setup_tasks(tasks: Task[]): void;
+    setupWrapper(elementReference: string | HTMLElement | SVGElement | unknown): void;
+    setupOptions(options: Options): void;
+    setupTasks(tasks: Task[]): void;
     setupDependencies(): void;
     refresh(tasks: Task[]): void;
-    change_view_mode(mode?: ViewMode): void;
-    update_view_scale(view_mode: ViewMode): void;
-    setup_dates(): void;
-    setup_gantt_dates(): void;
-    setup_date_values(): void;
-    bind_events(): void;
+    changeViewMode(mode?: ViewMode): void;
+    updateViewScale(view_mode: ViewMode): void;
+    setupDates(): void;
+    setupGanttDates(): void;
+    setupDateValues(): void;
+    bindEvents(): void;
     render(): void;
-    setup_layers(): void;
-    make_grid(): void;
-    make_grid_background(): void;
-    make_grid_rows(): void;
-    make_grid_header(): void;
-    make_grid_ticks(): void;
-    make_grid_highlights(): void;
-    make_dates(): void;
-    get_dates_to_draw(): DateInfo[];
-    get_date_info(date: Date, lastDate: Date, i: number): DateInfo;
-    make_bars(): void;
-    make_arrows(): void;
-    map_arrows_on_bars(): void;
-    set_width(): void;
-    set_scroll_position(): void;
-    bind_grid_click(): void;
-    bind_bar_events(): void;
-    bind_bar_progress(): void;
-    get_all_dependent_tasks(task_id: string): string[];
-    get_snap_position(dx: number): number;
-    unselect_all(): void;
-    view_is(modes: ViewMode | ViewMode[]): boolean;
-    get_task(id: string): ResolvedTask;
-    get_bar(id: string): Bar;
-    show_popup(options: PopupOptions): void;
-    hide_popup(): void;
-    trigger_event(event: string, args: unknown): void;
+    setupLayers(): void;
+    makeGrid(): void;
+    makeGridBackground(): void;
+    makeGridRows(): void;
+    makeGridHeader(): void;
+    makeGridTicks(): void;
+    makeGridHighlights(): void;
+    makeDates(): void;
+    getDatesToDraw(): DateInfo[];
+    getDateInfo(date: Date, lastDate: Date, i: number): DateInfo;
+    makeBars(): void;
+    makeArrows(): void;
+    mapArrowsOnBars(): void;
+    setWidth(): void;
+    setScrollPosition(): void;
+    bindGridClick(): void;
+    bindBarEvents(): void;
+    bindBarProgress(): void;
+    getAllDependentTasks(task_id: string): string[];
+    getSnapPosition(dx: number): number;
+    unselectAll(): void;
+    viewIs(modes: ViewMode | ViewMode[]): boolean;
+    getTask(id: string): ResolvedTask;
+    getBar(id: string): Bar;
+    showPopup(options: PopupOptions): void;
+    hidePopup(): void;
+    triggerEvent(event: string, args: unknown): void;
     /**
        * Gets the oldest starting date from the list of tasks
        *
        * @returns Date
        * @memberof Gantt
        */
-    get_oldest_starting_date(): Date;
+    getOldestStartingDate(): Date;
     /**
        * Clear all elements from the parent svg element
        *

@@ -18,11 +18,11 @@ export default class Arrow {
     this.fromTask = from_task;
     this.toTask = to_task;
 
-    this.calculate_path();
+    this.calculatePath();
     this.draw();
   }
 
-  calculate_path(): void {
+  calculatePath(): void {
     let startX = this.fromTask.$bar.getX() + this.fromTask.$bar.getWidth() / 2;
 
     const condition = (): boolean => this.toTask.$bar.getX() < startX + this.gantt.options.padding
@@ -96,7 +96,7 @@ export default class Arrow {
   }
 
   update(): void {
-    this.calculate_path();
+    this.calculatePath();
     this.element.setAttribute('d', this.path);
   }
 }

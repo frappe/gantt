@@ -4,10 +4,10 @@ export default class Arrow {
         this.gantt = gantt;
         this.fromTask = from_task;
         this.toTask = to_task;
-        this.calculate_path();
+        this.calculatePath();
         this.draw();
     }
-    calculate_path() {
+    calculatePath() {
         let startX = this.fromTask.$bar.getX() + this.fromTask.$bar.getWidth() / 2;
         const condition = () => this.toTask.$bar.getX() < startX + this.gantt.options.padding
             && startX > this.fromTask.$bar.getX() + this.gantt.options.padding;
@@ -69,7 +69,7 @@ export default class Arrow {
         });
     }
     update() {
-        this.calculate_path();
+        this.calculatePath();
         this.element.setAttribute('d', this.path);
     }
 }

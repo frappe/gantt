@@ -142,13 +142,13 @@ export default class Bar {
         });
         if (this.task.progress && this.task.progress < 100) {
             this.$handleProgress = createSVG('polygon', {
-                points: this.get_progress_polygon_points().join(','),
+                points: this.getProgressPolygonPoints().join(','),
                 class: 'handle progress',
                 append_to: this.handle_group,
             });
         }
     }
-    get_progress_polygon_points() {
+    getProgressPolygonPoints() {
         const barProgress = this.$barProgress;
         return [
             barProgress.getEndX() - 5,
@@ -171,7 +171,7 @@ export default class Bar {
                 return;
             }
             this.show_popup();
-            this.gantt.unselect_all();
+            this.gantt.unselectAll();
             this.group.classList.add('active');
         });
         $.on(this.group, 'dblclick', () => {
@@ -179,7 +179,7 @@ export default class Bar {
                 // just finished a move action, wait for a few seconds
                 return;
             }
-            this.gantt.trigger_event('click', [this.task]);
+            this.gantt.triggerEvent('Click', [this.task]);
         });
     }
     show_popup() {
@@ -188,7 +188,7 @@ export default class Bar {
         const startDate = date_utils.format(this.task.startResolved, 'MMM D', this.gantt.options.language);
         const endDate = date_utils.format(date_utils.add(this.task.endResolved, -1, 'second'), 'MMM D', this.gantt.options.language);
         const subtitle = `${startDate} - ${endDate}`;
-        this.gantt.show_popup({
+        this.gantt.showPopup({
             // @ts-ignore
             targetElement: this.$bar,
             title: this.task.name,
@@ -200,7 +200,7 @@ export default class Bar {
         const bar = this.$bar;
         if (x) {
             // get all x values of parent task
-            const xs = this.task.dependencies.map((dep) => this.gantt.get_bar(dep).$bar.getX());
+            const xs = this.task.dependencies.map((dep) => this.gantt.getBar(dep).$bar.getX());
             // child task must not go before parent
             // @ts-ignore
             const validX = xs.reduce((_prev, curr) => x >= curr, x);
@@ -232,18 +232,18 @@ export default class Bar {
         }
         if (!changed)
             return;
-        this.gantt.trigger_event('date_change', [
+        this.gantt.triggerEvent('DateChange', [
             this.task,
             newStartDate,
             date_utils.add(newEndDate, -1, 'second'),
         ]);
     }
-    progress_changed() {
+    progressChanged() {
         const newProgress = this.compute_progress();
         this.task.progress = newProgress;
-        this.gantt.trigger_event('progress_change', [this.task, newProgress]);
+        this.gantt.triggerEvent('ProgressChange', [this.task, newProgress]);
     }
-    set_action_completed() {
+    setActionCompleted() {
         this.action_completed = true;
         setTimeout(() => { this.action_completed = false; }, 1000);
     }
@@ -265,7 +265,7 @@ export default class Bar {
         const { ganttStart } = this.gantt;
         let diff = date_utils.diff(taskStart, ganttStart, 'hour');
         let x = (diff / step) * columnWidth;
-        if (this.gantt.view_is('Month')) {
+        if (this.gantt.viewIs('Month')) {
             diff = date_utils.diff(taskStart, ganttStart, 'day');
             x = (diff * columnWidth) / 30;
         }
@@ -280,7 +280,7 @@ export default class Bar {
         const odx = dx;
         let rem;
         let position;
-        if (this.gantt.view_is('Week')) {
+        if (this.gantt.viewIs('Week')) {
             rem = dx % (this.gantt.options.columnWidth / 7);
             position = odx
                 - rem
@@ -288,7 +288,7 @@ export default class Bar {
                     ? 0
                     : this.gantt.options.columnWidth / 7);
         }
-        else if (this.gantt.view_is('Month')) {
+        else if (this.gantt.viewIs('Month')) {
             rem = dx % (this.gantt.options.columnWidth / 30);
             position = odx
                 - rem
@@ -332,7 +332,7 @@ export default class Bar {
             .setAttribute('x', String(bar.getEndX() - 9));
         const handle = this.group.querySelector('.handle.progress');
         if (handle)
-            handle.setAttribute('points', this.get_progress_polygon_points().join(','));
+            handle.setAttribute('points', this.getProgressPolygonPoints().join(','));
     }
     update_arrow_position() {
         this.arrows = this.arrows || [];

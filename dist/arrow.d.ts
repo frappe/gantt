@@ -7,7 +7,7 @@ export default class Arrow {
     private path;
     element: SVGElement;
     constructor(gantt: Gantt, from_task: Bar, to_task: Bar);
-    calculate_path(): void;
+    calculatePath(): void;
     draw(): void;
     update(): void;
 }

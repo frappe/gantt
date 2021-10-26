@@ -145,11 +145,11 @@ export default {
         }
         return null;
     },
-    to_string(date, with_time = false) {
+    toString(date, with_time = false) {
         if (!(date instanceof Date)) {
             throw new TypeError('Invalid argument type');
         }
-        const vals = this.get_date_values(date).map((val, i) => {
+        const vals = this.getDateValues(date).map((val, i) => {
             if (i === 1) {
                 // add 1 for month
                 // eslint-disable-next-line no-param-reassign
@@ -168,7 +168,7 @@ export default {
         if (!Object.keys(monthNames).includes(lang)) {
             throw new Error('Invalid Language');
         }
-        const values = this.get_date_values(date).map((d) => padStart(d, 2, 0));
+        const values = this.getDateValues(date).map((d) => padStart(d, 2, 0));
         const formatMap = {
             YYYY: values[0],
             MM: padStart(+values[1] + 1, 2, 0),
@@ -219,7 +219,7 @@ export default {
         }[scale]);
     },
     today() {
-        const vals = this.get_date_values(new Date()).slice(0, 3);
+        const vals = this.getDateValues(new Date()).slice(0, 3);
         // @ts-ignore
         return new Date(...vals);
     },
@@ -240,7 +240,7 @@ export default {
         // @ts-ignore
         return new Date(...vals);
     },
-    start_of(date, scale) {
+    startOf(date, scale) {
         const scores = {
             [YEAR]: 6,
             [MONTH]: 5,
@@ -268,9 +268,9 @@ export default {
     },
     clone(date) {
         // @ts-ignore
-        return new Date(...this.get_date_values(date));
+        return new Date(...this.getDateValues(date));
     },
-    get_date_values(date) {
+    getDateValues(date) {
         return [
             date.getFullYear(),
             date.getMonth(),
@@ -281,7 +281,7 @@ export default {
             date.getMilliseconds(),
         ];
     },
-    get_days_in_month(date) {
+    getDaysInMonth(date) {
         const numDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         const month = date.getMonth();
         if (month !== 1) {

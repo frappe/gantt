@@ -29,7 +29,7 @@ export default class Bar {
     draw_progress_bar(): void;
     draw_label(): void;
     draw_resize_handles(): void;
-    get_progress_polygon_points(): number[];
+    getProgressPolygonPoints(): number[];
     bind(): void;
     setup_click_event(): void;
     show_popup(): void;
@@ -38,8 +38,8 @@ export default class Bar {
         width?: number | null;
     }): void;
     date_changed(): void;
-    progress_changed(): void;
-    set_action_completed(): void;
+    progressChanged(): void;
+    setActionCompleted(): void;
     compute_start_end_date(): {
         newStartDate: Date;
         newEndDate: Date;
