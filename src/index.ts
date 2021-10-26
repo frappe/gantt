@@ -14,7 +14,10 @@ interface Task {
   end: string | Date,
   progress: number,
   dependencies?: string | string[],
-  customClass?: string
+  customClass?: string,
+  color?: string,
+  progressColor?: string,
+  labelColor?: string
 }
 
 export interface ResolvedTask extends Task {
@@ -101,7 +104,7 @@ export default class Gantt {
 
   private dates: Date[];
 
-  public bar_being_dragged?: string;
+  public barBeingDragged?: string;
 
   private layers: Record<string, SVGElement>;
 
@@ -764,7 +767,7 @@ export default class Gantt {
     let isResizingRight = false;
     let parentBarId: string | Bar = null;
     let bars: Bar[] = []; // instanceof Bar
-    this.bar_being_dragged = null;
+    this.barBeingDragged = null;
 
     function actionInProgress(): boolean {
       return isDragging || isResizingLeft || isResizingRight;
@@ -793,7 +796,7 @@ export default class Gantt {
       ];
       bars = ids.map((id) => this.getBar(id));
 
-      this.bar_being_dragged = parentBarId;
+      this.barBeingDragged = parentBarId;
 
       bars.forEach((bar) => {
         const { $bar } = bar;
@@ -814,23 +817,23 @@ export default class Gantt {
 
         if (isResizingLeft) {
           if (parentBarId === bar.task.id) {
-            bar.update_bar_position({
+            bar.updateBarPosition({
               x: $bar.ox + $bar.finaldx,
               width: $bar.owidth - $bar.finaldx,
             });
           } else {
-            bar.update_bar_position({
+            bar.updateBarPosition({
               x: $bar.ox + $bar.finaldx,
             });
           }
         } else if (isResizingRight) {
           if (parentBarId === bar.task.id) {
-            bar.update_bar_position({
+            bar.updateBarPosition({
               width: $bar.owidth + $bar.finaldx,
             });
           }
         } else if (isDragging) {
-          bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+          bar.updateBarPosition({ x: $bar.ox + $bar.finaldx });
         }
       });
     });
@@ -846,11 +849,11 @@ export default class Gantt {
     });
 
     $.on(this.$svg, 'mouseup', () => {
-      this.bar_being_dragged = null;
+      this.barBeingDragged = null;
       bars.forEach((bar) => {
         const { $bar } = bar;
         if (!$bar.finaldx) return;
-        bar.date_changed();
+        bar.dateChanged();
         bar.setActionCompleted();
       });
     });

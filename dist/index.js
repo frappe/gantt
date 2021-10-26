@@ -564,7 +564,7 @@ export default class Gantt {
         let isResizingRight = false;
         let parentBarId = null;
         let bars = []; // instanceof Bar
-        this.bar_being_dragged = null;
+        this.barBeingDragged = null;
         function actionInProgress() {
             return isDragging || isResizingLeft || isResizingRight;
         }
@@ -588,7 +588,7 @@ export default class Gantt {
                 ...this.getAllDependentTasks(parentBarId),
             ];
             bars = ids.map((id) => this.getBar(id));
-            this.bar_being_dragged = parentBarId;
+            this.barBeingDragged = parentBarId;
             bars.forEach((bar) => {
                 const { $bar } = bar;
                 $bar.ox = $bar.getX();
@@ -606,26 +606,26 @@ export default class Gantt {
                 $bar.finaldx = this.getSnapPosition(dx);
                 if (isResizingLeft) {
                     if (parentBarId === bar.task.id) {
-                        bar.update_bar_position({
+                        bar.updateBarPosition({
                             x: $bar.ox + $bar.finaldx,
                             width: $bar.owidth - $bar.finaldx,
                         });
                     }
                     else {
-                        bar.update_bar_position({
+                        bar.updateBarPosition({
                             x: $bar.ox + $bar.finaldx,
                         });
                     }
                 }
                 else if (isResizingRight) {
                     if (parentBarId === bar.task.id) {
-                        bar.update_bar_position({
+                        bar.updateBarPosition({
                             width: $bar.owidth + $bar.finaldx,
                         });
                     }
                 }
                 else if (isDragging) {
-                    bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                    bar.updateBarPosition({ x: $bar.ox + $bar.finaldx });
                 }
             });
         });
@@ -638,12 +638,12 @@ export default class Gantt {
             isResizingRight = false;
         });
         $.on(this.$svg, 'mouseup', () => {
-            this.bar_being_dragged = null;
+            this.barBeingDragged = null;
             bars.forEach((bar) => {
                 const { $bar } = bar;
                 if (!$bar.finaldx)
                     return;
-                bar.date_changed();
+                bar.dateChanged();
                 bar.setActionCompleted();
             });
         });

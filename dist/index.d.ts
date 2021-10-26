@@ -10,6 +10,9 @@ interface Task {
     progress: number;
     dependencies?: string | string[];
     customClass?: string;
+    color?: string;
+    progressColor?: string;
+    labelColor?: string;
 }
 export interface ResolvedTask extends Task {
     invalid?: boolean;
@@ -56,7 +59,7 @@ export default class Gantt {
     ganttStart: null | Date;
     private ganttEnd;
     private dates;
-    bar_being_dragged?: string;
+    barBeingDragged?: string;
     private layers;
     private bars;
     private arrows;
