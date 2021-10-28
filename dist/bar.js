@@ -94,6 +94,7 @@ export default class Bar {
         if (this.task.color) {
             this.$bar.style.fill = this.task.color;
         }
+        animateSVG(this.$bar, 'width', 0, this.width);
         if (this.task.hasPlanned) {
             this.$plannedBar = createSVG('rect', {
                 x: this.plannedX,
@@ -107,11 +108,15 @@ export default class Bar {
             });
             this.$plannedBar.style.fillOpacity = '0';
             this.$plannedBar.style.strokeOpacity = '1';
-            this.$plannedBar.style.stroke = this.task.color;
+            this.$plannedBar.style.stroke = this.task.plannedColor || this.task.color;
             this.$plannedBar.style.strokeDasharray = '2,2';
             this.$plannedBar.style.strokeLinejoin = 'round';
+            this.$plannedBar.style.strokeWidth = '2px';
+            animateSVG(this.$plannedBar, 'width', 0, this.plannedWidth);
+            if (this.invalid) {
+                this.$plannedBar.classList.add('bar-invalid');
+            }
         }
-        animateSVG(this.$bar, 'width', 0, this.width);
         if (this.invalid) {
             this.$bar.classList.add('bar-invalid');
         }

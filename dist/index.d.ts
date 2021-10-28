@@ -13,6 +13,7 @@ interface Task {
     dependencies?: string | string[];
     customClass?: string;
     color?: string;
+    plannedColor?: string;
     progressColor?: string;
     labelColor?: string;
 }
