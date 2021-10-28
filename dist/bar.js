@@ -66,6 +66,13 @@ export default class Bar {
             class: 'handle-group',
             append_to: this.group,
         });
+        if (this.task.hasPlanned) {
+            this.plannedX = this.computeX(true);
+            this.plannedY = this.computeY();
+            this.plannedDuration = dateUtils.diff(this.task.plannedEndResolved, this.task.plannedStartResolved, 'hour')
+                / this.gantt.options.step;
+            this.plannedWidth = this.gantt.options.columnWidth * this.plannedDuration;
+        }
     }
     draw() {
         this.drawBar();
@@ -86,6 +93,23 @@ export default class Bar {
         });
         if (this.task.color) {
             this.$bar.style.fill = this.task.color;
+        }
+        if (this.task.hasPlanned) {
+            this.$plannedBar = createSVG('rect', {
+                x: this.plannedX,
+                y: this.plannedY,
+                width: this.plannedWidth,
+                height: this.height,
+                rx: this.cornerRadius,
+                ry: this.cornerRadius,
+                class: 'bar',
+                append_to: this.barGroup,
+            });
+            this.$plannedBar.style.fillOpacity = '0';
+            this.$plannedBar.style.strokeOpacity = '1';
+            this.$plannedBar.style.stroke = this.task.color;
+            this.$plannedBar.style.strokeDasharray = '2,2';
+            this.$plannedBar.style.strokeLinejoin = 'round';
         }
         animateSVG(this.$bar, 'width', 0, this.width);
         if (this.invalid) {
@@ -266,9 +290,9 @@ export default class Bar {
         const progress = (this.$barProgress.getWidth() / this.$bar.getWidth()) * 100;
         return parseInt(String(progress), 10);
     }
-    computeX() {
+    computeX(planned = false) {
         const { step, columnWidth } = this.gantt.options;
-        const taskStart = this.task.startResolved;
+        const taskStart = planned ? this.task.plannedStartResolved : this.task.startResolved;
         const { ganttStart } = this.gantt;
         let diff = dateUtils.diff(taskStart, ganttStart, 'hour');
         let x = (diff / step) * columnWidth;

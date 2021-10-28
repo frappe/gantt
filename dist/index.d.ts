@@ -8,6 +8,8 @@ interface Task {
     start: string | Date;
     end: string | Date;
     progress: number;
+    plannedStart: string | Date;
+    plannedEnd: string | Date;
     dependencies?: string | string[];
     customClass?: string;
     color?: string;
@@ -20,6 +22,9 @@ export interface ResolvedTask extends Task {
     endResolved: Date;
     dependencies: string[];
     startResolved: Date;
+    plannedStartResolved?: Date;
+    plannedEndResolved?: Date;
+    hasPlanned: boolean;
 }
 export declare type ViewMode = 'Quarter Day' | 'Half Day' | 'Day' | 'Week' | 'Month' | 'Year';
 export interface Options {

@@ -493,6 +493,13 @@ var Gantt = (function () {
                 class: 'handle-group',
                 append_to: this.group,
             });
+            if (this.task.hasPlanned) {
+                this.plannedX = this.computeX(true);
+                this.plannedY = this.computeY();
+                this.plannedDuration = dateUtils.diff(this.task.plannedEndResolved, this.task.plannedStartResolved, 'hour')
+                    / this.gantt.options.step;
+                this.plannedWidth = this.gantt.options.columnWidth * this.plannedDuration;
+            }
         }
         draw() {
             this.drawBar();
@@ -513,6 +520,23 @@ var Gantt = (function () {
             });
             if (this.task.color) {
                 this.$bar.style.fill = this.task.color;
+            }
+            if (this.task.hasPlanned) {
+                this.$plannedBar = createSVG('rect', {
+                    x: this.plannedX,
+                    y: this.plannedY,
+                    width: this.plannedWidth,
+                    height: this.height,
+                    rx: this.cornerRadius,
+                    ry: this.cornerRadius,
+                    class: 'bar',
+                    append_to: this.barGroup,
+                });
+                this.$plannedBar.style.fillOpacity = '0';
+                this.$plannedBar.style.strokeOpacity = '1';
+                this.$plannedBar.style.stroke = this.task.color;
+                this.$plannedBar.style.strokeDasharray = '2,2';
+                this.$plannedBar.style.strokeLinejoin = 'round';
             }
             animateSVG(this.$bar, 'width', 0, this.width);
             if (this.invalid) {
@@ -693,9 +717,9 @@ var Gantt = (function () {
             const progress = (this.$barProgress.getWidth() / this.$bar.getWidth()) * 100;
             return parseInt(String(progress), 10);
         }
-        computeX() {
+        computeX(planned = false) {
             const { step, columnWidth } = this.gantt.options;
-            const taskStart = this.task.startResolved;
+            const taskStart = planned ? this.task.plannedStartResolved : this.task.startResolved;
             const { ganttStart } = this.gantt;
             let diff = dateUtils.diff(taskStart, ganttStart, 'hour');
             let x = (diff / step) * columnWidth;
@@ -1021,7 +1045,7 @@ var Gantt = (function () {
                 else {
                     dependencies = [];
                 }
-                const resolvedTask = Object.assign(Object.assign({}, task), { startResolved: dateUtils.parse(task.start), endResolved: dateUtils.parse(task.end), indexResolved: i, dependencies });
+                const resolvedTask = Object.assign(Object.assign({}, task), { startResolved: dateUtils.parse(task.start), endResolved: dateUtils.parse(task.end), hasPlanned: false, indexResolved: i, dependencies });
                 // make task invalid if duration too large
                 if (dateUtils.diff(resolvedTask.endResolved, resolvedTask.startResolved, 'year') > 10) {
                     resolvedTask.end = null;
@@ -1053,6 +1077,12 @@ var Gantt = (function () {
                 // uids
                 if (!resolvedTask.id) {
                     resolvedTask.id = generateId(resolvedTask);
+                }
+                // Planned start/finish.
+                if (task.plannedStart || task.plannedEnd) {
+                    resolvedTask.hasPlanned = true;
+                    resolvedTask.plannedStartResolved = dateUtils.parse(task.plannedStart || task.start);
+                    resolvedTask.plannedEndResolved = dateUtils.parse(task.plannedEnd || task.end);
                 }
                 return resolvedTask;
             });
@@ -1122,8 +1152,16 @@ var Gantt = (function () {
                 if (!this.ganttStart || task.startResolved < this.ganttStart) {
                     this.ganttStart = task.startResolved;
                 }
+                if (task.plannedStartResolved
+                    && (!this.ganttStart || task.plannedStartResolved > this.ganttStart)) {
+                    this.ganttStart = task.plannedStartResolved;
+                }
                 if (!this.ganttEnd || task.endResolved > this.ganttEnd) {
                     this.ganttEnd = task.endResolved;
+                }
+                if (task.plannedEndResolved
+                    && (!this.ganttEnd || task.plannedEndResolved > this.ganttEnd)) {
+                    this.ganttEnd = task.plannedEndResolved;
                 }
             });
             this.ganttStart = dateUtils.startOf(this.ganttStart, 'day');

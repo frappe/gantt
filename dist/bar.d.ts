@@ -19,6 +19,11 @@ export default class Bar {
     $barProgress: SVGElement;
     $handleProgress: SVGElement;
     arrows: Arrow[];
+    private plannedX?;
+    private plannedY?;
+    private plannedDuration?;
+    private $plannedBar?;
+    private plannedWidth?;
     constructor(gantt: Gantt, task: ResolvedTask);
     setDefaults(gantt: Gantt, task: ResolvedTask): void;
     prepare(): void;
@@ -45,7 +50,7 @@ export default class Bar {
         newEndDate: Date;
     };
     computeProgress(): number;
-    computeX(): number;
+    computeX(planned?: boolean): number;
     computeY(): number;
     getSnapPosition(dx: number): number;
     updateAttr: (element: Element, attr: string, value: number | string) => Element;

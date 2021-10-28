@@ -108,7 +108,7 @@ export default class Gantt {
             else {
                 dependencies = [];
             }
-            const resolvedTask = Object.assign(Object.assign({}, task), { startResolved: dateUtils.parse(task.start), endResolved: dateUtils.parse(task.end), indexResolved: i, dependencies });
+            const resolvedTask = Object.assign(Object.assign({}, task), { startResolved: dateUtils.parse(task.start), endResolved: dateUtils.parse(task.end), hasPlanned: false, indexResolved: i, dependencies });
             // make task invalid if duration too large
             if (dateUtils.diff(resolvedTask.endResolved, resolvedTask.startResolved, 'year') > 10) {
                 resolvedTask.end = null;
@@ -140,6 +140,12 @@ export default class Gantt {
             // uids
             if (!resolvedTask.id) {
                 resolvedTask.id = generateId(resolvedTask);
+            }
+            // Planned start/finish.
+            if (task.plannedStart || task.plannedEnd) {
+                resolvedTask.hasPlanned = true;
+                resolvedTask.plannedStartResolved = dateUtils.parse(task.plannedStart || task.start);
+                resolvedTask.plannedEndResolved = dateUtils.parse(task.plannedEnd || task.end);
             }
             return resolvedTask;
         });
@@ -209,8 +215,16 @@ export default class Gantt {
             if (!this.ganttStart || task.startResolved < this.ganttStart) {
                 this.ganttStart = task.startResolved;
             }
+            if (task.plannedStartResolved
+                && (!this.ganttStart || task.plannedStartResolved > this.ganttStart)) {
+                this.ganttStart = task.plannedStartResolved;
+            }
             if (!this.ganttEnd || task.endResolved > this.ganttEnd) {
                 this.ganttEnd = task.endResolved;
+            }
+            if (task.plannedEndResolved
+                && (!this.ganttEnd || task.plannedEndResolved > this.ganttEnd)) {
+                this.ganttEnd = task.plannedEndResolved;
             }
         });
         this.ganttStart = dateUtils.startOf(this.ganttStart, 'day');

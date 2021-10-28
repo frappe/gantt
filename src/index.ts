@@ -13,6 +13,8 @@ interface Task {
   start: string | Date,
   end: string | Date,
   progress: number,
+  plannedStart: string | Date,
+  plannedEnd: string | Date,
   dependencies?: string | string[],
   customClass?: string,
   color?: string,
@@ -26,6 +28,9 @@ export interface ResolvedTask extends Task {
   endResolved: Date;
   dependencies: string[],
   startResolved: Date;
+  plannedStartResolved?: Date;
+  plannedEndResolved?: Date;
+  hasPlanned: boolean;
 }
 
 export type ViewMode = 'Quarter Day' | 'Half Day' | 'Day' | 'Week' | 'Month' | 'Year';
@@ -221,6 +226,7 @@ export default class Gantt {
         ...task,
         startResolved: dateUtils.parse(task.start),
         endResolved: dateUtils.parse(task.end),
+        hasPlanned: false,
         indexResolved: i,
         dependencies,
       };
@@ -263,6 +269,13 @@ export default class Gantt {
       // uids
       if (!resolvedTask.id) {
         resolvedTask.id = generateId(resolvedTask);
+      }
+
+      // Planned start/finish.
+      if (task.plannedStart || task.plannedEnd) {
+        resolvedTask.hasPlanned = true;
+        resolvedTask.plannedStartResolved = dateUtils.parse(task.plannedStart || task.start);
+        resolvedTask.plannedEndResolved = dateUtils.parse(task.plannedEnd || task.end);
       }
 
       return resolvedTask;
@@ -342,8 +355,16 @@ export default class Gantt {
       if (!this.ganttStart || task.startResolved < this.ganttStart) {
         this.ganttStart = task.startResolved;
       }
+      if (task.plannedStartResolved
+          && (!this.ganttStart || task.plannedStartResolved > this.ganttStart)) {
+        this.ganttStart = task.plannedStartResolved;
+      }
       if (!this.ganttEnd || task.endResolved > this.ganttEnd) {
         this.ganttEnd = task.endResolved;
+      }
+      if (task.plannedEndResolved
+          && (!this.ganttEnd || task.plannedEndResolved > this.ganttEnd)) {
+        this.ganttEnd = task.plannedEndResolved;
       }
     });
 
