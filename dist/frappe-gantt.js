@@ -504,6 +504,8 @@ var Gantt = (function () {
         draw() {
             this.drawBar();
             this.drawProgressBar();
+            if (this.task.hasPlanned)
+                this.drawPlannedBar();
             this.drawLabel();
             this.drawResizeHandles();
         }
@@ -522,30 +524,30 @@ var Gantt = (function () {
                 this.$bar.style.fill = this.task.color;
             }
             animateSVG(this.$bar, 'width', 0, this.width);
-            if (this.task.hasPlanned) {
-                this.$plannedBar = createSVG('rect', {
-                    x: this.plannedX,
-                    y: this.plannedY,
-                    width: this.plannedWidth,
-                    height: this.height,
-                    rx: this.cornerRadius,
-                    ry: this.cornerRadius,
-                    class: 'bar',
-                    append_to: this.barGroup,
-                });
-                this.$plannedBar.style.fillOpacity = '0';
-                this.$plannedBar.style.strokeOpacity = '1';
-                this.$plannedBar.style.stroke = this.task.plannedColor || this.task.color;
-                this.$plannedBar.style.strokeDasharray = '2,2';
-                this.$plannedBar.style.strokeLinejoin = 'round';
-                this.$plannedBar.style.strokeWidth = '2px';
-                animateSVG(this.$plannedBar, 'width', 0, this.plannedWidth);
-                if (this.invalid) {
-                    this.$plannedBar.classList.add('bar-invalid');
-                }
-            }
             if (this.invalid) {
                 this.$bar.classList.add('bar-invalid');
+            }
+        }
+        drawPlannedBar() {
+            this.$plannedBar = createSVG('rect', {
+                x: this.plannedX,
+                y: this.plannedY,
+                width: this.plannedWidth,
+                height: this.height,
+                rx: this.cornerRadius,
+                ry: this.cornerRadius,
+                class: 'bar',
+                append_to: this.barGroup,
+            });
+            this.$plannedBar.style.fillOpacity = '0';
+            this.$plannedBar.style.strokeOpacity = '1';
+            this.$plannedBar.style.stroke = this.task.plannedColor || this.task.color;
+            this.$plannedBar.style.strokeDasharray = '2,2';
+            this.$plannedBar.style.strokeLinejoin = 'round';
+            this.$plannedBar.style.strokeWidth = '2px';
+            animateSVG(this.$plannedBar, 'width', 0, this.plannedWidth);
+            if (this.invalid) {
+                this.$plannedBar.classList.add('bar-invalid');
             }
         }
         drawProgressBar() {
@@ -605,7 +607,8 @@ var Gantt = (function () {
             });
             if (this.task.progress && this.task.progress < 100) {
                 this.$handleProgress = createSVG('polygon', {
-                    points: this.getProgressPolygonPoints().join(','),
+                    points: this.getProgressPolygonPoints()
+                        .join(','),
                     class: 'handle progress',
                     append_to: this.handleGroup,
                 });
@@ -659,11 +662,13 @@ var Gantt = (function () {
                 task: this.task,
             });
         }
-        updateBarPosition({ x = null, width = null }) {
+        updateBarPosition({ x = null, width = null, }) {
             const bar = this.$bar;
             if (x) {
                 // get all x values of parent task
-                const xs = this.task.dependencies.map((dep) => this.gantt.getBar(dep).$bar.getX());
+                const xs = this.task.dependencies.map((dep) => this.gantt.getBar(dep)
+                    .$bar
+                    .getX());
                 // child task must not go before parent
                 // @ts-ignore
                 const validX = xs.reduce((_prev, curr) => x >= curr, x);
@@ -684,7 +689,7 @@ var Gantt = (function () {
         }
         dateChanged() {
             let changed = false;
-            const { newStartDate, newEndDate } = this.computeStartEndDate();
+            const { newStartDate, newEndDate, } = this.computeStartEndDate();
             if (Number(this.task.startResolved) !== Number(newStartDate)) {
                 changed = true;
                 this.task.startResolved = newStartDate;
@@ -708,7 +713,9 @@ var Gantt = (function () {
         }
         setActionCompleted() {
             this.actionCompleted = true;
-            setTimeout(() => { this.actionCompleted = false; }, 1000);
+            setTimeout(() => {
+                this.actionCompleted = false;
+            }, 1000);
         }
         computeStartEndDate() {
             const bar = this.$bar;
@@ -716,14 +723,17 @@ var Gantt = (function () {
             const newStartDate = dateUtils.add(this.gantt.ganttStart, xInUnits * this.gantt.options.step, 'hour');
             const widthInUnits = bar.getWidth() / this.gantt.options.columnWidth;
             const newEndDate = dateUtils.add(newStartDate, widthInUnits * this.gantt.options.step, 'hour');
-            return { newStartDate, newEndDate };
+            return {
+                newStartDate,
+                newEndDate,
+            };
         }
         computeProgress() {
             const progress = (this.$barProgress.getWidth() / this.$bar.getWidth()) * 100;
             return parseInt(String(progress), 10);
         }
         computeX(planned = false) {
-            const { step, columnWidth } = this.gantt.options;
+            const { step, columnWidth, } = this.gantt.options;
             const taskStart = planned ? this.task.plannedStartResolved : this.task.startResolved;
             const { ganttStart } = this.gantt;
             let diff = dateUtils.diff(taskStart, ganttStart, 'hour');
@@ -794,8 +804,10 @@ var Gantt = (function () {
                 .querySelector('.handle.right')
                 .setAttribute('x', String(bar.getEndX() - 9));
             const handle = this.group.querySelector('.handle.progress');
-            if (handle)
-                handle.setAttribute('points', this.getProgressPolygonPoints().join(','));
+            if (handle) {
+                handle.setAttribute('points', this.getProgressPolygonPoints()
+                    .join(','));
+            }
         }
         updateArrowPosition() {
             this.arrows = this.arrows || [];

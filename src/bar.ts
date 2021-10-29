@@ -1,6 +1,6 @@
 import Gantt, { ResolvedTask } from '.';
 import dateUtils from './dateUtils';
-import { $, createSVG, animateSVG } from './svgUtils';
+import { $, animateSVG, createSVG } from './svgUtils';
 import Arrow from './arrow';
 
 export default class Bar {
@@ -76,11 +76,11 @@ export default class Bar {
     this.y = this.computeY();
     this.cornerRadius = this.gantt.options.barCornerRadius;
     this.duration = dateUtils.diff(this.task.endResolved, this.task.startResolved, 'hour')
-        / this.gantt.options.step;
+            / this.gantt.options.step;
     this.width = this.gantt.options.columnWidth * this.duration;
     this.progressWidth = this.gantt.options.columnWidth
-        * this.duration
-        * (this.task.progress / 100) || 0;
+            * this.duration
+            * (this.task.progress / 100) || 0;
     this.group = createSVG('g', {
       class: `bar-wrapper ${this.task.customClass || ''}`,
       'data-id': this.task.id,
@@ -98,7 +98,7 @@ export default class Bar {
       this.plannedX = this.computeX(true);
       this.plannedY = this.computeY();
       this.plannedDuration = dateUtils.diff(this.task.plannedEndResolved, this.task.plannedStartResolved, 'hour')
-          / this.gantt.options.step;
+                / this.gantt.options.step;
       this.plannedWidth = this.gantt.options.columnWidth * this.plannedDuration;
     }
   }
@@ -126,6 +126,7 @@ export default class Bar {
   draw(): void {
     this.drawBar();
     this.drawProgressBar();
+    if (this.task.hasPlanned) this.drawPlannedBar();
     this.drawLabel();
     this.drawResizeHandles();
   }
@@ -148,34 +149,34 @@ export default class Bar {
 
     animateSVG(this.$bar, 'width', 0, this.width);
 
-    if (this.task.hasPlanned) {
-      this.$plannedBar = createSVG('rect', {
-        x: this.plannedX,
-        y: this.plannedY,
-        width: this.plannedWidth,
-        height: this.height,
-        rx: this.cornerRadius,
-        ry: this.cornerRadius,
-        class: 'bar',
-        append_to: this.barGroup,
-      });
-
-      this.$plannedBar.style.fillOpacity = '0';
-      this.$plannedBar.style.strokeOpacity = '1';
-      this.$plannedBar.style.stroke = this.task.plannedColor || this.task.color;
-      this.$plannedBar.style.strokeDasharray = '2,2';
-      this.$plannedBar.style.strokeLinejoin = 'round';
-      this.$plannedBar.style.strokeWidth = '2px';
-
-      animateSVG(this.$plannedBar, 'width', 0, this.plannedWidth);
-
-      if (this.invalid) {
-        this.$plannedBar.classList.add('bar-invalid');
-      }
-    }
-
     if (this.invalid) {
       this.$bar.classList.add('bar-invalid');
+    }
+  }
+
+  drawPlannedBar(): void {
+    this.$plannedBar = createSVG('rect', {
+      x: this.plannedX,
+      y: this.plannedY,
+      width: this.plannedWidth,
+      height: this.height,
+      rx: this.cornerRadius,
+      ry: this.cornerRadius,
+      class: 'bar',
+      append_to: this.barGroup,
+    });
+
+    this.$plannedBar.style.fillOpacity = '0';
+    this.$plannedBar.style.strokeOpacity = '1';
+    this.$plannedBar.style.stroke = this.task.plannedColor || this.task.color;
+    this.$plannedBar.style.strokeDasharray = '2,2';
+    this.$plannedBar.style.strokeLinejoin = 'round';
+    this.$plannedBar.style.strokeWidth = '2px';
+
+    animateSVG(this.$plannedBar, 'width', 0, this.plannedWidth);
+
+    if (this.invalid) {
+      this.$plannedBar.classList.add('bar-invalid');
     }
   }
 
@@ -242,7 +243,8 @@ export default class Bar {
 
     if (this.task.progress && this.task.progress < 100) {
       this.$handleProgress = createSVG('polygon', {
-        points: this.getProgressPolygonPoints().join(','),
+        points: this.getProgressPolygonPoints()
+          .join(','),
         class: 'handle progress',
         append_to: this.handleGroup,
       });
@@ -308,12 +310,17 @@ export default class Bar {
     });
   }
 
-  updateBarPosition({ x = null, width = null }:
+  updateBarPosition({
+    x = null,
+    width = null,
+  }:
   { x?: number | null, width?: number | null }): void {
     const bar = this.$bar;
     if (x) {
       // get all x values of parent task
-      const xs = this.task.dependencies.map((dep) => this.gantt.getBar(dep).$bar.getX());
+      const xs = this.task.dependencies.map((dep) => this.gantt.getBar(dep)
+        .$bar
+        .getX());
       // child task must not go before parent
       // @ts-ignore
       const validX = xs.reduce((_prev, curr) => x >= curr, x);
@@ -335,7 +342,10 @@ export default class Bar {
 
   dateChanged(): void {
     let changed = false;
-    const { newStartDate, newEndDate } = this.computeStartEndDate();
+    const {
+      newStartDate,
+      newEndDate,
+    } = this.computeStartEndDate();
 
     if (Number(this.task.startResolved) !== Number(newStartDate)) {
       changed = true;
@@ -364,7 +374,9 @@ export default class Bar {
 
   setActionCompleted(): void {
     this.actionCompleted = true;
-    setTimeout(() => { this.actionCompleted = false; }, 1000);
+    setTimeout(() => {
+      this.actionCompleted = false;
+    }, 1000);
   }
 
   computeStartEndDate(): { newStartDate: Date, newEndDate: Date } {
@@ -382,7 +394,10 @@ export default class Bar {
       'hour',
     );
 
-    return { newStartDate, newEndDate };
+    return {
+      newStartDate,
+      newEndDate,
+    };
   }
 
   computeProgress(): number {
@@ -391,7 +406,10 @@ export default class Bar {
   }
 
   computeX(planned: boolean = false): number {
-    const { step, columnWidth } = this.gantt.options;
+    const {
+      step,
+      columnWidth,
+    } = this.gantt.options;
     const taskStart = planned ? this.task.plannedStartResolved : this.task.startResolved;
     const { ganttStart } = this.gantt;
 
@@ -481,7 +499,10 @@ export default class Bar {
       .querySelector('.handle.right')
       .setAttribute('x', String(bar.getEndX() - 9));
     const handle = this.group.querySelector('.handle.progress');
-    if (handle) handle.setAttribute('points', this.getProgressPolygonPoints().join(','));
+    if (handle) {
+      handle.setAttribute('points', this.getProgressPolygonPoints()
+        .join(','));
+    }
   }
 
   updateArrowPosition(): void {

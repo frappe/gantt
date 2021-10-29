@@ -31,6 +31,7 @@ export default class Bar {
     prepareHelpers: () => void;
     draw(): void;
     drawBar(): void;
+    drawPlannedBar(): void;
     drawProgressBar(): void;
     drawLabel(): void;
     drawResizeHandles(): void;
@@ -38,7 +39,7 @@ export default class Bar {
     bind(): void;
     setupClickEvent(): void;
     showPopup(): void;
-    updateBarPosition({ x, width }: {
+    updateBarPosition({ x, width, }: {
         x?: number | null;
         width?: number | null;
     }): void;
