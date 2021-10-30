@@ -324,8 +324,8 @@ export default class Gantt {
         const rowWidth = this.dates.length * this.options.columnWidth;
         const rowHeight = this.options.barHeight + this.options.padding;
         let rowY = this.options.headerHeight + this.options.padding / 2;
-        this.tasks.forEach(() => {
-            createSVG('rect', {
+        this.tasks.forEach((task) => {
+            task.gridRow = createSVG('rect', {
                 x: 0,
                 y: rowY,
                 width: rowWidth,
@@ -748,7 +748,8 @@ export default class Gantt {
         return position;
     }
     unselectAll() {
-        Array.from(this.$svg.querySelectorAll('.bar-wrapper')).forEach((el) => {
+        Array.from(this.$svg.querySelectorAll('.bar-wrapper'))
+            .forEach((el) => {
             el.classList.remove('active');
         });
     }

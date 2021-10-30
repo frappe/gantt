@@ -32,6 +32,8 @@ export default class Bar {
 
   private handleGroup: SVGElement;
 
+  private plannedHandleGroup: SVGElement;
+
   $bar: SVGElement;
 
   $barProgress: SVGElement;
@@ -50,6 +52,8 @@ export default class Bar {
   private $plannedBar?: SVGElement;
 
   private plannedWidth?: number;
+
+  interactionTarget: 'planned' | 'main' | null;
 
   constructor(gantt: Gantt, task: ResolvedTask) {
     this.setDefaults(gantt, task);
@@ -100,6 +104,11 @@ export default class Bar {
       this.plannedDuration = dateUtils.diff(this.task.plannedEndResolved, this.task.plannedStartResolved, 'hour')
                 / this.gantt.options.step;
       this.plannedWidth = this.gantt.options.columnWidth * this.plannedDuration;
+
+      this.plannedHandleGroup = createSVG('g', {
+        class: 'handle-group planned',
+        append_to: this.group,
+      });
     }
   }
 
@@ -139,7 +148,7 @@ export default class Bar {
       height: this.height,
       rx: this.cornerRadius,
       ry: this.cornerRadius,
-      class: 'bar',
+      class: 'bar bar-actual',
       append_to: this.barGroup,
     });
 
@@ -162,7 +171,7 @@ export default class Bar {
       height: this.height,
       rx: this.cornerRadius,
       ry: this.cornerRadius,
-      class: 'bar',
+      class: 'bar bar-planned',
       append_to: this.barGroup,
     });
 
@@ -241,6 +250,32 @@ export default class Bar {
       append_to: this.handleGroup,
     });
 
+    if (this.task.hasPlanned) {
+      const plannedBar = this.$plannedBar;
+
+      createSVG('rect', {
+        x: plannedBar.getX() + plannedBar.getWidth() - 9,
+        y: plannedBar.getY() + 1,
+        width: handleWidth,
+        height: this.height - 2,
+        rx: this.cornerRadius,
+        ry: this.cornerRadius,
+        class: 'handle right',
+        append_to: this.plannedHandleGroup,
+      });
+
+      createSVG('rect', {
+        x: plannedBar.getX() + 1,
+        y: plannedBar.getY() + 1,
+        width: handleWidth,
+        height: this.height - 2,
+        rx: this.cornerRadius,
+        ry: this.cornerRadius,
+        class: 'handle left',
+        append_to: this.plannedHandleGroup,
+      });
+    }
+
     if (this.task.progress && this.task.progress < 100) {
       this.$handleProgress = createSVG('polygon', {
         points: this.getProgressPolygonPoints()
@@ -266,6 +301,7 @@ export default class Bar {
   bind(): void {
     if (this.invalid) return;
     this.setupClickEvent();
+    this.setupHoverEvent();
   }
 
   setupClickEvent(): void {
@@ -511,15 +547,50 @@ export default class Bar {
       arrow.update();
     });
   }
-}
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// noinspection JSUnusedLocalSymbols
-// @ts-ignore
-function isFunction(functionToCheck: unknown): boolean {
-  const getType = {};
-  return (
-    functionToCheck
-        && getType.toString.call(functionToCheck) === '[object Function]'
-  );
+  setupHoverEvent(): void {
+    $.on(this.task.gridRow, 'mousemove', () => {
+      // Mouse is not hovering over any elements.
+      this.setHover(false, false);
+    });
+
+    $.on(this.group, 'mousemove', (e: MouseEvent) => {
+      let mainHover = false;
+      let plannedHover = false;
+
+      const bar = this.$bar;
+
+      if (e.offsetX >= bar.getX() && e.offsetX <= bar.getEndX()) {
+        mainHover = true;
+        // if (e.offsetX <= this.computeX() + this.progressWidth) {
+        //   progressHover = true;
+        // }
+      }
+
+      if (this.task.hasPlanned) {
+        const plannedBar = this.$plannedBar;
+        if (e.offsetX >= plannedBar.getX() && e.offsetX <= plannedBar.getEndX()) {
+          plannedHover = true;
+        }
+      }
+
+      this.setHover(mainHover, plannedHover);
+    });
+  }
+
+  setHover(main: boolean, planned: boolean): void {
+    if (main) {
+      this.interactionTarget = 'main';
+      this.handleGroup.classList.add('visible');
+      this.plannedHandleGroup.classList.remove('visible');
+    } else if (planned) {
+      this.interactionTarget = 'planned';
+      this.handleGroup.classList.remove('visible');
+      this.plannedHandleGroup.classList.add('visible');
+    } else {
+      this.interactionTarget = null;
+      this.handleGroup.classList.remove('visible');
+      this.plannedHandleGroup.classList.remove('visible');
+    }
+  }
 }

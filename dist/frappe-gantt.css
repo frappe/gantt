@@ -61,6 +61,10 @@
   fill: #555;
   text-anchor: start;
 }
+.gantt .handle-group.visible .handle {
+  visibility: visible;
+  opacity: 1;
+}
 .gantt .handle {
   fill: #ddd;
   cursor: ew-resize;
@@ -77,10 +81,6 @@
 }
 .gantt .bar-wrapper:hover .bar-progress {
   fill: #8a8aff;
-}
-.gantt .bar-wrapper:hover .handle {
-  visibility: visible;
-  opacity: 1;
 }
 .gantt .bar-wrapper.active .bar {
   fill: #a9b5c1;

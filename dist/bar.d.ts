@@ -15,6 +15,7 @@ export default class Bar {
     group: SVGElement;
     private barGroup;
     private handleGroup;
+    private plannedHandleGroup;
     $bar: SVGElement;
     $barProgress: SVGElement;
     $handleProgress: SVGElement;
@@ -24,6 +25,7 @@ export default class Bar {
     private plannedDuration?;
     private $plannedBar?;
     private plannedWidth?;
+    interactionTarget: 'planned' | 'main' | null;
     constructor(gantt: Gantt, task: ResolvedTask);
     setDefaults(gantt: Gantt, task: ResolvedTask): void;
     prepare(): void;
@@ -59,4 +61,6 @@ export default class Bar {
     updateLabelPosition(): void;
     updateHandlePosition(): void;
     updateArrowPosition(): void;
+    setupHoverEvent(): void;
+    setHover(main: boolean, planned: boolean): void;
 }

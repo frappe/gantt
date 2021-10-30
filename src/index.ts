@@ -32,6 +32,7 @@ export interface ResolvedTask extends Task {
   plannedStartResolved?: Date;
   plannedEndResolved?: Date;
   hasPlanned: boolean;
+  gridRow?: SVGElement;
 }
 
 export type ViewMode = 'Quarter Day' | 'Half Day' | 'Day' | 'Week' | 'Month' | 'Year';
@@ -50,7 +51,7 @@ export interface Options {
   customPopupHtml?: string | null,
   popupTrigger: string,
   language: Language,
-  onClick?: (task: ResolvedTask)=>void,
+  onClick?: (task: ResolvedTask) => void,
   onDateChange?: (task: ResolvedTask, startDate: Date, endDate: Date) => void,
   onProgressChange?: (task: ResolvedTask, progress: number) => void,
   onViewChange?: (mode: ViewMode) => void,
@@ -357,14 +358,14 @@ export default class Gantt {
         this.ganttStart = task.startResolved;
       }
       if (task.plannedStartResolved
-          && (!this.ganttStart || task.plannedStartResolved > this.ganttStart)) {
+                && (!this.ganttStart || task.plannedStartResolved > this.ganttStart)) {
         this.ganttStart = task.plannedStartResolved;
       }
       if (!this.ganttEnd || task.endResolved > this.ganttEnd) {
         this.ganttEnd = task.endResolved;
       }
       if (task.plannedEndResolved
-          && (!this.ganttEnd || task.plannedEndResolved > this.ganttEnd)) {
+                && (!this.ganttEnd || task.plannedEndResolved > this.ganttEnd)) {
         this.ganttEnd = task.plannedEndResolved;
       }
     });
@@ -478,8 +479,8 @@ export default class Gantt {
 
     let rowY = this.options.headerHeight + this.options.padding / 2;
 
-    this.tasks.forEach(() => {
-      createSVG('rect', {
+    this.tasks.forEach((task) => {
+      task.gridRow = createSVG('rect', {
         x: 0,
         y: rowY,
         width: rowWidth,
@@ -548,7 +549,7 @@ export default class Gantt {
       if (this.viewIs(VIEW_MODE.MONTH)) {
         tickX
                     += (dateUtils.getDaysInMonth(date)
-                    * this.options.columnWidth)
+                        * this.options.columnWidth)
                     / 30;
       } else {
         tickX += this.options.columnWidth;
@@ -560,7 +561,7 @@ export default class Gantt {
     // highlight today's date
     if (this.viewIs(VIEW_MODE.DAY)) {
       const x = (dateUtils.diff(dateUtils.today(), this.ganttStart, 'hour')
-                / this.options.step)
+                    / this.options.step)
                 * this.options.columnWidth;
       const y = 0;
 
@@ -765,9 +766,9 @@ export default class Gantt {
     );
 
     parentElement.scrollLeft = (hoursBeforeFirstTask
-        / this.options.step)
-        * this.options.columnWidth
-        - this.options.columnWidth;
+                / this.options.step)
+            * this.options.columnWidth
+            - this.options.columnWidth;
   }
 
   bindGridClick(): void {
@@ -977,9 +978,10 @@ export default class Gantt {
   }
 
   unselectAll(): void {
-    Array.from(this.$svg.querySelectorAll('.bar-wrapper')).forEach((el) => {
-      el.classList.remove('active');
-    });
+    Array.from(this.$svg.querySelectorAll('.bar-wrapper'))
+      .forEach((el) => {
+        el.classList.remove('active');
+      });
   }
 
   viewIs(modes: ViewMode | ViewMode[]): boolean {

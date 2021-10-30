@@ -11,158 +11,177 @@ $blue: #a3a3ff;
 $handle-color: #ddd !default;
 
 .gantt {
-	.grid-background {
-		fill: none;
-	}
-	.grid-header {
-		fill: #ffffff;
-		stroke: $border-color;
-		stroke-width: 1.4;
-	}
-	.grid-row {
-		fill: #ffffff;
-	}
-	.grid-row:nth-child(even) {
-		fill: $light-bg;
-	}
-	.row-line {
-		stroke: $light-border-color;
-	}
-	.tick {
-		stroke: $border-color;
-		stroke-width: 0.2;
-		&.thick {
-			stroke-width: 0.4;
-		}
-	}
-	.today-highlight {
-		fill: $light-yellow;
-		opacity: 0.5;
-	}
+  .grid-background {
+    fill: none;
+  }
 
-	.arrow {
-		fill: none;
-		stroke: $text-muted;
-		stroke-width: 1.4;
-	}
+  .grid-header {
+    fill: #ffffff;
+    stroke: $border-color;
+    stroke-width: 1.4;
+  }
 
-	.bar {
-		fill: $bar-color;
-		stroke: $bar-stroke;
-		stroke-width: 0;
-		transition: stroke-width .3s ease;
-		user-select: none;
-	}
-	.bar-progress {
-		fill: $blue;
-	}
-	.bar-invalid {
-		fill: transparent;
-		stroke: $bar-stroke;
-		stroke-width: 1;
-		stroke-dasharray: 5;
+  .grid-row {
+    fill: #ffffff;
+  }
 
-		&~.bar-label {
-			fill: $text-light;
-		}
-	}
-	.bar-label {
-		fill: #fff;
-		dominant-baseline: central;
-		text-anchor: middle;
-		font-size: 12px;
-		font-weight: lighter;
+  .grid-row:nth-child(even) {
+    fill: $light-bg;
+  }
 
-		&.big {
-			fill: $text-light;
-			text-anchor: start;
-		}
-	}
+  .row-line {
+    stroke: $light-border-color;
+  }
 
-	.handle {
-		fill: $handle-color;
-		cursor: ew-resize;
-		opacity: 0;
-		visibility: hidden;
-		transition: opacity .3s ease;
-	}
+  .tick {
+    stroke: $border-color;
+    stroke-width: 0.2;
 
-	.bar-wrapper {
-		cursor: pointer;
-		outline: none;
+    &.thick {
+      stroke-width: 0.4;
+    }
+  }
 
-		&:hover {
-			.bar {
-				fill: darken($bar-color, 5);
-			}
+  .today-highlight {
+    fill: $light-yellow;
+    opacity: 0.5;
+  }
 
-			.bar-progress {
-				fill: darken($blue, 5);
-			}
+  .arrow {
+    fill: none;
+    stroke: $text-muted;
+    stroke-width: 1.4;
+  }
 
-			.handle {
-				visibility: visible;
-				opacity: 1;
-			}
-		}
+  .bar {
+    fill: $bar-color;
+    stroke: $bar-stroke;
+    stroke-width: 0;
+    transition: stroke-width .3s ease;
+    user-select: none;
+  }
 
-		&.active {
-			.bar {
-				fill: darken($bar-color, 5);
-			}
+  .bar-progress {
+    fill: $blue;
+  }
 
-			.bar-progress {
-				fill: darken($blue, 5);
-			}
-		}
-	}
+  .bar-invalid {
+    fill: transparent;
+    stroke: $bar-stroke;
+    stroke-width: 1;
+    stroke-dasharray: 5;
 
-	.lower-text, .upper-text {
-		font-size: 12px;
-		text-anchor: middle;
-	}
-	.upper-text {
-		fill: $text-light;
-	}
-	.lower-text {
-		fill: $text-color;
-	}
+    & ~ .bar-label {
+      fill: $text-light;
+    }
+  }
 
-	.hide {
-		display: none;
-	}
+  .bar-label {
+    fill: #fff;
+    dominant-baseline: central;
+    text-anchor: middle;
+    font-size: 12px;
+    font-weight: lighter;
+
+    &.big {
+      fill: $text-light;
+      text-anchor: start;
+    }
+  }
+
+  .handle-group.visible {
+    .handle {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+
+  .handle {
+    fill: $handle-color;
+    cursor: ew-resize;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s ease;
+  }
+
+  .bar-wrapper {
+    cursor: pointer;
+    outline: none;
+
+    &:hover {
+      .bar {
+        fill: darken($bar-color, 5);
+      }
+
+      .bar-progress {
+        fill: darken($blue, 5);
+      }
+
+      //.handle {
+      //	visibility: visible;
+      //	opacity: 1;
+      //}
+    }
+
+    &.active {
+      .bar {
+        fill: darken($bar-color, 5);
+      }
+
+      .bar-progress {
+        fill: darken($blue, 5);
+      }
+    }
+  }
+
+  .lower-text, .upper-text {
+    font-size: 12px;
+    text-anchor: middle;
+  }
+
+  .upper-text {
+    fill: $text-light;
+  }
+
+  .lower-text {
+    fill: $text-color;
+  }
+
+  .hide {
+    display: none;
+  }
 }
 
 .gantt-container {
-	position: relative;
-	overflow: auto;
-	font-size: 12px;
+  position: relative;
+  overflow: auto;
+  font-size: 12px;
 
-	.popup-wrapper {
-		position: absolute;
-		top: 0;
-		left: 0;
-		background: rgba(0, 0, 0, 0.8);
-		padding: 0;
-		color: #959da5;
-		border-radius: 3px;
+  .popup-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 0;
+    color: #959da5;
+    border-radius: 3px;
 
-		.title {
-			border-bottom: 3px solid $blue;
-			padding: 10px;
-		}
+    .title {
+      border-bottom: 3px solid $blue;
+      padding: 10px;
+    }
 
-		.subtitle {
-			padding: 10px;
-			color: #dfe2e5;
-		}
+    .subtitle {
+      padding: 10px;
+      color: #dfe2e5;
+    }
 
-		.pointer {
-			position: absolute;
-			height: 5px;
-			margin: 0 0 0 -5px;
-			border: 5px solid transparent;
-			border-top-color: rgba(0, 0, 0, 0.8);
-		}
-	}
+    .pointer {
+      position: absolute;
+      height: 5px;
+      margin: 0 0 0 -5px;
+      border: 5px solid transparent;
+      border-top-color: rgba(0, 0, 0, 0.8);
+    }
+  }
 }

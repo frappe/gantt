@@ -499,6 +499,10 @@ var Gantt = (function () {
                 this.plannedDuration = dateUtils.diff(this.task.plannedEndResolved, this.task.plannedStartResolved, 'hour')
                     / this.gantt.options.step;
                 this.plannedWidth = this.gantt.options.columnWidth * this.plannedDuration;
+                this.plannedHandleGroup = createSVG('g', {
+                    class: 'handle-group planned',
+                    append_to: this.group,
+                });
             }
         }
         draw() {
@@ -517,7 +521,7 @@ var Gantt = (function () {
                 height: this.height,
                 rx: this.cornerRadius,
                 ry: this.cornerRadius,
-                class: 'bar',
+                class: 'bar bar-actual',
                 append_to: this.barGroup,
             });
             if (this.task.color) {
@@ -536,7 +540,7 @@ var Gantt = (function () {
                 height: this.height,
                 rx: this.cornerRadius,
                 ry: this.cornerRadius,
-                class: 'bar',
+                class: 'bar bar-planned',
                 append_to: this.barGroup,
             });
             this.$plannedBar.style.fillOpacity = '0';
@@ -605,6 +609,29 @@ var Gantt = (function () {
                 class: 'handle left',
                 append_to: this.handleGroup,
             });
+            if (this.task.hasPlanned) {
+                const plannedBar = this.$plannedBar;
+                createSVG('rect', {
+                    x: plannedBar.getX() + plannedBar.getWidth() - 9,
+                    y: plannedBar.getY() + 1,
+                    width: handleWidth,
+                    height: this.height - 2,
+                    rx: this.cornerRadius,
+                    ry: this.cornerRadius,
+                    class: 'handle right',
+                    append_to: this.plannedHandleGroup,
+                });
+                createSVG('rect', {
+                    x: plannedBar.getX() + 1,
+                    y: plannedBar.getY() + 1,
+                    width: handleWidth,
+                    height: this.height - 2,
+                    rx: this.cornerRadius,
+                    ry: this.cornerRadius,
+                    class: 'handle left',
+                    append_to: this.plannedHandleGroup,
+                });
+            }
             if (this.task.progress && this.task.progress < 100) {
                 this.$handleProgress = createSVG('polygon', {
                     points: this.getProgressPolygonPoints()
@@ -629,6 +656,7 @@ var Gantt = (function () {
             if (this.invalid)
                 return;
             this.setupClickEvent();
+            this.setupHoverEvent();
         }
         setupClickEvent() {
             $.on(this.group, `focus ${this.gantt.options.popupTrigger}`, () => {
@@ -814,6 +842,47 @@ var Gantt = (function () {
             this.arrows.forEach((arrow) => {
                 arrow.update();
             });
+        }
+        setupHoverEvent() {
+            $.on(this.task.gridRow, 'mousemove', () => {
+                // Mouse is not hovering over any elements.
+                this.setHover(false, false);
+            });
+            $.on(this.group, 'mousemove', (e) => {
+                let mainHover = false;
+                let plannedHover = false;
+                const bar = this.$bar;
+                if (e.offsetX >= bar.getX() && e.offsetX <= bar.getEndX()) {
+                    mainHover = true;
+                    // if (e.offsetX <= this.computeX() + this.progressWidth) {
+                    //   progressHover = true;
+                    // }
+                }
+                if (this.task.hasPlanned) {
+                    const plannedBar = this.$plannedBar;
+                    if (e.offsetX >= plannedBar.getX() && e.offsetX <= plannedBar.getEndX()) {
+                        plannedHover = true;
+                    }
+                }
+                this.setHover(mainHover, plannedHover);
+            });
+        }
+        setHover(main, planned) {
+            if (main) {
+                this.interactionTarget = 'main';
+                this.handleGroup.classList.add('visible');
+                this.plannedHandleGroup.classList.remove('visible');
+            }
+            else if (planned) {
+                this.interactionTarget = 'planned';
+                this.handleGroup.classList.remove('visible');
+                this.plannedHandleGroup.classList.add('visible');
+            }
+            else {
+                this.interactionTarget = null;
+                this.handleGroup.classList.remove('visible');
+                this.plannedHandleGroup.classList.remove('visible');
+            }
         }
     }
 
@@ -1278,8 +1347,8 @@ var Gantt = (function () {
             const rowWidth = this.dates.length * this.options.columnWidth;
             const rowHeight = this.options.barHeight + this.options.padding;
             let rowY = this.options.headerHeight + this.options.padding / 2;
-            this.tasks.forEach(() => {
-                createSVG('rect', {
+            this.tasks.forEach((task) => {
+                task.gridRow = createSVG('rect', {
                     x: 0,
                     y: rowY,
                     width: rowWidth,
@@ -1702,7 +1771,8 @@ var Gantt = (function () {
             return position;
         }
         unselectAll() {
-            Array.from(this.$svg.querySelectorAll('.bar-wrapper')).forEach((el) => {
+            Array.from(this.$svg.querySelectorAll('.bar-wrapper'))
+                .forEach((el) => {
                 el.classList.remove('active');
             });
         }

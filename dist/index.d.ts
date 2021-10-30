@@ -26,6 +26,7 @@ export interface ResolvedTask extends Task {
     plannedStartResolved?: Date;
     plannedEndResolved?: Date;
     hasPlanned: boolean;
+    gridRow?: SVGElement;
 }
 export declare type ViewMode = 'Quarter Day' | 'Half Day' | 'Day' | 'Week' | 'Month' | 'Year';
 export interface Options {

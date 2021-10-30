@@ -16,5 +16,6 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 2,
     '@typescript-eslint/explicit-function-return-type': 1,
     'import/no-cycle': 0,
+    'no-param-reassign': ['error', { props: false }],
   },
 };
