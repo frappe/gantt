@@ -23,7 +23,7 @@ export default class Bar {
     private plannedX?;
     private plannedY?;
     private plannedDuration?;
-    private $plannedBar?;
+    $plannedBar?: SVGElement;
     private plannedWidth?;
     interactionTarget: 'planned' | 'main' | null;
     constructor(gantt: Gantt, task: ResolvedTask);
@@ -41,14 +41,15 @@ export default class Bar {
     bind(): void;
     setupClickEvent(): void;
     showPopup(): void;
-    updateBarPosition({ x, width, }: {
+    updateBarPosition({ x, width, planned, }: {
         x?: number | null;
         width?: number | null;
+        planned: boolean;
     }): void;
     dateChanged(): void;
     progressChanged(): void;
     setActionCompleted(): void;
-    computeStartEndDate(): {
+    computeStartEndDate(planned?: boolean): {
         newStartDate: Date;
         newEndDate: Date;
     };

@@ -146,6 +146,13 @@ export default class Gantt {
                 resolvedTask.hasPlanned = true;
                 resolvedTask.plannedStartResolved = dateUtils.parse(task.plannedStart || task.start);
                 resolvedTask.plannedEndResolved = dateUtils.parse(task.plannedEnd || task.end);
+                // if hours is not set, assume the last day is full day
+                // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
+                const plannedTaskEndValues = dateUtils.getDateValues(resolvedTask.plannedEndResolved);
+                if (plannedTaskEndValues.slice(3)
+                    .every((d) => d === 0)) {
+                    resolvedTask.plannedEndResolved = dateUtils.add(resolvedTask.plannedEndResolved, 24, 'hour');
+                }
             }
             return resolvedTask;
         });
@@ -577,13 +584,14 @@ export default class Gantt {
         let isResizingLeft = false;
         let isResizingRight = false;
         let parentBarId = null;
+        let draggingPlanned = false;
         let bars = []; // instanceof Bar
         this.barBeingDragged = null;
         function actionInProgress() {
             return isDragging || isResizingLeft || isResizingRight;
         }
         // @ts-ignore Weird sorcery. I don't touch it and it keeps working.
-        $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
+        $.on(this.$svg, 'mousedown', '.bar, .bar-progress, .handle', (e, element) => {
             const barWrapper = $.closest('.bar-wrapper', element);
             if (element.classList.contains('left')) {
                 isResizingLeft = true;
@@ -591,8 +599,11 @@ export default class Gantt {
             else if (element.classList.contains('right')) {
                 isResizingRight = true;
             }
-            else if (element.classList.contains('bar-wrapper')) {
+            else if (element.classList.contains('bar') || element.classList.contains('bar-progress')) {
                 isDragging = true;
+            }
+            if (element.classList.contains('planned')) {
+                draggingPlanned = true;
             }
             barWrapper.classList.add('active');
             xOnStart = e.offsetX;
@@ -604,7 +615,8 @@ export default class Gantt {
             bars = ids.map((id) => this.getBar(id));
             this.barBeingDragged = parentBarId;
             bars.forEach((bar) => {
-                const { $bar } = bar;
+                var _a;
+                const $bar = draggingPlanned ? ((_a = bar.$plannedBar) !== null && _a !== void 0 ? _a : bar.$bar) : bar.$bar;
                 $bar.ox = $bar.getX();
                 $bar.oy = $bar.getY();
                 $bar.owidth = $bar.getWidth();
@@ -616,18 +628,21 @@ export default class Gantt {
                 return;
             const dx = e.offsetX - xOnStart;
             bars.forEach((bar) => {
-                const { $bar } = bar;
+                var _a;
+                const $bar = draggingPlanned ? ((_a = bar.$plannedBar) !== null && _a !== void 0 ? _a : bar.$bar) : bar.$bar;
                 $bar.finaldx = this.getSnapPosition(dx);
                 if (isResizingLeft) {
                     if (parentBarId === bar.task.id) {
                         bar.updateBarPosition({
                             x: $bar.ox + $bar.finaldx,
                             width: $bar.owidth - $bar.finaldx,
+                            planned: draggingPlanned,
                         });
                     }
                     else {
                         bar.updateBarPosition({
                             x: $bar.ox + $bar.finaldx,
+                            planned: draggingPlanned,
                         });
                     }
                 }
@@ -635,11 +650,12 @@ export default class Gantt {
                     if (parentBarId === bar.task.id) {
                         bar.updateBarPosition({
                             width: $bar.owidth + $bar.finaldx,
+                            planned: draggingPlanned,
                         });
                     }
                 }
                 else if (isDragging) {
-                    bar.updateBarPosition({ x: $bar.ox + $bar.finaldx });
+                    bar.updateBarPosition({ x: $bar.ox + $bar.finaldx, planned: draggingPlanned });
                 }
             });
         });
@@ -650,12 +666,13 @@ export default class Gantt {
             isDragging = false;
             isResizingLeft = false;
             isResizingRight = false;
+            draggingPlanned = false;
         });
         $.on(this.$svg, 'mouseup', () => {
             this.barBeingDragged = null;
             bars.forEach((bar) => {
-                const { $bar } = bar;
-                if (!$bar.finaldx)
+                const { $bar, task, $plannedBar } = bar;
+                if (!$bar.finaldx && !(task.hasPlanned && $plannedBar.finaldx))
                     return;
                 bar.dateChanged();
                 bar.setActionCompleted();

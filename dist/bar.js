@@ -73,7 +73,7 @@ export default class Bar {
                 / this.gantt.options.step;
             this.plannedWidth = this.gantt.options.columnWidth * this.plannedDuration;
             this.plannedHandleGroup = createSVG('g', {
-                class: 'handle-group planned',
+                class: 'handle-group',
                 append_to: this.group,
             });
         }
@@ -113,7 +113,7 @@ export default class Bar {
             height: this.height,
             rx: this.cornerRadius,
             ry: this.cornerRadius,
-            class: 'bar bar-planned',
+            class: 'bar planned',
             append_to: this.barGroup,
         });
         this.$plannedBar.style.fillOpacity = '0';
@@ -191,7 +191,7 @@ export default class Bar {
                 height: this.height - 2,
                 rx: this.cornerRadius,
                 ry: this.cornerRadius,
-                class: 'handle right',
+                class: 'handle right planned',
                 append_to: this.plannedHandleGroup,
             });
             createSVG('rect', {
@@ -201,7 +201,7 @@ export default class Bar {
                 height: this.height - 2,
                 rx: this.cornerRadius,
                 ry: this.cornerRadius,
-                class: 'handle left',
+                class: 'handle left planned',
                 append_to: this.plannedHandleGroup,
             });
         }
@@ -263,25 +263,28 @@ export default class Bar {
             task: this.task,
         });
     }
-    updateBarPosition({ x = null, width = null, }) {
+    updateBarPosition({ x = null, width = null, planned = false, }) {
         const bar = this.$bar;
+        const plannedBar = this.$plannedBar;
         if (x) {
-            // get all x values of parent task
-            const xs = this.task.dependencies.map((dep) => this.gantt.getBar(dep)
-                .$bar
-                .getX());
-            // child task must not go before parent
-            // @ts-ignore
-            const validX = xs.reduce((_prev, curr) => x >= curr, x);
-            if (!validX) {
-                // eslint-disable-next-line no-param-reassign
-                width = null;
-                return;
+            if (!planned) {
+                // get all x values of parent task
+                const xs = this.task.dependencies.map((dep) => this.gantt.getBar(dep)
+                    .$bar
+                    .getX());
+                // child task must not go before parent
+                // @ts-ignore
+                const validX = xs.reduce((_prev, curr) => x >= curr, x);
+                if (!validX) {
+                    // eslint-disable-next-line no-param-reassign
+                    width = null;
+                    return;
+                }
             }
-            this.updateAttr(bar, 'x', x);
+            this.updateAttr(planned ? plannedBar : bar, 'x', x);
         }
         if (width && width >= this.gantt.options.columnWidth) {
-            this.updateAttr(bar, 'width', width);
+            this.updateAttr(planned ? plannedBar : bar, 'width', width);
         }
         this.updateLabelPosition();
         this.updateHandlePosition();
@@ -289,23 +292,42 @@ export default class Bar {
         this.updateArrowPosition();
     }
     dateChanged() {
-        let changed = false;
-        const { newStartDate, newEndDate, } = this.computeStartEndDate();
-        if (Number(this.task.startResolved) !== Number(newStartDate)) {
-            changed = true;
-            this.task.startResolved = newStartDate;
+        {
+            let changed = false;
+            const { newStartDate, newEndDate, } = this.computeStartEndDate();
+            if (Number(this.task.startResolved) !== Number(newStartDate)) {
+                changed = true;
+                this.task.startResolved = newStartDate;
+            }
+            if (Number(this.task.endResolved) !== Number(newEndDate)) {
+                changed = true;
+                this.task.endResolved = newEndDate;
+            }
+            if (changed) {
+                this.gantt.triggerEvent('DateChange', [
+                    this.task,
+                    newStartDate,
+                    dateUtils.add(newEndDate, -1, 'second'),
+                    false,
+                ]);
+            }
         }
-        if (Number(this.task.endResolved) !== Number(newEndDate)) {
-            changed = true;
-            this.task.endResolved = newEndDate;
+        if (this.task.hasPlanned) {
+            let changed = false;
+            const { newStartDate, newEndDate, } = this.computeStartEndDate(true);
+            if (Number(this.task.plannedStartResolved) !== Number(newStartDate)) {
+                changed = true;
+                this.task.plannedStartResolved = newStartDate;
+            }
+            if (changed) {
+                this.gantt.triggerEvent('DateChange', [
+                    this.task,
+                    newStartDate,
+                    dateUtils.add(newEndDate, -1, 'second'),
+                    true,
+                ]);
+            }
         }
-        if (!changed)
-            return;
-        this.gantt.triggerEvent('DateChange', [
-            this.task,
-            newStartDate,
-            dateUtils.add(newEndDate, -1, 'second'),
-        ]);
     }
     progressChanged() {
         const newProgress = this.computeProgress();
@@ -318,9 +340,9 @@ export default class Bar {
             this.actionCompleted = false;
         }, 1000);
     }
-    computeStartEndDate() {
-        const bar = this.$bar;
-        const xInUnits = bar.getX() / this.gantt.options.columnWidth;
+    computeStartEndDate(planned = false) {
+        const bar = planned ? this.$plannedBar : this.$bar;
+        const xInUnits = Math.round(bar.getX() / this.gantt.options.columnWidth);
         const newStartDate = dateUtils.add(this.gantt.ganttStart, xInUnits * this.gantt.options.step, 'hour');
         const widthInUnits = bar.getWidth() / this.gantt.options.columnWidth;
         const newEndDate = dateUtils.add(newStartDate, widthInUnits * this.gantt.options.step, 'hour');
@@ -398,6 +420,15 @@ export default class Bar {
     }
     updateHandlePosition() {
         const bar = this.$bar;
+        const plannedBar = this.$plannedBar;
+        if (this.task.hasPlanned) {
+            this.plannedHandleGroup
+                .querySelector('.handle.left')
+                .setAttribute('x', String(plannedBar.getX() + 1));
+            this.plannedHandleGroup
+                .querySelector('.handle.right')
+                .setAttribute('x', String(plannedBar.getEndX() - 9));
+        }
         this.handleGroup
             .querySelector('.handle.left')
             .setAttribute('x', String(bar.getX() + 1));
@@ -425,6 +456,10 @@ export default class Bar {
             let mainHover = false;
             let plannedHover = false;
             const bar = this.$bar;
+            if (e.buttons % 2 === 1) {
+                this.setHover(false, false);
+                return;
+            }
             if (e.offsetX >= bar.getX() && e.offsetX <= bar.getEndX()) {
                 mainHover = true;
                 // if (e.offsetX <= this.computeX() + this.progressWidth) {
