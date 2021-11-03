@@ -121,6 +121,8 @@ export default class Gantt {
 
   private popup: Popup;
 
+  private sortKey: (a: ResolvedTask, b: ResolvedTask) => number;
+
   static VIEW_MODE: { QUARTER_DAY: 'Quarter Day'; HALF_DAY: 'Half Day'; DAY: 'Day'; WEEK: 'Week'; MONTH: 'Month'; YEAR: 'Year' };
 
   constructor(
@@ -131,6 +133,7 @@ export default class Gantt {
     this.setupWrapper(wrapper);
     this.setupOptions(options);
     this.setupTasks(tasks);
+    this.setSortKey((a, b) => a.id.localeCompare(b.id));
     // initialize with default view mode
     this.changeViewMode();
     this.bindEvents();
@@ -1061,6 +1064,19 @@ export default class Gantt {
      */
   clear(): void {
     this.$svg.innerHTML = '';
+  }
+
+  setSortKey(sortFn: (a: ResolvedTask, b: ResolvedTask) => number): void {
+    this.sortKey = sortFn;
+    this.sortTasks();
+  }
+
+  sortTasks(): void {
+    const updatedTasks = this.tasks.sort(this.sortKey).map((task, newIndex) => {
+      task.indexResolved = newIndex;
+      return task;
+    });
+    this.refresh(updatedTasks);
   }
 }
 

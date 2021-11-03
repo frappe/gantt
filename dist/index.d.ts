@@ -71,6 +71,7 @@ export default class Gantt {
     private bars;
     private arrows;
     private popup;
+    private sortKey;
     static VIEW_MODE: {
         QUARTER_DAY: 'Quarter Day';
         HALF_DAY: 'Half Day';
@@ -132,5 +133,7 @@ export default class Gantt {
        * @memberof Gantt
        */
     clear(): void;
+    setSortKey(sortFn: (a: ResolvedTask, b: ResolvedTask) => number): void;
+    sortTasks(): void;
 }
 export {};

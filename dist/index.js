@@ -23,6 +23,7 @@ export default class Gantt {
         this.setupWrapper(wrapper);
         this.setupOptions(options);
         this.setupTasks(tasks);
+        this.setSortKey((a, b) => a.id.localeCompare(b.id));
         // initialize with default view mode
         this.changeViewMode();
         this.bindEvents();
@@ -818,6 +819,17 @@ export default class Gantt {
        */
     clear() {
         this.$svg.innerHTML = '';
+    }
+    setSortKey(sortFn) {
+        this.sortKey = sortFn;
+        this.sortTasks();
+    }
+    sortTasks() {
+        const updatedTasks = this.tasks.sort(this.sortKey).map((task, newIndex) => {
+            task.indexResolved = newIndex;
+            return task;
+        });
+        this.refresh(updatedTasks);
     }
 }
 Gantt.VIEW_MODE = VIEW_MODE;
