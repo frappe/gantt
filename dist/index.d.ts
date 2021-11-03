@@ -133,7 +133,7 @@ export default class Gantt {
        * @memberof Gantt
        */
     clear(): void;
-    setSortKey(sortFn: (a: ResolvedTask, b: ResolvedTask) => number): void;
+    setSortKey(sortFn?: (a: ResolvedTask, b: ResolvedTask) => number): void;
     sortTasks(): void;
 }
 export {};

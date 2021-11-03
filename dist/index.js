@@ -821,7 +821,7 @@ export default class Gantt {
         this.$svg.innerHTML = '';
     }
     setSortKey(sortFn) {
-        this.sortKey = sortFn;
+        this.sortKey = sortFn !== null && sortFn !== void 0 ? sortFn : ((a, b) => a.id.localeCompare(b.id));
         this.sortTasks();
     }
     sortTasks() {
