@@ -479,17 +479,20 @@ export default class Bar {
         if (main) {
             this.interactionTarget = 'main';
             this.handleGroup.classList.add('visible');
-            this.plannedHandleGroup.classList.remove('visible');
+            if (this.plannedHandleGroup)
+                this.plannedHandleGroup.classList.remove('visible');
         }
         else if (planned) {
             this.interactionTarget = 'planned';
             this.handleGroup.classList.remove('visible');
-            this.plannedHandleGroup.classList.add('visible');
+            if (this.plannedHandleGroup)
+                this.plannedHandleGroup.classList.add('visible');
         }
         else {
             this.interactionTarget = null;
             this.handleGroup.classList.remove('visible');
-            this.plannedHandleGroup.classList.remove('visible');
+            if (this.plannedHandleGroup)
+                this.plannedHandleGroup.classList.remove('visible');
         }
     }
 }
