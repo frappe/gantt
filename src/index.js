@@ -42,7 +42,7 @@ export default class Gantt {
         } else {
             throw new TypeError(
                 'Frappé Gantt only supports usage of a string CSS selector,' +
-                    " HTML DOM element or SVG DOM element for the 'element' parameter"
+                " HTML DOM element or SVG DOM element for the 'element' parameter"
             );
         }
 
@@ -51,19 +51,33 @@ export default class Gantt {
             // create it
             this.$svg = createSVG('svg', {
                 append_to: wrapper_element,
-                class: 'gantt'
+                class: 'gantt',
+                id: 'ganttSvg'
+            });
+            this.$column_svg = createSVG('svg', {
+                append_to: wrapper_element,
+                class: 'gantt',
+                width: 400,
+                id: 'columnSvg'
             });
         } else {
             this.$svg = svg_element;
             this.$svg.classList.add('gantt');
+            this.$column_svg = svg_element;
+            this.$column_svg.classList.add('gantt');
         }
 
         // wrapper element
         this.$container = document.createElement('div');
         this.$container.classList.add('gantt-container');
+        this.$column_container = document.createElement('div');
+        this.$column_container.classList.add('gantt-container');
+        this.$column_container.classList.add('columns_svg');
 
         const parent_element = this.$svg.parentElement;
+        parent_element.appendChild(this.$column_container);
         parent_element.appendChild(this.$container);
+        this.$column_container.appendChild(this.$column_svg);
         this.$container.appendChild(this.$svg);
 
         // popup wrapper
@@ -76,6 +90,7 @@ export default class Gantt {
         const default_options = {
             header_height: 50,
             column_width: 30,
+            column_width_for_columns: 120,
             step: 24,
             view_modes: [...Object.values(VIEW_MODE)],
             bar_height: 20,
@@ -283,12 +298,18 @@ export default class Gantt {
 
     setup_layers() {
         this.layers = {};
+        this.column_layers = {};
         const layers = ['grid', 'date', 'arrow', 'progress', 'bar', 'details'];
+        const column_layers = ['grid', 'date', 'arrow', 'progress', 'bar', 'details'];
         // make group layers
         for (let layer of layers) {
             this.layers[layer] = createSVG('g', {
                 class: layer,
                 append_to: this.$svg
+            });
+            this.column_layers[layer] = createSVG('g', {
+                class: layer,
+                append_to: this.$column_svg
             });
         }
     }
@@ -297,39 +318,56 @@ export default class Gantt {
         this.make_grid_background();
         this.make_grid_rows();
         this.make_grid_header();
+        this.make_columns_grid_header();
         this.make_grid_ticks();
         this.make_grid_highlights();
     }
 
     make_grid_background() {
         const grid_width = this.dates.length * this.options.column_width;
+        const column_grid_width = this.options.columns.length * this.options.column_width_for_columns;
         const grid_height =
             this.options.header_height +
             this.options.padding +
             (this.options.bar_height + this.options.padding) *
-                this.tasks.length;
+            this.tasks.length;
 
+        createSVG('rect', {
+            x: 0,
+            y: 0,
+            width: column_grid_width,
+            height: grid_height,
+            class: 'grid-background',
+            append_to: this.layers.grid
+        });
         createSVG('rect', {
             x: 0,
             y: 0,
             width: grid_width,
             height: grid_height,
             class: 'grid-background',
-            append_to: this.layers.grid
+            append_to: this.column_layers.grid
         });
 
         $.attr(this.$svg, {
             height: grid_height + this.options.padding + 100,
             width: '100%'
         });
+        $.attr(this.$column_svg, {
+            height: grid_height + this.options.padding + 100,
+            width: column_grid_width
+        });
     }
 
     make_grid_rows() {
         const rows_layer = createSVG('g', { append_to: this.layers.grid });
         const lines_layer = createSVG('g', { append_to: this.layers.grid });
+        const columns_rows_layer = createSVG('g', { append_to: this.column_layers.grid });
+        const columns_lines_layer = createSVG('g', { append_to: this.column_layers.grid });
 
         const row_width = this.dates.length * this.options.column_width;
         const row_height = this.options.bar_height + this.options.padding;
+        const column_row_width = this.options.columns.length * this.options.column_width_for_columns;
 
         let row_y = this.options.header_height + this.options.padding / 2;
 
@@ -342,6 +380,14 @@ export default class Gantt {
                 class: 'grid-row',
                 append_to: rows_layer
             });
+            createSVG('rect', {
+                x: 0,
+                y: row_y,
+                width: column_row_width,
+                height: row_height,
+                class: 'grid-row',
+                append_to: columns_rows_layer
+            });
 
             createSVG('line', {
                 x1: 0,
@@ -350,6 +396,15 @@ export default class Gantt {
                 y2: row_y + row_height,
                 class: 'row-line',
                 append_to: lines_layer
+            });
+
+            createSVG('line', {
+                x1: 0,
+                y1: row_y + row_height,
+                x2: column_row_width,
+                y2: row_y + row_height,
+                class: 'row-line',
+                append_to: columns_lines_layer
             });
 
             row_y += this.options.bar_height + this.options.padding;
@@ -366,6 +421,18 @@ export default class Gantt {
             height: header_height,
             class: 'grid-header',
             append_to: this.layers.grid
+        });
+    }
+    make_columns_grid_header() {
+        const header_width = this.options.columns.length * this.options.column_width;
+        const header_height = this.options.header_height + 10;
+        createSVG('rect', {
+            x: 0,
+            y: 0,
+            width: header_width,
+            height: header_height,
+            class: 'grid-header',
+            append_to: this.column_layers.grid
         });
     }
 
@@ -424,7 +491,7 @@ export default class Gantt {
             const width = this.options.column_width;
             const height =
                 (this.options.bar_height + this.options.padding) *
-                    this.tasks.length +
+                this.tasks.length +
                 this.options.header_height +
                 this.options.padding / 2;
 
@@ -464,6 +531,32 @@ export default class Gantt {
                 ) {
                     $upper_text.remove();
                 }
+            }
+        }
+        let x = 60;
+        for (let column of this.options.columns) {
+            createSVG('text', {
+                x: x,
+                y: 50,
+                innerHTML: column,
+                class: 'lower-text',
+                append_to: this.column_layers.date
+            });
+            x += 120;
+        }
+
+        for (let task of this.tasks) {
+            let posY = 15 + this.options.header_height + this.options.padding + task._index * (this.options.bar_height + this.options.padding);
+            x = 60;
+            for (let column of this.options.columns) {
+                createSVG('text', {
+                    x: x,
+                    y: posY,
+                    innerHTML: ((String(task[column]).slice(0, 25)) + (String(task[column]).length>25?"...":"")) ,
+                    class: 'lower-text',
+                    append_to: this.column_layers.date
+                });
+                x += 120;
             }
         }
     }
@@ -510,8 +603,8 @@ export default class Gantt {
             'Half Day_upper':
                 date.getDate() !== last_date.getDate()
                     ? date.getMonth() !== last_date.getMonth()
-                      ? date_utils.format(date, 'D MMM', this.options.language)
-                      : date_utils.format(date, 'D', this.options.language)
+                    ? date_utils.format(date, 'D MMM', this.options.language)
+                    : date_utils.format(date, 'D', this.options.language)
                     : '',
             Day_upper:
                 date.getMonth() !== last_date.getMonth()
@@ -624,8 +717,8 @@ export default class Gantt {
 
         const scroll_pos =
             hours_before_first_task /
-                this.options.step *
-                this.options.column_width -
+            this.options.step *
+            this.options.column_width -
             this.options.column_width;
 
         parent_element.scrollLeft = scroll_pos;
@@ -674,10 +767,17 @@ export default class Gantt {
             y_on_start = e.offsetY;
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
-            const ids = [
-                parent_bar_id,
-                ...this.get_all_dependent_tasks(parent_bar_id)
-            ];
+            let dependents = this.get_all_dependent_tasks(parent_bar_id);
+            let ids;
+            if(dependents.length>0){
+                ids = [
+                    parent_bar_id, ...dependents
+                ];
+            }else {
+                ids = [
+                    parent_bar_id
+                ];
+            }
             bars = ids.map(id => this.get_bar(id));
 
             this.bar_being_dragged = parent_bar_id;

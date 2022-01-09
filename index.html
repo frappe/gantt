@@ -84,6 +84,7 @@
 			}
 		]
 		var gantt_chart = new Gantt(".gantt-target", tasks, {
+			columns: ['id', 'name'],
 			on_click: function (task) {
 				console.log(task);
 			},
