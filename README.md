@@ -1,3 +1,5 @@
+<h2>NB: This is for those that want to add columns to the gantt chart<h2>
+
 <div align="center">
     <img src="https://github.com/frappe/design/blob/master/logos/logo-2019/frappe-gantt-logo.png" height="128">
     <h2>Frappe Gantt</h2>
