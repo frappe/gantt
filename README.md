@@ -49,6 +49,7 @@ var gantt = new Gantt("#gantt", tasks);
 You can also pass various options to the Gantt constructor:
 ```js
 var gantt = new Gantt("#gantt", tasks, {
+    columns: ['id', 'name', 'dependencies'],
     header_height: 50,
     column_width: 30,
     step: 24,
@@ -62,7 +63,7 @@ var gantt = new Gantt("#gantt", tasks, {
     custom_popup_html: null
 });
 ```
-
+Notice the columns array added there.. 
 If you want to contribute:
 
 1. Clone this repo.
