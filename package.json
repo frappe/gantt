@@ -30,16 +30,16 @@
   },
   "homepage": "https://github.com/frappe/gantt",
   "devDependencies": {
-    "babel-preset-env": "^1.6.1",
-    "deepmerge": "^2.0.1",
-    "eslint": "^4.17.0",
-    "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-prettier": "^2.6.0",
-    "jest": "^22.2.1",
-    "prettier": "1.10.2",
-    "rollup": "^0.55.3",
+    "babel-preset-env": "^1.7.0",
+    "deepmerge": "^4.2.2",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "jest": "^27.0.6",
+    "prettier": "2.3.2",
+    "rollup": "^2.53.3",
     "rollup-plugin-sass": "^1.2.2",
-    "rollup-plugin-uglify": "^3.0.0"
+    "rollup-plugin-uglify": "^6.0.4"
   },
   "eslintIgnore": [
     "dist"

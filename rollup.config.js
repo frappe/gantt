@@ -11,6 +11,7 @@ const dev = {
     },
     plugins: [
         sass({
+            include: ['/**/*.css', '/**/*.scss', '/**/*.sass'],
             output: 'dist/frappe-gantt.css'
         })
     ]
@@ -19,7 +20,7 @@ const prod = merge(dev, {
     output: {
         file: 'dist/frappe-gantt.min.js'
     },
-    plugins: [uglify()]
+    plugins: [uglify.uglify()]
 });
 
 export default [dev, prod];

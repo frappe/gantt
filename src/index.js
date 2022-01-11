@@ -42,7 +42,7 @@ export default class Gantt {
         } else {
             throw new TypeError(
                 'Frappé Gantt only supports usage of a string CSS selector,' +
-                    " HTML DOM element or SVG DOM element for the 'element' parameter"
+                " HTML DOM element or SVG DOM element for the 'element' parameter"
             );
         }
 
@@ -272,6 +272,7 @@ export default class Gantt {
     render() {
         this.clear();
         this.setup_layers();
+        this.make_resource();
         this.make_grid();
         this.make_dates();
         this.make_bars();
@@ -283,13 +284,102 @@ export default class Gantt {
 
     setup_layers() {
         this.layers = {};
-        const layers = ['grid', 'date', 'arrow', 'progress', 'bar', 'details'];
+        const layers = [
+            'grid',
+            'resource',
+            'date',
+            'arrow',
+            'progress',
+            'bar',
+            'details'
+        ];
         // make group layers
         for (let layer of layers) {
             this.layers[layer] = createSVG('g', {
                 class: layer,
                 append_to: this.$svg
             });
+        }
+    }
+
+    make_resource() {
+        //define width size
+        this.resource_width = 300;
+
+        const grid_layer = createSVG('g', { append_to: this.layers.resource });
+        const text_layer = createSVG('g', { append_to: this.layers.resource });
+        const lines_layer = createSVG('g', { append_to: this.layers.resource });
+
+        const row_width = this.resource_width;
+        const row_height = this.options.bar_height + this.options.padding;
+
+        let row_y = this.options.header_height + this.options.padding / 2;
+
+        // make resource
+        createSVG('rect', {
+            x: 0,
+            y: 0,
+            width: row_width,
+            height: row_height + this.options.header_height - 25,
+            class: 'grid-row',
+            append_to: text_layer
+        });
+
+        createSVG('text', {
+            x: this.resource_width / 2,
+            y: row_y - 20,
+            width: row_width,
+            height: row_height,
+            innerHTML: 'Resource',
+            class: 'header-text',
+            append_to: text_layer
+        });
+
+        createSVG('line', {
+            x1: 0,
+            y1: row_y,
+            x2: row_width,
+            y2: row_y + 1,
+            class: 'grid-header',
+            append_to: lines_layer
+        });
+
+        createSVG('path', {
+            d: `M ${row_width} ${this.options.header_height + this.options.padding / 2} v ${(this.options.bar_height + this.options.padding) *
+                this.tasks.length}`,
+            class: 'resource-line',
+            append_to: lines_layer
+        });
+
+        // reouse name 
+        for (let task of this.tasks) {
+            createSVG('rect', {
+                x: 0,
+                y: row_y,
+                width: row_width,
+                height: row_height,
+                class: 'grid-row',
+                append_to: grid_layer
+            });
+
+            createSVG('text', {
+                x: this.resource_width / 2,
+                y: row_y + (row_height / 2) + 5,
+                innerHTML: `${task.name.slice(0, 40)}${task.name.length > 50 ? '...' : ''}`,
+                class: 'resource-text',
+                append_to: text_layer
+            });
+
+            createSVG('line', {
+                x1: 0,
+                y1: row_y + row_height,
+                x2: row_width,
+                y2: row_y + row_height,
+                class: 'row-line',
+                append_to: lines_layer
+            });
+
+            row_y += this.options.bar_height + this.options.padding;
         }
     }
 
@@ -302,12 +392,12 @@ export default class Gantt {
     }
 
     make_grid_background() {
-        const grid_width = this.dates.length * this.options.column_width;
+        const grid_width = this.resource_width + this.dates.length * this.options.column_width;
         const grid_height =
             this.options.header_height +
             this.options.padding +
             (this.options.bar_height + this.options.padding) *
-                this.tasks.length;
+            this.tasks.length;
 
         createSVG('rect', {
             x: 0,
@@ -328,14 +418,14 @@ export default class Gantt {
         const rows_layer = createSVG('g', { append_to: this.layers.grid });
         const lines_layer = createSVG('g', { append_to: this.layers.grid });
 
-        const row_width = this.dates.length * this.options.column_width;
+        const row_width = this.resource_width + this.dates.length * this.options.column_width;
         const row_height = this.options.bar_height + this.options.padding;
 
         let row_y = this.options.header_height + this.options.padding / 2;
 
         for (let task of this.tasks) {
             createSVG('rect', {
-                x: 0,
+                x: this.resource_width,
                 y: row_y,
                 width: row_width,
                 height: row_height,
@@ -344,7 +434,7 @@ export default class Gantt {
             });
 
             createSVG('line', {
-                x1: 0,
+                x1: this.resource_width,
                 y1: row_y + row_height,
                 x2: row_width,
                 y2: row_y + row_height,
@@ -357,10 +447,10 @@ export default class Gantt {
     }
 
     make_grid_header() {
-        const header_width = this.dates.length * this.options.column_width;
+        const header_width = this.resource_width + this.dates.length * this.options.column_width;
         const header_height = this.options.header_height + 10;
         createSVG('rect', {
-            x: 0,
+            x: this.resource_width,
             y: 0,
             width: header_width,
             height: header_height,
@@ -370,7 +460,7 @@ export default class Gantt {
     }
 
     make_grid_ticks() {
-        let tick_x = 0;
+        let tick_x = this.resource_width;
         let tick_y = this.options.header_height + this.options.padding / 2;
         let tick_height =
             (this.options.bar_height + this.options.padding) *
@@ -424,7 +514,7 @@ export default class Gantt {
             const width = this.options.column_width;
             const height =
                 (this.options.bar_height + this.options.padding) *
-                    this.tasks.length +
+                this.tasks.length +
                 this.options.header_height +
                 this.options.padding / 2;
 
@@ -442,7 +532,7 @@ export default class Gantt {
     make_dates() {
         for (let date of this.get_dates_to_draw()) {
             createSVG('text', {
-                x: date.lower_x,
+                x: this.resource_width + date.lower_x,
                 y: date.lower_y,
                 innerHTML: date.lower_text,
                 class: 'lower-text',
@@ -451,7 +541,7 @@ export default class Gantt {
 
             if (date.upper_text) {
                 const $upper_text = createSVG('text', {
-                    x: date.upper_x,
+                    x: this.resource_width + date.upper_x,
                     y: date.upper_y,
                     innerHTML: date.upper_text,
                     class: 'upper-text',
@@ -510,8 +600,8 @@ export default class Gantt {
             'Half Day_upper':
                 date.getDate() !== last_date.getDate()
                     ? date.getMonth() !== last_date.getMonth()
-                      ? date_utils.format(date, 'D MMM', this.options.language)
-                      : date_utils.format(date, 'D', this.options.language)
+                        ? date_utils.format(date, 'D MMM', this.options.language)
+                        : date_utils.format(date, 'D', this.options.language)
                     : '',
             Day_upper:
                 date.getMonth() !== last_date.getMonth()
@@ -564,7 +654,7 @@ export default class Gantt {
 
     make_bars() {
         this.bars = this.tasks.map(task => {
-            const bar = new Bar(this, task);
+            const bar = new Bar(this, task, this.resource_width);
             this.layers.bar.appendChild(bar.group);
             return bar;
         });
@@ -624,8 +714,8 @@ export default class Gantt {
 
         const scroll_pos =
             hours_before_first_task /
-                this.options.step *
-                this.options.column_width -
+            this.options.step *
+            this.options.column_width -
             this.options.column_width;
 
         parent_element.scrollLeft = scroll_pos;
@@ -645,7 +735,7 @@ export default class Gantt {
 
     bind_bar_events() {
         let is_dragging = false;
-        let x_on_start = 0;
+        let x_on_start = this.resource_width + 0;
         let y_on_start = 0;
         let is_resizing_left = false;
         let is_resizing_right = false;
@@ -747,7 +837,7 @@ export default class Gantt {
     }
 
     bind_bar_progress() {
-        let x_on_start = 0;
+        let x_on_start = this.resource_width + 0;
         let y_on_start = 0;
         let is_resizing = null;
         let bar = null;
