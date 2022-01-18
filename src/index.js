@@ -86,7 +86,7 @@ export default class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
-            language: 'en'
+            language: 'ru'
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -105,7 +105,9 @@ export default class Gantt {
 
             // cache index
             task._index = i;
-
+            if (typeof task.custom_index === 'number') {
+                task._index = task.custom_index;
+                }
             // invalid dates
             if (!task.start && !task.end) {
                 const today = date_utils.today();
