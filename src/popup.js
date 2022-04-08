@@ -64,5 +64,6 @@ export default class Popup {
 
     hide() {
         this.parent.style.opacity = 0;
+        this.parent.style.left = 0;
     }
 }
