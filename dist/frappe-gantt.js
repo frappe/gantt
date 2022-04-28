@@ -1193,6 +1193,10 @@ var Gantt = (function () {
                 }
             }
         }
+        if(!this.gantt_start)
+            this.gantt_start = new Date();
+        if(!this.gantt_end)
+            this.gantt_end = new Date();
 
         refresh(tasks) {
             this.setup_tasks(tasks);
