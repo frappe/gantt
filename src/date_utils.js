@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 const YEAR = 'year';
 const MONTH = 'month';
 const DAY = 'day';
@@ -19,7 +20,7 @@ const month_names = {
         'September',
         'October',
         'November',
-        'December'
+        'December',
     ],
     es: [
         'Enero',
@@ -33,7 +34,7 @@ const month_names = {
         'Septiembre',
         'Octubre',
         'Noviembre',
-        'Diciembre'
+        'Diciembre',
     ],
     ru: [
         'Январь',
@@ -47,7 +48,7 @@ const month_names = {
         'Сентябрь',
         'Октябрь',
         'Ноябрь',
-        'Декабрь'
+        'Декабрь',
     ],
     ptBr: [
         'Janeiro',
@@ -62,9 +63,7 @@ const month_names = {
         'Outubro',
         'Novembro',
         'Dezembro'
-
     ],    
-
     de: [
 		'Januar',
         'Februar',
@@ -91,7 +90,7 @@ const month_names = {
         'Septembre',
         'Octobre',
         'Novembre',
-        'Décembre'
+        'Décembre',
     ],
     tr: [
         'Ocak',
@@ -105,7 +104,7 @@ const month_names = {
         'Eylül',
         'Ekim',
         'Kasım',
-        'Aralık'
+        'Aralık',
     ],
     zh: [
         '一月',
@@ -119,8 +118,8 @@ const month_names = {
         '九月',
         '十月',
         '十一月',
-        '十二月'
-    ]
+        '十二月',
+    ],
 };
 
 export default {
@@ -134,7 +133,7 @@ export default {
 
             date_parts = parts[0]
                 .split(date_separator)
-                .map(val => parseInt(val, 10));
+                .map((val) => parseInt(val, 10));
             time_parts = parts[1] && parts[1].split(time_separator);
 
             // month is 0 indexed
@@ -176,13 +175,9 @@ export default {
         return date_string + (with_time ? ' ' + time_string : '');
     },
 
-    format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang) {
-    	//  add localization to format Date
-    	var localMonthNames = month_names[lang];
-    	if(localMonthNames == null)
-    		localMonthNames = month_names['en'];
-    	
-        const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
+    format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
+        const values = this.get_date_values(date).map((d) => padStart(d, 2, 0));
+
         const format_map = {
             YYYY: values[0],
             MM: padStart(+values[1] + 1, 2, 0),
@@ -190,10 +185,11 @@ export default {
             HH: values[3],
             mm: values[4],
             ss: values[5],
-            SSS:values[6],
+            SSS: values[6],
             D: values[2],
-            MMMM: localMonthNames[+values[1]],
-            MMM: localMonthNames[+values[1]]
+
+            MMMM: month_names[lang][+values[1]],
+            MMM: month_names[lang][+values[1]],
         };
 
         let str = format_string;
@@ -201,7 +197,7 @@ export default {
 
         Object.keys(format_map)
             .sort((a, b) => b.length - a.length) // big string first
-            .forEach(key => {
+            .forEach((key) => {
                 if (str.includes(key)) {
                     str = str.replace(key, `$${formatted_values.length}`);
                     formatted_values.push(format_map[key]);
@@ -238,7 +234,7 @@ export default {
                 hours,
                 days,
                 months,
-                years
+                years,
             }[scale]
         );
     },
@@ -261,7 +257,7 @@ export default {
             date.getHours() + (scale === HOUR ? qty : 0),
             date.getMinutes() + (scale === MINUTE ? qty : 0),
             date.getSeconds() + (scale === SECOND ? qty : 0),
-            date.getMilliseconds() + (scale === MILLISECOND ? qty : 0)
+            date.getMilliseconds() + (scale === MILLISECOND ? qty : 0),
         ];
         return new Date(...vals);
     },
@@ -274,7 +270,7 @@ export default {
             [HOUR]: 3,
             [MINUTE]: 2,
             [SECOND]: 1,
-            [MILLISECOND]: 0
+            [MILLISECOND]: 0,
         };
 
         function should_reset(_scale) {
@@ -289,7 +285,7 @@ export default {
             should_reset(DAY) ? 0 : date.getHours(),
             should_reset(HOUR) ? 0 : date.getMinutes(),
             should_reset(MINUTE) ? 0 : date.getSeconds(),
-            should_reset(SECOND) ? 0 : date.getMilliseconds()
+            should_reset(SECOND) ? 0 : date.getMilliseconds(),
         ];
 
         return new Date(...vals);
@@ -307,7 +303,7 @@ export default {
             date.getHours(),
             date.getMinutes(),
             date.getSeconds(),
-            date.getMilliseconds()
+            date.getMilliseconds(),
         ];
     },
 
@@ -326,7 +322,7 @@ export default {
             return 29;
         }
         return 28;
-    }
+    },
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart

@@ -1,25 +1,37 @@
 import sass from 'rollup-plugin-sass';
-import uglify from 'rollup-plugin-uglify';
-import merge from 'deepmerge';
+import { terser } from 'rollup-plugin-terser';
 
 const dev = {
     input: 'src/index.js',
     output: {
         name: 'Gantt',
         file: 'dist/frappe-gantt.js',
-        format: 'iife'
+        sourcemap: true,
+        format: 'iife',
     },
     plugins: [
         sass({
-            output: 'dist/frappe-gantt.css'
-        })
-    ]
+            output: true,
+        }),
+    ],
 };
-const prod = merge(dev, {
+const prod = {
+    input: 'src/index.js',
     output: {
-        file: 'dist/frappe-gantt.min.js'
+        name: 'Gantt',
+        file: 'dist/frappe-gantt.min.js',
+        sourcemap: true,
+        format: 'iife',
     },
-    plugins: [uglify()]
-});
+    plugins: [
+        sass({
+            output: true,
+            options: {
+                outputStyle: 'compressed',
+            },
+        }),
+        terser(),
+    ],
+};
 
 export default [dev, prod];
