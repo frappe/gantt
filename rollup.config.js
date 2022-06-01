@@ -1,5 +1,7 @@
 import sass from 'rollup-plugin-sass';
 import { terser } from 'rollup-plugin-terser';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 
 const dev = {
     input: 'src/index.js',
@@ -10,6 +12,8 @@ const dev = {
         format: 'iife',
     },
     plugins: [
+        nodeResolve(),
+        commonjs(),
         sass({
             output: true,
         }),
@@ -24,6 +28,8 @@ const prod = {
         format: 'iife',
     },
     plugins: [
+        nodeResolve(),
+        commonjs(),
         sass({
             output: true,
             options: {

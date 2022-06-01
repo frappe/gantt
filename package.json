@@ -1,5 +1,5 @@
 {
-  "name": "frappe-gantt",
+  "name": "frappe-gantt-jalali",
   "version": "0.6.1",
   "description": "A simple, modern, interactive gantt library for the web",
   "main": "src/index.js",
@@ -9,8 +9,8 @@
     "dev": "rollup -c -w",
     "test": "jest",
     "test:watch": "jest --watch",
-    "prettier": "prettier --write \"{src/*,tests/*,rollup.config}.js\"",
-    "prettier-check": "prettier --check \"{src/*,tests/*,rollup.config}.js\""
+    "prettier": "prettier --write \"{src/*,tests/*,rollup.config}.mjs\"",
+    "prettier-check": "prettier --check \"{src/*,tests/*,rollup.config}.mjs\""
   },
   "repository": {
     "type": "git",
@@ -35,7 +35,14 @@
     "url": "https://github.com/frappe/gantt/issues"
   },
   "homepage": "https://github.com/frappe/gantt",
+  "dependencies": {
+    "jalali-moment": "^3.3.11"
+  },
   "devDependencies": {
+    "@babel/core": "^7.18.2",
+    "@babel/preset-env": "^7.18.2",
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
     "babel-preset-env": "^1.6.1",
     "eslint": "^4.17.0",
     "eslint-config-prettier": "^2.9.0",
@@ -48,5 +55,6 @@
   },
   "eslintIgnore": [
     "dist"
-  ]
+  ],
+  "type": "module"
 }

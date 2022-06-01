@@ -1,3 +1,6 @@
+// https://blog.openreplay.com/the-ultimate-guide-to-getting-started-with-the-rollup-js-javascript-bundler
+import * as moment from 'jalali-moment';
+
 const YEAR = 'year';
 const MONTH = 'month';
 const DAY = 'day';
@@ -105,9 +108,32 @@ const month_names = {
         '十一月',
         '十二月',
     ],
+    fa: [
+        'فروردین',
+        'اردیبهشت',
+        'خرداد',
+        'تیر',
+        'مرداد',
+        'شهریور',
+        'مهر',
+        'آبان',
+        'اذر',
+        'دی',
+        'بهمن',
+        'اسفند'
+    ]
 };
 
-export default {
+export default class {
+
+    constructor(options) {
+        let default_options = {
+            is_jalali: false,
+            language: 'en'
+        };
+        this.options = Object.assign({}, default_options, options);
+    }
+    
     parse(date, date_separator = '-', time_separator = /[.:]/) {
         if (date instanceof Date) {
             return date;
@@ -136,7 +162,7 @@ export default {
 
             return new Date(...vals);
         }
-    },
+    }
 
     to_string(date, with_time = false) {
         if (!(date instanceof Date)) {
@@ -158,11 +184,11 @@ export default {
         const time_string = `${vals[3]}:${vals[4]}:${vals[5]}.${vals[6]}`;
 
         return date_string + (with_time ? ' ' + time_string : '');
-    },
+    }
 
-    format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
+    format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS') {
         const values = this.get_date_values(date).map((d) => padStart(d, 2, 0));
-        const format_map = {
+        let format_map = {
             YYYY: values[0],
             MM: padStart(+values[1] + 1, 2, 0),
             DD: values[2],
@@ -171,9 +197,32 @@ export default {
             ss: values[5],
             SSS: values[6],
             D: values[2],
-            MMMM: month_names[lang][+values[1]],
-            MMM: month_names[lang][+values[1]],
+            MMMM: month_names[this.options.language][+values[1]],
+            MMM: month_names[this.options.language][+values[1]],
         };
+
+        if (this.options.is_jalali) {
+            let m = padStart(+values[1] + 1, 2, 0);
+            let inDate = values[0] + '-' + m + '-' + values[2];
+
+            let jalali = moment.from(inDate, 'en', 'YYYY-MM-DD').locale('fa');
+            let jYear = jalali.format('jYYYY');
+            let jMonth = jalali.format('jMM');
+            let jDay = jalali.format('jDD');
+            let jdateNum = jMonth - 1;
+            format_map = {
+                YYYY: jYear,
+                MM: jMonth,
+                DD: jDay,
+                HH: values[3],
+                mm: values[4],
+                ss: values[5],
+                SSS: values[6],
+                D: jDay,
+                MMMM: month_names[this.options.language][jdateNum],
+                MMM: month_names[this.options.language][jdateNum]
+            };
+        }
 
         let str = format_string;
         const formatted_values = [];
@@ -192,7 +241,7 @@ export default {
         });
 
         return str;
-    },
+    }
 
     diff(date_a, date_b, scale = DAY) {
         let milliseconds, seconds, hours, minutes, days, months, years;
@@ -220,16 +269,16 @@ export default {
                 years,
             }[scale]
         );
-    },
+    }
 
     today() {
         const vals = this.get_date_values(new Date()).slice(0, 3);
         return new Date(...vals);
-    },
+    }
 
     now() {
         return new Date();
-    },
+    }
 
     add(date, qty, scale) {
         qty = parseInt(qty, 10);
@@ -243,7 +292,7 @@ export default {
             date.getMilliseconds() + (scale === MILLISECOND ? qty : 0),
         ];
         return new Date(...vals);
-    },
+    }
 
     start_of(date, scale) {
         const scores = {
@@ -272,11 +321,11 @@ export default {
         ];
 
         return new Date(...vals);
-    },
+    }
 
     clone(date) {
         return new Date(...this.get_date_values(date));
-    },
+    }
 
     get_date_values(date) {
         return [
@@ -288,13 +337,20 @@ export default {
             date.getSeconds(),
             date.getMilliseconds(),
         ];
-    },
+    }
 
     get_days_in_month(date) {
-        const no_of_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        let no_of_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
         const month = date.getMonth();
 
+        if (this.options.is_jalali) {
+            no_of_days = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+            if (month !== 12) {
+                return no_of_days[month];
+            }
+        }
+        
         if (month !== 1) {
             return no_of_days[month];
         }
@@ -305,7 +361,7 @@ export default {
             return 29;
         }
         return 28;
-    },
+    }
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart

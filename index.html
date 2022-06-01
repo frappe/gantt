@@ -19,6 +19,7 @@
 	</style>
 	<link rel="stylesheet" href="dist/frappe-gantt.css" />
 	<script src="dist/frappe-gantt.js"></script>
+<!--	<script src="node_modules/moment-jalaali/build/moment-jalaali.js"></script>-->
 </head>
 <body>
 	<div class="container">
@@ -28,56 +29,56 @@
 	<script>
 		var tasks = [
 			{
-				start: '2018-10-01',
-				end: '2018-10-08',
-				name: 'Redesign website',
+				start: '2021-10-01',
+				end: '2021-10-08',
+				name: 'طراحی مجدد سایت',
 				id: "Task 0",
 				progress: 20
 			},
 			{
-				start: '2018-10-03',
-				end: '2018-10-06',
-				name: 'Write new content',
+				start: '2021-10-03',
+				end: '2021-10-06',
+				name: 'نوشتن محتوای جدید',
 				id: "Task 1",
 				progress: 5,
 				dependencies: 'Task 0'
 			},
 			{
-				start: '2018-10-04',
-				end: '2018-10-08',
-				name: 'Apply new styles',
+				start: '2021-10-04',
+				end: '2021-10-08',
+				name: 'افزودن استایل جدید',
 				id: "Task 2",
 				progress: 10,
 				dependencies: 'Task 1'
 			},
 			{
-				start: '2018-10-08',
-				end: '2018-10-09',
-				name: 'Review',
+				start: '2021-10-08',
+				end: '2021-10-09',
+				name: 'بازبینی',
 				id: "Task 3",
 				progress: 5,
 				dependencies: 'Task 2'
 			},
 			{
-				start: '2018-10-08',
-				end: '2018-10-10',
-				name: 'Deploy',
+				start: '2021-10-08',
+				end: '2021-10-10',
+				name: 'استقرار',
 				id: "Task 4",
 				progress: 0,
 				dependencies: 'Task 2'
 			},
 			{
-				start: '2018-10-11',
-				end: '2018-10-11',
-				name: 'Go Live!',
+				start: '2021-10-11',
+				end: '2021-10-11',
+				name: 'پشتیبانی',
 				id: "Task 5",
 				progress: 0,
 				dependencies: 'Task 4',
 				custom_class: 'bar-milestone'
 			},
 			{
-				start: '2014-01-05',
-				end: '2019-10-12',
+				start: '2021-01-05',
+				end: '2021-10-12',
 				name: 'Long term task',
 				id: "Task 6",
 				progress: 0
@@ -97,7 +98,8 @@
 				console.log(mode);
 			},
 			view_mode: 'Month',
-			language: 'en'
+			language: 'fa',
+			is_jalali:true
 		});
 		console.log(gantt_chart);
 	</script>
