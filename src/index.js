@@ -813,11 +813,11 @@ export default class Gantt {
                 return acc;
             }, []);
 
-            out = out.concat(deps);
-            to_process = deps.filter((d) => !to_process.includes(d));
+            to_process = deps.filter((d) => !out.includes(d));
+            out = out.concat(to_process);
         }
 
-        return out.filter(Boolean);
+        return out.filter((id) => id && id !== task_id);
     }
 
     get_snap_position(dx) {
