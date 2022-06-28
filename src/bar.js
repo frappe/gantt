@@ -219,7 +219,7 @@ export default class Bar {
         });
     }
 
-    update_bar_position({ x = null, width = null }) {
+    update_bar_position({ x = null, width = null, y = null }) {
         const bar = this.$bar;
         if (x) {
             // get all x values of parent task
@@ -239,9 +239,12 @@ export default class Bar {
         if (width && width >= this.gantt.options.column_width) {
             this.update_attr(bar, 'width', width);
         }
+        if (y) {
+            this.update_attr(bar, 'y', y);
+        }
         this.update_label_position();
-        this.update_handle_position();
         this.update_progressbar_position();
+        this.update_handle_position();
         this.update_arrow_position();
     }
 
@@ -370,6 +373,7 @@ export default class Bar {
     update_progressbar_position() {
         if (this.invalid) return;
         this.$bar_progress.setAttribute('x', this.$bar.getX());
+        this.$bar_progress.setAttribute('y', this.$bar.getY());
         this.$bar_progress.setAttribute(
             'width',
             this.$bar.getWidth() * (this.task.progress / 100)
@@ -387,6 +391,7 @@ export default class Bar {
             label.classList.remove('big');
             label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
         }
+        label.setAttribute('y', bar.getY() + bar.getHeight() / 2);
     }
 
     update_handle_position() {
@@ -396,8 +401,14 @@ export default class Bar {
             .querySelector('.handle.left')
             .setAttribute('x', bar.getX() + 1);
         this.handle_group
+            .querySelector('.handle.left')
+            .setAttribute('y', bar.getY() + 1);
+        this.handle_group
             .querySelector('.handle.right')
             .setAttribute('x', bar.getEndX() - 9);
+        this.handle_group
+            .querySelector('.handle.right')
+            .setAttribute('y', bar.getY() + 1);
         const handle = this.group.querySelector('.handle.progress');
         handle &&
             handle.setAttribute('points', this.get_progress_polygon_points());

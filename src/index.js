@@ -87,6 +87,7 @@ export default class Gantt {
             popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
+            sortable: false,
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -649,6 +650,26 @@ export default class Gantt {
         );
     }
 
+    sort_bars() {
+        const changed_bars = [];
+        if (!this.bars) {
+            return changed_bars;
+        }
+        this.bars = this.bars.sort((b0, b1) => {
+            return b0.$bar.getY() - b1.$bar.getY();
+        });
+
+        this.tasks = this.bars.map((b, i) => {
+            const task = b.task;
+            if (task._index !== i) {
+                changed_bars.push(b);
+            }
+            task._index = i;
+            return task;
+        });
+        return changed_bars;
+    }
+
     bind_bar_events() {
         let is_dragging = false;
         let x_on_start = 0;
@@ -656,8 +677,13 @@ export default class Gantt {
         let is_resizing_left = false;
         let is_resizing_right = false;
         let parent_bar_id = null;
-        let bars = []; // instanceof Bar
-        this.bar_being_dragged = null;
+        let bars = []; // instanceof Bars, the dragged bar and its children
+        const min_y = this.options.header_height;
+        const max_y =
+            this.options.header_height +
+            this.tasks.length *
+                (this.options.bar_height + this.options.padding);
+        this.bar_being_dragged = null; // instanceof dragged bar
 
         function action_in_progress() {
             return is_dragging || is_resizing_left || is_resizing_right;
@@ -684,16 +710,18 @@ export default class Gantt {
                 parent_bar_id,
                 ...this.get_all_dependent_tasks(parent_bar_id),
             ];
-            bars = ids.map((id) => this.get_bar(id));
-
-            this.bar_being_dragged = parent_bar_id;
-
-            bars.forEach((bar) => {
+            bars = ids.map((id) => {
+                const bar = this.get_bar(id);
+                if (parent_bar_id === id) {
+                    this.bar_being_dragged = bar;
+                }
                 const $bar = bar.$bar;
                 $bar.ox = $bar.getX();
                 $bar.oy = $bar.getY();
                 $bar.owidth = $bar.getWidth();
                 $bar.finaldx = 0;
+                $bar.finaldy = 0;
+                return bar;
             });
         });
 
@@ -702,51 +730,102 @@ export default class Gantt {
             const dx = e.offsetX - x_on_start;
             const dy = e.offsetY - y_on_start;
 
+            this.hide_popup();
+
+            // update the dragged bar
+            const bar_being_dragged = this.bar_being_dragged;
+            bar_being_dragged.$bar.finaldx = this.get_snap_position(dx);
+            if (is_resizing_left) {
+                bar_being_dragged.update_bar_position({
+                    x:
+                        bar_being_dragged.$bar.ox +
+                        bar_being_dragged.$bar.finaldx,
+                    width:
+                        bar_being_dragged.$bar.owidth -
+                        bar_being_dragged.$bar.finaldx,
+                });
+            } else if (is_resizing_right) {
+                bar_being_dragged.update_bar_position({
+                    width:
+                        bar_being_dragged.$bar.owidth +
+                        bar_being_dragged.$bar.finaldx,
+                });
+            } else if (is_dragging) {
+                let y = bar_being_dragged.$bar.oy + dy;
+                if (y < min_y) {
+                    y = min_y;
+                } else if (y > max_y) {
+                    y = max_y;
+                }
+                bar_being_dragged.update_bar_position({
+                    x:
+                        bar_being_dragged.$bar.ox +
+                        bar_being_dragged.$bar.finaldx,
+                    y: this.options.sortable ? y : null,
+                });
+            }
+
+            // update children
             bars.forEach((bar) => {
+                if (bar.task.id === parent_bar_id) {
+                    return;
+                }
                 const $bar = bar.$bar;
                 $bar.finaldx = this.get_snap_position(dx);
                 this.hide_popup();
                 if (is_resizing_left) {
-                    if (parent_bar_id === bar.task.id) {
-                        bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx,
-                            width: $bar.owidth - $bar.finaldx,
-                        });
-                    } else {
-                        bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx,
-                        });
-                    }
-                } else if (is_resizing_right) {
-                    if (parent_bar_id === bar.task.id) {
-                        bar.update_bar_position({
-                            width: $bar.owidth + $bar.finaldx,
-                        });
-                    }
+                    bar.update_bar_position({
+                        x: $bar.ox + $bar.finaldx,
+                    });
                 } else if (is_dragging) {
-                    bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                    bar.update_bar_position({
+                        x: $bar.ox + $bar.finaldx,
+                    });
                 }
             });
+
+            // update y pos
+            if (
+                this.options.sortable &&
+                is_dragging &&
+                Math.abs(dy - bar_being_dragged.$bar.finaldy) >
+                    bar_being_dragged.height
+            ) {
+                this.sort_bars().map((bar) => {
+                    const y = bar.compute_y();
+                    if (bar.task.id === parent_bar_id) {
+                        bar.$bar.finaldy = y - bar.$bar.oy;
+                        return;
+                    }
+                    bar.update_bar_position({ y: y });
+                });
+            }
         });
 
         document.addEventListener('mouseup', (e) => {
+            const dy = e.offsetY - y_on_start;
             if (is_dragging || is_resizing_left || is_resizing_right) {
-                bars.forEach((bar) => bar.group.classList.remove('active'));
+                bars.forEach((bar) => {
+                    bar.group.classList.remove('active');
+
+                    const $bar = bar.$bar;
+                    if ($bar.finaldx) {
+                        bar.date_changed();
+                        bar.set_action_completed();
+                    }
+                });
+                const $bar = this.bar_being_dragged.$bar;
+                if (this.options.sortable && dy !== $bar.finaldy) {
+                    this.bar_being_dragged.update_bar_position({
+                        y: $bar.oy + $bar.finaldy,
+                    });
+                }
             }
 
+            this.bar_being_dragged = null;
             is_dragging = false;
             is_resizing_left = false;
             is_resizing_right = false;
-        });
-
-        $.on(this.$svg, 'mouseup', (e) => {
-            this.bar_being_dragged = null;
-            bars.forEach((bar) => {
-                const $bar = bar.$bar;
-                if (!$bar.finaldx) return;
-                bar.date_changed();
-                bar.set_action_completed();
-            });
         });
 
         this.bind_bar_progress();
