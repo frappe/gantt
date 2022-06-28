@@ -368,6 +368,7 @@ export default class Bar {
     }
 
     update_progressbar_position() {
+        if (this.invalid) return;
         this.$bar_progress.setAttribute('x', this.$bar.getX());
         this.$bar_progress.setAttribute(
             'width',
@@ -389,6 +390,7 @@ export default class Bar {
     }
 
     update_handle_position() {
+        if (this.invalid) return;
         const bar = this.$bar;
         this.handle_group
             .querySelector('.handle.left')
