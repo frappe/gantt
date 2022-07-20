@@ -148,7 +148,7 @@ export default class Bar {
             append_to: this.handle_group,
         });
 
-        if (this.task.progress && this.task.progress < 100) {
+        if (this.task.progress >= 0 && this.task.progress <= 100) {
             this.$handle_progress = createSVG('polygon', {
                 points: this.get_progress_polygon_points().join(','),
                 class: 'handle progress',
