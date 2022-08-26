@@ -1,6 +1,6 @@
 import { createSVG } from './svg_utils';
 
-export default class Arrow {
+export class Arrow {
     constructor(gantt, from_task, to_task) {
         this.gantt = gantt;
         this.from_task = from_task;

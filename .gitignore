@@ -29,3 +29,14 @@ node_modules
 .DS_Store
 
 gh-pages
+
+# yarn
+.pnp.*
+.yarn/*
+!.yarn/cache/.gitignore
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.vercel

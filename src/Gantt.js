@@ -1,8 +1,8 @@
 import date_utils from './date_utils';
 import { $, createSVG } from './svg_utils';
-import Bar from './bar';
-import Arrow from './arrow';
-import Popup from './popup';
+import { Bar } from './Bar';
+import { Arrow } from './Arrow';
+import { Popup } from './Popup';
 
 import './gantt.scss';
 
@@ -15,7 +15,7 @@ const VIEW_MODE = {
     YEAR: 'Year',
 };
 
-export default class Gantt {
+export class Gantt {
     constructor(wrapper, tasks, options) {
         this.setup_wrapper(wrapper);
         this.setup_options(options);
