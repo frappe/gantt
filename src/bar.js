@@ -1,7 +1,7 @@
 import date_utils from './date_utils';
 import { $, createSVG, animateSVG } from './svg_utils';
 
-export default class Bar {
+export class Bar {
     constructor(gantt, task) {
         this.set_defaults(gantt, task);
         this.prepare();

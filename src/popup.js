@@ -1,4 +1,4 @@
-export default class Popup {
+export class Popup {
     constructor(parent, custom_html) {
         this.parent = parent;
         this.custom_html = custom_html;
