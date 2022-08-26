@@ -155,7 +155,7 @@
             padding: 10px;
         }
 
-        .subtitle {
+        & .subtitle {
             padding: 10px;
             color: #dfe2e5;
         }

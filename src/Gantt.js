@@ -4,6 +4,8 @@ import { Bar } from './Bar';
 import { Arrow } from './Arrow';
 import { Popup } from './Popup';
 
+import './gantt.css';
+
 const VIEW_MODE = {
     QUARTER_DAY: 'Quarter Day',
     HALF_DAY: 'Half Day',
