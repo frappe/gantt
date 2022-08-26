@@ -45,11 +45,13 @@
         "rollup": "^2.70.2",
         "rollup-plugin-terser": "^7.0.2",
         "sass": "^1.54.5",
-        "typescript": "^4.8.2",
         "vite": "^3.0.9"
     },
     "eslintIgnore": [
         "dist"
     ],
-    "packageManager": "yarn@3.2.3"
+    "packageManager": "yarn@3.2.3",
+    "dependencies": {
+        "postcss-nesting": "^10.1.10"
+    }
 }

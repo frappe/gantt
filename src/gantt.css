@@ -1,0 +1,171 @@
+:root { 
+	--gantt-bar-color: #b8c2cc;
+	--gantt-bar-stroke: #8d99a6;
+	--gantt-border-color: #e0e0e0;
+	--gantt-light-bg: #f5f5f5;
+	--gantt-light-border:color: #ebeff2;
+	--gantt-light-yellow: #fcf8e3;
+	--gantt-text-muted: #666;
+	--gantt-text-light: #555;
+	--gantt-text-color: #333;
+	--gantt-blue::#a3a3ff;
+	--gantt-handle-color: #ddd;
+}
+
+.gantt {
+    & .grid-background {
+        fill: none;
+    }
+    & .grid-header {
+        fill: #fff;
+        stroke: var(--gantt-border-color);
+        stroke-width: 1.4;
+    }
+    & .grid-row {
+        fill: #fff;
+    }
+    & .grid-row:nth-child(even) {
+        fill: var(--gantt-light-bg);
+    }
+    & .row-line {
+        stroke: var(--gantt-light-border-color);
+    }
+    &.tick {
+        stroke: var(--gantt-border-color);
+        stroke-width: 0.2;
+        &.thick {
+            stroke-width: 0.4;
+        }
+    }
+    & .today-highlight {
+        fill: var(--gantt-light-yellow);
+        opacity: 0.5;
+    }
+
+    & .arrow {
+        fill: none;
+        stroke: var(--gantt-text-muted);
+        stroke-width: 1.4;
+    }
+
+    & .bar {
+        fill: var(--gantt-bar-color);
+        stroke: var(--gantt-bar-stroke);
+        stroke-width: 0;
+        transition: stroke-width 0.3s ease;
+        user-select: none;
+    }
+    & .bar-progress {
+        fill: var(--gantt-blue);
+    }
+    & .bar-invalid {
+        fill: transparent;
+        stroke: var(--gantt-bar-stroke);
+        stroke-width: 1;
+        stroke-dasharray: 5;
+
+        & ~ .bar-label {
+            fill: var(--gantt-text-light);
+        }
+    }
+    & .bar-label {
+        fill: #fff;
+        dominant-baseline: central;
+        text-anchor: middle;
+        font-size: 12px;
+        font-weight: lighter;
+
+        &.big {
+            fill: var(--gantt-text-light);
+            text-anchor: start;
+        }
+    }
+
+    & .handle {
+        fill: var(--gantt-handle-color);
+        cursor: ew-resize;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+    }
+
+    & .bar-wrapper {
+        cursor: pointer;
+        outline: none;
+
+        &:hover {
+            & .bar {
+                fill: darken($bar-color, 5);
+            }
+
+            & .bar-progress {
+                fill: darken($blue, 5);
+            }
+
+            & .handle {
+                visibility: visible;
+                opacity: 1;
+            }
+        }
+
+        &.active {
+            & .bar {
+                fill: darken($bar-color, 5);
+            }
+
+            & .bar-progress {
+                fill: darken($blue, 5);
+            }
+        }
+    }
+
+    & .lower-text,
+    & .upper-text {
+        font-size: 12px;
+        text-anchor: middle;
+    }
+    & .upper-text {
+        fill: var(--gantt-text-light);
+    }
+    & .lower-text {
+        fill: var(--gantt-text-color);
+    }
+
+    & .hide {
+        display: none;
+    }
+}
+
+.gantt-container {
+    position: relative;
+    overflow: auto;
+    font-size: 12px;
+
+    & .popup-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 0;
+        color: #959da5;
+        border-radius: 3px;
+
+        & .title {
+            border-bottom: 3px solid $blue;
+            padding: 10px;
+        }
+
+        .subtitle {
+            padding: 10px;
+            color: #dfe2e5;
+        }
+
+        & .pointer {
+            position: absolute;
+            height: 5px;
+            margin: 0 0 0 -5px;
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.8);
+        }
+    }
+}

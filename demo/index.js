@@ -1,4 +1,5 @@
 import { Gantt } from '../src/Gantt';
+import '../src/gantt.css';
 
 var tasks = [
     {
