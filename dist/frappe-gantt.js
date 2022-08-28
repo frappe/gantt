@@ -730,6 +730,7 @@ var Gantt = (function () {
 
         progress_changed() {
             const new_progress = this.compute_progress();
+            if (this.task.progress === new_progress) return;
             this.task.progress = new_progress;
             this.gantt.trigger_event('progress_change', [this.task, new_progress]);
         }
@@ -1827,6 +1828,7 @@ var Gantt = (function () {
             $.on(this.$svg, 'mouseup', () => {
                 is_resizing = false;
                 if (!($bar_progress && $bar_progress.finaldx)) return;
+
                 bar.progress_changed();
                 bar.set_action_completed();
             });
