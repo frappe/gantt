@@ -801,6 +801,7 @@ export default class Gantt {
             if (!($bar_progress && $bar_progress.finaldx)) return;
             bar.progress_changed();
             bar.set_action_completed();
+            $bar_progress.finaldx = 0;
         });
     }
 
