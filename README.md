@@ -54,11 +54,16 @@ var gantt = new Gantt("#gantt", tasks, {
     bar_height: 20,
     bar_corner_radius: 3,
     arrow_curve: 5,
-    padding: 18,
     view_mode: 'Day',
     date_format: 'YYYY-MM-DD',
     language: 'en', // or 'es', 'it', 'ru', 'ptBr', 'fr', 'tr', 'zh', 'de', 'hu'
-    custom_popup_html: null
+    custom_popup_html: null,
+    padding_bottom: 5,
+    padding_bar_top: 5,
+    padding_bar_bottom: 5,
+    allow_dragging: true,
+    allow_progress_update: true,
+    draw_labels: true
 });
 ```
 
