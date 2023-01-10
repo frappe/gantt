@@ -38,6 +38,20 @@ var Gantt = (function () {
             'Noviembre',
             'Diciembre',
         ],
+        it: [
+            'Gennaio',
+            'Febbraio',
+            'Marzo',
+            'Aprile',
+            'Maggio',
+            'Giugno',
+            'Luglio',
+            'Agosto',
+            'Settembre',
+            'Ottobre',
+            'Novembre',
+            'Dicembre',
+        ],
         ru: [
             'Январь',
             'Февраль',
@@ -107,6 +121,34 @@ var Gantt = (function () {
             '十月',
             '十一月',
             '十二月',
+        ],
+        de: [
+            'Januar',
+            'Februar',
+            'März',
+            'April',
+            'Mai',
+            'Juni',
+            'Juli',
+            'August',
+            'September',
+            'Oktober',
+            'November',
+            'Dezember',
+        ],
+        hu: [
+            'Január',
+            'Február',
+            'Március',
+            'Április',
+            'Május',
+            'Június',
+            'Július',
+            'Augusztus',
+            'Szeptember',
+            'Október',
+            'November',
+            'December',
         ],
     };
 
@@ -529,8 +571,12 @@ var Gantt = (function () {
         draw() {
             this.draw_bar();
             this.draw_progress_bar();
-            this.draw_label();
-            this.draw_resize_handles();
+            if (this.gantt.options.draw_labels){
+                this.draw_label();
+            }
+            if (this.gantt.options.allow_dragging || this.gantt.options.allow_progress_update){
+                this.draw_resize_handles();
+            }
         }
 
         draw_bar() {
@@ -699,7 +745,9 @@ var Gantt = (function () {
             if (width && width >= this.gantt.options.column_width) {
                 this.update_attr(bar, 'width', width);
             }
-            this.update_label_position();
+            if (this.gantt.options.draw_labels){
+                this.update_label_position();
+            }
             this.update_handle_position();
             this.update_progressbar_position();
             this.update_arrow_position();
@@ -780,9 +828,8 @@ var Gantt = (function () {
 
         compute_y() {
             return (
-                this.gantt.options.header_height +
-                this.gantt.options.padding +
-                this.task._index * (this.height + this.gantt.options.padding)
+                this.gantt.options.header_height + 10 + this.gantt.options.padding_bar_top +
+                this.task._index * (this.height + this.gantt.options.padding_bar_top + this.gantt.options.padding_bar_bottom)
             );
         }
 
@@ -828,6 +875,7 @@ var Gantt = (function () {
         }
 
         update_progressbar_position() {
+            if (this.invalid) return;
             this.$bar_progress.setAttribute('x', this.$bar.getX());
             this.$bar_progress.setAttribute(
                 'width',
@@ -849,6 +897,7 @@ var Gantt = (function () {
         }
 
         update_handle_position() {
+            if (this.invalid) return;
             const bar = this.$bar;
             this.handle_group
                 .querySelector('.handle.left')
@@ -884,8 +933,8 @@ var Gantt = (function () {
                 this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
 
             const condition = () =>
-                this.to_task.$bar.getX() < start_x + this.gantt.options.padding &&
-                start_x > this.from_task.$bar.getX() + this.gantt.options.padding;
+                this.to_task.$bar.getX() < start_x &&
+                start_x > this.from_task.$bar.getX();
 
             while (condition()) {
                 start_x -= 10;
@@ -894,17 +943,15 @@ var Gantt = (function () {
             const start_y =
                 this.gantt.options.header_height +
                 this.gantt.options.bar_height +
-                (this.gantt.options.padding + this.gantt.options.bar_height) *
-                    this.from_task.task._index +
-                this.gantt.options.padding;
+                (this.gantt.options.padding_bar_top + this.gantt.options.padding_bar_bottom + this.gantt.options.bar_height) *
+                    this.from_task.task._index;
 
-            const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
+            const end_x = this.to_task.$bar.getX() / 2;
             const end_y =
                 this.gantt.options.header_height +
                 this.gantt.options.bar_height / 2 +
-                (this.gantt.options.padding + this.gantt.options.bar_height) *
-                    this.to_task.task._index +
-                this.gantt.options.padding;
+                (this.gantt.options.padding_bar_top + this.gantt.options.padding_bar_bottom + this.gantt.options.bar_height) *
+                    this.to_task.task._index;
 
             const from_is_below_to =
                 this.from_task.task._index > this.to_task.task._index;
@@ -925,15 +972,14 @@ var Gantt = (function () {
             l -5 5`;
 
             if (
-                this.to_task.$bar.getX() <
-                this.from_task.$bar.getX() + this.gantt.options.padding
+                this.to_task.$bar.getX() < this.from_task.$bar.getX() 
             ) {
-                const down_1 = this.gantt.options.padding / 2 - curve;
+                const down_1 = curve;//this.gantt.options.padding / 2 - curve;
                 const down_2 =
                     this.to_task.$bar.getY() +
                     this.to_task.$bar.getHeight() / 2 -
                     curve_y;
-                const left = this.to_task.$bar.getX() - this.gantt.options.padding;
+                const left = this.to_task.$bar.getX();
 
                 this.path = `
                 M ${start_x} ${start_y}
@@ -1109,12 +1155,18 @@ var Gantt = (function () {
                 bar_height: 20,
                 bar_corner_radius: 3,
                 arrow_curve: 5,
-                padding: 18,
                 view_mode: 'Day',
                 date_format: 'YYYY-MM-DD',
                 popup_trigger: 'click',
                 custom_popup_html: null,
                 language: 'en',
+                allow_dragging: true,
+                allow_progress_update: true,
+                draw_labels: true,
+                show_today_highlight: true,
+                padding_bottom: 5,
+                padding_bar_top: 5,
+                padding_bar_bottom: 5
             };
             this.options = Object.assign({}, default_options, options);
         }
@@ -1326,16 +1378,18 @@ var Gantt = (function () {
             this.make_grid_rows();
             this.make_grid_header();
             this.make_grid_ticks();
-            this.make_grid_highlights();
+            if (this.options.show_today_highlight){
+                this.make_grid_highlights();
+            }
         }
 
         make_grid_background() {
             const grid_width = this.dates.length * this.options.column_width;
             const grid_height =
                 this.options.header_height +
-                this.options.padding +
-                (this.options.bar_height + this.options.padding) *
-                    this.tasks.length;
+                this.options.padding_bottom +
+                (this.options.bar_height + this.options.padding_bar_top + this.options.padding_bar_bottom) *
+                this.tasks.length;
 
             createSVG('rect', {
                 x: 0,
@@ -1347,7 +1401,7 @@ var Gantt = (function () {
             });
 
             $.attr(this.$svg, {
-                height: grid_height + this.options.padding + 100,
+                height: grid_height + this.options.padding_bottom,
                 width: '100%',
             });
         }
@@ -1357,9 +1411,9 @@ var Gantt = (function () {
             const lines_layer = createSVG('g', { append_to: this.layers.grid });
 
             const row_width = this.dates.length * this.options.column_width;
-            const row_height = this.options.bar_height + this.options.padding;
+            const row_height = this.options.bar_height + this.options.padding_bar_top + this.options.padding_bar_bottom;
 
-            let row_y = this.options.header_height + this.options.padding / 2;
+            let row_y = this.options.header_height + 10;
 
             for (let task of this.tasks) {
                 createSVG('rect', {
@@ -1380,7 +1434,7 @@ var Gantt = (function () {
                     append_to: lines_layer,
                 });
 
-                row_y += this.options.bar_height + this.options.padding;
+                row_y += this.options.bar_height + this.options.padding_bar_top + this.options.padding_bar_bottom;
             }
         }
 
@@ -1399,9 +1453,9 @@ var Gantt = (function () {
 
         make_grid_ticks() {
             let tick_x = 0;
-            let tick_y = this.options.header_height + this.options.padding / 2;
+            let tick_y = this.options.header_height / 2;
             let tick_height =
-                (this.options.bar_height + this.options.padding) *
+                (this.options.bar_height + this.options.padding_bar_top + this.options.padding_bar_bottom) *
                 this.tasks.length;
 
             for (let date of this.dates) {
@@ -1419,10 +1473,7 @@ var Gantt = (function () {
                     tick_class += ' thick';
                 }
                 // thick ticks for quarters
-                if (
-                    this.view_is(VIEW_MODE.MONTH) &&
-                    (date.getMonth() + 1) % 3 === 0
-                ) {
+                if (this.view_is(VIEW_MODE.MONTH) && date.getMonth() % 3 === 0) {
                     tick_class += ' thick';
                 }
 
@@ -1454,10 +1505,9 @@ var Gantt = (function () {
 
                 const width = this.options.column_width;
                 const height =
-                    (this.options.bar_height + this.options.padding) *
+                    (this.options.bar_height + this.options.padding_bar_top + this.options.padding_bar_bottom) *
                         this.tasks.length +
-                    this.options.header_height +
-                    this.options.padding / 2;
+                    this.options.header_height + 10;
 
                 createSVG('rect', {
                     x,
@@ -1690,92 +1740,94 @@ var Gantt = (function () {
             function action_in_progress() {
                 return is_dragging || is_resizing_left || is_resizing_right;
             }
+            
+            if (this.options.allow_dragging){
+                $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
+                    const bar_wrapper = $.closest('.bar-wrapper', element);
 
-            $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
-                const bar_wrapper = $.closest('.bar-wrapper', element);
-
-                if (element.classList.contains('left')) {
-                    is_resizing_left = true;
-                } else if (element.classList.contains('right')) {
-                    is_resizing_right = true;
-                } else if (element.classList.contains('bar-wrapper')) {
-                    is_dragging = true;
-                }
-
-                bar_wrapper.classList.add('active');
-
-                x_on_start = e.offsetX;
-                y_on_start = e.offsetY;
-
-                parent_bar_id = bar_wrapper.getAttribute('data-id');
-                const ids = [
-                    parent_bar_id,
-                    ...this.get_all_dependent_tasks(parent_bar_id),
-                ];
-                bars = ids.map((id) => this.get_bar(id));
-
-                this.bar_being_dragged = parent_bar_id;
-
-                bars.forEach((bar) => {
-                    const $bar = bar.$bar;
-                    $bar.ox = $bar.getX();
-                    $bar.oy = $bar.getY();
-                    $bar.owidth = $bar.getWidth();
-                    $bar.finaldx = 0;
-                });
-            });
-
-            $.on(this.$svg, 'mousemove', (e) => {
-                if (!action_in_progress()) return;
-                const dx = e.offsetX - x_on_start;
-                e.offsetY - y_on_start;
-
-                bars.forEach((bar) => {
-                    const $bar = bar.$bar;
-                    $bar.finaldx = this.get_snap_position(dx);
-                    this.hide_popup();
-                    if (is_resizing_left) {
-                        if (parent_bar_id === bar.task.id) {
-                            bar.update_bar_position({
-                                x: $bar.ox + $bar.finaldx,
-                                width: $bar.owidth - $bar.finaldx,
-                            });
-                        } else {
-                            bar.update_bar_position({
-                                x: $bar.ox + $bar.finaldx,
-                            });
-                        }
-                    } else if (is_resizing_right) {
-                        if (parent_bar_id === bar.task.id) {
-                            bar.update_bar_position({
-                                width: $bar.owidth + $bar.finaldx,
-                            });
-                        }
-                    } else if (is_dragging) {
-                        bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                    if (element.classList.contains('left')) {
+                        is_resizing_left = true;
+                    } else if (element.classList.contains('right')) {
+                        is_resizing_right = true;
+                    } else if (element.classList.contains('bar-wrapper')) {
+                        is_dragging = true;
                     }
+
+                    bar_wrapper.classList.add('active');
+
+                    x_on_start = e.offsetX;
+                    y_on_start = e.offsetY;
+
+                    parent_bar_id = bar_wrapper.getAttribute('data-id');
+                    const ids = [
+                        parent_bar_id,
+                        ...this.get_all_dependent_tasks(parent_bar_id),
+                    ];
+                    bars = ids.map((id) => this.get_bar(id));
+
+                    this.bar_being_dragged = parent_bar_id;
+
+                    bars.forEach((bar) => {
+                        const $bar = bar.$bar;
+                        $bar.ox = $bar.getX();
+                        $bar.oy = $bar.getY();
+                        $bar.owidth = $bar.getWidth();
+                        $bar.finaldx = 0;
+                    });
                 });
-            });
 
-            document.addEventListener('mouseup', (e) => {
-                if (is_dragging || is_resizing_left || is_resizing_right) {
-                    bars.forEach((bar) => bar.group.classList.remove('active'));
-                }
+                $.on(this.$svg, 'mousemove', (e) => {
+                    if (!action_in_progress()) return;
+                    const dx = e.offsetX - x_on_start;
+                    e.offsetY - y_on_start;
 
-                is_dragging = false;
-                is_resizing_left = false;
-                is_resizing_right = false;
-            });
-
-            $.on(this.$svg, 'mouseup', (e) => {
-                this.bar_being_dragged = null;
-                bars.forEach((bar) => {
-                    const $bar = bar.$bar;
-                    if (!$bar.finaldx) return;
-                    bar.date_changed();
-                    bar.set_action_completed();
+                    bars.forEach((bar) => {
+                        const $bar = bar.$bar;
+                        $bar.finaldx = this.get_snap_position(dx);
+                        this.hide_popup();
+                        if (is_resizing_left) {
+                            if (parent_bar_id === bar.task.id) {
+                                bar.update_bar_position({
+                                    x: $bar.ox + $bar.finaldx,
+                                    width: $bar.owidth - $bar.finaldx,
+                                });
+                            } else {
+                                bar.update_bar_position({
+                                    x: $bar.ox + $bar.finaldx,
+                                });
+                            }
+                        } else if (is_resizing_right) {
+                            if (parent_bar_id === bar.task.id) {
+                                bar.update_bar_position({
+                                    width: $bar.owidth + $bar.finaldx,
+                                });
+                            }
+                        } else if (is_dragging) {
+                            bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                        }
+                    });
                 });
-            });
+
+                document.addEventListener('mouseup', (e) => {
+                    if (is_dragging || is_resizing_left || is_resizing_right) {
+                        bars.forEach((bar) => bar.group.classList.remove('active'));
+                    }
+
+                    is_dragging = false;
+                    is_resizing_left = false;
+                    is_resizing_right = false;
+                });
+
+                $.on(this.$svg, 'mouseup', (e) => {
+                    this.bar_being_dragged = null;
+                    bars.forEach((bar) => {
+                        const $bar = bar.$bar;
+                        if (!$bar.finaldx) return;
+                        bar.date_changed();
+                        bar.set_action_completed();
+                    });
+                });
+            }
 
             this.bind_bar_progress();
         }
@@ -1788,48 +1840,50 @@ var Gantt = (function () {
             let $bar_progress = null;
             let $bar = null;
 
-            $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
-                is_resizing = true;
-                x_on_start = e.offsetX;
-                y_on_start = e.offsetY;
+            if (this.allow_progress_update){
+                $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
+                    is_resizing = true;
+                    x_on_start = e.offsetX;
+                    y_on_start = e.offsetY;
 
-                const $bar_wrapper = $.closest('.bar-wrapper', handle);
-                const id = $bar_wrapper.getAttribute('data-id');
-                bar = this.get_bar(id);
+                    const $bar_wrapper = $.closest('.bar-wrapper', handle);
+                    const id = $bar_wrapper.getAttribute('data-id');
+                    bar = this.get_bar(id);
 
-                $bar_progress = bar.$bar_progress;
-                $bar = bar.$bar;
+                    $bar_progress = bar.$bar_progress;
+                    $bar = bar.$bar;
 
-                $bar_progress.finaldx = 0;
-                $bar_progress.owidth = $bar_progress.getWidth();
-                $bar_progress.min_dx = -$bar_progress.getWidth();
-                $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
-            });
+                    $bar_progress.finaldx = 0;
+                    $bar_progress.owidth = $bar_progress.getWidth();
+                    $bar_progress.min_dx = -$bar_progress.getWidth();
+                    $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
+                });
 
-            $.on(this.$svg, 'mousemove', (e) => {
-                if (!is_resizing) return;
-                let dx = e.offsetX - x_on_start;
-                e.offsetY - y_on_start;
+                $.on(this.$svg, 'mousemove', (e) => {
+                    if (!is_resizing) return;
+                    let dx = e.offsetX - x_on_start;
+                    e.offsetY - y_on_start;
 
-                if (dx > $bar_progress.max_dx) {
-                    dx = $bar_progress.max_dx;
-                }
-                if (dx < $bar_progress.min_dx) {
-                    dx = $bar_progress.min_dx;
-                }
+                    if (dx > $bar_progress.max_dx) {
+                        dx = $bar_progress.max_dx;
+                    }
+                    if (dx < $bar_progress.min_dx) {
+                        dx = $bar_progress.min_dx;
+                    }
 
-                const $handle = bar.$handle_progress;
-                $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
-                $.attr($handle, 'points', bar.get_progress_polygon_points());
-                $bar_progress.finaldx = dx;
-            });
+                    const $handle = bar.$handle_progress;
+                    $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
+                    $.attr($handle, 'points', bar.get_progress_polygon_points());
+                    $bar_progress.finaldx = dx;
+                });
 
-            $.on(this.$svg, 'mouseup', () => {
-                is_resizing = false;
-                if (!($bar_progress && $bar_progress.finaldx)) return;
-                bar.progress_changed();
-                bar.set_action_completed();
-            });
+                $.on(this.$svg, 'mouseup', () => {
+                    is_resizing = false;
+                    if (!($bar_progress && $bar_progress.finaldx)) return;
+                    bar.progress_changed();
+                    bar.set_action_completed();
+                });
+            }
         }
 
         get_all_dependent_tasks(task_id) {
