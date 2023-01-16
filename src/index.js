@@ -448,7 +448,6 @@ export default class Gantt {
         const x = (date_utils.diff(the_date, this.gantt_start, 'hour') /
             this.options.step) *
             this.options.column_width;
-        console.log(the_date, this.gantt_start, x, date_utils.diff(the_date, this.gantt_start, 'hour'));
         const y = 0;
 
         const width = this.options.column_width;
@@ -953,6 +952,14 @@ export default class Gantt {
      */
     clear() {
         this.$svg.innerHTML = '';
+    }
+
+    JumpToToday(Animate = false) {
+        if (Animate){
+            document.querySelector('.today-highlight').scrollIntoView({behavior: 'smooth', inline: 'center'});
+        } else {
+            document.querySelector('.today-highlight').scrollIntoView({inline: 'center'});
+        }
     }
 }
 
