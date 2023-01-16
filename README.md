@@ -69,6 +69,11 @@ var gantt = new Gantt("#gantt", tasks, {
     show_sunday_highlights: false
 });
 ```
+You can also make the chart jump to the current day by using `jump_to_today` with a boolean value passed in for animation.
+
+```js
+gantt_chart.jump_to_today(true)
+```
 
 ### Contributing
 If you want to contribute enhancements or fixes:
