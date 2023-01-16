@@ -946,10 +946,10 @@ var Gantt = (function () {
                 (this.gantt.options.padding_bar_top + this.gantt.options.padding_bar_bottom + this.gantt.options.bar_height) *
                     this.from_task.task._index;
 
-            const end_x = this.to_task.$bar.getX() / 2;
+            const end_x = this.to_task.$bar.getX();
             const end_y =
                 this.gantt.options.header_height +
-                this.gantt.options.bar_height / 2 +
+                this.gantt.options.bar_height + this.gantt.options.padding_bar_top + 
                 (this.gantt.options.padding_bar_top + this.gantt.options.padding_bar_bottom + this.gantt.options.bar_height) *
                     this.to_task.task._index;
 
@@ -1166,7 +1166,9 @@ var Gantt = (function () {
                 show_today_highlight: true,
                 padding_bottom: 5,
                 padding_bar_top: 5,
-                padding_bar_bottom: 5
+                padding_bar_bottom: 5,
+                show_saturday_highlight: false,
+                show_sunday_highlights: false
             };
             this.options = Object.assign({}, default_options, options);
         }
@@ -1378,9 +1380,7 @@ var Gantt = (function () {
             this.make_grid_rows();
             this.make_grid_header();
             this.make_grid_ticks();
-            if (this.options.show_today_highlight){
-                this.make_grid_highlights();
-            }
+            this.make_grid_highlights();
         }
 
         make_grid_background() {
@@ -1495,29 +1495,50 @@ var Gantt = (function () {
         }
 
         make_grid_highlights() {
-            // highlight today's date
-            if (this.view_is(VIEW_MODE.DAY)) {
-                const x =
-                    (date_utils.diff(date_utils.today(), this.gantt_start, 'hour') /
-                        this.options.step) *
-                    this.options.column_width;
-                const y = 0;
+            // highlight saturday dates
+            
+            if (this.view_is(VIEW_MODE.DAY)) {            
+                // highlight today's date
+                if (this.options.show_today_highlight){
+                    this.make_highlight_bar(date_utils.today(), 'today-highlight');
+                }
+                // show weekend highlights
+                if (this.options.show_saturday_highlight || this.options.show_sunday_highlights){
+                    for (var D = new Date(this.gantt_start); D <= this.gantt_end; D.setDate(D.getDate() + 1)){
+                        if (
+                            (D.getDay() == 0 && this.options.show_sunday_highlights) ||
+                            (D.getDay() == 6 && this.options.show_saturday_highlight)
+                        ){
+                            this.make_highlight_bar(D, 'noneworkingday-highlight');
+                        }
+                    }
+                    
+                }
 
-                const width = this.options.column_width;
-                const height =
-                    (this.options.bar_height + this.options.padding_bar_top + this.options.padding_bar_bottom) *
-                        this.tasks.length +
-                    this.options.header_height + 10;
-
-                createSVG('rect', {
-                    x,
-                    y,
-                    width,
-                    height,
-                    class: 'today-highlight',
-                    append_to: this.layers.grid,
-                });
             }
+        }
+
+        make_highlight_bar(the_date, highlight_class){
+            const x = (date_utils.diff(the_date, this.gantt_start, 'hour') /
+                this.options.step) *
+                this.options.column_width;
+            console.log(the_date, this.gantt_start, x, date_utils.diff(the_date, this.gantt_start, 'hour'));
+            const y = 0;
+
+            const width = this.options.column_width;
+            const height =
+                (this.options.bar_height + this.options.padding_bar_top + this.options.padding_bar_bottom) *
+                    this.tasks.length +
+                this.options.header_height + 10;
+
+            createSVG('rect', {
+                x,
+                y,
+                width,
+                height,
+                class: highlight_class,
+                append_to: this.layers.grid,
+            });
         }
 
         make_dates() {

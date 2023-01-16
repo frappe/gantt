@@ -63,7 +63,10 @@ var gantt = new Gantt("#gantt", tasks, {
     padding_bar_bottom: 5,
     allow_dragging: true,
     allow_progress_update: true,
-    draw_labels: true
+    draw_labels: true,
+    show_today_highlight: true,
+    show_saturday_highlight: false,
+    show_sunday_highlights: false
 });
 ```
 

@@ -26,6 +26,10 @@
   fill: #fcf8e3;
   opacity: 0.5;
 }
+.gantt .noneworkingday-highlight {
+  fill: #EEE;
+  opacity: 0.5;
+}
 .gantt .arrow {
   fill: none;
   stroke: #666;
