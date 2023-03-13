@@ -232,7 +232,13 @@ export default class Gantt {
             this.gantt_start = date_utils.start_of(this.gantt_start, 'year');
             this.gantt_end = date_utils.add(this.gantt_end, 1, 'year');
         } else if (this.view_is(VIEW_MODE.YEAR)) {
-            this.gantt_start = date_utils.add(this.gantt_start, -2, 'year');
+            const gantt_start = new Date(
+                date_utils.format(
+                    date_utils.add(this.gantt_start, -2, 'year'),
+                    'YYYY'
+                )
+            );
+            this.gantt_start = gantt_start;
             this.gantt_end = date_utils.add(this.gantt_end, 2, 'year');
         } else {
             this.gantt_start = date_utils.add(this.gantt_start, -1, 'month');
