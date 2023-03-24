@@ -87,6 +87,7 @@ export default class Gantt {
             popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
+            read_only: false,
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -647,6 +648,7 @@ export default class Gantt {
     }
 
     bind_bar_events() {
+        if (this.options.read_only) return
         let is_dragging = false;
         let x_on_start = 0;
         let y_on_start = 0;
