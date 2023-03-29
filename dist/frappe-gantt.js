@@ -654,12 +654,6 @@ var Gantt = (function () {
 
                 this.gantt.trigger_event('click', [this.task]);
             });
-
-            // if (this.gantt.options.hasOwnProperty("scroll_drag") && this.gantt.options.scroll_drag) {
-            //     $.on(this.gantt, '', (e) => {
-            //
-            //     })
-            // }
         }
 
         show_popup() {
@@ -685,7 +679,7 @@ var Gantt = (function () {
             });
         }
 
-        update_bar_position({x = null, width = null}) {
+        update_bar_position({ x = null, width = null }) {
             const bar = this.$bar;
             if (x) {
                 // get all x values of parent task
@@ -713,7 +707,7 @@ var Gantt = (function () {
 
         date_changed() {
             let changed = false;
-            const {new_start_date, new_end_date} = this.compute_start_end_date();
+            const { new_start_date, new_end_date } = this.compute_start_end_date();
 
             if (Number(this.task._start) !== Number(new_start_date)) {
                 changed = true;
@@ -760,7 +754,7 @@ var Gantt = (function () {
                 'hour'
             );
 
-            return {new_start_date, new_end_date};
+            return { new_start_date, new_end_date };
         }
 
         compute_progress() {
@@ -770,7 +764,7 @@ var Gantt = (function () {
         }
 
         compute_x() {
-            const {step, column_width} = this.gantt.options;
+            const { step, column_width } = this.gantt.options;
             const task_start = this.task._start;
             const gantt_start = this.gantt.gantt_start;
 
@@ -1360,8 +1354,8 @@ var Gantt = (function () {
         }
 
         make_grid_rows() {
-            const rows_layer = createSVG('g', {append_to: this.layers.grid});
-            const lines_layer = createSVG('g', {append_to: this.layers.grid});
+            const rows_layer = createSVG('g', { append_to: this.layers.grid });
+            const lines_layer = createSVG('g', { append_to: this.layers.grid });
 
             const row_width = this.dates.length * this.options.column_width;
             const row_height = this.options.bar_height + this.options.padding;
@@ -1813,7 +1807,7 @@ var Gantt = (function () {
                             });
                         }
                     } else if (is_dragging) {
-                        bar.update_bar_position({x: $bar.ox + $bar.finaldx});
+                        bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
                     }
                 });
             });
