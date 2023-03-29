@@ -492,8 +492,8 @@ var Gantt = (function () {
             this.width = this.gantt.options.column_width * this.duration;
             this.progress_width =
                 this.gantt.options.column_width *
-                    this.duration *
-                    (this.task.progress / 100) || 0;
+                this.duration *
+                (this.task.progress / 100) || 0;
             this.group = createSVG('g', {
                 class: 'bar-wrapper ' + (this.task.custom_class || ''),
                 'data-id': this.task.id,
@@ -654,6 +654,12 @@ var Gantt = (function () {
 
                 this.gantt.trigger_event('click', [this.task]);
             });
+
+            // if (this.gantt.options.hasOwnProperty("scroll_drag") && this.gantt.options.scroll_drag) {
+            //     $.on(this.gantt, '', (e) => {
+            //
+            //     })
+            // }
         }
 
         show_popup() {
@@ -679,7 +685,7 @@ var Gantt = (function () {
             });
         }
 
-        update_bar_position({ x = null, width = null }) {
+        update_bar_position({x = null, width = null}) {
             const bar = this.$bar;
             if (x) {
                 // get all x values of parent task
@@ -707,7 +713,7 @@ var Gantt = (function () {
 
         date_changed() {
             let changed = false;
-            const { new_start_date, new_end_date } = this.compute_start_end_date();
+            const {new_start_date, new_end_date} = this.compute_start_end_date();
 
             if (Number(this.task._start) !== Number(new_start_date)) {
                 changed = true;
@@ -754,7 +760,7 @@ var Gantt = (function () {
                 'hour'
             );
 
-            return { new_start_date, new_end_date };
+            return {new_start_date, new_end_date};
         }
 
         compute_progress() {
@@ -764,7 +770,7 @@ var Gantt = (function () {
         }
 
         compute_x() {
-            const { step, column_width } = this.gantt.options;
+            const {step, column_width} = this.gantt.options;
             const task_start = this.task._start;
             const gantt_start = this.gantt.gantt_start;
 
@@ -858,7 +864,7 @@ var Gantt = (function () {
                 .setAttribute('x', bar.getEndX() - 9);
             const handle = this.group.querySelector('.handle.progress');
             handle &&
-                handle.setAttribute('points', this.get_progress_polygon_points());
+            handle.setAttribute('points', this.get_progress_polygon_points());
         }
 
         update_arrow_position() {
@@ -895,7 +901,7 @@ var Gantt = (function () {
                 this.gantt.options.header_height +
                 this.gantt.options.bar_height +
                 (this.gantt.options.padding + this.gantt.options.bar_height) *
-                    this.from_task.task._index +
+                this.from_task.task._index +
                 this.gantt.options.padding;
 
             const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
@@ -903,7 +909,7 @@ var Gantt = (function () {
                 this.gantt.options.header_height +
                 this.gantt.options.bar_height / 2 +
                 (this.gantt.options.padding + this.gantt.options.bar_height) *
-                    this.to_task.task._index +
+                this.to_task.task._index +
                 this.gantt.options.padding;
 
             const from_is_below_to =
@@ -1070,7 +1076,7 @@ var Gantt = (function () {
             } else {
                 throw new TypeError(
                     'Frappé Gantt only supports usage of a string CSS selector,' +
-                        " HTML DOM element or SVG DOM element for the 'element' parameter"
+                    " HTML DOM element or SVG DOM element for the 'element' parameter"
                 );
             }
 
@@ -1115,6 +1121,7 @@ var Gantt = (function () {
                 popup_trigger: 'click',
                 custom_popup_html: null,
                 language: 'en',
+                scroll_drag: true,
             };
             this.options = Object.assign({}, default_options, options);
         }
@@ -1335,7 +1342,7 @@ var Gantt = (function () {
                 this.options.header_height +
                 this.options.padding +
                 (this.options.bar_height + this.options.padding) *
-                    this.tasks.length;
+                this.tasks.length;
 
             createSVG('rect', {
                 x: 0,
@@ -1353,8 +1360,8 @@ var Gantt = (function () {
         }
 
         make_grid_rows() {
-            const rows_layer = createSVG('g', { append_to: this.layers.grid });
-            const lines_layer = createSVG('g', { append_to: this.layers.grid });
+            const rows_layer = createSVG('g', {append_to: this.layers.grid});
+            const lines_layer = createSVG('g', {append_to: this.layers.grid});
 
             const row_width = this.dates.length * this.options.column_width;
             const row_height = this.options.bar_height + this.options.padding;
@@ -1455,7 +1462,7 @@ var Gantt = (function () {
                 const width = this.options.column_width;
                 const height =
                     (this.options.bar_height + this.options.padding) *
-                        this.tasks.length +
+                    this.tasks.length +
                     this.options.header_height +
                     this.options.padding / 2;
 
@@ -1542,10 +1549,10 @@ var Gantt = (function () {
                     date.getDate() !== last_date.getDate()
                         ? date.getMonth() !== last_date.getMonth()
                             ? date_utils.format(
-                                  date,
-                                  'D MMM',
-                                  this.options.language
-                              )
+                                date,
+                                'D MMM',
+                                this.options.language
+                            )
                             : date_utils.format(date, 'D', this.options.language)
                         : '',
                 Day_upper:
@@ -1659,7 +1666,7 @@ var Gantt = (function () {
 
             const scroll_pos =
                 (hours_before_first_task / this.options.step) *
-                    this.options.column_width -
+                this.options.column_width -
                 this.options.column_width;
 
             parent_element.scrollLeft = scroll_pos;
@@ -1675,6 +1682,60 @@ var Gantt = (function () {
                     this.hide_popup();
                 }
             );
+
+            if (this.options.scroll_drag) {
+                this.enable_scroll_drag();
+            }
+        }
+
+        enable_scroll_drag() {
+            // const el = document.getElementByClass(".gantt-container")
+            this.$container.scrollTop = 100;
+            this.$container.scrollLeft = 150;
+
+            let pos = {top: 0, left: 0, x: 0, y: 0};
+
+            const el = this.$container;
+            const mouseDownHandler = function (e) {
+                if (e.delegatedTarget) {
+                    return
+                }
+                el.style.cursor = 'grabbing';
+                el.style.userSelect = 'none';
+
+                pos = {
+                    left: el.scrollLeft,
+                    top: el.scrollTop,
+                    x: e.clientX,
+                    y: e.clientY,
+                };
+
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+            };
+
+            const mouseMoveHandler = function (e) {
+                if (el.style.cursor !== 'grabbing') {
+                    return;
+                }
+                // How far the mouse has been moved
+                const dx = e.clientX - pos.x;
+                const dy = e.clientY - pos.y;
+
+                // Scroll the element
+                el.scrollTop = pos.top - dy;
+                el.scrollLeft = pos.left - dx;
+            };
+
+            const mouseUpHandler = function () {
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+
+                el.style.cursor = 'grab';
+                el.style.removeProperty('user-select');
+            };
+
+            this.$container.addEventListener("mousedown", mouseDownHandler)
         }
 
         bind_bar_events() {
@@ -1752,7 +1813,7 @@ var Gantt = (function () {
                             });
                         }
                     } else if (is_dragging) {
-                        bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                        bar.update_bar_position({x: $bar.ox + $bar.finaldx});
                     }
                 });
             });
