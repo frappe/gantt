@@ -371,7 +371,7 @@ export default class Gantt {
         for (var key in VIEW_MODE){
             
             createSVG('text', {
-                x: row_width / 2.5 + position_x + 3,
+                x: position_x + 4,
                 y: row_y + 29,
                 innerHTML: VIEW_MODE[key],
                 class: 'button-text',
@@ -380,7 +380,7 @@ export default class Gantt {
 
             createSVG('rect', {
                 id: VIEW_MODE[key],
-                x: row_width / 2.5 + position_x,
+                x: position_x +1 ,
                 y: row_y + 12,
                 width: 85,
                 height: 25,
