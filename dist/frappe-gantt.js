@@ -1347,6 +1347,7 @@ var Gantt = (function () {
         bind_events() {
             this.bind_grid_click();
             this.bind_bar_events();
+            this.bind_button_event();
         }
 
         render() {
@@ -1434,6 +1435,43 @@ var Gantt = (function () {
 
                 row_y += this.options.bar_height + this.options.padding;
             }
+
+            const button_layer_view_mode = createSVG('g', {append_to: this.layers.grid});
+
+            var position_x = 0;
+
+            for (var key in VIEW_MODE){
+                
+                createSVG('text', {
+                    x: row_width / 2.5 + position_x + 3,
+                    y: row_y + 29,
+                    innerHTML: VIEW_MODE[key],
+                    class: 'button-text',
+                    append_to: button_layer_view_mode,
+                });
+
+                createSVG('rect', {
+                    id: VIEW_MODE[key],
+                    x: row_width / 2.5 + position_x,
+                    y: row_y + 12,
+                    width: 85,
+                    height: 25,
+                    class: 'button',
+                    append_to: button_layer_view_mode,
+                });
+            
+                position_x += 125;
+            }
+        }
+
+        bind_button_event(){
+
+            $.on(this.$svg, 'mousedown', '.button', (e, element) => {
+            var change_view_mode_through_button = element.attributes[0].nodeValue;
+
+            this.change_view_mode(change_view_mode_through_button);
+           
+            });
         }
 
         make_grid_header() {
@@ -1999,7 +2037,7 @@ var Gantt = (function () {
             if(!this.tasks.length){
                 return this.gantt_start;
             }
-            
+
             return this.tasks
                 .map((task) => task._start)
                 .reduce((prev_date, cur_date) =>
