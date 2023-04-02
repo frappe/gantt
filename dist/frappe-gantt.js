@@ -1438,6 +1438,7 @@ var Gantt = (function () {
 
             const button_layer_view_mode = createSVG('g', {append_to: this.layers.grid});
 
+            // View Mode Buttons always at the beginning of Gantt chart
             var position_x = 0;
 
             for (var key in VIEW_MODE){
@@ -1731,7 +1732,28 @@ var Gantt = (function () {
             var check_width = this.$svg.querySelector('.grid .grid-row');
             if (check_width === null){
 
-                console.log(check_width);
+            
+             //Visualization options for empty task Gantt   
+                switch (this.options.view_mode) {
+                    case 'Quarter Day':
+                        this.$svg.setAttribute('width', 3838);
+                        break;
+                    case 'Half Day':
+                        this.$svg.setAttribute('width', 1938);
+                    case 'Day':
+                        this.$svg.setAttribute('width', 2274);
+                    case 'Week':
+                        this.$svg.setAttribute('width', 1680);
+                      break;
+                    case 'Month':
+                        this.$svg.setAttribute('width', 2760);
+                        break;
+                    case 'Year':
+                        this.$svg.setAttribute('width', 720);
+                        break;
+                    default:
+                        this.$svg.setAttribute('width', cur_width); 
+                  }
 
             }else {
                 const actual_width = this.$svg.querySelector('.grid .grid-row').getAttribute('width');
