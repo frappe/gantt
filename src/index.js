@@ -624,11 +624,8 @@ export default class Gantt {
             console.log(check_width);
 
         }else{
-            const actual_width = this.$svg
-                .querySelector('.grid .grid-row')
-                .getAttribute('width');
+            const actual_width = this.$svg.querySelector('.grid .grid-row').getAttribute('width');
 
-        
             if (cur_width < actual_width) {
                 this.$svg.setAttribute('width', actual_width);
             }
@@ -926,6 +923,11 @@ export default class Gantt {
      * @memberof Gantt
      */
     get_oldest_starting_date() {
+
+        if(!this.tasks.length){
+            return this.gantt_start;
+        }
+        
         return this.tasks
             .map((task) => task._start)
             .reduce((prev_date, cur_date) =>
