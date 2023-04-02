@@ -221,6 +221,14 @@ export default class Gantt {
             }
         }
 
+        //empty Gantt --- no tasks
+        if(!this.gantt_start){
+            this.gantt_start = new Date();
+        }
+        if(!this.gantt_end){
+            this.gantt_end = new Date();
+        }
+
         this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
         this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
 
@@ -608,11 +616,22 @@ export default class Gantt {
 
     set_width() {
         const cur_width = this.$svg.getBoundingClientRect().width;
-        const actual_width = this.$svg
-            .querySelector('.grid .grid-row')
-            .getAttribute('width');
-        if (cur_width < actual_width) {
-            this.$svg.setAttribute('width', actual_width);
+
+        //check width of grid row
+        var check_width = this.$svg.querySelector('.grid .grid-row');
+        if (check_width === null){
+
+            console.log(check_width);
+
+        }else{
+            const actual_width = this.$svg
+                .querySelector('.grid .grid-row')
+                .getAttribute('width');
+
+        
+            if (cur_width < actual_width) {
+                this.$svg.setAttribute('width', actual_width);
+            }
         }
     }
 
