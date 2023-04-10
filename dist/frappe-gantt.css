@@ -1,5 +1,10 @@
+.gantt .button-print {
+  cursor: pointer;
+  border-radius: 3px;
+  opacity: 0.35;
+}
 .gantt .grid-background {
-  fill: none;
+  fill: #ffffff;
 }
 .gantt .grid-header {
   fill: #ffffff;

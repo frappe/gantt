@@ -267,6 +267,7 @@ export default class Gantt {
     bind_events() {
         this.bind_grid_click();
         this.bind_bar_events();
+        this.bind_button_print_event();
     }
 
     render() {
@@ -354,6 +355,48 @@ export default class Gantt {
 
             row_y += this.options.bar_height + this.options.padding;
         }
+
+
+        const button_layer_print = createSVG('g', {append_to: this.layers.grid});
+
+        createSVG('text', {
+            x: 5,
+            y: row_y + 71,
+            innerHTML: 'Print',
+            class: 'button-text',
+            append_to: button_layer_print,
+            });
+
+        createSVG('rect', {
+            id: 'print',
+            x: 0,
+            y: row_y + 55,
+            width: 85,
+            height: 25,
+            class: 'button-print',
+            append_to: button_layer_print,
+        });
+    }
+
+    bind_button_print_event(){
+        $.on(this.$svg, 'mousedown', '.button-print', (e, element) =>{
+
+            let ganttContents = this.$container.innerHTML;
+            let showPrintWindow = window.open('', 'Print','width=1000,height=1000');
+            showPrintWindow.document.write('<html><head><title>'+ 'Print Gantt' + '</title>');
+            showPrintWindow.document.write('<link rel="stylesheet" href="dist/frappe-gantt.css" type="text/css" /');
+            showPrintWindow.document.write('</head><body>');
+            showPrintWindow.document.write(ganttContents);
+            showPrintWindow.document.write('</body></html>');
+            showPrintWindow.document.close();
+
+            showPrintWindow.onload= function(){
+                showPrintWindow.focus();
+                showPrintWindow.print();
+                showPrintWindow.close();
+                
+            };
+        })
     }
 
     make_grid_header() {

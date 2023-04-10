@@ -11,8 +11,15 @@ $blue: #a3a3ff !default;
 $handle-color: #ddd !default;
 
 .gantt {
+
+	.button-print{
+		cursor: pointer;
+		border-radius: 3px;
+		opacity: 0.35;
+	}
+	
 	.grid-background {
-		fill: none;
+		fill: #ffffff;
 	}
 	.grid-header {
 		fill: #ffffff;
