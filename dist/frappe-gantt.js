@@ -38,6 +38,20 @@ var Gantt = (function () {
             'Noviembre',
             'Diciembre',
         ],
+        it: [
+            'Gennaio',
+            'Febbraio',
+            'Marzo',
+            'Aprile',
+            'Maggio',
+            'Giugno',
+            'Luglio',
+            'Agosto',
+            'Settembre',
+            'Ottobre',
+            'Novembre',
+            'Dicembre',
+        ],
         ru: [
             'Январь',
             'Февраль',
@@ -107,6 +121,34 @@ var Gantt = (function () {
             '十月',
             '十一月',
             '十二月',
+        ],
+        de: [
+            'Januar',
+            'Februar',
+            'März',
+            'April',
+            'Mai',
+            'Juni',
+            'Juli',
+            'August',
+            'September',
+            'Oktober',
+            'November',
+            'Dezember',
+        ],
+        hu: [
+            'Január',
+            'Február',
+            'Március',
+            'Április',
+            'Május',
+            'Június',
+            'Július',
+            'Augusztus',
+            'Szeptember',
+            'Október',
+            'November',
+            'December',
         ],
     };
 
@@ -828,6 +870,7 @@ var Gantt = (function () {
         }
 
         update_progressbar_position() {
+            if (this.invalid) return;
             this.$bar_progress.setAttribute('x', this.$bar.getX());
             this.$bar_progress.setAttribute(
                 'width',
@@ -849,6 +892,7 @@ var Gantt = (function () {
         }
 
         update_handle_position() {
+            if (this.invalid) return;
             const bar = this.$bar;
             this.handle_group
                 .querySelector('.handle.left')
@@ -1295,6 +1339,7 @@ var Gantt = (function () {
         bind_events() {
             this.bind_grid_click();
             this.bind_bar_events();
+            this.bind_button_print_event();
         }
 
         render() {
@@ -1382,6 +1427,48 @@ var Gantt = (function () {
 
                 row_y += this.options.bar_height + this.options.padding;
             }
+
+
+            const button_layer_print = createSVG('g', {append_to: this.layers.grid});
+
+            createSVG('text', {
+                x: 5,
+                y: row_y + 71,
+                innerHTML: 'Print',
+                class: 'button-text',
+                append_to: button_layer_print,
+                });
+
+            createSVG('rect', {
+                id: 'print',
+                x: 0,
+                y: row_y + 55,
+                width: 85,
+                height: 25,
+                class: 'button-print',
+                append_to: button_layer_print,
+            });
+        }
+
+        bind_button_print_event(){
+            $.on(this.$svg, 'mousedown', '.button-print', (e, element) =>{
+
+                let ganttContents = this.$container.innerHTML;
+                let showPrintWindow = window.open('', 'Print','width=1000,height=1000');
+                showPrintWindow.document.write('<html><head><title>'+ 'Print Gantt' + '</title>');
+                showPrintWindow.document.write('<link rel="stylesheet" href="dist/frappe-gantt.css" type="text/css" /');
+                showPrintWindow.document.write('</head><body>');
+                showPrintWindow.document.write(ganttContents);
+                showPrintWindow.document.write('</body></html>');
+                showPrintWindow.document.close();
+
+                showPrintWindow.onload= function(){
+                    showPrintWindow.focus();
+                    showPrintWindow.print();
+                    showPrintWindow.close();
+                    
+                };
+            });
         }
 
         make_grid_header() {
@@ -1419,10 +1506,7 @@ var Gantt = (function () {
                     tick_class += ' thick';
                 }
                 // thick ticks for quarters
-                if (
-                    this.view_is(VIEW_MODE.MONTH) &&
-                    (date.getMonth() + 1) % 3 === 0
-                ) {
+                if (this.view_is(VIEW_MODE.MONTH) && date.getMonth() % 3 === 0) {
                     tick_class += ' thick';
                 }
 
