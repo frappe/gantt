@@ -668,11 +668,13 @@ export default class Gantt {
                     break;
                 case 'Half Day':
                     this.$svg.setAttribute('width', 1938);
+                    break;
                 case 'Day':
                     this.$svg.setAttribute('width', 2274);
+                    break;
                 case 'Week':
                     this.$svg.setAttribute('width', 1680);
-                  break;
+                    break;
                 case 'Month':
                     this.$svg.setAttribute('width', 2760);
                     break;
