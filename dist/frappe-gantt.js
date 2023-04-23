@@ -1439,9 +1439,9 @@ var Gantt = (function () {
             const button_layer_view_mode = createSVG('g', {append_to: this.layers.grid});
 
             // View Mode Buttons always at the beginning of Gantt chart
-            var position_x = 0;
+            let position_x = 0;
 
-            for (var key in VIEW_MODE){
+            for (let key in VIEW_MODE){
                 
                 createSVG('text', {
                     x: position_x + 4,
@@ -1468,7 +1468,7 @@ var Gantt = (function () {
         bind_button_event(){
 
             $.on(this.$svg, 'mousedown', '.button', (e, element) => {
-            var change_view_mode_through_button = element.attributes[0].nodeValue;
+            let change_view_mode_through_button = element.attributes[0].nodeValue;
 
             this.change_view_mode(change_view_mode_through_button);
            
@@ -1740,11 +1740,13 @@ var Gantt = (function () {
                         break;
                     case 'Half Day':
                         this.$svg.setAttribute('width', 1938);
+                        break;
                     case 'Day':
                         this.$svg.setAttribute('width', 2274);
+                        break;
                     case 'Week':
                         this.$svg.setAttribute('width', 1680);
-                      break;
+                        break;
                     case 'Month':
                         this.$svg.setAttribute('width', 2760);
                         break;
