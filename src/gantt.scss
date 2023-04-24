@@ -11,6 +11,19 @@ $blue: #a3a3ff !default;
 $handle-color: #ddd !default;
 
 .gantt {
+
+	.button {
+		fill: #ffffff;
+        stroke: $bar-stroke;
+        cursor: pointer;
+		opacity: 0.35;
+		border-radius: 50px;
+	}
+
+	.button-text{
+		font-weight: 400;
+	}
+	
 	.grid-background {
 		fill: none;
 	}

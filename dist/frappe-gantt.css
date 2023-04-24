@@ -1,3 +1,13 @@
+.gantt .button {
+  fill: #ffffff;
+  stroke: #8D99A6;
+  cursor: pointer;
+  opacity: 0.35;
+  border-radius: 50px;
+}
+.gantt .button-text {
+  font-weight: 400;
+}
 .gantt .grid-background {
   fill: none;
 }
