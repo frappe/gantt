@@ -657,7 +657,7 @@ export default class Gantt {
         const cur_width = this.$svg.getBoundingClientRect().width;
 
         //check width of grid row
-        var check_width = this.$svg.querySelector('.grid .grid-row');
+        let check_width = this.$svg.querySelector('.grid .grid-row');
         if (check_width === null){
 
         
