@@ -334,12 +334,15 @@ export default class Gantt {
         let row_y = this.options.header_height + this.options.padding / 2;
 
         for (let task of this.tasks) {
+            //工区かどうか。
+            const isKouku = task.hasOwnProperty('taskIds')
             createSVG('rect', {
                 x: 0,
                 y: row_y,
                 width: row_width,
                 height: row_height,
-                class: 'grid-row',
+                //工区の場合は、クラスを変える。
+                class: isKouku ? 'grid-row-kouku': 'grid-row',
                 append_to: rows_layer,
             });
 
