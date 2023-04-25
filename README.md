@@ -99,3 +99,9 @@ License: MIT
 
 ------------------
 Project maintained by [frappe](https://github.com/frappe)
+
+### fork-history
+
+- .scssファイルを消してます。これがあるとNextjsで怒られるので。 
+    - なのでこれ使う時にはglobal.cssに該当のスタイルちゃんと書きましょう。
+- 第一引数のtaskに、taskIdsを渡せるように変更。これ渡すと該当のbarにgrid-row-koukuクラスが追加されるよ
