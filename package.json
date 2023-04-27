@@ -40,6 +40,7 @@
     "eslint": "^4.17.0",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.6.0",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^22.2.1",
     "prettier": "^2.6.2",
     "rollup": "^2.70.2",

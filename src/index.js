@@ -1,8 +1,8 @@
-import date_utils from './date_utils';
-import { $, createSVG } from './svg_utils';
-import Bar from './bar';
 import Arrow from './arrow';
+import Bar from './bar';
+import date_utils from './date_utils';
 import Popup from './popup';
+import { $, createSVG } from './svg_utils';
 
 import './gantt.scss';
 
@@ -19,7 +19,8 @@ export default class Gantt {
     constructor(wrapper, tasks, options) {
         this.setup_wrapper(wrapper);
         this.setup_options(options);
-        this.setup_tasks(tasks);
+        this.tasks = Gantt.setup_tasks(tasks);
+        this.setup_dependencies();
         // initialize with default view mode
         this.change_view_mode();
         this.bind_events();
@@ -91,9 +92,9 @@ export default class Gantt {
         this.options = Object.assign({}, default_options, options);
     }
 
-    setup_tasks(tasks) {
+    static setup_tasks(tasks) {
         // prepare tasks
-        this.tasks = tasks.map((task, i) => {
+        return tasks.map((task, i) => {
             // convert to Date objects
             task._start = date_utils.parse(task.start);
             task._end = date_utils.parse(task.end);
@@ -121,11 +122,18 @@ export default class Gantt {
                 task._end = date_utils.add(task._start, 2, 'day');
             }
 
-            // if hours is not set, assume the last day is full day
-            // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
-            const task_end_values = date_utils.get_date_values(task._end);
-            if (task_end_values.slice(3).every((d) => d === 0)) {
-                task._end = date_utils.add(task._end, 24, 'hour');
+            if (task.end instanceof Date) {
+                task._end = task._end;
+            }
+            if (typeof task.end === 'string') {
+                const time_parts = task.end.split(' ')[1];
+                if (time_parts) {
+                    task._end = task._end;
+                } else {
+                    // if hours is not set, assume the last day is full day
+                    // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
+                    task._end = date_utils.add(task._end, 24, 'hour');
+                }
             }
 
             // invalid flag
@@ -152,8 +160,6 @@ export default class Gantt {
 
             return task;
         });
-
-        this.setup_dependencies();
     }
 
     setup_dependencies() {
