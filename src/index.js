@@ -1,8 +1,8 @@
-import date_utils from './date_utils';
-import { $, createSVG } from './svg_utils';
-import Bar from './bar';
 import Arrow from './arrow';
+import Bar from './bar';
+import date_utils from './date_utils';
 import Popup from './popup';
+import { $, createSVG } from './svg_utils';
 
 import './gantt.scss';
 
@@ -469,19 +469,15 @@ export default class Gantt {
     }
 
     get_dates_to_draw() {
-        let last_date = null;
         const dates = this.dates.map((date, i) => {
-            const d = this.get_date_info(date, last_date, i);
-            last_date = date;
-            return d;
+            const last_date = i >= 1 ? this.dates[i - 1] : null;
+            return this.get_date_info(date, last_date, i);
         });
         return dates;
     }
 
     get_date_info(date, last_date, i) {
-        if (!last_date) {
-            last_date = date_utils.add(date, 1, 'year');
-        }
+        const first_process = last_date === null;
         const date_text = {
             'Quarter Day_lower': date_utils.format(
                 date,
@@ -494,22 +490,22 @@ export default class Gantt {
                 this.options.language
             ),
             Day_lower:
-                date.getDate() !== last_date.getDate()
+                first_process || date.getDate() !== last_date.getDate()
                     ? date_utils.format(date, 'D', this.options.language)
                     : '',
             Week_lower:
-                date.getMonth() !== last_date.getMonth()
+                first_process || date.getMonth() !== last_date.getMonth()
                     ? date_utils.format(date, 'D MMM', this.options.language)
                     : date_utils.format(date, 'D', this.options.language),
             Month_lower: date_utils.format(date, 'MMMM', this.options.language),
             Year_lower: date_utils.format(date, 'YYYY', this.options.language),
             'Quarter Day_upper':
-                date.getDate() !== last_date.getDate()
+                first_process || date.getDate() !== last_date.getDate()
                     ? date_utils.format(date, 'D MMM', this.options.language)
                     : '',
             'Half Day_upper':
-                date.getDate() !== last_date.getDate()
-                    ? date.getMonth() !== last_date.getMonth()
+                first_process || date.getDate() !== last_date.getDate()
+                    ? first_process || date.getMonth() !== last_date.getMonth()
                         ? date_utils.format(
                               date,
                               'D MMM',
@@ -518,19 +514,19 @@ export default class Gantt {
                         : date_utils.format(date, 'D', this.options.language)
                     : '',
             Day_upper:
-                date.getMonth() !== last_date.getMonth()
+                first_process || date.getMonth() !== last_date.getMonth()
                     ? date_utils.format(date, 'MMMM', this.options.language)
                     : '',
             Week_upper:
-                date.getMonth() !== last_date.getMonth()
+                first_process || date.getMonth() !== last_date.getMonth()
                     ? date_utils.format(date, 'MMMM', this.options.language)
                     : '',
             Month_upper:
-                date.getFullYear() !== last_date.getFullYear()
+                first_process || date.getFullYear() !== last_date.getFullYear()
                     ? date_utils.format(date, 'YYYY', this.options.language)
                     : '',
             Year_upper:
-                date.getFullYear() !== last_date.getFullYear()
+                first_process || date.getFullYear() !== last_date.getFullYear()
                     ? date_utils.format(date, 'YYYY', this.options.language)
                     : '',
         };
@@ -542,10 +538,10 @@ export default class Gantt {
         };
 
         const x_pos = {
-            'Quarter Day_lower': (this.options.column_width * 4) / 2,
-            'Quarter Day_upper': 0,
-            'Half Day_lower': (this.options.column_width * 2) / 2,
-            'Half Day_upper': 0,
+            'Quarter Day_lower': 0,
+            'Quarter Day_upper': (this.options.column_width * 4) / 2,
+            'Half Day_lower': 0,
+            'Half Day_upper': (this.options.column_width * 2) / 2,
             Day_lower: this.options.column_width / 2,
             Day_upper: (this.options.column_width * 30) / 2,
             Week_lower: 0,
