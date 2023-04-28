@@ -42,7 +42,7 @@ test('setup_tasks', () => {
         },
     ];
 
-    const copiedTasks = tasks.map(task => ({ ...task }));
+    const copiedTasks = tasks.map((task) => ({ ...task }));
     const tasks_processed = Gantt.setup_tasks(copiedTasks);
 
     expect(tasks_processed).toMatchObject(tasks);
