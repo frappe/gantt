@@ -12,6 +12,10 @@
 			width: 80%;
 			margin: 0 auto;
 		}
+
+		.gantt-target {
+			display: flex;
+		}
 		/* custom class */
 		.gantt .bar-milestone .bar {
 			fill: tomato;
@@ -29,77 +33,37 @@
 		<div class="gantt-target"></div>
 	</div>
 	<script>
-		var tasks = [
+		const tasks = [
 			{
-				start: '2018-10-01',
-				end: '2018-10-08',
-				name: 'Redesign website',
-				id: "Task 0",
-				progress: 20
-			},
-			{
-				start: '2018-10-03',
-				end: '2018-10-06',
-				name: 'Write new content',
-				id: "Task 1",
-				progress: 5,
-				dependencies: 'Task 0'
+				employee_id: 'abc',
+				start_date: '2018-10-01',
+				end_date: '2018-10-08',
+				project_name: 'Timebinder',
+				position: 'Frontend',
+				status: 'PD',
+				employee_name: "Narongdej",
 			},
 			{
-				start: '2018-10-04',
-				end: '2018-10-08',
-				name: 'Apply new styles',
-				id: "Task 2",
-				progress: 10,
-				dependencies: 'Task 1'
+				employee_id: 'abc',
+				start_date: '2018-10-10',
+				end_date: '2018-10-12',
+				project_name: 'Timebinder 2',
+				position: 'Frontend',
+				status: 'PD',
+				employee_name: "Narongdej",
 			},
 			{
-				start: '2018-10-08',
-				end: '2018-10-09',
-				name: 'Review',
-				id: "Task 3",
-				progress: 5,
-				dependencies: 'Task 2'
+				employee_id: 'ebc',
+				start_date: '2018-10-11',
+				end_date: '2018-10-14',
+				project_name: 'Tester',
+				position: 'Backend',
+				status: 'PD',
+				employee_name: "Someone",
 			},
-			{
-				start: '2018-10-08',
-				end: '2018-10-10',
-				name: 'Deploy',
-				id: "Task 4",
-				progress: 0,
-				dependencies: 'Task 2'
-			},
-			{
-				start: '2018-10-11',
-				end: '2018-10-11',
-				name: 'Go Live!',
-				id: "Task 5",
-				progress: 0,
-				dependencies: 'Task 4',
-				custom_class: 'bar-milestone'
-			},
-			{
-				start: '2014-01-05',
-				end: '2019-10-12',
-				name: 'Long term task',
-				id: "Task 6",
-				progress: 0
-			}
-		]
-		var gantt_chart = new Gantt(".gantt-target", tasks, {
-			on_click: task => {
-				console.log(task);
-			},
-			on_date_change: (task, start, end) => {
-				console.log(task, start, end);
-			},
-			on_progress_change: (task, progress) => {
-				console.log(task, progress);
-			},
-			on_view_change: (mode) => {
-				console.log(mode);
-			},
-			view_mode: 'Month',
+		];
+		const gantt_chart = new Gantt(".gantt-target", tasks, {
+			view_mode: 'Day',
 			language: 'en'
 		});
 		console.log(gantt_chart);

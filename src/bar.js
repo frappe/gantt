@@ -70,7 +70,7 @@ export default class Bar {
         this.draw_bar();
         this.draw_progress_bar();
         this.draw_label();
-        this.draw_resize_handles();
+        // this.draw_resize_handles();
     }
 
     draw_bar() {
@@ -112,7 +112,7 @@ export default class Bar {
         createSVG('text', {
             x: this.x + this.width / 2,
             y: this.y + this.height / 2,
-            innerHTML: this.task.name,
+            innerHTML: this.task.project_name,
             class: 'bar-label',
             append_to: this.bar_group,
         });
@@ -175,16 +175,16 @@ export default class Bar {
     }
 
     setup_click_event() {
-        $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, (e) => {
-            if (this.action_completed) {
-                // just finished a move action, wait for a few seconds
-                return;
-            }
-
-            this.show_popup();
-            this.gantt.unselect_all();
-            this.group.classList.add('active');
-        });
+        // $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, (e) => {
+        //     if (this.action_completed) {
+        //         // just finished a move action, wait for a few seconds
+        //         return;
+        //     }
+        //
+        //     this.show_popup();
+        //     this.gantt.unselect_all();
+        //     this.group.classList.add('active');
+        // });
 
         $.on(this.group, 'dblclick', (e) => {
             if (this.action_completed) {

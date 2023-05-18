@@ -10,7 +10,7 @@ $text-color: #333 !default;
 $blue: #a3a3ff !default;
 $handle-color: #ddd !default;
 
-.gantt {
+.gantt, .description {
 	.grid-background {
 		fill: none;
 	}
@@ -79,6 +79,18 @@ $handle-color: #ddd !default;
 		}
 	}
 
+	.name-label {
+		dominant-baseline: central;
+		text-anchor: start;
+		font-size: 12px;
+		font-weight: lighter;
+
+		&.big {
+			fill: $text-light;
+			text-anchor: start;
+		}
+	}
+
 	.handle {
 		fill: $handle-color;
 		cursor: ew-resize;
@@ -133,10 +145,18 @@ $handle-color: #ddd !default;
 	}
 }
 
+.description-container {
+	width: 170px;
+	height: 100%;
+	background-color: white;
+	display: flex;
+}
+
 .gantt-container {
 	position: relative;
-	overflow: auto;
+	overflow-x: auto;
 	font-size: 12px;
+	background: white;
 
 	.popup-wrapper {
 		position: absolute;
