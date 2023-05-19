@@ -244,7 +244,9 @@ export default class Gantt {
 
     change_view_mode(mode = this.options.view_mode) {
         this.update_view_scale(mode);
-        this.setup_dates();
+        if (this.tasks.length > 0) {
+            this.setup_dates();
+        }
         this.render();
         this.render_description();
         // fire viewmode_change event
@@ -345,23 +347,31 @@ export default class Gantt {
 
     render() {
         this.clear();
-        this.setup_layers();
-        this.make_grid();
-        this.make_dates();
-        this.make_bars();
-        // this.make_arrows();
-        // this.map_arrows_on_bars();
-        this.set_width();
-        this.set_scroll_position();
+        if (this.tasks.length > 0) {
+            this.setup_layers();
+            this.make_grid();
+            this.make_dates();
+            this.make_bars();
+            // this.make_arrows();
+            // this.map_arrows_on_bars();
+            this.set_width();
+            this.set_scroll_position();
+        }
     }
 
     render_description() {
-        this.setup_description_layers();
-        this.make_description_grid();
-        this.make_description_dates();
-        this.make_description_name();
-        // this.make_description_grid_rows();
-        // this.make_description_bar();
+        if (this.$svg_description) {
+            this.$svg_description.innerHTML = ''
+        }
+        this.description_layer = {}
+        if (this.tasks && this.tasks.length > 0) {
+            this.setup_description_layers();
+            this.make_description_grid();
+            this.make_description_dates();
+            this.make_description_name();
+            // this.make_description_grid_rows();
+            // this.make_description_bar();
+        }
     }
 
     setup_layers() {
