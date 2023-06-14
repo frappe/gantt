@@ -23,22 +23,14 @@ export default class Arrow {
         }
 
         const start_y =
-            this.gantt.options.header_height +
-            this.gantt.options.bar_height +
-            (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.from_task.task._index +
-            this.gantt.options.padding;
+            this.from_task.$bar.getY() + this.gantt.options.bar_height;
 
         const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
         const end_y =
-            this.gantt.options.header_height +
-            this.gantt.options.bar_height / 2 +
-            (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.to_task.task._index +
-            this.gantt.options.padding;
+            this.to_task.$bar.getY() + this.gantt.options.bar_height / 2;
 
         const from_is_below_to =
-            this.from_task.task._index > this.to_task.task._index;
+            this.from_task.$bar.getY() > this.to_task.$bar.getY();
         const curve = this.gantt.options.arrow_curve;
         const clockwise = from_is_below_to ? 1 : 0;
         const curve_y = from_is_below_to ? -curve : curve;
