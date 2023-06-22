@@ -636,6 +636,7 @@ var Gantt = (function () {
 
         progress_changed() {
             const new_progress = this.compute_progress();
+            if (this.task.progress === new_progress) return;
             this.task.progress = new_progress;
             this.gantt.trigger_event('progress_change', [this.task, new_progress]);
         }
