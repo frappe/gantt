@@ -46,16 +46,14 @@ export default class Gantt {
             );
         }
 
-        // svg element
-        if (!svg_element) {
-            // create it
+        if (svg_element) {
+            this.$svg = svg_element;
+            this.$svg.classList.add('gantt');
+        } else {
             this.$svg = createSVG('svg', {
                 append_to: wrapper_element,
                 class: 'gantt',
             });
-        } else {
-            this.$svg = svg_element;
-            this.$svg.classList.add('gantt');
         }
 
         // wrapper element
