@@ -563,7 +563,7 @@ var Gantt = (function () {
         }
 
         show_popup() {
-            if (this.gantt.bar_being_dragged == null) return;
+            if (this.gantt.bar_being_dragged) return;
 
             const start_date = date_utils.format(
                 this.task._start,
@@ -644,7 +644,7 @@ var Gantt = (function () {
             this.action_completed = true;
             // Reduced timeout lets user see pop up after resizing bars 
             // without any bugs.
-            setTimeout(() => (this.action_completed = false), 200);
+            setTimeout(() => (this.action_completed = false), 1000);
         }
 
         compute_start_end_date() {
