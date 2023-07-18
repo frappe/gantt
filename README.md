@@ -67,7 +67,7 @@ If you want to contribute enhancements or fixes:
 
 1. Clone this repo.
 2. `cd` into project directory
-3. `yarn`
+3. Install Yarn by typing `npm install --global yarn` in your terminal
 4. `yarn run dev`
 5. Open `index.html` in your browser, make your code changes and test them.
 

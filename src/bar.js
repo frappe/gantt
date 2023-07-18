@@ -197,7 +197,7 @@ export default class Bar {
     }
 
     show_popup() {
-        if (this.gantt.bar_being_dragged) return;
+        if (this.gantt.bar_being_dragged == null) return;
 
         const start_date = date_utils.format(
             this.task._start,
@@ -276,7 +276,7 @@ export default class Bar {
 
     set_action_completed() {
         this.action_completed = true;
-        setTimeout(() => (this.action_completed = false), 1000);
+        setTimeout(() => (this.action_completed = false), 200);
     }
 
     compute_start_end_date() {
