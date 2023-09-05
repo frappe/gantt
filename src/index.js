@@ -470,17 +470,20 @@ export default class Gantt {
     }
 
     get_dates_to_draw() {
-        let last_date = null;
-        const dates = this.dates.map((date, i) => {
-            const d = this.get_date_info(date, last_date, i);
-            last_date = date;
+        let last_date_info = null;
+        const dates = this.dates.map((date) => {
+            const d = this.get_date_info(date, last_date_info);
+            last_date_info = d;
             return d;
         });
         return dates;
     }
 
-    get_date_info(date, last_date, i) {
-        if (!last_date) {
+    get_date_info(date, last_date_info) {
+        let last_date = null;
+        if (last_date_info) {
+            last_date = last_date_info.date;
+        } else {
             last_date = date_utils.add(date, 1, 'year');
         }
         const date_text = {
@@ -536,28 +539,39 @@ export default class Gantt {
                     : '',
         };
 
+        let column_width = this.options.column_width;
+        if (this.view_is(VIEW_MODE.MONTH)) {
+            column_width =
+                (date_utils.get_days_in_month(date) * column_width) / 30;
+        }
+
         const base_pos = {
-            x: i * this.options.column_width,
+            x: last_date_info
+                ? last_date_info.base_pos_x + last_date_info.column_width
+                : 0,
             lower_y: this.options.header_height,
             upper_y: this.options.header_height - 25,
         };
 
         const x_pos = {
-            'Quarter Day_lower': (this.options.column_width * 4) / 2,
+            'Quarter Day_lower': (column_width * 4) / 2,
             'Quarter Day_upper': 0,
-            'Half Day_lower': (this.options.column_width * 2) / 2,
+            'Half Day_lower': (column_width * 2) / 2,
             'Half Day_upper': 0,
-            Day_lower: this.options.column_width / 2,
-            Day_upper: (this.options.column_width * 30) / 2,
+            Day_lower: column_width / 2,
+            Day_upper: (column_width * 30) / 2,
             Week_lower: 0,
-            Week_upper: (this.options.column_width * 4) / 2,
-            Month_lower: this.options.column_width / 2,
-            Month_upper: (this.options.column_width * 12) / 2,
-            Year_lower: this.options.column_width / 2,
-            Year_upper: (this.options.column_width * 30) / 2,
+            Week_upper: (column_width * 4) / 2,
+            Month_lower: column_width / 2,
+            Month_upper: (column_width * 12) / 2,
+            Year_lower: column_width / 2,
+            Year_upper: (column_width * 30) / 2,
         };
 
         return {
+            date,
+            column_width,
+            base_pos_x: base_pos.x,
             upper_text: date_text[`${this.options.view_mode}_upper`],
             lower_text: date_text[`${this.options.view_mode}_lower`],
             upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
