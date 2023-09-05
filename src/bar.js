@@ -23,6 +23,7 @@ export default class Bar {
     prepare_values() {
         this.invalid = this.task.invalid;
         this.height = this.gantt.options.bar_height;
+        this.handle_width = 8;
         this.x = this.compute_x();
         this.y = this.compute_y();
         this.corner_radius = this.gantt.options.bar_corner_radius;
@@ -32,8 +33,8 @@ export default class Bar {
         this.width = this.gantt.options.column_width * this.duration;
         this.progress_width =
             this.gantt.options.column_width *
-                this.duration *
-                (this.task.progress / 100) || 0;
+            this.duration *
+            (this.task.progress / 100) || 0;
         this.group = createSVG('g', {
             class: 'bar-wrapper ' + (this.task.custom_class || ''),
             'data-id': this.task.id,
@@ -124,10 +125,10 @@ export default class Bar {
         if (this.invalid) return;
 
         const bar = this.$bar;
-        const handle_width = 8;
+        const handle_width = this.handle_width;
 
         createSVG('rect', {
-            x: bar.getX() + bar.getWidth() - 9,
+            x: bar.getX() + bar.getWidth() - handle_width - 1,
             y: bar.getY() + 1,
             width: handle_width,
             height: this.height - 2,
@@ -236,7 +237,7 @@ export default class Bar {
             }
             this.update_attr(bar, 'x', x);
         }
-        if (width && width >= this.gantt.options.column_width) {
+        if (width && width >= this.handle_width * 2 + 3) {
             this.update_attr(bar, 'width', width);
         }
         if (y) {
@@ -405,7 +406,7 @@ export default class Bar {
             .setAttribute('y', bar.getY() + 1);
         this.handle_group
             .querySelector('.handle.right')
-            .setAttribute('x', bar.getEndX() - 9);
+            .setAttribute('x', bar.getEndX() - this.handle_width - 1);
         this.handle_group
             .querySelector('.handle.right')
             .setAttribute('y', bar.getY() + 1);
