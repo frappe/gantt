@@ -70,14 +70,17 @@ export default class Gantt {
 
         // wrapper element
         this.$container = document.createElement('div');
-        this.$container.classList.add('gantt-container');
+        this.$container.classList.add('gantt-grid-container');
         this.$column_container = document.createElement('div');
-        this.$column_container.classList.add('gantt-container');
-        this.$column_container.classList.add('columns_svg');
+        this.$column_container.classList.add('gantt-columns-container');
+
+        this.$container_parent = document.createElement('div');
+        this.$container_parent.classList.add('gantt-container');
+        this.$container_parent.appendChild(this.$column_container);
+        this.$container_parent.appendChild(this.$container);
 
         const parent_element = this.$svg.parentElement;
-        parent_element.appendChild(this.$column_container);
-        parent_element.appendChild(this.$container);
+        parent_element.appendChild(this.$container_parent);
         this.$column_container.appendChild(this.$column_svg);
         this.$container.appendChild(this.$svg);
 
@@ -428,7 +431,7 @@ export default class Gantt {
         });
     }
     make_columns_grid_header() {
-        const header_width = this.options.columns.length * this.options.column_width;
+        const header_width = this.options.columns.length * this.options.column_width_for_columns;
         const header_height = this.options.header_height + 10;
         createSVG('rect', {
             x: 0,
