@@ -1,0 +1,8 @@
+scrolla al click sulla griglia: https://github.com/frappe/gantt/pull/317
+
+done:
+fix tooltip: https://github.com/frappe/gantt/pull/334
+move on y axis: https://github.com/frappe/gantt/pull/278
+bar width adjustment (only month): https://github.com/frappe/gantt/pull/276
+hour mode: https://github.com/frappe/gantt/pull/142
+columns: https://github.com/frappe/gantt/issues/195
