@@ -28,6 +28,21 @@ export default class Arrow {
         const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
         const end_y =
             this.to_task.$bar.getY() + this.gantt.options.bar_height / 2;
+        // ======= TODO Da capire come gestirlo
+        //             this.gantt.options.header_height +
+        //             this.gantt.options.bar_height +
+        //             (this.gantt.options.padding + this.gantt.options.bar_height) *
+        //             this.from_task.task._index +
+        //             this.gantt.options.padding;
+
+        //         const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
+        //         const end_y =
+        //             this.gantt.options.header_height +
+        //             this.gantt.options.bar_height / 2 +
+        //             (this.gantt.options.padding + this.gantt.options.bar_height) *
+        //             this.to_task.task._index +
+        //             this.gantt.options.padding;
+        // >>>>>>> 5ec8c1cf7d6f126a89a5e5db096915fb66cda0a4
 
         const from_is_below_to =
             this.from_task.$bar.getY() > this.to_task.$bar.getY();
