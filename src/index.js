@@ -460,7 +460,7 @@ export default class Gantt {
         let tick_y = this.options.header_height + this.options.padding / 2;
         let tick_height =
             (this.options.bar_height + this.options.padding) *
-            this.tasks.length;
+            this.options.rows.length;
 
         for (let date of this.dates) {
             let tick_class = 'tick';
@@ -510,7 +510,7 @@ export default class Gantt {
             const width = this.options.column_width;
             const height =
                 (this.options.bar_height + this.options.padding) *
-                this.tasks.length +
+                this.options.rows.length +
                 this.options.header_height +
                 this.options.padding / 2;
 
@@ -797,7 +797,7 @@ export default class Gantt {
         const min_y = this.options.header_height;
         const max_y =
             this.options.header_height +
-            this.tasks.length *
+            this.options.rows.length *
             (this.options.bar_height + this.options.padding);
         this.bar_being_dragged = null; // instanceof dragged bar
 
