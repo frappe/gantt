@@ -582,7 +582,7 @@ var Gantt = (function () {
                 target_element: this.$bar,
                 title: this.task.name,
                 subtitle: subtitle,
-                task: this.task,
+                task: this.task
             });
         }
 
@@ -817,6 +817,21 @@ var Gantt = (function () {
             const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
             const end_y =
                 this.to_task.$bar.getY() + this.gantt.options.bar_height / 2;
+            // ======= TODO Da capire come gestirlo
+            //             this.gantt.options.header_height +
+            //             this.gantt.options.bar_height +
+            //             (this.gantt.options.padding + this.gantt.options.bar_height) *
+            //             this.from_task.task._index +
+            //             this.gantt.options.padding;
+
+            //         const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
+            //         const end_y =
+            //             this.gantt.options.header_height +
+            //             this.gantt.options.bar_height / 2 +
+            //             (this.gantt.options.padding + this.gantt.options.bar_height) *
+            //             this.to_task.task._index +
+            //             this.gantt.options.padding;
+            // >>>>>>> 5ec8c1cf7d6f126a89a5e5db096915fb66cda0a4
 
             const from_is_below_to =
                 this.from_task.$bar.getY() > this.to_task.$bar.getY();
@@ -957,9 +972,10 @@ var Gantt = (function () {
     };
 
     class Gantt {
-        constructor(wrapper, tasks, options) {
+        constructor(wrapper, tasks, cells, options) {
             this.setup_wrapper(wrapper);
             this.setup_options(options);
+            this.setup_cells(cells);
             this.setup_tasks(tasks);
             // initialize with default view mode
             this.change_view_mode();
@@ -987,24 +1003,42 @@ var Gantt = (function () {
                 );
             }
 
+            // TODO da capire se da cambiare
             // svg element
             if (!svg_element) {
                 // create it
                 this.$svg = createSVG('svg', {
                     append_to: wrapper_element,
                     class: 'gantt',
+                    id: 'ganttSvg'
+                });
+                this.$column_svg = createSVG('svg', {
+                    append_to: wrapper_element,
+                    class: 'gantt',
+                    width: 0,
+                    id: 'columnSvg'
                 });
             } else {
                 this.$svg = svg_element;
                 this.$svg.classList.add('gantt');
+                this.$column_svg = svg_element;
+                this.$column_svg.classList.add('gantt');
             }
 
             // wrapper element
             this.$container = document.createElement('div');
-            this.$container.classList.add('gantt-container');
+            this.$container.classList.add('gantt-grid-container');
+            this.$column_container = document.createElement('div');
+            this.$column_container.classList.add('gantt-columns-container');
+
+            this.$container_parent = document.createElement('div');
+            this.$container_parent.classList.add('gantt-container');
+            this.$container_parent.appendChild(this.$column_container);
+            this.$container_parent.appendChild(this.$container);
 
             const parent_element = this.$svg.parentElement;
-            parent_element.appendChild(this.$container);
+            parent_element.appendChild(this.$container_parent);
+            this.$column_container.appendChild(this.$column_svg);
             this.$container.appendChild(this.$svg);
 
             // popup wrapper
@@ -1017,6 +1051,7 @@ var Gantt = (function () {
             const default_options = {
                 header_height: 50,
                 column_width: 30,
+                column_width_for_columns: 120,
                 step: 24,
                 view_modes: [...Object.values(VIEW_MODE)],
                 bar_height: 20,
@@ -1029,13 +1064,19 @@ var Gantt = (function () {
                 custom_popup_html: null,
                 language: 'en',
                 sortable: false,
+                columns: [],
+                rows: [],
             };
             this.options = Object.assign({}, default_options, options);
         }
 
+        setup_cells(cells) {
+            this.cells = cells.filter(t => t.row && t.column);
+        }
+
         setup_tasks(tasks) {
             // prepare tasks
-            this.tasks = tasks.map((task, i) => {
+            this.tasks = tasks.filter(t => t.row).map((task, i) => {
                 // convert to Date objects
                 task._start = date_utils.parse(task.start);
                 task._end = date_utils.parse(task.end);
@@ -1046,7 +1087,8 @@ var Gantt = (function () {
                 }
 
                 // cache index
-                task._index = i;
+                task._index = this.options.rows.indexOf(task.row);
+                if (task._index === -1) task._index = 0;
 
                 // invalid dates
                 if (!task.start && !task.end) {
@@ -1227,12 +1269,17 @@ var Gantt = (function () {
 
         setup_layers() {
             this.layers = {};
+            this.column_layers = {};
             const layers = ['grid', 'date', 'arrow', 'progress', 'bar', 'details'];
             // make group layers
             for (let layer of layers) {
                 this.layers[layer] = createSVG('g', {
                     class: layer,
                     append_to: this.$svg,
+                });
+                this.column_layers[layer] = createSVG('g', {
+                    class: layer,
+                    append_to: this.$column_svg
                 });
             }
         }
@@ -1241,50 +1288,76 @@ var Gantt = (function () {
             this.make_grid_background();
             this.make_grid_rows();
             this.make_grid_header();
+            this.make_columns_grid_header();
             this.make_grid_ticks();
             this.make_grid_highlights();
         }
 
         make_grid_background() {
             const grid_width = this.dates.length * this.options.column_width;
+            const column_grid_width = this.options.columns.length * this.options.column_width_for_columns;
             const grid_height =
                 this.options.header_height +
                 this.options.padding +
                 (this.options.bar_height + this.options.padding) *
-                this.tasks.length;
+                this.options.rows.length;
 
+            createSVG('rect', {
+                x: 0,
+                y: 0,
+                width: column_grid_width,
+                height: grid_height,
+                class: 'grid-background',
+                append_to: this.layers.grid,
+            });
             createSVG('rect', {
                 x: 0,
                 y: 0,
                 width: grid_width,
                 height: grid_height,
                 class: 'grid-background',
-                append_to: this.layers.grid,
+                append_to: this.column_layers.grid
             });
 
             $.attr(this.$svg, {
-                height: grid_height + this.options.padding + 100,
+                height: grid_height + this.options.padding,
                 width: '100%',
+            });
+            $.attr(this.$column_svg, {
+                height: grid_height + this.options.padding,
+                width: column_grid_width
             });
         }
 
         make_grid_rows() {
             const rows_layer = createSVG('g', { append_to: this.layers.grid });
             const lines_layer = createSVG('g', { append_to: this.layers.grid });
+            const columns_rows_layer = createSVG('g', { append_to: this.column_layers.grid });
+            const columns_lines_layer = createSVG('g', { append_to: this.column_layers.grid });
 
             const row_width = this.dates.length * this.options.column_width;
             const row_height = this.options.bar_height + this.options.padding;
+            const column_row_width = this.options.columns.length * this.options.column_width_for_columns;
 
             let row_y = this.options.header_height + this.options.padding / 2;
 
-            for (let task of this.tasks) {
+            for (let row of this.options.rows) {
                 createSVG('rect', {
                     x: 0,
                     y: row_y,
                     width: row_width,
                     height: row_height,
                     class: 'grid-row',
+                    'data-id': row,
                     append_to: rows_layer,
+                });
+                createSVG('rect', {
+                    x: 0,
+                    y: row_y,
+                    width: column_row_width,
+                    height: row_height,
+                    class: 'grid-row',
+                    append_to: columns_rows_layer
                 });
 
                 createSVG('line', {
@@ -1294,6 +1367,15 @@ var Gantt = (function () {
                     y2: row_y + row_height,
                     class: 'row-line',
                     append_to: lines_layer,
+                });
+
+                createSVG('line', {
+                    x1: 0,
+                    y1: row_y + row_height,
+                    x2: column_row_width,
+                    y2: row_y + row_height,
+                    class: 'row-line',
+                    append_to: columns_lines_layer
                 });
 
                 row_y += this.options.bar_height + this.options.padding;
@@ -1310,6 +1392,18 @@ var Gantt = (function () {
                 height: header_height,
                 class: 'grid-header',
                 append_to: this.layers.grid,
+            });
+        }
+        make_columns_grid_header() {
+            const header_width = this.options.columns.length * this.options.column_width_for_columns;
+            const header_height = this.options.header_height + 10;
+            createSVG('rect', {
+                x: 0,
+                y: 0,
+                width: header_width,
+                height: header_height,
+                class: 'grid-header',
+                append_to: this.column_layers.grid
             });
         }
 
@@ -1409,6 +1503,33 @@ var Gantt = (function () {
                         $upper_text.remove();
                     }
                 }
+            }
+            let x = 60;
+            for (let column of this.options.columns) {
+                createSVG('text', {
+                    x: x,
+                    y: 50,
+                    innerHTML: column,
+                    class: 'lower-text',
+                    append_to: this.column_layers.date
+                });
+                x += 120;
+            }
+
+            for (let cell of this.cells) {
+                let index = this.options.rows.indexOf(cell.row);
+                let posY = 15 + this.options.header_height + this.options.padding + index * (this.options.bar_height + this.options.padding);
+
+                // TODO width of column
+                index = this.options.columns.indexOf(cell.column);
+                let posX = 60 + index * 120;
+                createSVG('text', {
+                    x: posX,
+                    y: posY,
+                    innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
+                    class: 'lower-text',
+                    append_to: this.column_layers.date
+                });
             }
         }
 
@@ -1551,10 +1672,11 @@ var Gantt = (function () {
                     .map((task_id) => {
                         const dependency = this.get_task(task_id);
                         if (!dependency) return;
+                        // TODO da rifare, _index non è più univoco
                         const arrow = new Arrow(
                             this,
-                            this.bars[dependency._index], // from_task
-                            this.bars[task._index] // to_task
+                            this.get_bar(dependency.id), // from_task
+                            this.get_bar(task.id) // to_task
                         );
                         this.layers.arrow.appendChild(arrow.element);
                         return arrow;
@@ -1613,26 +1735,6 @@ var Gantt = (function () {
                     this.hide_popup();
                 }
             );
-        }
-
-        sort_bars() {
-            const changed_bars = [];
-            if (!this.bars) {
-                return changed_bars;
-            }
-            this.bars = this.bars.sort((b0, b1) => {
-                return b0.$bar.getY() - b1.$bar.getY();
-            });
-
-            this.tasks = this.bars.map((b, i) => {
-                const task = b.task;
-                if (task._index !== i) {
-                    changed_bars.push(b);
-                }
-                task._index = i;
-                return task;
-            });
-            return changed_bars;
         }
 
         bind_bar_events() {
@@ -1756,14 +1858,14 @@ var Gantt = (function () {
                     Math.abs(dy - bar_being_dragged.$bar.finaldy) >
                     bar_being_dragged.height
                 ) {
-                    this.sort_bars().map((bar) => {
-                        const y = bar.compute_y();
-                        if (bar.task.id === parent_bar_id) {
-                            bar.$bar.finaldy = y - bar.$bar.oy;
-                            return;
-                        }
-                        bar.update_bar_position({ y: y });
-                    });
+                    if ((dy - bar_being_dragged.$bar.finaldy) > bar_being_dragged.height) {
+                        bar_being_dragged.task._index += 1;
+                    }
+                    else {
+                        bar_being_dragged.task._index -= 1;
+                    }
+                    const y = bar_being_dragged.compute_y();
+                    bar_being_dragged.$bar.finaldy = y - bar_being_dragged.$bar.oy;
                 }
             });
 
