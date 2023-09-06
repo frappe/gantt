@@ -109,7 +109,7 @@
 }
 .gantt-container .gantt-columns-container {
   flex: 0 0 auto;
-  overflow: auto;
+  overflow: hidden;
 }
 .gantt-container .gantt-grid-container {
   flex: 1;

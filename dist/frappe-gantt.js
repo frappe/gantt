@@ -1025,6 +1025,7 @@ var Gantt = (function () {
                 this.$column_svg.classList.add('gantt');
             }
 
+            // TODO da rivedere questo giro di wrapper
             // wrapper element
             this.$container = document.createElement('div');
             this.$container.classList.add('gantt-grid-container');
@@ -1033,6 +1034,7 @@ var Gantt = (function () {
 
             this.$container_parent = document.createElement('div');
             this.$container_parent.classList.add('gantt-container');
+            this.$container_parent.style.height = '300px';
             this.$container_parent.appendChild(this.$column_container);
             this.$container_parent.appendChild(this.$container);
 
@@ -1270,7 +1272,8 @@ var Gantt = (function () {
         setup_layers() {
             this.layers = {};
             this.column_layers = {};
-            const layers = ['grid', 'date', 'arrow', 'progress', 'bar', 'details'];
+            const layers = ['grid', 'arrow', 'progress', 'bar', 'details', 'date'];
+            // const column_layers = ['grid', 'arrow', 'progress', 'bar', 'details', 'date'];
             // make group layers
             for (let layer of layers) {
                 this.layers[layer] = createSVG('g', {
@@ -1320,11 +1323,11 @@ var Gantt = (function () {
             });
 
             $.attr(this.$svg, {
-                height: grid_height + this.options.padding,
+                height: grid_height,
                 width: '100%',
             });
             $.attr(this.$column_svg, {
-                height: grid_height + this.options.padding,
+                height: grid_height + 30,
                 width: column_grid_width
             });
         }
@@ -1391,7 +1394,7 @@ var Gantt = (function () {
                 width: header_width,
                 height: header_height,
                 class: 'grid-header',
-                append_to: this.layers.grid,
+                append_to: this.layers.date,
             });
         }
         make_columns_grid_header() {
@@ -1403,7 +1406,7 @@ var Gantt = (function () {
                 width: header_width,
                 height: header_height,
                 class: 'grid-header',
-                append_to: this.column_layers.grid
+                append_to: this.column_layers.date
             });
         }
 
@@ -1516,6 +1519,7 @@ var Gantt = (function () {
                 x += 120;
             }
 
+            // questo secondo me è da spostare
             for (let cell of this.cells) {
                 let index = this.options.rows.indexOf(cell.row);
                 let posY = 15 + this.options.header_height + this.options.padding + index * (this.options.bar_height + this.options.padding);
@@ -1528,7 +1532,7 @@ var Gantt = (function () {
                     y: posY,
                     innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
                     class: 'lower-text',
-                    append_to: this.column_layers.date
+                    append_to: this.column_layers.bar
                 });
             }
         }
@@ -1893,6 +1897,13 @@ var Gantt = (function () {
                 is_dragging = false;
                 is_resizing_left = false;
                 is_resizing_right = false;
+            });
+
+            // TODO anche se non è proprio bar events ma vabbè
+            $.on(this.$container, 'scroll', e => {
+                this.$column_container.scrollTop = e.currentTarget.scrollTop;
+                this.layers.date.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
+                this.column_layers.date.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
             });
 
             this.bind_bar_progress();

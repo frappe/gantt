@@ -152,7 +152,7 @@ $handle-color: #ddd !default;
 
     .gantt-columns-container {
         flex: 0 0 auto;
-        overflow: auto;
+        overflow: hidden;
     }
 
     .gantt-grid-container {
