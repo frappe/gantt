@@ -40,7 +40,8 @@
                 end: '2018-10-08',
                 name: 'Redesign website',
                 id: "Task 0",
-                progress: 20
+                progress: 20,
+                row: 'machine_1',
             },
             {
                 start: '2018-10-03',
@@ -48,6 +49,7 @@
                 name: 'Write new content',
                 id: "Task 1",
                 progress: 5,
+                row: 'machine_3',
             },
             {
                 start: '2018-10-04',
@@ -55,6 +57,7 @@
                 name: 'Apply new styles',
                 id: "Task 2",
                 progress: 10,
+                row: 'machine_2',
             },
             {
                 start: '2018-10-08',
@@ -62,6 +65,7 @@
                 name: 'Review',
                 id: "Task 3",
                 progress: 5,
+                row: 'machine_4',
             },
             {
                 start: '2018-10-08',
@@ -69,6 +73,7 @@
                 name: 'Deploy',
                 id: "Task 4",
                 progress: 0,
+                row: 'machine_5',
             },
             {
                 start: '2018-10-11',
@@ -77,17 +82,33 @@
                 id: "Task 5",
                 progress: 0,
                 dependencies: 'Task 4',
+                row: 'machine_6',
                 custom_class: 'bar-milestone'
             }
-            // {
-            // 	start: '2014-01-05',
-            // 	end: '2019-10-12',
-            // 	name: 'Long term task',
-            // 	id: "Task 6",
-            // 	progress: 0
-            // }
         ]
-        var gantt_chart = new Gantt(".gantt-target", tasks, {
+        var cells = [
+            {
+                row: 'machine_1',
+                column: 'name',
+                value: 'Machine 1'
+            },
+            {
+                row: 'machine_1',
+                column: 'description',
+                value: 'Machine 1 Desc'
+            },
+            {
+                row: 'machine_3',
+                column: 'name',
+                value: 'Machine 3'
+            },
+            {
+                row: 'machine_3',
+                column: 'description',
+                value: 'Machine 3 Desc'
+            },
+        ]
+        var gantt_chart = new Gantt(".gantt-target", tasks, cells, {
             on_click: task => {
                 console.log(task);
             },
@@ -103,7 +124,8 @@
             view_mode: 'Day',
             language: 'en',
             sortable: true,
-            columns: ['id', 'name', 'start']
+            rows: ['machine_1', 'machine_2', 'machine_3', 'machine_4', 'machine_5', 'machine_6'],
+            columns: ['name', 'description']
         });
         console.log(gantt_chart);
     </script>

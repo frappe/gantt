@@ -17,9 +17,10 @@ const VIEW_MODE = {
 };
 
 export default class Gantt {
-    constructor(wrapper, tasks, options) {
+    constructor(wrapper, tasks, cells, options) {
         this.setup_wrapper(wrapper);
         this.setup_options(options);
+        this.setup_cells(cells);
         this.setup_tasks(tasks);
         // initialize with default view mode
         this.change_view_mode();
@@ -47,6 +48,7 @@ export default class Gantt {
             );
         }
 
+        // TODO da capire se da cambiare
         // svg element
         if (!svg_element) {
             // create it
@@ -58,7 +60,7 @@ export default class Gantt {
             this.$column_svg = createSVG('svg', {
                 append_to: wrapper_element,
                 class: 'gantt',
-                width: 400,
+                width: 0,
                 id: 'columnSvg'
             });
         } else {
@@ -107,13 +109,19 @@ export default class Gantt {
             custom_popup_html: null,
             language: 'en',
             sortable: false,
+            columns: [],
+            rows: [],
         };
         this.options = Object.assign({}, default_options, options);
     }
 
+    setup_cells(cells) {
+        this.cells = cells.filter(t => t.row && t.column);
+    }
+
     setup_tasks(tasks) {
         // prepare tasks
-        this.tasks = tasks.map((task, i) => {
+        this.tasks = tasks.filter(t => t.row).map((task, i) => {
             // convert to Date objects
             task._start = date_utils.parse(task.start);
             task._end = date_utils.parse(task.end);
@@ -124,7 +132,8 @@ export default class Gantt {
             }
 
             // cache index
-            task._index = i;
+            task._index = this.options.rows.indexOf(task.row);
+            if (task._index === -1) task._index = 0;
 
             // invalid dates
             if (!task.start && !task.end) {
@@ -337,7 +346,7 @@ export default class Gantt {
             this.options.header_height +
             this.options.padding +
             (this.options.bar_height + this.options.padding) *
-            this.tasks.length;
+            this.options.rows.length;
 
         createSVG('rect', {
             x: 0,
@@ -357,11 +366,11 @@ export default class Gantt {
         });
 
         $.attr(this.$svg, {
-            height: grid_height + this.options.padding + 100,
+            height: grid_height + this.options.padding,
             width: '100%',
         });
         $.attr(this.$column_svg, {
-            height: grid_height + this.options.padding + 100,
+            height: grid_height + this.options.padding,
             width: column_grid_width
         });
     }
@@ -378,13 +387,14 @@ export default class Gantt {
 
         let row_y = this.options.header_height + this.options.padding / 2;
 
-        for (let task of this.tasks) {
+        for (let row of this.options.rows) {
             createSVG('rect', {
                 x: 0,
                 y: row_y,
                 width: row_width,
                 height: row_height,
                 class: 'grid-row',
+                'data-id': row,
                 append_to: rows_layer,
             });
             createSVG('rect', {
@@ -552,19 +562,20 @@ export default class Gantt {
             x += 120;
         }
 
-        for (let task of this.tasks) {
-            let posY = 15 + this.options.header_height + this.options.padding + task._index * (this.options.bar_height + this.options.padding);
-            x = 60;
-            for (let column of this.options.columns) {
-                createSVG('text', {
-                    x: x,
-                    y: posY,
-                    innerHTML: ((String(task[column]).slice(0, 25)) + (String(task[column]).length > 25 ? "..." : "")),
-                    class: 'lower-text',
-                    append_to: this.column_layers.date
-                });
-                x += 120;
-            }
+        for (let cell of this.cells) {
+            let index = this.options.rows.indexOf(cell.row);
+            let posY = 15 + this.options.header_height + this.options.padding + index * (this.options.bar_height + this.options.padding);
+
+            // TODO width of column
+            index = this.options.columns.indexOf(cell.column);
+            let posX = 60 + index * 120;
+            createSVG('text', {
+                x: posX,
+                y: posY,
+                innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
+                class: 'lower-text',
+                append_to: this.column_layers.date
+            });
         }
     }
 
@@ -707,10 +718,11 @@ export default class Gantt {
                 .map((task_id) => {
                     const dependency = this.get_task(task_id);
                     if (!dependency) return;
+                    // TODO da rifare, _index non è più univoco
                     const arrow = new Arrow(
                         this,
-                        this.bars[dependency._index], // from_task
-                        this.bars[task._index] // to_task
+                        this.get_bar(dependency.id), // from_task
+                        this.get_bar(task.id) // to_task
                     );
                     this.layers.arrow.appendChild(arrow.element);
                     return arrow;
@@ -769,26 +781,6 @@ export default class Gantt {
                 this.hide_popup();
             }
         );
-    }
-
-    sort_bars() {
-        const changed_bars = [];
-        if (!this.bars) {
-            return changed_bars;
-        }
-        this.bars = this.bars.sort((b0, b1) => {
-            return b0.$bar.getY() - b1.$bar.getY();
-        });
-
-        this.tasks = this.bars.map((b, i) => {
-            const task = b.task;
-            if (task._index !== i) {
-                changed_bars.push(b);
-            }
-            task._index = i;
-            return task;
-        });
-        return changed_bars;
     }
 
     bind_bar_events() {
@@ -912,14 +904,14 @@ export default class Gantt {
                 Math.abs(dy - bar_being_dragged.$bar.finaldy) >
                 bar_being_dragged.height
             ) {
-                this.sort_bars().map((bar) => {
-                    const y = bar.compute_y();
-                    if (bar.task.id === parent_bar_id) {
-                        bar.$bar.finaldy = y - bar.$bar.oy;
-                        return;
-                    }
-                    bar.update_bar_position({ y: y });
-                });
+                if ((dy - bar_being_dragged.$bar.finaldy) > bar_being_dragged.height) {
+                    bar_being_dragged.task._index += 1;
+                }
+                else {
+                    bar_being_dragged.task._index -= 1;
+                }
+                const y = bar_being_dragged.compute_y();
+                bar_being_dragged.$bar.finaldy = y - bar_being_dragged.$bar.oy;
             }
         });
 
