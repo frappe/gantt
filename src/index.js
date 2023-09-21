@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import date_utils from './date_utils';
 import { $, createSVG } from './svg_utils';
 import Bar from './bar';
@@ -7,9 +8,9 @@ import Popup from './popup';
 import './gantt.scss';
 
 function flip(obj) {
-  const ret = {};
-  Object.keys(obj).forEach(key => ret[obj[key]] = key);
-  return ret;
+    const ret = {};
+    Object.keys(obj).forEach(key => ret[obj[key]] = key);
+    return ret;
 }
 
 const VIEW_MODE = {
@@ -426,11 +427,10 @@ export default class Gantt {
             }
         }
     }
-
     make_grid_highlights() {
         // highlight saturday dates
-        
-        if (this.view_is(VIEW_MODE.DAY)) {            
+
+        if (this.view_is(VIEW_MODE.DAY)) {
             // highlight today's date
             if (this.options.show_today_highlight){
                 this.make_highlight_bar(date_utils.today(), 'today-highlight')
@@ -445,7 +445,7 @@ export default class Gantt {
                         this.make_highlight_bar(D, 'noneworkingday-highlight')
                     }
                 }
-                
+
             }
 
         }
@@ -576,10 +576,10 @@ export default class Gantt {
         };
 
         const x_pos = {
-            'Quarter Day_lower': (this.options.column_width * 4) / 2,
-            'Quarter Day_upper': 0,
-            'Half Day_lower': (this.options.column_width * 2) / 2,
-            'Half Day_upper': 0,
+            'Quarter Day_lower': 0,
+            'Quarter Day_upper': this.options.column_width * 4 / 2,
+            'Half Day_lower': 0,
+            'Half Day_upper': this.options.column_width * 2 / 2,
             Day_lower: this.options.column_width / 2,
             Day_upper: (this.options.column_width * 30) / 2,
             Week_lower: 0,
@@ -793,7 +793,7 @@ export default class Gantt {
         let $bar_progress = null;
         let $bar = null;
 
-        if (this.allow_progress_update){
+        if (this.options.allow_progress_update){
             $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
                 is_resizing = true;
                 x_on_start = e.offsetX;
@@ -965,6 +965,7 @@ export default class Gantt {
         if (Animate){
             document.querySelector('.today-highlight').scrollIntoView({behavior: 'smooth', inline: 'center'});
         } else {
+            // @ts-ignore
             document.querySelector('.today-highlight').scrollIntoView({inline: 'center'});
         }
     }
