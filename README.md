@@ -54,12 +54,25 @@ var gantt = new Gantt("#gantt", tasks, {
     bar_height: 20,
     bar_corner_radius: 3,
     arrow_curve: 5,
-    padding: 18,
     view_mode: 'Day',
     date_format: 'YYYY-MM-DD',
     language: 'en', // or 'es', 'it', 'ru', 'ptBr', 'fr', 'tr', 'zh', 'de', 'hu'
-    custom_popup_html: null
+    custom_popup_html: null,
+    padding_bottom: 5,
+    padding_bar_top: 5,
+    padding_bar_bottom: 5,
+    allow_dragging: true,
+    allow_progress_update: true,
+    draw_labels: true,
+    show_today_highlight: true,
+    show_saturday_highlight: false,
+    show_sunday_highlights: false
 });
+```
+You can also make the chart jump to the current day by using `jump_to_today` with a boolean value passed in for animation.
+
+```js
+gantt_chart.jump_to_today(true)
 ```
 
 ### Contributing

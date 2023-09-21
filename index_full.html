@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Simple Gantt</title>
+	<style>
+		body {
+			font-family: sans-serif;
+			background: #ccc;
+		}
+		.container {
+			width: 80%;
+			margin: 0 auto;
+		}
+		/* custom class */
+		.gantt .bar-milestone .bar {
+			fill: tomato;
+		}
+		.heading {
+			text-align: center;
+		}
+	</style>
+	<link rel="stylesheet" href="dist/frappe-gantt.css" />
+	<script src="dist/frappe-gantt.js"></script>
+</head>
+<body>
+	<div class="container">
+		<h2 class="heading">Interactive Gantt Chart entirely made in SVG!</h2>
+		<div class="gantt-target"></div>
+        <button onclick="gantt_chart.jump_to_today(true)">Smooth To Today</button>
+        <button onclick="gantt_chart.jump_to_today(false)">Jump To Today</button>
+	</div>
+	<script>
+		var tasks = [
+			{
+				start: '2023-01-01',
+				end: '2023-01-08',
+				name: 'Redesign website',
+				id: "Task 0",
+				progress: 20
+			},
+			{
+				start: '2023-01-03',
+				end: '2023-01-06',
+				name: 'Write new content',
+				id: "Task 1",
+				progress: 5,
+				dependencies: 'Task 0'
+			},
+			{
+				start: '2023-01-04',
+				end: '2023-01-08',
+				name: 'Apply new styles',
+				id: "Task 2",
+				progress: 01,
+				dependencies: 'Task 1'
+			},
+			{
+				start: '2023-01-08',
+				end: '2023-01-09',
+				name: 'Review',
+				id: "Task 3",
+				progress: 5,
+				dependencies: 'Task 2'
+			},
+			{
+				start: '2023-01-08',
+				end: '2023-01-01',
+				name: 'Deploy',
+				id: "Task 4",
+				progress: 0,
+				dependencies: 'Task 2'
+			},
+			{
+				start: '2023-01-11',
+				end: '2023-01-11',
+				name: 'Go Live!',
+				id: "Task 5",
+				progress: 0,
+				dependencies: 'Task 4',
+				custom_class: 'bar-milestone'
+			},
+			{
+				start: '2022-01-05',
+				end: '2024-01-12',
+				name: 'Long term task',
+				id: "Task 6",
+				progress: 0
+			}
+		]
+		var gantt_chart = new Gantt(".gantt-target", tasks, {
+			on_click: task => {
+				console.log(task);
+			},
+			on_date_change: (task, start, end) => {
+				console.log(task, start, end);
+			},
+			on_progress_change: (task, progress) => {
+				console.log(task, progress);
+			},
+			on_view_change: (mode) => {
+				console.log(mode);
+			},
+			view_mode: 'Day',
+			language: 'en',
+            show_today_highlight: true,
+            show_saturday_highlight: true,
+            show_sunday_highlights: true
+		});
+	</script>
+</body>
+</html>

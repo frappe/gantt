@@ -15,8 +15,8 @@ export default class Arrow {
             this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
 
         const condition = () =>
-            this.to_task.$bar.getX() < start_x + this.gantt.options.padding &&
-            start_x > this.from_task.$bar.getX() + this.gantt.options.padding;
+            this.to_task.$bar.getX() < start_x &&
+            start_x > this.from_task.$bar.getX();
 
         while (condition()) {
             start_x -= 10;
@@ -25,17 +25,15 @@ export default class Arrow {
         const start_y =
             this.gantt.options.header_height +
             this.gantt.options.bar_height +
-            (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.from_task.task._index +
-            this.gantt.options.padding;
+            (this.gantt.options.padding_bar_top + this.gantt.options.padding_bar_bottom + this.gantt.options.bar_height) *
+                this.from_task.task._index;
 
-        const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
+        const end_x = this.to_task.$bar.getX();
         const end_y =
             this.gantt.options.header_height +
-            this.gantt.options.bar_height / 2 +
-            (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.to_task.task._index +
-            this.gantt.options.padding;
+            this.gantt.options.bar_height + this.gantt.options.padding_bar_top + 
+            (this.gantt.options.padding_bar_top + this.gantt.options.padding_bar_bottom + this.gantt.options.bar_height) *
+                this.to_task.task._index;
 
         const from_is_below_to =
             this.from_task.task._index > this.to_task.task._index;
@@ -56,15 +54,14 @@ export default class Arrow {
             l -5 5`;
 
         if (
-            this.to_task.$bar.getX() <
-            this.from_task.$bar.getX() + this.gantt.options.padding
+            this.to_task.$bar.getX() < this.from_task.$bar.getX() 
         ) {
-            const down_1 = this.gantt.options.padding / 2 - curve;
+            const down_1 = curve;//this.gantt.options.padding / 2 - curve;
             const down_2 =
                 this.to_task.$bar.getY() +
                 this.to_task.$bar.getHeight() / 2 -
                 curve_y;
-            const left = this.to_task.$bar.getX() - this.gantt.options.padding;
+            const left = this.to_task.$bar.getX();
 
             this.path = `
                 M ${start_x} ${start_y}
