@@ -6,6 +6,12 @@ import Popup from './popup';
 
 import './gantt.scss';
 
+function flip(obj) {
+  const ret = {};
+  Object.keys(obj).forEach(key => ret[obj[key]] = key);
+  return ret;
+}
+
 const VIEW_MODE = {
     QUARTER_DAY: 'Quarter Day',
     HALF_DAY: 'Half Day',
@@ -13,6 +19,15 @@ const VIEW_MODE = {
     WEEK: 'Week',
     MONTH: 'Month',
     YEAR: 'Year',
+};
+
+const VIEW_MODE_PADDING = {
+    QUARTER_DAY: [[-7, 'day'], [7, 'day']],
+    HALF_DAY: [[-7, 'day'], [7, 'day']],
+    DAY: [[-1, 'month'], [1, 'month']],
+    WEEK: [[-1, 'month'], [1, 'month']],
+    MONTH: [[0, 'month'], [1, 'month']],
+    YEAR: [[-2, 'year'], [2, 'year']],
 };
 
 export default class Gantt {
@@ -78,6 +93,7 @@ export default class Gantt {
             column_width: 30,
             step: 24,
             view_modes: [...Object.values(VIEW_MODE)],
+            view_mode_padding: VIEW_MODE_PADDING,
             bar_height: 20,
             bar_corner_radius: 3,
             arrow_curve: 5,
@@ -233,19 +249,10 @@ export default class Gantt {
         this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
 
         // add date padding on both sides
-        if (this.view_is([VIEW_MODE.QUARTER_DAY, VIEW_MODE.HALF_DAY])) {
-            this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
-            this.gantt_end = date_utils.add(this.gantt_end, 7, 'day');
-        } else if (this.view_is(VIEW_MODE.MONTH)) {
-            this.gantt_start = date_utils.start_of(this.gantt_start, 'year');
-            this.gantt_end = date_utils.add(this.gantt_end, 1, 'year');
-        } else if (this.view_is(VIEW_MODE.YEAR)) {
-            this.gantt_start = date_utils.add(this.gantt_start, -2, 'year');
-            this.gantt_end = date_utils.add(this.gantt_end, 2, 'year');
-        } else {
-            this.gantt_start = date_utils.add(this.gantt_start, -1, 'month');
-            this.gantt_end = date_utils.add(this.gantt_end, 1, 'month');
-        }
+        const viewKey = flip(VIEW_MODE)[this.options.view_mode]
+        const [padding_start, padding_end] = this.options.view_mode_padding[viewKey]
+        this.gantt_start = date_utils.add(this.gantt_start, ...padding_start);
+        this.gantt_end = date_utils.add(this.gantt_end, ...padding_end);
     }
 
     setup_date_values() {
