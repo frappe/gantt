@@ -104,6 +104,7 @@ $handle-color: #ddd !default;
         &:hover {
             .bar {
                 fill: darken($bar-color, 5);
+                stroke-width: 2;
             }
 
             .bar-progress {
@@ -119,6 +120,7 @@ $handle-color: #ddd !default;
         &.active {
             .bar {
                 fill: darken($bar-color, 5);
+                stroke-width: 2;
             }
 
             .bar-progress {
@@ -131,6 +133,7 @@ $handle-color: #ddd !default;
     .upper-text {
         font-size: 12px;
         text-anchor: middle;
+        user-select: none;
     }
 
     .upper-text {

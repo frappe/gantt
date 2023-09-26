@@ -788,7 +788,6 @@ export default class Gantt {
                 .map((task_id) => {
                     const dependency = this.get_task(task_id);
                     if (!dependency) return;
-                    // TODO da rifare, _index non è più univoco
                     const arrow = new Arrow(
                         this,
                         this.get_bar(dependency.id), // from_task
@@ -926,13 +925,13 @@ export default class Gantt {
         $.on(this.$svg, 'mousemove', (e) => {
             if (!action_in_progress()) return;
             const dx = e.offsetX - x_on_start;
-            const dy = e.offsetY - y_on_start;
+            let dy = e.offsetY - y_on_start;
 
             this.hide_popup();
 
             // update the dragged bar
             const bar_being_dragged = this.bar_being_dragged;
-            bar_being_dragged.$bar.finaldx = this.get_snap_position(dx);
+            bar_being_dragged.$bar.finaldx = this.get_snap_x_position(dx);
             if (is_resizing_left) {
                 bar_being_dragged.update_bar_position({
                     x:
@@ -949,18 +948,32 @@ export default class Gantt {
                         bar_being_dragged.$bar.finaldx,
                 });
             } else if (is_dragging) {
-                let y = bar_being_dragged.$bar.oy + dy;
-                if (y < min_y) {
-                    y = min_y;
-                } else if (y > max_y) {
-                    y = max_y;
+                if (!this.options.sortable) {
+                    bar_being_dragged.update_bar_position({
+                        x:
+                            bar_being_dragged.$bar.ox +
+                            bar_being_dragged.$bar.finaldx
+                    });
                 }
-                bar_being_dragged.update_bar_position({
-                    x:
-                        bar_being_dragged.$bar.ox +
-                        bar_being_dragged.$bar.finaldx,
-                    y: this.options.sortable ? y : null,
-                });
+                else {
+                    // TODO improve max_y and get_snap_y_position
+                    const y = bar_being_dragged.$bar.oy + dy;
+                    if (y < min_y) {
+                        dy = min_y - bar_being_dragged.$bar.oy;
+                    } else if (y > max_y) {
+                        dy = max_y - bar_being_dragged.$bar.oy;
+                    }
+                    bar_being_dragged.$bar.finaldy = this.get_snap_y_position(dy);
+                    bar_being_dragged.update_bar_position({
+                        x:
+                            bar_being_dragged.$bar.ox +
+                            bar_being_dragged.$bar.finaldx,
+                        y: this.options.sortable ?
+                            bar_being_dragged.$bar.oy +
+                            bar_being_dragged.$bar.finaldy
+                            : null,
+                    });
+                }
             }
 
             // update children
@@ -969,7 +982,7 @@ export default class Gantt {
                     return;
                 }
                 const $bar = bar.$bar;
-                $bar.finaldx = this.get_snap_position(dx);
+                $bar.finaldx = this.get_snap_x_position(dx);
                 this.hide_popup();
                 if (is_resizing_left) {
                     bar.update_bar_position({
@@ -981,43 +994,19 @@ export default class Gantt {
                     });
                 }
             });
-
-            // update y pos
-            if (
-                this.options.sortable &&
-                is_dragging &&
-                Math.abs(dy - bar_being_dragged.$bar.finaldy) >
-                bar_being_dragged.height
-            ) {
-                if ((dy - bar_being_dragged.$bar.finaldy) > bar_being_dragged.height) {
-                    bar_being_dragged.task._index += 1;
-                }
-                else {
-                    bar_being_dragged.task._index -= 1;
-                }
-                const y = bar_being_dragged.compute_y();
-                bar_being_dragged.$bar.finaldy = y - bar_being_dragged.$bar.oy;
-            }
         });
 
         $.on(this.$svg, 'mouseup', (e) => {
-            const dy = e.offsetY - y_on_start;
             if (is_dragging || is_resizing_left || is_resizing_right) {
                 bars.forEach((bar) => {
                     bar.group.classList.remove('active');
 
                     const $bar = bar.$bar;
-                    if ($bar.finaldx) {
-                        bar.date_changed();
+                    if ($bar.finaldx || $bar.finaldy) {
+                        bar.position_changed();
                         bar.set_action_completed();
                     }
                 });
-                const $bar = this.bar_being_dragged.$bar;
-                if (this.options.sortable && dy !== $bar.finaldy) {
-                    this.bar_being_dragged.update_bar_position({
-                        y: $bar.oy + $bar.finaldy,
-                    });
-                }
             }
 
             this.bar_being_dragged = null;
@@ -1097,7 +1086,7 @@ export default class Gantt {
         return out.filter(Boolean);
     }
 
-    get_snap_position(dx) {
+    get_snap_x_position(dx) {
         let odx = dx,
             rem,
             position;
@@ -1127,6 +1116,21 @@ export default class Gantt {
                     ? 0
                     : this.options.column_width);
         }
+        return position;
+    }
+
+    get_snap_y_position(dy) {
+        let ody = dy,
+            rem,
+            position;
+        const row_height = this.options.bar_height + this.options.padding;
+        rem = ody % row_height;
+        position =
+            ody -
+            rem +
+            (rem < row_height / 2
+                ? 0
+                : row_height);
         return position;
     }
 

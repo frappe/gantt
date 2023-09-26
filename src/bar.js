@@ -181,8 +181,9 @@ export default class Bar {
         });
 
         $.on(this.group, 'mouseleave', '.bar-wrapper', (e) => {
-            if (e.relatedTarget.classList.contains('pointer') ||
-                e.relatedTarget.classList.contains('title')) return;
+            if (e.relatedTarget != null &&
+                (e.relatedTarget.classList.contains('pointer') ||
+                    e.relatedTarget.classList.contains('title'))) return;
             this.gantt.hide_popup();
         });
 
@@ -253,7 +254,7 @@ export default class Bar {
         this.update_arrow_position();
     }
 
-    date_changed() {
+    position_changed() {
         let changed = false;
         const { new_start_date, new_end_date } = this.compute_start_end_date();
 
@@ -267,10 +268,19 @@ export default class Bar {
             this.task._end = new_end_date;
         }
 
+        const new_index = this.compute_index();
+        const new_row = this.gantt.options.rows[new_index];
+        if (this.task._index !== new_index) {
+            changed = true;
+            this.task._index = new_index;
+            this.task.row = new_row;
+        }
+
         if (!changed) return;
 
-        this.gantt.trigger_event('date_change', [
+        this.gantt.trigger_event('position_change', [
             this.task,
+            new_row,
             new_start_date,
             date_utils.add(new_end_date, -1, 'second'),
         ]);
@@ -303,6 +313,13 @@ export default class Bar {
         );
 
         return { new_start_date, new_end_date };
+    }
+
+    compute_index() {
+        const bar = this.$bar;
+        const row_height = this.gantt.options.bar_height + this.gantt.options.padding;
+        const new_index = (bar.getY() - this.gantt.options.header_height) / row_height;
+        return Math.ceil(new_index) - 1;
     }
 
     compute_progress() {
