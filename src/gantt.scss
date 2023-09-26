@@ -144,6 +144,11 @@ $handle-color: #ddd !default;
     .hide {
         display: none;
     }
+
+    .cell-wrapper {
+        fill: transparent;
+        user-select: none;
+    }
 }
 
 .gantt-container {

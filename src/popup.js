@@ -2,6 +2,7 @@ export default class Popup {
     constructor(parent, custom_html) {
         this.parent = parent;
         this.custom_html = custom_html;
+        this.is_showing = false;
         this.make();
     }
 
@@ -20,6 +21,7 @@ export default class Popup {
     }
 
     show(options) {
+        if (this.is_showing) return;
         if (!options.target_element) {
             throw new Error('target_element is required to show popup');
         }
@@ -60,10 +62,12 @@ export default class Popup {
 
         // show
         this.parent.style.opacity = 1;
+        this.is_showing = true;
     }
 
     hide() {
         this.parent.style.opacity = 0;
         this.parent.style.left = 0;
+        this.is_showing = false;
     }
 }

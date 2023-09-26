@@ -91,6 +91,10 @@ export default class Gantt {
         this.popup_wrapper = document.createElement('div');
         this.popup_wrapper.classList.add('popup-wrapper');
         this.$container.appendChild(this.popup_wrapper);
+
+        $.on(this.popup_wrapper, 'mouseleave', '.popup-wrapper', (e) => {
+            this.hide_popup();
+        });
     }
 
     setup_options(options) {
@@ -334,6 +338,7 @@ export default class Gantt {
         }
     }
 
+    // TODO refactor with single functions?
     make_fixed_columns() {
         // make_grid_background
         const column_grid_width = this.options.fixed_columns.length * this.options.fixed_column_width;
@@ -388,20 +393,6 @@ export default class Gantt {
             row_y += this.options.bar_height + this.options.padding;
         }
 
-
-        // for (let i = 0; i < this.options.fixed_columns.length; i++) {
-        //     createSVG('rect', {
-        //         x: this.options.fixed_column_width * i,
-        //         y: row_y,
-        //         width: this.options.fixed_column_width,
-        //         height: row_height,
-        //         class: 'grid-cell',
-        //         'data-row-id': row,
-        //         'data-col-id': this.options.fixed_columns[i],
-        //         append_to: g
-        //     });
-        // }
-
         // make_grid_header
         const header_width = this.options.fixed_columns.length * this.options.fixed_column_width;
         const header_height = this.options.header_height + 10;
@@ -413,6 +404,22 @@ export default class Gantt {
             class: 'grid-header',
             append_to: this.fixed_col_layers.header
         });
+
+        // make_grid_ticks
+        let tick_x = this.options.fixed_column_width;
+        let tick_y = this.options.header_height + this.options.padding / 2;
+        let tick_height =
+            (this.options.bar_height + this.options.padding) *
+            this.options.rows.length;
+        for (let _ of this.options.fixed_columns) {
+            createSVG('path', {
+                d: `M ${tick_x} ${tick_y} v ${tick_height}`,
+                class: 'tick thick',
+                append_to: this.fixed_col_layers.grid,
+            });
+
+            tick_x += this.options.fixed_column_width;
+        }
 
         // make_dates -> header
         const pos_y = this.options.header_height;
@@ -429,20 +436,40 @@ export default class Gantt {
         }
 
         // make_bars
-        for (let cell of this.cells) {
-            let index = this.options.rows.indexOf(cell.row);
-            let posY = 15 + this.options.header_height + this.options.padding + index * (this.options.bar_height + this.options.padding);
+        this.make_cells();
+    }
 
-            // TODO width of column
-            index = this.options.fixed_columns.indexOf(cell.column);
-            let posX = this.options.fixed_column_width / 2 + index * this.options.fixed_column_width;
-            createSVG('text', {
-                x: posX,
-                y: posY,
-                innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
-                class: 'lower-text',
-                append_to: this.fixed_col_layers.cell
-            });
+    make_cells() {
+        const row_height = this.options.bar_height + this.options.padding;
+
+        for (let r = 0; r < this.options.rows.length; r++) {
+            for (let c = 0; c < this.options.fixed_columns.length; c++) {
+                const cell_wrapper = createSVG('g', {
+                    class: 'cell-wrapper',
+                    'data-row-id': this.options.rows[r],
+                    'data-col-id': this.options.fixed_columns[c],
+                    append_to: this.fixed_col_layers.cell,
+                });
+
+                createSVG('rect', {
+                    x: c * this.options.fixed_column_width,
+                    y: this.options.header_height + this.options.padding / 2 + (row_height) * r,
+                    width: this.options.fixed_column_width,
+                    height: row_height,
+                    append_to: cell_wrapper,
+                });
+
+                const cell = this.cells.find(t => t.row === this.options.rows[r] && t.column === this.options.fixed_columns[c]);
+                if (cell) {
+                    createSVG('text', {
+                        x: this.options.fixed_column_width / 2 + c * this.options.fixed_column_width,
+                        y: 15 + this.options.header_height + this.options.padding + r * row_height,
+                        innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
+                        class: 'lower-text',
+                        append_to: cell_wrapper
+                    });
+                }
+            }
         }
     }
 
@@ -833,9 +860,10 @@ export default class Gantt {
     }
 
     bind_cell_events() {
-        $.on(this.$column_svg, 'dblclick', '.grid-cell', (e) => {
-            const data_row_id = e.target.getAttribute('data-row-id');
-            const data_col_id = e.target.getAttribute('data-col-id');
+        $.on(this.$column_svg, 'dblclick', '.cell-wrapper', (e) => {
+            const cell_wrapper = $.closest('.cell-wrapper', e.target);
+            const data_row_id = cell_wrapper.getAttribute('data-row-id');
+            const data_col_id = cell_wrapper.getAttribute('data-col-id');
             this.trigger_event('cell_dblclick', [data_row_id, data_col_id]);
         });
     }

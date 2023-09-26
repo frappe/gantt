@@ -109,7 +109,7 @@
             },
         ]
         var gantt_chart = new Gantt(".gantt-target", tasks, cells, {
-            on_dblclick: task => {
+            on_task_dblclick: task => {
                 console.log(task);
             },
             on_grid_dblclick: row_id => {
