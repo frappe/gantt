@@ -60,7 +60,6 @@ export default class Gantt {
             this.$column_svg = createSVG('svg', {
                 append_to: wrapper_element,
                 class: 'gantt',
-                width: 0,
                 id: 'columnSvg'
             });
         } else {
@@ -98,7 +97,7 @@ export default class Gantt {
         const default_options = {
             header_height: 50,
             column_width: 30,
-            column_width_for_columns: 120,
+            fixed_column_width: 120,
             step: 24,
             view_modes: [...Object.values(VIEW_MODE)],
             bar_height: 20,
@@ -107,11 +106,10 @@ export default class Gantt {
             padding: 18,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
-            popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
             sortable: false,
-            columns: [],
+            fixed_columns: [],
             rows: [],
         };
         this.options = Object.assign({}, default_options, options);
@@ -298,13 +296,15 @@ export default class Gantt {
     }
 
     bind_events() {
-        this.bind_grid_click();
+        this.bind_grid_events();
+        this.bind_cell_events();
         this.bind_bar_events();
     }
 
     render() {
         this.clear();
         this.setup_layers();
+        this.make_fixed_columns();
         this.make_grid();
         this.make_dates();
         this.make_bars();
@@ -316,34 +316,27 @@ export default class Gantt {
 
     setup_layers() {
         this.layers = {};
-        this.column_layers = {};
+        this.fixed_col_layers = {};
         const layers = ['grid', 'arrow', 'progress', 'bar', 'details', 'date'];
-        // const column_layers = ['grid', 'arrow', 'progress', 'bar', 'details', 'date'];
+        const fixed_col_layers = ['grid', 'cell', 'header'];
         // make group layers
         for (let layer of layers) {
             this.layers[layer] = createSVG('g', {
                 class: layer,
                 append_to: this.$svg,
             });
-            this.column_layers[layer] = createSVG('g', {
+        }
+        for (let layer of fixed_col_layers) {
+            this.fixed_col_layers[layer] = createSVG('g', {
                 class: layer,
                 append_to: this.$column_svg
             });
         }
     }
 
-    make_grid() {
-        this.make_grid_background();
-        this.make_grid_rows();
-        this.make_grid_header();
-        this.make_columns_grid_header();
-        this.make_grid_ticks();
-        this.make_grid_highlights();
-    }
-
-    make_grid_background() {
-        const grid_width = this.dates.length * this.options.column_width;
-        const column_grid_width = this.options.columns.length * this.options.column_width_for_columns;
+    make_fixed_columns() {
+        // make_grid_background
+        const column_grid_width = this.options.fixed_columns.length * this.options.fixed_column_width;
         const grid_height =
             this.options.header_height +
             this.options.padding +
@@ -356,36 +349,19 @@ export default class Gantt {
             width: column_grid_width,
             height: grid_height,
             class: 'grid-background',
-            append_to: this.layers.grid,
-        });
-        createSVG('rect', {
-            x: 0,
-            y: 0,
-            width: grid_width,
-            height: grid_height,
-            class: 'grid-background',
-            append_to: this.column_layers.grid
-        });
-
-        $.attr(this.$svg, {
-            height: grid_height,
-            width: '100%',
+            append_to: this.fixed_col_layers.grid
         });
         $.attr(this.$column_svg, {
             height: grid_height + 30,
-            width: column_grid_width
+            width: column_grid_width,
         });
-    }
 
-    make_grid_rows() {
-        const rows_layer = createSVG('g', { append_to: this.layers.grid });
-        const lines_layer = createSVG('g', { append_to: this.layers.grid });
-        const columns_rows_layer = createSVG('g', { append_to: this.column_layers.grid });
-        const columns_lines_layer = createSVG('g', { append_to: this.column_layers.grid });
+        // make_grid_rows // praticamente è identica, cambia solo il layer e la width
+        const rows_layer = createSVG('g', { append_to: this.fixed_col_layers.grid });
+        const lines_layer = createSVG('g', { append_to: this.fixed_col_layers.grid });
 
-        const row_width = this.dates.length * this.options.column_width;
+        const row_width = this.options.fixed_columns.length * this.options.fixed_column_width;
         const row_height = this.options.bar_height + this.options.padding;
-        const column_row_width = this.options.columns.length * this.options.column_width_for_columns;
 
         let row_y = this.options.header_height + this.options.padding / 2;
 
@@ -399,14 +375,6 @@ export default class Gantt {
                 'data-id': row,
                 append_to: rows_layer,
             });
-            createSVG('rect', {
-                x: 0,
-                y: row_y,
-                width: column_row_width,
-                height: row_height,
-                class: 'grid-row',
-                append_to: columns_rows_layer
-            });
 
             createSVG('line', {
                 x1: 0,
@@ -417,13 +385,125 @@ export default class Gantt {
                 append_to: lines_layer,
             });
 
+            row_y += this.options.bar_height + this.options.padding;
+        }
+
+
+        // for (let i = 0; i < this.options.fixed_columns.length; i++) {
+        //     createSVG('rect', {
+        //         x: this.options.fixed_column_width * i,
+        //         y: row_y,
+        //         width: this.options.fixed_column_width,
+        //         height: row_height,
+        //         class: 'grid-cell',
+        //         'data-row-id': row,
+        //         'data-col-id': this.options.fixed_columns[i],
+        //         append_to: g
+        //     });
+        // }
+
+        // make_grid_header
+        const header_width = this.options.fixed_columns.length * this.options.fixed_column_width;
+        const header_height = this.options.header_height + 10;
+        createSVG('rect', {
+            x: 0,
+            y: 0,
+            width: header_width,
+            height: header_height,
+            class: 'grid-header',
+            append_to: this.fixed_col_layers.header
+        });
+
+        // make_dates -> header
+        const pos_y = this.options.header_height;
+        let pos_x = this.options.fixed_column_width / 2;
+        for (let column of this.options.fixed_columns) {
+            createSVG('text', {
+                x: pos_x,
+                y: pos_y,
+                innerHTML: column,
+                class: 'lower-text',
+                append_to: this.fixed_col_layers.header
+            });
+            pos_x += (pos_x * 2);
+        }
+
+        // make_bars
+        for (let cell of this.cells) {
+            let index = this.options.rows.indexOf(cell.row);
+            let posY = 15 + this.options.header_height + this.options.padding + index * (this.options.bar_height + this.options.padding);
+
+            // TODO width of column
+            index = this.options.fixed_columns.indexOf(cell.column);
+            let posX = this.options.fixed_column_width / 2 + index * this.options.fixed_column_width;
+            createSVG('text', {
+                x: posX,
+                y: posY,
+                innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
+                class: 'lower-text',
+                append_to: this.fixed_col_layers.cell
+            });
+        }
+    }
+
+    make_grid() {
+        this.make_grid_background();
+        this.make_grid_rows();
+        this.make_grid_header();
+        this.make_grid_ticks();
+        this.make_grid_highlights();
+    }
+
+    make_grid_background() {
+        const grid_width = this.dates.length * this.options.column_width;
+        const grid_height =
+            this.options.header_height +
+            this.options.padding +
+            (this.options.bar_height + this.options.padding) *
+            this.options.rows.length;
+
+        createSVG('rect', {
+            x: 0,
+            y: 0,
+            width: grid_width,
+            height: grid_height,
+            class: 'grid-background',
+            append_to: this.layers.grid,
+        });
+
+        $.attr(this.$svg, {
+            height: grid_height,
+            width: '100%',
+        });
+    }
+
+    make_grid_rows() {
+        const rows_layer = createSVG('g', { append_to: this.layers.grid });
+        const lines_layer = createSVG('g', { append_to: this.layers.grid });
+
+        const row_width = this.dates.length * this.options.column_width;
+        const row_height = this.options.bar_height + this.options.padding;
+
+        let row_y = this.options.header_height + this.options.padding / 2;
+
+        for (let row of this.options.rows) {
+            createSVG('rect', {
+                x: 0,
+                y: row_y,
+                width: row_width,
+                height: row_height,
+                class: 'grid-row',
+                'data-id': row,
+                append_to: rows_layer,
+            });
+
             createSVG('line', {
                 x1: 0,
                 y1: row_y + row_height,
-                x2: column_row_width,
+                x2: row_width,
                 y2: row_y + row_height,
                 class: 'row-line',
-                append_to: columns_lines_layer
+                append_to: lines_layer,
             });
 
             row_y += this.options.bar_height + this.options.padding;
@@ -440,18 +520,6 @@ export default class Gantt {
             height: header_height,
             class: 'grid-header',
             append_to: this.layers.date,
-        });
-    }
-    make_columns_grid_header() {
-        const header_width = this.options.columns.length * this.options.column_width_for_columns;
-        const header_height = this.options.header_height + 10;
-        createSVG('rect', {
-            x: 0,
-            y: 0,
-            width: header_width,
-            height: header_height,
-            class: 'grid-header',
-            append_to: this.column_layers.date
         });
     }
 
@@ -551,34 +619,6 @@ export default class Gantt {
                     $upper_text.remove();
                 }
             }
-        }
-        let x = 60;
-        for (let column of this.options.columns) {
-            createSVG('text', {
-                x: x,
-                y: 50,
-                innerHTML: column,
-                class: 'lower-text',
-                append_to: this.column_layers.date
-            });
-            x += 120;
-        }
-
-        // questo secondo me è da spostare
-        for (let cell of this.cells) {
-            let index = this.options.rows.indexOf(cell.row);
-            let posY = 15 + this.options.header_height + this.options.padding + index * (this.options.bar_height + this.options.padding);
-
-            // TODO width of column
-            index = this.options.columns.indexOf(cell.column);
-            let posX = 60 + index * 120;
-            createSVG('text', {
-                x: posX,
-                y: posY,
-                innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
-                class: 'lower-text',
-                append_to: this.column_layers.bar
-            });
         }
     }
 
@@ -774,16 +814,30 @@ export default class Gantt {
         parent_element.scrollLeft = scroll_pos;
     }
 
-    bind_grid_click() {
-        $.on(
-            this.$svg,
-            this.options.popup_trigger,
-            '.grid-row, .grid-header',
-            () => {
-                this.unselect_all();
-                this.hide_popup();
-            }
-        );
+    bind_grid_events() {
+        $.on(this.$svg, 'click', '.grid-row, .grid-header', () => {
+            this.unselect_all();
+            this.hide_popup();
+        });
+
+        $.on(this.$svg, 'dblclick', '.grid-row', (e) => {
+            const data_id = e.target.getAttribute('data-id');
+            this.trigger_event('grid_dblclick', [data_id]);
+        });
+
+        $.on(this.$container, 'scroll', e => {
+            this.$column_container.scrollTop = e.currentTarget.scrollTop;
+            this.layers.date.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
+            this.fixed_col_layers.header.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
+        });
+    }
+
+    bind_cell_events() {
+        $.on(this.$column_svg, 'dblclick', '.grid-cell', (e) => {
+            const data_row_id = e.target.getAttribute('data-row-id');
+            const data_col_id = e.target.getAttribute('data-col-id');
+            this.trigger_event('cell_dblclick', [data_row_id, data_col_id]);
+        });
     }
 
     bind_bar_events() {
@@ -918,7 +972,7 @@ export default class Gantt {
             }
         });
 
-        document.addEventListener('mouseup', (e) => {
+        $.on(this.$svg, 'mouseup', (e) => {
             const dy = e.offsetY - y_on_start;
             if (is_dragging || is_resizing_left || is_resizing_right) {
                 bars.forEach((bar) => {
@@ -942,13 +996,6 @@ export default class Gantt {
             is_dragging = false;
             is_resizing_left = false;
             is_resizing_right = false;
-        });
-
-        // TODO anche se non è proprio bar events ma vabbè
-        $.on(this.$container, 'scroll', e => {
-            this.$column_container.scrollTop = e.currentTarget.scrollTop;
-            this.layers.date.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
-            this.column_layers.date.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
         });
 
         this.bind_bar_progress();

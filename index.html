@@ -109,8 +109,14 @@
             },
         ]
         var gantt_chart = new Gantt(".gantt-target", tasks, cells, {
-            on_click: task => {
+            on_dblclick: task => {
                 console.log(task);
+            },
+            on_grid_dblclick: row_id => {
+                console.log(row_id);
+            },
+            on_cell_dblclick: (row_id, col_id) => {
+                console.log(row_id, col_id);
             },
             on_date_change: (task, start, end) => {
                 console.log(task, start, end);
@@ -125,7 +131,7 @@
             language: 'en',
             sortable: true,
             rows: ['machine_1', 'machine_2', 'machine_3', 'machine_4', 'machine_5', 'machine_6', 'machine_7', 'machine_8', 'machine_9', 'machine_10'],
-            columns: ['name', 'description']
+            fixed_columns: ['name', 'description']
         });
         console.log(gantt_chart);
     </script>

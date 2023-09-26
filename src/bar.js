@@ -176,13 +176,23 @@ export default class Bar {
     }
 
     setup_click_event() {
-        $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, (e) => {
-            if (this.action_completed) {
-                // just finished a move action, wait for a few seconds
-                return;
-            }
+        let is_showing_popup = false;
 
-            this.show_popup();
+        $.on(this.group, 'mouseover', (e) => {
+            if (!is_showing_popup) {
+                this.show_popup();
+                is_showing_popup = true;
+            }
+        });
+
+        $.on(this.group, 'mouseleave', (e) => {
+            is_showing_popup = false;
+            this.gantt.hide_popup();
+        });
+
+        $.on(this.group, 'click', (e) => {
+            if (this.action_completed) return;
+
             this.gantt.unselect_all();
             this.group.classList.add('active');
         });
@@ -193,12 +203,14 @@ export default class Bar {
                 return;
             }
 
-            this.gantt.trigger_event('click', [this.task]);
+            this.gantt.trigger_event('dblclick', [this.task]);
         });
     }
 
     show_popup() {
-        if (this.gantt.bar_being_dragged == null) return;
+        // console.log('show');
+        // if (this.gantt.bar_being_dragged == null) return;
+        // se quello aperto è this.$bar allora non fare nulla
 
         const start_date = date_utils.format(
             this.task._start,
