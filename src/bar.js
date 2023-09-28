@@ -69,8 +69,12 @@ export default class Bar {
     draw() {
         this.draw_bar();
         this.draw_progress_bar();
-        this.draw_label();
-        this.draw_resize_handles();
+        if (this.gantt.options.draw_labels){
+            this.draw_label();
+        }
+        if (this.gantt.options.allow_dragging || this.gantt.options.allow_progress_update){
+            this.draw_resize_handles();
+        }
     }
 
     draw_bar() {
@@ -239,7 +243,9 @@ export default class Bar {
         if (width && width >= this.gantt.options.column_width) {
             this.update_attr(bar, 'width', width);
         }
-        this.update_label_position();
+        if (this.gantt.options.draw_labels){
+            this.update_label_position();
+        }
         this.update_handle_position();
         this.update_progressbar_position();
         this.update_arrow_position();
@@ -320,9 +326,8 @@ export default class Bar {
 
     compute_y() {
         return (
-            this.gantt.options.header_height +
-            this.gantt.options.padding +
-            this.task._index * (this.height + this.gantt.options.padding)
+            this.gantt.options.header_height + 10 + this.gantt.options.padding_bar_top +
+            this.task._index * (this.height + this.gantt.options.padding_bar_top + this.gantt.options.padding_bar_bottom)
         );
     }
 

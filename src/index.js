@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import date_utils from './date_utils';
 import { $, createSVG } from './svg_utils';
 import Bar from './bar';
@@ -6,6 +7,12 @@ import Popup from './popup';
 
 import './gantt.scss';
 
+function flip(obj) {
+    const ret = {};
+    Object.keys(obj).forEach(key => ret[obj[key]] = key);
+    return ret;
+}
+
 const VIEW_MODE = {
     QUARTER_DAY: 'Quarter Day',
     HALF_DAY: 'Half Day',
@@ -13,6 +20,15 @@ const VIEW_MODE = {
     WEEK: 'Week',
     MONTH: 'Month',
     YEAR: 'Year',
+};
+
+const VIEW_MODE_PADDING = {
+    QUARTER_DAY: [[-7, 'day'], [7, 'day']],
+    HALF_DAY: [[-7, 'day'], [7, 'day']],
+    DAY: [[-1, 'month'], [1, 'month']],
+    WEEK: [[-1, 'month'], [1, 'month']],
+    MONTH: [[0, 'month'], [1, 'month']],
+    YEAR: [[-2, 'year'], [2, 'year']],
 };
 
 export default class Gantt {
@@ -78,15 +94,24 @@ export default class Gantt {
             column_width: 30,
             step: 24,
             view_modes: [...Object.values(VIEW_MODE)],
+            view_mode_padding: VIEW_MODE_PADDING,
             bar_height: 20,
             bar_corner_radius: 3,
             arrow_curve: 5,
-            padding: 18,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
             language: 'en',
+            allow_dragging: true,
+            allow_progress_update: true,
+            draw_labels: true,
+            show_today_highlight: true,
+            padding_bottom: 5,
+            padding_bar_top: 5,
+            padding_bar_bottom: 5,
+            show_saturday_highlight: false,
+            show_sunday_highlights: false
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -104,7 +129,22 @@ export default class Gantt {
             }
 
             // cache index
-            task._index = i;
+            //task._index = i;
+
+            let useCondensedRows = false
+            if (typeof this.options.use_condensed_rows !== typeof undefined) {
+                useCondensedRows = this.options.use_condensed_rows
+            }
+
+            if (useCondensedRows) {
+                if (typeof task.row_index !== typeof undefined && typeof task.row_index === typeof 2) {
+                    task._index = task.row_index
+                } else {
+                    task._index = i
+                }
+            } else {
+                task._index = i
+            }
 
             // invalid dates
             if (!task.start && !task.end) {
@@ -211,13 +251,19 @@ export default class Gantt {
     setup_gantt_dates() {
         this.gantt_start = this.gantt_end = null;
 
-        for (let task of this.tasks) {
-            // set global start and end date
-            if (!this.gantt_start || task._start < this.gantt_start) {
-                this.gantt_start = task._start;
-            }
-            if (!this.gantt_end || task._end > this.gantt_end) {
-                this.gantt_end = task._end;
+        if (this.tasks.length < 1) {
+            const date_start = new Date()
+            this.gantt_start = `${date_start.getFullYear()}-${(date_start.getMonth() + 1 < 10 ? `0${date_start.getMonth() + 1}` : date_start.getMonth() + 1)}-${date_start.getDate()}`
+            this.gantt_end = `${date_start.getFullYear() + 1}-${(date_start.getMonth() + 1 < 10 ? `0${date_start.getMonth() + 1}` : date_start.getMonth() + 1)}-${date_start.getDate()}`
+        } else {
+            for (let task of this.tasks) {
+                // set global start and end date
+                if (!this.gantt_start || task._start < this.gantt_start) {
+                    this.gantt_start = task._start;
+                }
+                if (!this.gantt_end || task._end > this.gantt_end) {
+                    this.gantt_end = task._end;
+                }
             }
         }
 
@@ -225,19 +271,10 @@ export default class Gantt {
         this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
 
         // add date padding on both sides
-        if (this.view_is([VIEW_MODE.QUARTER_DAY, VIEW_MODE.HALF_DAY])) {
-            this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
-            this.gantt_end = date_utils.add(this.gantt_end, 7, 'day');
-        } else if (this.view_is(VIEW_MODE.MONTH)) {
-            this.gantt_start = date_utils.start_of(this.gantt_start, 'year');
-            this.gantt_end = date_utils.add(this.gantt_end, 1, 'year');
-        } else if (this.view_is(VIEW_MODE.YEAR)) {
-            this.gantt_start = date_utils.add(this.gantt_start, -2, 'year');
-            this.gantt_end = date_utils.add(this.gantt_end, 2, 'year');
-        } else {
-            this.gantt_start = date_utils.add(this.gantt_start, -1, 'month');
-            this.gantt_end = date_utils.add(this.gantt_end, 1, 'month');
-        }
+        const viewKey = flip(VIEW_MODE)[this.options.view_mode]
+        const [padding_start, padding_end] = this.options.view_mode_padding[viewKey]
+        this.gantt_start = date_utils.add(this.gantt_start, ...padding_start);
+        this.gantt_end = date_utils.add(this.gantt_end, ...padding_end);
     }
 
     setup_date_values() {
@@ -294,20 +331,34 @@ export default class Gantt {
     }
 
     make_grid() {
-        this.make_grid_background();
-        this.make_grid_rows();
+
+        let useCondensedRows = false
+        if (typeof this.options.use_condensed_rows !== typeof undefined) {
+            useCondensedRows = this.options.use_condensed_rows
+        }
+        let counter_rows = -1
+        
+        if (useCondensedRows) {
+            //counter_rows = 0
+            const distinctRows = [...new Set(this.tasks.map(a => a.row_index))]
+            counter_rows = distinctRows.length
+        }
+
+        this.make_grid_background(counter_rows);
+        this.make_grid_rows(counter_rows);
         this.make_grid_header();
         this.make_grid_ticks();
         this.make_grid_highlights();
     }
 
-    make_grid_background() {
+    make_grid_background(lenRows) {
+        // @ts-ignore
         const grid_width = this.dates.length * this.options.column_width;
         const grid_height =
             this.options.header_height +
-            this.options.padding +
-            (this.options.bar_height + this.options.padding) *
-                this.tasks.length;
+            this.options.padding_bottom +
+            (this.options.bar_height + this.options.padding_bar_top + this.options.padding_bar_bottom) *
+            (lenRows > -1 ? lenRows : this.tasks.length);
 
         createSVG('rect', {
             x: 0,
@@ -315,25 +366,25 @@ export default class Gantt {
             width: grid_width,
             height: grid_height,
             class: 'grid-background',
+            // @ts-ignore
             append_to: this.layers.grid,
         });
 
         $.attr(this.$svg, {
-            height: grid_height + this.options.padding + 100,
+            height: grid_height + this.options.padding_bottom,
             width: '100%',
         });
     }
 
-    make_grid_rows() {
+    make_grid_rows(lenRows) {
         const rows_layer = createSVG('g', { append_to: this.layers.grid });
         const lines_layer = createSVG('g', { append_to: this.layers.grid });
-
         const row_width = this.dates.length * this.options.column_width;
-        const row_height = this.options.bar_height + this.options.padding;
+        const row_height = this.options.bar_height + this.options.padding_bar_top + this.options.padding_bar_bottom;
 
-        let row_y = this.options.header_height + this.options.padding / 2;
+        let row_y = this.options.header_height + 10;
 
-        for (let task of this.tasks) {
+        [...Array((lenRows > -1 ? lenRows : this.tasks.length))].forEach((e,i) => {
             createSVG('rect', {
                 x: 0,
                 y: row_y,
@@ -352,11 +403,12 @@ export default class Gantt {
                 append_to: lines_layer,
             });
 
-            row_y += this.options.bar_height + this.options.padding;
-        }
+            row_y += this.options.bar_height + this.options.padding_bar_top + this.options.padding_bar_bottom;
+        });
     }
 
     make_grid_header() {
+        // @ts-ignore
         const header_width = this.dates.length * this.options.column_width;
         const header_height = this.options.header_height + 10;
         createSVG('rect', {
@@ -365,17 +417,19 @@ export default class Gantt {
             width: header_width,
             height: header_height,
             class: 'grid-header',
+            // @ts-ignore
             append_to: this.layers.grid,
         });
     }
 
     make_grid_ticks() {
         let tick_x = 0;
-        let tick_y = this.options.header_height + this.options.padding / 2;
+        let tick_y = this.options.header_height / 2;
         let tick_height =
-            (this.options.bar_height + this.options.padding) *
+            (this.options.bar_height + this.options.padding_bar_top + this.options.padding_bar_bottom) *
             this.tasks.length;
 
+        // @ts-ignore
         for (let date of this.dates) {
             let tick_class = 'tick';
             // thick tick for monday
@@ -398,6 +452,7 @@ export default class Gantt {
             createSVG('path', {
                 d: `M ${tick_x} ${tick_y} v ${tick_height}`,
                 class: tick_class,
+                // @ts-ignore
                 append_to: this.layers.grid,
             });
 
@@ -411,32 +466,51 @@ export default class Gantt {
             }
         }
     }
-
     make_grid_highlights() {
-        // highlight today's date
+        // highlight saturday dates
+
         if (this.view_is(VIEW_MODE.DAY)) {
-            const x =
-                (date_utils.diff(date_utils.today(), this.gantt_start, 'hour') /
-                    this.options.step) *
-                this.options.column_width;
-            const y = 0;
+            // highlight today's date
+            if (this.options.show_today_highlight){
+                this.make_highlight_bar(date_utils.today(), 'today-highlight')
+            }
+            // show weekend highlights
+            if (this.options.show_saturday_highlight || this.options.show_sunday_highlights){
+                for (var D = new Date(this.gantt_start); D <= this.gantt_end; D.setDate(D.getDate() + 1)){
+                    if (
+                        (D.getDay() == 0 && this.options.show_sunday_highlights) ||
+                        (D.getDay() == 6 && this.options.show_saturday_highlight)
+                    ){
+                        this.make_highlight_bar(D, 'noneworkingday-highlight')
+                    }
+                }
 
-            const width = this.options.column_width;
-            const height =
-                (this.options.bar_height + this.options.padding) *
-                    this.tasks.length +
-                this.options.header_height +
-                this.options.padding / 2;
+            }
 
-            createSVG('rect', {
-                x,
-                y,
-                width,
-                height,
-                class: 'today-highlight',
-                append_to: this.layers.grid,
-            });
         }
+    }
+
+    make_highlight_bar(the_date, highlight_class){
+        const x = (date_utils.diff(the_date, this.gantt_start, 'hour') /
+            this.options.step) *
+            this.options.column_width;
+        const y = 0;
+
+        const width = this.options.column_width;
+        const height =
+            (this.options.bar_height + this.options.padding_bar_top + this.options.padding_bar_bottom) *
+                this.tasks.length +
+            this.options.header_height + 10;
+
+        createSVG('rect', {
+            x,
+            y,
+            width,
+            height,
+            class: highlight_class,
+            // @ts-ignore
+            append_to: this.layers.grid,
+        });
     }
 
     make_dates() {
@@ -446,6 +520,7 @@ export default class Gantt {
                 y: date.lower_y,
                 innerHTML: date.lower_text,
                 class: 'lower-text',
+                // @ts-ignore
                 append_to: this.layers.date,
             });
 
@@ -455,11 +530,13 @@ export default class Gantt {
                     y: date.upper_y,
                     innerHTML: date.upper_text,
                     class: 'upper-text',
+                    // @ts-ignore
                     append_to: this.layers.date,
                 });
 
                 // remove out-of-bound dates
                 if (
+                    // @ts-ignore
                     $upper_text.getBBox().x2 > this.layers.grid.getBBox().width
                 ) {
                     $upper_text.remove();
@@ -470,6 +547,7 @@ export default class Gantt {
 
     get_dates_to_draw() {
         let last_date = null;
+        // @ts-ignore
         const dates = this.dates.map((date, i) => {
             const d = this.get_date_info(date, last_date, i);
             last_date = date;
@@ -542,10 +620,10 @@ export default class Gantt {
         };
 
         const x_pos = {
-            'Quarter Day_lower': (this.options.column_width * 4) / 2,
-            'Quarter Day_upper': 0,
-            'Half Day_lower': (this.options.column_width * 2) / 2,
-            'Half Day_upper': 0,
+            'Quarter Day_lower': 0,
+            'Quarter Day_upper': this.options.column_width * 4 / 2,
+            'Half Day_lower': 0,
+            'Half Day_upper': this.options.column_width * 2 / 2,
             Day_lower: this.options.column_width / 2,
             Day_upper: (this.options.column_width * 30) / 2,
             Week_lower: 0,
@@ -569,6 +647,7 @@ export default class Gantt {
     make_bars() {
         this.bars = this.tasks.map((task) => {
             const bar = new Bar(this, task);
+            // @ts-ignore
             this.layers.bar.appendChild(bar.group);
             return bar;
         });
@@ -587,6 +666,7 @@ export default class Gantt {
                         this.bars[dependency._index], // from_task
                         this.bars[task._index] // to_task
                     );
+                    // @ts-ignore
                     this.layers.arrow.appendChild(arrow.element);
                     return arrow;
                 })
@@ -608,9 +688,9 @@ export default class Gantt {
 
     set_width() {
         const cur_width = this.$svg.getBoundingClientRect().width;
-        const actual_width = this.$svg
+        const actual_width = this.$svg.querySelector('.grid .grid-row') ? this.$svg
             .querySelector('.grid .grid-row')
-            .getAttribute('width');
+            .getAttribute('width') : 0;
         if (cur_width < actual_width) {
             this.$svg.setAttribute('width', actual_width);
         }
@@ -659,92 +739,97 @@ export default class Gantt {
         function action_in_progress() {
             return is_dragging || is_resizing_left || is_resizing_right;
         }
+        
+        if (this.options.allow_dragging){
+            $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
+                const bar_wrapper = $.closest('.bar-wrapper', element);
 
-        $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
-            const bar_wrapper = $.closest('.bar-wrapper', element);
-
-            if (element.classList.contains('left')) {
-                is_resizing_left = true;
-            } else if (element.classList.contains('right')) {
-                is_resizing_right = true;
-            } else if (element.classList.contains('bar-wrapper')) {
-                is_dragging = true;
-            }
-
-            bar_wrapper.classList.add('active');
-
-            x_on_start = e.offsetX;
-            y_on_start = e.offsetY;
-
-            parent_bar_id = bar_wrapper.getAttribute('data-id');
-            const ids = [
-                parent_bar_id,
-                ...this.get_all_dependent_tasks(parent_bar_id),
-            ];
-            bars = ids.map((id) => this.get_bar(id));
-
-            this.bar_being_dragged = parent_bar_id;
-
-            bars.forEach((bar) => {
-                const $bar = bar.$bar;
-                $bar.ox = $bar.getX();
-                $bar.oy = $bar.getY();
-                $bar.owidth = $bar.getWidth();
-                $bar.finaldx = 0;
-            });
-        });
-
-        $.on(this.$svg, 'mousemove', (e) => {
-            if (!action_in_progress()) return;
-            const dx = e.offsetX - x_on_start;
-            const dy = e.offsetY - y_on_start;
-
-            bars.forEach((bar) => {
-                const $bar = bar.$bar;
-                $bar.finaldx = this.get_snap_position(dx);
-                this.hide_popup();
-                if (is_resizing_left) {
-                    if (parent_bar_id === bar.task.id) {
-                        bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx,
-                            width: $bar.owidth - $bar.finaldx,
-                        });
-                    } else {
-                        bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx,
-                        });
-                    }
-                } else if (is_resizing_right) {
-                    if (parent_bar_id === bar.task.id) {
-                        bar.update_bar_position({
-                            width: $bar.owidth + $bar.finaldx,
-                        });
-                    }
-                } else if (is_dragging) {
-                    bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                if (element.classList.contains('left')) {
+                    is_resizing_left = true;
+                } else if (element.classList.contains('right')) {
+                    is_resizing_right = true;
+                } else if (element.classList.contains('bar-wrapper')) {
+                    is_dragging = true;
                 }
+
+                bar_wrapper.classList.add('active');
+
+                x_on_start = e.offsetX;
+                y_on_start = e.offsetY;
+
+                parent_bar_id = bar_wrapper.getAttribute('data-id');
+                const ids = [
+                    parent_bar_id,
+                    ...this.get_all_dependent_tasks(parent_bar_id),
+                ];
+                bars = ids.map((id) => this.get_bar(id));
+
+                this.bar_being_dragged = parent_bar_id;
+
+                bars.forEach((bar) => {
+                    const $bar = bar.$bar;
+                    $bar.ox = $bar.getX();
+                    $bar.oy = $bar.getY();
+                    $bar.owidth = $bar.getWidth();
+                    $bar.finaldx = 0;
+                });
             });
-        });
 
-        document.addEventListener('mouseup', (e) => {
-            if (is_dragging || is_resizing_left || is_resizing_right) {
-                bars.forEach((bar) => bar.group.classList.remove('active'));
-            }
+            $.on(this.$svg, 'mousemove', (e) => {
+                if (!action_in_progress()) return;
+                const dx = e.offsetX - x_on_start;
+                // @ts-ignore
+                const dy = e.offsetY - y_on_start;
 
-            is_dragging = false;
-            is_resizing_left = false;
-            is_resizing_right = false;
-        });
-
-        $.on(this.$svg, 'mouseup', (e) => {
-            this.bar_being_dragged = null;
-            bars.forEach((bar) => {
-                const $bar = bar.$bar;
-                if (!$bar.finaldx) return;
-                bar.date_changed();
-                bar.set_action_completed();
+                bars.forEach((bar) => {
+                    const $bar = bar.$bar;
+                    $bar.finaldx = this.get_snap_position(dx);
+                    this.hide_popup();
+                    if (is_resizing_left) {
+                        if (parent_bar_id === bar.task.id) {
+                            bar.update_bar_position({
+                                x: $bar.ox + $bar.finaldx,
+                                width: $bar.owidth - $bar.finaldx,
+                            });
+                        } else {
+                            bar.update_bar_position({
+                                x: $bar.ox + $bar.finaldx,
+                            });
+                        }
+                    } else if (is_resizing_right) {
+                        if (parent_bar_id === bar.task.id) {
+                            bar.update_bar_position({
+                                width: $bar.owidth + $bar.finaldx,
+                            });
+                        }
+                    } else if (is_dragging) {
+                        bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                    }
+                });
             });
-        });
+
+            // @ts-ignore
+            document.addEventListener('mouseup', (e) => {
+                if (is_dragging || is_resizing_left || is_resizing_right) {
+                    bars.forEach((bar) => bar.group.classList.remove('active'));
+                }
+
+                is_dragging = false;
+                is_resizing_left = false;
+                is_resizing_right = false;
+            });
+
+            // @ts-ignore
+            $.on(this.$svg, 'mouseup', (e) => {
+                this.bar_being_dragged = null;
+                bars.forEach((bar) => {
+                    const $bar = bar.$bar;
+                    if (!$bar.finaldx) return;
+                    bar.date_changed();
+                    bar.set_action_completed();
+                });
+            });
+        }
 
         this.bind_bar_progress();
     }
@@ -757,48 +842,51 @@ export default class Gantt {
         let $bar_progress = null;
         let $bar = null;
 
-        $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
-            is_resizing = true;
-            x_on_start = e.offsetX;
-            y_on_start = e.offsetY;
+        if (this.options.allow_progress_update){
+            $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
+                is_resizing = true;
+                x_on_start = e.offsetX;
+                y_on_start = e.offsetY;
 
-            const $bar_wrapper = $.closest('.bar-wrapper', handle);
-            const id = $bar_wrapper.getAttribute('data-id');
-            bar = this.get_bar(id);
+                const $bar_wrapper = $.closest('.bar-wrapper', handle);
+                const id = $bar_wrapper.getAttribute('data-id');
+                bar = this.get_bar(id);
 
-            $bar_progress = bar.$bar_progress;
-            $bar = bar.$bar;
+                $bar_progress = bar.$bar_progress;
+                $bar = bar.$bar;
 
-            $bar_progress.finaldx = 0;
-            $bar_progress.owidth = $bar_progress.getWidth();
-            $bar_progress.min_dx = -$bar_progress.getWidth();
-            $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
-        });
+                $bar_progress.finaldx = 0;
+                $bar_progress.owidth = $bar_progress.getWidth();
+                $bar_progress.min_dx = -$bar_progress.getWidth();
+                $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
+            });
 
-        $.on(this.$svg, 'mousemove', (e) => {
-            if (!is_resizing) return;
-            let dx = e.offsetX - x_on_start;
-            let dy = e.offsetY - y_on_start;
+            $.on(this.$svg, 'mousemove', (e) => {
+                if (!is_resizing) return;
+                let dx = e.offsetX - x_on_start;
+                // @ts-ignore
+                let dy = e.offsetY - y_on_start;
 
-            if (dx > $bar_progress.max_dx) {
-                dx = $bar_progress.max_dx;
-            }
-            if (dx < $bar_progress.min_dx) {
-                dx = $bar_progress.min_dx;
-            }
+                if (dx > $bar_progress.max_dx) {
+                    dx = $bar_progress.max_dx;
+                }
+                if (dx < $bar_progress.min_dx) {
+                    dx = $bar_progress.min_dx;
+                }
 
-            const $handle = bar.$handle_progress;
-            $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
-            $.attr($handle, 'points', bar.get_progress_polygon_points());
-            $bar_progress.finaldx = dx;
-        });
+                const $handle = bar.$handle_progress;
+                $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
+                $.attr($handle, 'points', bar.get_progress_polygon_points());
+                $bar_progress.finaldx = dx;
+            });
 
-        $.on(this.$svg, 'mouseup', () => {
-            is_resizing = false;
-            if (!($bar_progress && $bar_progress.finaldx)) return;
-            bar.progress_changed();
-            bar.set_action_completed();
-        });
+            $.on(this.$svg, 'mouseup', () => {
+                is_resizing = false;
+                if (!($bar_progress && $bar_progress.finaldx)) return;
+                bar.progress_changed();
+                bar.set_action_completed();
+            });
+        }
     }
 
     get_all_dependent_tasks(task_id) {
@@ -806,6 +894,7 @@ export default class Gantt {
         let to_process = [task_id];
         while (to_process.length) {
             const deps = to_process.reduce((acc, curr) => {
+                // @ts-ignore
                 acc = acc.concat(this.dependency_map[curr]);
                 return acc;
             }, []);
@@ -907,6 +996,9 @@ export default class Gantt {
      * @memberof Gantt
      */
     get_oldest_starting_date() {
+        if (this.tasks.length === 0) {
+            return this.gantt_start
+        }
         return this.tasks
             .map((task) => task._start)
             .reduce((prev_date, cur_date) =>
@@ -921,6 +1013,16 @@ export default class Gantt {
      */
     clear() {
         this.$svg.innerHTML = '';
+    }
+
+    JumpToToday(Animate = false) {
+        if (Animate){
+            // @ts-ignore
+            document.querySelector('.today-highlight').scrollIntoView({behavior: 'smooth', inline: 'center'});
+        } else {
+            // @ts-ignore
+            document.querySelector('.today-highlight').scrollIntoView({inline: 'center'});
+        }
     }
 }
 
