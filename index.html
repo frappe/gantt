@@ -30,49 +30,49 @@
 	</div>
 	<script>
 		var tasks = [
-			{
-                start: '2023-09-21 00',
-                end: '2023-09-21 12',
-                name: 'Task 0',
-                id: "Task 0",
-                progress: 100,
-            },
-            {
-                start: '2023-09-21 12',
-                end: '2023-09-21 14',
-                name: 'driving 1',
-                id: "Task 1",
-                progress: 100,
-                dependencies: 'Task 0',
-				row_index: 1
-            },
-            {
-                start: '2023-09-21 09',
-                end: '2023-09-21 12',
-                name: 'site 2',
-                id: "Task 2",
-                progress: 100,
-                dependencies: 'Task 1',
-				row_index: 2
-            },
-			{
-                start: '2023-09-21 09',
-                end: '2023-09-21 20',
-                name: 'site 3',
-                id: "Task 3",
-                progress: 100,
-                dependencies: '',
-				row_index: 2
-            },
-            {
-                start: '2023-09-22 14',
-                end: '2023-09-22 20',
-                name: 'Driving 4',
-                id: "Task 4",
-                progress: 100,
-                dependencies: '',
-				row_index: 1
-            }
+			// {
+            //     start: '2023-09-21 00',
+            //     end: '2023-09-21 12',
+            //     name: 'Task 0',
+            //     id: "Task 0",
+            //     progress: 100,
+            // },
+            // {
+            //     start: '2023-09-21 12',
+            //     end: '2023-09-21 14',
+            //     name: 'driving 1',
+            //     id: "Task 1",
+            //     progress: 100,
+            //     dependencies: 'Task 0',
+			// 	row_index: 1
+            // },
+            // {
+            //     start: '2023-09-21 09',
+            //     end: '2023-09-21 12',
+            //     name: 'site 2',
+            //     id: "Task 2",
+            //     progress: 100,
+            //     dependencies: 'Task 1',
+			// 	row_index: 2
+            // },
+			// {
+            //     start: '2023-09-21 09',
+            //     end: '2023-09-21 20',
+            //     name: 'site 3',
+            //     id: "Task 3",
+            //     progress: 100,
+            //     dependencies: '',
+			// 	row_index: 2
+            // },
+            // {
+            //     start: '2023-09-22 14',
+            //     end: '2023-09-22 20',
+            //     name: 'Driving 4',
+            //     id: "Task 4",
+            //     progress: 100,
+            //     dependencies: '',
+			// 	row_index: 1
+            // }
 		]
 		var gantt_chart = new Gantt(".gantt-target", tasks, {
 			on_click: task => {

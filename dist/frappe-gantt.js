@@ -170,6 +170,8 @@ var Gantt = (function () {
                 return scores[_scale] <= max_score;
             }
 
+            date = new Date(date);
+
             const vals = [
                 date.getFullYear(),
                 should_reset(YEAR) ? 0 : date.getMonth(),
@@ -1190,13 +1192,19 @@ var Gantt = (function () {
         setup_gantt_dates() {
             this.gantt_start = this.gantt_end = null;
 
-            for (let task of this.tasks) {
-                // set global start and end date
-                if (!this.gantt_start || task._start < this.gantt_start) {
-                    this.gantt_start = task._start;
-                }
-                if (!this.gantt_end || task._end > this.gantt_end) {
-                    this.gantt_end = task._end;
+            if (this.tasks.length < 1) {
+                const date_start = new Date();
+                this.gantt_start = `${date_start.getFullYear()}-${(date_start.getMonth() + 1 < 10 ? `0${date_start.getMonth() + 1}` : date_start.getMonth() + 1)}-${date_start.getDate()}`;
+                this.gantt_end = `${date_start.getFullYear() + 1}-${(date_start.getMonth() + 1 < 10 ? `0${date_start.getMonth() + 1}` : date_start.getMonth() + 1)}-${date_start.getDate()}`;
+            } else {
+                for (let task of this.tasks) {
+                    // set global start and end date
+                    if (!this.gantt_start || task._start < this.gantt_start) {
+                        this.gantt_start = task._start;
+                    }
+                    if (!this.gantt_end || task._end > this.gantt_end) {
+                        this.gantt_end = task._end;
+                    }
                 }
             }
 
@@ -1310,7 +1318,6 @@ var Gantt = (function () {
         }
 
         make_grid_rows(lenRows) {
-            console.log("🚀 ~ file: index.js:370 ~ Gantt ~ make_grid_rows ~ lenRows:", lenRows);
             const rows_layer = createSVG('g', { append_to: this.layers.grid });
             const lines_layer = createSVG('g', { append_to: this.layers.grid });
             const row_width = this.dates.length * this.options.column_width;
@@ -1622,9 +1629,9 @@ var Gantt = (function () {
 
         set_width() {
             const cur_width = this.$svg.getBoundingClientRect().width;
-            const actual_width = this.$svg
+            const actual_width = this.$svg.querySelector('.grid .grid-row') ? this.$svg
                 .querySelector('.grid .grid-row')
-                .getAttribute('width');
+                .getAttribute('width') : 0;
             if (cur_width < actual_width) {
                 this.$svg.setAttribute('width', actual_width);
             }
@@ -1930,6 +1937,9 @@ var Gantt = (function () {
          * @memberof Gantt
          */
         get_oldest_starting_date() {
+            if (this.tasks.length === 0) {
+                return this.gantt_start
+            }
             return this.tasks
                 .map((task) => task._start)
                 .reduce((prev_date, cur_date) =>

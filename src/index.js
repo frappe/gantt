@@ -251,13 +251,19 @@ export default class Gantt {
     setup_gantt_dates() {
         this.gantt_start = this.gantt_end = null;
 
-        for (let task of this.tasks) {
-            // set global start and end date
-            if (!this.gantt_start || task._start < this.gantt_start) {
-                this.gantt_start = task._start;
-            }
-            if (!this.gantt_end || task._end > this.gantt_end) {
-                this.gantt_end = task._end;
+        if (this.tasks.length < 1) {
+            const date_start = new Date()
+            this.gantt_start = `${date_start.getFullYear()}-${(date_start.getMonth() + 1 < 10 ? `0${date_start.getMonth() + 1}` : date_start.getMonth() + 1)}-${date_start.getDate()}`
+            this.gantt_end = `${date_start.getFullYear() + 1}-${(date_start.getMonth() + 1 < 10 ? `0${date_start.getMonth() + 1}` : date_start.getMonth() + 1)}-${date_start.getDate()}`
+        } else {
+            for (let task of this.tasks) {
+                // set global start and end date
+                if (!this.gantt_start || task._start < this.gantt_start) {
+                    this.gantt_start = task._start;
+                }
+                if (!this.gantt_end || task._end > this.gantt_end) {
+                    this.gantt_end = task._end;
+                }
             }
         }
 
@@ -682,9 +688,9 @@ export default class Gantt {
 
     set_width() {
         const cur_width = this.$svg.getBoundingClientRect().width;
-        const actual_width = this.$svg
+        const actual_width = this.$svg.querySelector('.grid .grid-row') ? this.$svg
             .querySelector('.grid .grid-row')
-            .getAttribute('width');
+            .getAttribute('width') : 0;
         if (cur_width < actual_width) {
             this.$svg.setAttribute('width', actual_width);
         }
@@ -990,6 +996,9 @@ export default class Gantt {
      * @memberof Gantt
      */
     get_oldest_starting_date() {
+        if (this.tasks.length === 0) {
+            return this.gantt_start
+        }
         return this.tasks
             .map((task) => task._start)
             .reduce((prev_date, cur_date) =>
