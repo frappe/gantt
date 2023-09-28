@@ -371,7 +371,6 @@ export default class Gantt {
     }
 
     make_grid_rows(lenRows) {
-        console.log("🚀 ~ file: index.js:370 ~ Gantt ~ make_grid_rows ~ lenRows:", lenRows)
         const rows_layer = createSVG('g', { append_to: this.layers.grid });
         const lines_layer = createSVG('g', { append_to: this.layers.grid });
         const row_width = this.dates.length * this.options.column_width;
