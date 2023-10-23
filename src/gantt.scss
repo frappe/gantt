@@ -12,10 +12,10 @@ $handle-color: #ddd !default;
 
 .gantt {
 	.grid-background {
-		fill: none;
+		fill: #000;
 	}
 	.grid-header {
-		fill: #ffffff;
+		fill: #fff;
 		stroke: $border-color;
 		stroke-width: 1.4;
 	}

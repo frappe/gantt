@@ -2,12 +2,114 @@ var Gantt = (function () {
     'use strict';
 
     const YEAR = 'year';
+    const QUARTER = 'quarter';
     const MONTH = 'month';
     const DAY = 'day';
     const HOUR = 'hour';
     const MINUTE = 'minute';
     const SECOND = 'second';
     const MILLISECOND = 'millisecond';
+
+    const month_names = {
+        en: [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
+        ],
+        es: [
+            'Enero',
+            'Febrero',
+            'Marzo',
+            'Abril',
+            'Mayo',
+            'Junio',
+            'Julio',
+            'Agosto',
+            'Septiembre',
+            'Octubre',
+            'Noviembre',
+            'Diciembre',
+        ],
+        ru: [
+            'Январь',
+            'Февраль',
+            'Март',
+            'Апрель',
+            'Май',
+            'Июнь',
+            'Июль',
+            'Август',
+            'Сентябрь',
+            'Октябрь',
+            'Ноябрь',
+            'Декабрь',
+        ],
+        ptBr: [
+            'Janeiro',
+            'Fevereiro',
+            'Março',
+            'Abril',
+            'Maio',
+            'Junho',
+            'Julho',
+            'Agosto',
+            'Setembro',
+            'Outubro',
+            'Novembro',
+            'Dezembro',
+        ],
+        fr: [
+            'Janvier',
+            'Février',
+            'Mars',
+            'Avril',
+            'Mai',
+            'Juin',
+            'Juillet',
+            'Août',
+            'Septembre',
+            'Octobre',
+            'Novembre',
+            'Décembre',
+        ],
+        tr: [
+            'Ocak',
+            'Şubat',
+            'Mart',
+            'Nisan',
+            'Mayıs',
+            'Haziran',
+            'Temmuz',
+            'Ağustos',
+            'Eylül',
+            'Ekim',
+            'Kasım',
+            'Aralık',
+        ],
+        zh: [
+            '一月',
+            '二月',
+            '三月',
+            '四月',
+            '五月',
+            '六月',
+            '七月',
+            '八月',
+            '九月',
+            '十月',
+            '十一月',
+            '十二月',
+        ],
+    };
 
     var date_utils = {
         parse(date, date_separator = '-', time_separator = /[.:]/) {
@@ -63,15 +165,13 @@ var Gantt = (function () {
         },
 
         format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
-            const dateTimeFormat = new Intl.DateTimeFormat(lang, {
-                month: 'long'
-            });
-            const month_name = dateTimeFormat.format(date);
-            const month_name_capitalized =
-                month_name.charAt(0).toUpperCase() + month_name.slice(1);
-
-            const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
+            const values = this.get_date_values(date).map((d) => padStart(d, 2, 0));
+            let quarter, year;
+            quarter =  Math.ceil((padStart(+values[1] + 2, 2, 0)) / 3);
+            year = values[0]
+            if(quarter > 4){ quarter = Math.floor(quarter / 4); year = parseInt(year) + 1;}
             const format_map = {
+                QQ: 'Q' +  + quarter + '-' + year.toString().substr(-2),
                 YYYY: values[0],
                 MM: padStart(+values[1] + 1, 2, 0),
                 DD: values[2],
@@ -80,8 +180,8 @@ var Gantt = (function () {
                 ss: values[5],
                 SSS: values[6],
                 D: values[2],
-                MMMM: month_name_capitalized,
-                MMM: month_name_capitalized,
+                MMMM: month_names[lang][+values[1]],
+                MMM: month_names[lang][+values[1]],
             };
 
             let str = format_string;
@@ -104,7 +204,7 @@ var Gantt = (function () {
         },
 
         diff(date_a, date_b, scale = DAY) {
-            let milliseconds, seconds, hours, minutes, days, months, years;
+            let milliseconds, seconds, hours, minutes, days, months, quarters, years;
 
             milliseconds = date_a - date_b;
             seconds = milliseconds / 1000;
@@ -112,6 +212,7 @@ var Gantt = (function () {
             hours = minutes / 60;
             days = hours / 24;
             months = days / 30;
+            quarters = months / 3;
             years = months / 12;
 
             if (!scale.endsWith('s')) {
@@ -126,6 +227,7 @@ var Gantt = (function () {
                     hours,
                     days,
                     months,
+                    quarters,
                     years,
                 }[scale]
             );
@@ -156,7 +258,8 @@ var Gantt = (function () {
 
         start_of(date, scale) {
             const scores = {
-                [YEAR]: 6,
+                [YEAR]: 7,
+                [QUARTER]: 6,
                 [MONTH]: 5,
                 [DAY]: 4,
                 [HOUR]: 3,
@@ -173,6 +276,7 @@ var Gantt = (function () {
             const vals = [
                 date.getFullYear(),
                 should_reset(YEAR) ? 0 : date.getMonth(),
+                should_reset(QUARTER) ? 0 : Math.ceil((date.getMonth() + 1) / 3),
                 should_reset(MONTH) ? 1 : date.getDate(),
                 should_reset(DAY) ? 0 : date.getHours(),
                 should_reset(HOUR) ? 0 : date.getMinutes(),
@@ -713,7 +817,7 @@ var Gantt = (function () {
                     (rem < this.gantt.options.column_width / 60
                         ? 0
                         : this.gantt.options.column_width / 30);
-            } else {
+            }   else {
                 rem = dx % this.gantt.options.column_width;
                 position =
                     odx -
@@ -734,7 +838,6 @@ var Gantt = (function () {
         }
 
         update_progressbar_position() {
-            if (this.invalid) return;
             this.$bar_progress.setAttribute('x', this.$bar.getX());
             this.$bar_progress.setAttribute(
                 'width',
@@ -756,7 +859,6 @@ var Gantt = (function () {
         }
 
         update_handle_position() {
-            if (this.invalid) return;
             const bar = this.$bar;
             this.handle_group
                 .querySelector('.handle.left')
@@ -948,6 +1050,7 @@ var Gantt = (function () {
         DAY: 'Day',
         WEEK: 'Week',
         MONTH: 'Month',
+        QUARTER: 'Quarter',
         YEAR: 'Year',
     };
 
@@ -1133,6 +1236,9 @@ var Gantt = (function () {
             } else if (view_mode === VIEW_MODE.MONTH) {
                 this.options.step = 24 * 30;
                 this.options.column_width = 120;
+            } else if (view_mode === VIEW_MODE.QUARTER) {
+                this.options.step = 24 * (365 / 3);
+                this.options.column_width = 50;
             } else if (view_mode === VIEW_MODE.YEAR) {
                 this.options.step = 24 * 365;
                 this.options.column_width = 120;
@@ -1327,7 +1433,18 @@ var Gantt = (function () {
                     tick_class += ' thick';
                 }
                 // thick ticks for quarters
-                if (this.view_is(VIEW_MODE.MONTH) && date.getMonth() % 3 === 0) {
+                if (
+                    this.view_is(VIEW_MODE.MONTH) &&
+                    (date.getMonth() + 1) % 3 === 0
+                ) {
+                    tick_class += ' thick';
+                }
+
+                 // thick ticks for quarters
+                if (
+                    this.view_is(VIEW_MODE.QUARTER) &&
+                    (date.getMonth() + 1) % 3 === 0
+                ) {
                     tick_class += ' thick';
                 }
 
@@ -1438,6 +1555,7 @@ var Gantt = (function () {
                         ? date_utils.format(date, 'D MMM', this.options.language)
                         : date_utils.format(date, 'D', this.options.language),
                 Month_lower: date_utils.format(date, 'MMMM', this.options.language),
+                Quarter_lower: date_utils.format(date, 'QQ', this.options.language),
                 Year_lower: date_utils.format(date, 'YYYY', this.options.language),
                 'Quarter Day_upper':
                     date.getDate() !== last_date.getDate()
@@ -1488,6 +1606,8 @@ var Gantt = (function () {
                 Week_upper: (this.options.column_width * 4) / 2,
                 Month_lower: this.options.column_width / 2,
                 Month_upper: (this.options.column_width * 12) / 2,
+                Quarter_lower: this.options.column_width / 2,
+                Quarter_upper: (this.options.column_width * 30) / 2,
                 Year_lower: this.options.column_width / 2,
                 Year_upper: (this.options.column_width * 30) / 2,
             };

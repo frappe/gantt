@@ -1,4 +1,5 @@
 const YEAR = 'year';
+const QUARTER = 'quarter';
 const MONTH = 'month';
 const DAY = 'day';
 const HOUR = 'hour';
@@ -101,7 +102,7 @@ export default {
     },
 
     diff(date_a, date_b, scale = DAY) {
-        let milliseconds, seconds, hours, minutes, days, months, years;
+        let milliseconds, seconds, hours, minutes, days, months, quarters, years;
 
         milliseconds = date_a - date_b;
         seconds = milliseconds / 1000;
@@ -110,6 +111,7 @@ export default {
         days = hours / 24;
         months = days / 30;
         years = months / 12;
+        quarters = months / 4;
 
         if (!scale.endsWith('s')) {
             scale += 's';
@@ -123,6 +125,7 @@ export default {
                 hours,
                 days,
                 months,
+                quarters,
                 years,
             }[scale]
         );
@@ -141,6 +144,7 @@ export default {
         qty = parseInt(qty, 10);
         const vals = [
             date.getFullYear() + (scale === YEAR ? qty : 0),
+            date.getMonth() + (scale === QUARTER ? qty : 0),
             date.getMonth() + (scale === MONTH ? qty : 0),
             date.getDate() + (scale === DAY ? qty : 0),
             date.getHours() + (scale === HOUR ? qty : 0),
@@ -153,6 +157,7 @@ export default {
 
     start_of(date, scale) {
         const scores = {
+            [QUARTER]: 7,
             [YEAR]: 6,
             [MONTH]: 5,
             [DAY]: 4,
@@ -170,6 +175,7 @@ export default {
         const vals = [
             date.getFullYear(),
             should_reset(YEAR) ? 0 : date.getMonth(),
+            should_reset(QUARTER) ? 0 : date.getMonth(),
             should_reset(MONTH) ? 1 : date.getDate(),
             should_reset(DAY) ? 0 : date.getHours(),
             should_reset(HOUR) ? 0 : date.getMinutes(),

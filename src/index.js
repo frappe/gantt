@@ -12,6 +12,7 @@ const VIEW_MODE = {
     DAY: 'Day',
     WEEK: 'Week',
     MONTH: 'Month',
+    QUARTER: 'Quarter',
     YEAR: 'Year',
 };
 
@@ -200,6 +201,9 @@ export default class Gantt {
         } else if (view_mode === VIEW_MODE.YEAR) {
             this.options.step = 24 * 365;
             this.options.column_width = 120;
+        } else if (view_mode === VIEW_MODE.QUARTER) {
+            this.options.step = 24 * 90;
+            this.options.column_width = 120;
         }
     }
 
@@ -234,6 +238,9 @@ export default class Gantt {
         } else if (this.view_is(VIEW_MODE.YEAR)) {
             this.gantt_start = date_utils.add(this.gantt_start, -2, 'year');
             this.gantt_end = date_utils.add(this.gantt_end, 2, 'year');
+        } else if (this.view_is(VIEW_MODE.QUARTER)) {
+            this.gantt_start = date_utils.add(this.gantt_start, -2, 'quarter');
+            this.gantt_end = date_utils.add(this.gantt_end, 2, 'quarter');
         } else {
             this.gantt_start = date_utils.add(this.gantt_start, -1, 'month');
             this.gantt_end = date_utils.add(this.gantt_end, 1, 'month');
@@ -252,7 +259,10 @@ export default class Gantt {
                     cur_date = date_utils.add(cur_date, 1, 'year');
                 } else if (this.view_is(VIEW_MODE.MONTH)) {
                     cur_date = date_utils.add(cur_date, 1, 'month');
-                } else {
+
+                } else if (this.view_is(VIEW_MODE.QUARTER)) {
+                    cur_date = date_utils.add(cur_date, 1, 'quarter');
+                }  else {
                     cur_date = date_utils.add(
                         cur_date,
                         this.options.step,
@@ -395,6 +405,11 @@ export default class Gantt {
                 tick_class += ' thick';
             }
 
+              // thick ticks for quarters
+            if (this.view_is(VIEW_MODE.QUARTER) && date.getMonth() % 3 === 0) {
+                tick_class += ' thick';
+            }
+
             createSVG('path', {
                 d: `M ${tick_x} ${tick_y} v ${tick_height}`,
                 class: tick_class,
@@ -501,6 +516,7 @@ export default class Gantt {
                 date.getMonth() !== last_date.getMonth()
                     ? date_utils.format(date, 'D MMM', this.options.language)
                     : date_utils.format(date, 'D', this.options.language),
+            Quarter_lower: date_utils.format(date, 'MMMM', this.options.language),
             Month_lower: date_utils.format(date, 'MMMM', this.options.language),
             Year_lower: date_utils.format(date, 'YYYY', this.options.language),
             'Quarter Day_upper':
@@ -550,6 +566,8 @@ export default class Gantt {
             Day_upper: (this.options.column_width * 30) / 2,
             Week_lower: 0,
             Week_upper: (this.options.column_width * 4) / 2,
+            Quarter_lower: this.options.column_width / 2,
+            Quarter_upper: (this.options.column_width * 12) / 2,
             Month_lower: this.options.column_width / 2,
             Month_upper: (this.options.column_width * 12) / 2,
             Year_lower: this.options.column_width / 2,
