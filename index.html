@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Simple Gantt</title>
+    <title>Simple Scheduler</title>
     <style>
         body {
             font-family: sans-serif;
@@ -16,7 +16,7 @@
         }
 
         /* custom class */
-        .gantt .bar-milestone .bar {
+        .scheduler .bar-milestone .bar {
             fill: tomato;
         }
 
@@ -24,14 +24,14 @@
             text-align: center;
         }
     </style>
-    <link rel="stylesheet" href="dist/frappe-gantt.css" />
-    <script src="dist/frappe-gantt.js"></script>
+    <link rel="stylesheet" href="dist/horsa-scheduler.css" />
+    <script src="dist/horsa-scheduler.js"></script>
 </head>
 
 <body>
     <div class="container">
-        <h2 class="heading">Interactive Gantt Chart entirely made in SVG!</h2>
-        <div class="gantt-target"></div>
+        <h2 class="heading">Interactive Scheduler Chart entirely made in SVG!</h2>
+        <div class="scheduler-target"></div>
     </div>
     <script>
         var tasks = [
@@ -108,7 +108,7 @@
                 value: 'Machine 3 Desc'
             },
         ]
-        var gantt_chart = new Gantt(".gantt-target", tasks, cells, {
+        var scheduler_chart = new Scheduler(".scheduler-target", tasks, cells, {
             on_task_dblclick: task => {
                 console.log(task);
             },
@@ -133,7 +133,7 @@
             rows: ['machine_1', 'machine_2', 'machine_3', 'machine_4', 'machine_5', 'machine_6', 'machine_7', 'machine_8', 'machine_9', 'machine_10'],
             fixed_columns: ['name', 'description']
         });
-        console.log(gantt_chart);
+        console.log(scheduler_chart);
     </script>
 </body>
 

@@ -4,8 +4,8 @@ import { terser } from 'rollup-plugin-terser';
 const dev = {
     input: 'src/index.js',
     output: {
-        name: 'Gantt',
-        file: 'dist/frappe-gantt.js',
+        name: 'Scheduler',
+        file: 'dist/horsa-scheduler.js',
         sourcemap: true,
         format: 'iife',
     },
@@ -18,8 +18,8 @@ const dev = {
 const prod = {
     input: 'src/index.js',
     output: {
-        name: 'Gantt',
-        file: 'dist/frappe-gantt.min.js',
+        name: 'Scheduler',
+        file: 'dist/horsa-scheduler.min.js',
         sourcemap: true,
         format: 'iife',
     },

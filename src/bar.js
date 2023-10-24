@@ -2,16 +2,16 @@ import date_utils from './date_utils';
 import { $, createSVG, animateSVG } from './svg_utils';
 
 export default class Bar {
-    constructor(gantt, task) {
-        this.set_defaults(gantt, task);
+    constructor(scheduler, task) {
+        this.set_defaults(scheduler, task);
         this.prepare();
         this.draw();
         this.bind();
     }
 
-    set_defaults(gantt, task) {
+    set_defaults(scheduler, task) {
         this.action_completed = false;
-        this.gantt = gantt;
+        this.scheduler = scheduler;
         this.task = task;
     }
 
@@ -22,17 +22,17 @@ export default class Bar {
 
     prepare_values() {
         this.invalid = this.task.invalid;
-        this.height = this.gantt.options.bar_height;
+        this.height = this.scheduler.options.bar_height;
         this.handle_width = 8;
         this.x = this.compute_x();
         this.y = this.compute_y();
-        this.corner_radius = this.gantt.options.bar_corner_radius;
+        this.corner_radius = this.scheduler.options.bar_corner_radius;
         this.duration =
             date_utils.diff(this.task._end, this.task._start, 'hour') /
-            this.gantt.options.step;
-        this.width = this.gantt.options.column_width * this.duration;
+            this.scheduler.options.step;
+        this.width = this.scheduler.options.column_width * this.duration;
         this.progress_width =
-            this.gantt.options.column_width *
+            this.scheduler.options.column_width *
             this.duration *
             (this.task.progress / 100) || 0;
         this.group = createSVG('g', {
@@ -184,13 +184,13 @@ export default class Bar {
             if (e.relatedTarget != null &&
                 (e.relatedTarget.classList.contains('pointer') ||
                     e.relatedTarget.classList.contains('title'))) return;
-            this.gantt.hide_popup();
+            this.scheduler.hide_popup();
         });
 
         $.on(this.group, 'click', (e) => {
             if (this.action_completed) return;
 
-            this.gantt.unselect_all();
+            this.scheduler.unselect_all();
             this.group.classList.add('active');
         });
 
@@ -200,7 +200,7 @@ export default class Bar {
                 return;
             }
 
-            this.gantt.trigger_event('task_dblclick', [this.task]);
+            this.scheduler.trigger_event('task_dblclick', [this.task]);
         });
     }
 
@@ -208,16 +208,16 @@ export default class Bar {
         const start_date = date_utils.format(
             this.task._start,
             'MMM D',
-            this.gantt.options.language
+            this.scheduler.options.language
         );
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),
             'MMM D',
-            this.gantt.options.language
+            this.scheduler.options.language
         );
         const subtitle = start_date + ' - ' + end_date;
 
-        this.gantt.show_popup({
+        this.scheduler.show_popup({
             target_element: this.$bar,
             title: this.task.name,
             subtitle: subtitle,
@@ -230,7 +230,7 @@ export default class Bar {
         if (x) {
             // get all x values of parent task
             const xs = this.task.dependencies.map((dep) => {
-                return this.gantt.get_bar(dep).$bar.getX();
+                return this.scheduler.get_bar(dep).$bar.getX();
             });
             // child task must not go before parent
             const valid_x = xs.reduce((prev, curr) => {
@@ -269,7 +269,7 @@ export default class Bar {
         }
 
         const new_index = this.compute_index();
-        const new_row = this.gantt.options.rows[new_index];
+        const new_row = this.scheduler.options.rows[new_index];
         if (this.task._index !== new_index) {
             changed = true;
             this.task._index = new_index;
@@ -278,7 +278,7 @@ export default class Bar {
 
         if (!changed) return;
 
-        this.gantt.trigger_event('position_change', [
+        this.scheduler.trigger_event('position_change', [
             this.task,
             new_row,
             new_start_date,
@@ -289,7 +289,7 @@ export default class Bar {
     progress_changed() {
         const new_progress = this.compute_progress();
         this.task.progress = new_progress;
-        this.gantt.trigger_event('progress_change', [this.task, new_progress]);
+        this.scheduler.trigger_event('progress_change', [this.task, new_progress]);
     }
 
     set_action_completed() {
@@ -299,16 +299,16 @@ export default class Bar {
 
     compute_start_end_date() {
         const bar = this.$bar;
-        const x_in_units = bar.getX() / this.gantt.options.column_width;
+        const x_in_units = bar.getX() / this.scheduler.options.column_width;
         const new_start_date = date_utils.add(
-            this.gantt.gantt_start,
-            x_in_units * this.gantt.options.step,
+            this.scheduler.scheduler_start,
+            x_in_units * this.scheduler.options.step,
             'hour'
         );
-        const width_in_units = bar.getWidth() / this.gantt.options.column_width;
+        const width_in_units = bar.getWidth() / this.scheduler.options.column_width;
         const new_end_date = date_utils.add(
             new_start_date,
-            width_in_units * this.gantt.options.step,
+            width_in_units * this.scheduler.options.step,
             'hour'
         );
 
@@ -317,8 +317,8 @@ export default class Bar {
 
     compute_index() {
         const bar = this.$bar;
-        const row_height = this.gantt.options.bar_height + this.gantt.options.padding;
-        const new_index = (bar.getY() - this.gantt.options.header_height) / row_height;
+        const row_height = this.scheduler.options.bar_height + this.scheduler.options.padding;
+        const new_index = (bar.getY() - this.scheduler.options.header_height) / row_height;
         return Math.ceil(new_index) - 1;
     }
 
@@ -329,15 +329,15 @@ export default class Bar {
     }
 
     compute_x() {
-        const { step, column_width } = this.gantt.options;
+        const { step, column_width } = this.scheduler.options;
         const task_start = this.task._start;
-        const gantt_start = this.gantt.gantt_start;
+        const scheduler_start = this.scheduler.scheduler_start;
 
-        const diff = date_utils.diff(task_start, gantt_start, 'hour');
+        const diff = date_utils.diff(task_start, scheduler_start, 'hour');
         let x = (diff / step) * column_width;
 
-        if (this.gantt.view_is('Month')) {
-            const diff = date_utils.diff(task_start, gantt_start, 'day');
+        if (this.scheduler.view_is('Month')) {
+            const diff = date_utils.diff(task_start, scheduler_start, 'day');
             x = (diff * column_width) / 30;
         }
         return x;
@@ -345,9 +345,9 @@ export default class Bar {
 
     compute_y() {
         return (
-            this.gantt.options.header_height +
-            this.gantt.options.padding +
-            this.task._index * (this.height + this.gantt.options.padding)
+            this.scheduler.options.header_height +
+            this.scheduler.options.padding +
+            this.task._index * (this.height + this.scheduler.options.padding)
         );
     }
 
@@ -356,30 +356,30 @@ export default class Bar {
             rem,
             position;
 
-        if (this.gantt.view_is('Week')) {
-            rem = dx % (this.gantt.options.column_width / 7);
+        if (this.scheduler.view_is('Week')) {
+            rem = dx % (this.scheduler.options.column_width / 7);
             position =
                 odx -
                 rem +
-                (rem < this.gantt.options.column_width / 14
+                (rem < this.scheduler.options.column_width / 14
                     ? 0
-                    : this.gantt.options.column_width / 7);
-        } else if (this.gantt.view_is('Month')) {
-            rem = dx % (this.gantt.options.column_width / 30);
+                    : this.scheduler.options.column_width / 7);
+        } else if (this.scheduler.view_is('Month')) {
+            rem = dx % (this.scheduler.options.column_width / 30);
             position =
                 odx -
                 rem +
-                (rem < this.gantt.options.column_width / 60
+                (rem < this.scheduler.options.column_width / 60
                     ? 0
-                    : this.gantt.options.column_width / 30);
+                    : this.scheduler.options.column_width / 30);
         } else {
-            rem = dx % this.gantt.options.column_width;
+            rem = dx % this.scheduler.options.column_width;
             position =
                 odx -
                 rem +
-                (rem < this.gantt.options.column_width / 2
+                (rem < this.scheduler.options.column_width / 2
                     ? 0
-                    : this.gantt.options.column_width);
+                    : this.scheduler.options.column_width);
         }
         return position;
     }

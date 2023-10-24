@@ -10,7 +10,7 @@ $text-color: #333 !default;
 $blue: #a3a3ff !default;
 $handle-color: #ddd !default;
 
-.gantt {
+.scheduler {
     .grid-background {
         fill: none;
     }
@@ -154,16 +154,16 @@ $handle-color: #ddd !default;
     }
 }
 
-.gantt-container {
+.scheduler-container {
     display: flex;
     font-size: 12px;
 
-    .gantt-columns-container {
+    .scheduler-columns-container {
         flex: 0 0 auto;
         overflow: hidden;
     }
 
-    .gantt-grid-container {
+    .scheduler-grid-container {
         flex: 1;
         overflow: auto;
         position: relative;

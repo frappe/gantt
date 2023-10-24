@@ -4,7 +4,7 @@ import Bar from './bar';
 import Arrow from './arrow';
 import Popup from './popup';
 
-import './gantt.scss';
+import './scheduler.scss';
 
 const VIEW_MODE = {
     HOUR: 'Hour',
@@ -16,7 +16,7 @@ const VIEW_MODE = {
     YEAR: 'Year',
 };
 
-export default class Gantt {
+export default class Scheduler {
     constructor(wrapper, tasks, cells, options) {
         this.setup_wrapper(wrapper);
         this.setup_options(options);
@@ -43,7 +43,7 @@ export default class Gantt {
             svg_element = element;
         } else {
             throw new TypeError(
-                'Frappé Gantt only supports usage of a string CSS selector,' +
+                'Scheduler only supports usage of a string CSS selector,' +
                 " HTML DOM element or SVG DOM element for the 'element' parameter"
             );
         }
@@ -54,30 +54,30 @@ export default class Gantt {
             // create it
             this.$svg = createSVG('svg', {
                 append_to: wrapper_element,
-                class: 'gantt',
-                id: 'ganttSvg'
+                class: 'scheduler',
+                id: 'schedulerSvg'
             });
             this.$column_svg = createSVG('svg', {
                 append_to: wrapper_element,
-                class: 'gantt',
+                class: 'scheduler',
                 id: 'columnSvg'
             });
         } else {
             this.$svg = svg_element;
-            this.$svg.classList.add('gantt');
+            this.$svg.classList.add('scheduler');
             this.$column_svg = svg_element;
-            this.$column_svg.classList.add('gantt');
+            this.$column_svg.classList.add('scheduler');
         }
 
         // TODO da rivedere questo giro di wrapper
         // wrapper element
         this.$container = document.createElement('div');
-        this.$container.classList.add('gantt-grid-container');
+        this.$container.classList.add('scheduler-grid-container');
         this.$column_container = document.createElement('div');
-        this.$column_container.classList.add('gantt-columns-container');
+        this.$column_container.classList.add('scheduler-columns-container');
 
         this.$container_parent = document.createElement('div');
-        this.$container_parent.classList.add('gantt-container');
+        this.$container_parent.classList.add('scheduler-container');
         this.$container_parent.style.height = '300px';
         this.$container_parent.appendChild(this.$column_container);
         this.$container_parent.appendChild(this.$container);
@@ -239,39 +239,39 @@ export default class Gantt {
     }
 
     setup_dates() {
-        this.setup_gantt_dates();
+        this.setup_scheduler_dates();
         this.setup_date_values();
     }
 
-    setup_gantt_dates() {
-        this.gantt_start = this.gantt_end = null;
+    setup_scheduler_dates() {
+        this.scheduler_start = this.scheduler_end = null;
 
         for (let task of this.tasks) {
             // set global start and end date
-            if (!this.gantt_start || task._start < this.gantt_start) {
-                this.gantt_start = task._start;
+            if (!this.scheduler_start || task._start < this.scheduler_start) {
+                this.scheduler_start = task._start;
             }
-            if (!this.gantt_end || task._end > this.gantt_end) {
-                this.gantt_end = task._end;
+            if (!this.scheduler_end || task._end > this.scheduler_end) {
+                this.scheduler_end = task._end;
             }
         }
 
-        this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
-        this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
+        this.scheduler_start = date_utils.start_of(this.scheduler_start, 'day');
+        this.scheduler_end = date_utils.start_of(this.scheduler_end, 'day');
 
         // add date padding on both sides
         if (this.view_is([VIEW_MODE.HOUR, VIEW_MODE.QUARTER_DAY, VIEW_MODE.HALF_DAY])) {
-            this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
-            this.gantt_end = date_utils.add(this.gantt_end, 7, 'day');
+            this.scheduler_start = date_utils.add(this.scheduler_start, -7, 'day');
+            this.scheduler_end = date_utils.add(this.scheduler_end, 7, 'day');
         } else if (this.view_is(VIEW_MODE.MONTH)) {
-            this.gantt_start = date_utils.start_of(this.gantt_start, 'year');
-            this.gantt_end = date_utils.add(this.gantt_end, 1, 'year');
+            this.scheduler_start = date_utils.start_of(this.scheduler_start, 'year');
+            this.scheduler_end = date_utils.add(this.scheduler_end, 1, 'year');
         } else if (this.view_is(VIEW_MODE.YEAR)) {
-            this.gantt_start = date_utils.add(this.gantt_start, -2, 'year');
-            this.gantt_end = date_utils.add(this.gantt_end, 2, 'year');
+            this.scheduler_start = date_utils.add(this.scheduler_start, -2, 'year');
+            this.scheduler_end = date_utils.add(this.scheduler_end, 2, 'year');
         } else {
-            this.gantt_start = date_utils.add(this.gantt_start, -1, 'month');
-            this.gantt_end = date_utils.add(this.gantt_end, 1, 'month');
+            this.scheduler_start = date_utils.add(this.scheduler_start, -1, 'month');
+            this.scheduler_end = date_utils.add(this.scheduler_end, 1, 'month');
         }
     }
 
@@ -279,9 +279,9 @@ export default class Gantt {
         this.dates = [];
         let cur_date = null;
 
-        while (cur_date === null || cur_date < this.gantt_end) {
+        while (cur_date === null || cur_date < this.scheduler_end) {
             if (!cur_date) {
-                cur_date = date_utils.clone(this.gantt_start);
+                cur_date = date_utils.clone(this.scheduler_start);
             } else {
                 if (this.view_is(VIEW_MODE.YEAR)) {
                     cur_date = date_utils.add(cur_date, 1, 'year');
@@ -597,7 +597,7 @@ export default class Gantt {
         // highlight today's date
         if (this.view_is(VIEW_MODE.DAY)) {
             const x =
-                (date_utils.diff(date_utils.today(), this.gantt_start, 'hour') /
+                (date_utils.diff(date_utils.today(), this.scheduler_start, 'hour') /
                     this.options.step) *
                 this.options.column_width;
             const y = 0;
@@ -828,7 +828,7 @@ export default class Gantt {
 
         const hours_before_first_task = date_utils.diff(
             this.get_oldest_starting_date(),
-            this.gantt_start,
+            this.scheduler_start,
             'hour'
         );
 
@@ -1188,7 +1188,7 @@ export default class Gantt {
      * Gets the oldest starting date from the list of tasks
      *
      * @returns Date
-     * @memberof Gantt
+     * @memberof Scheduler
      */
     get_oldest_starting_date() {
         return this.tasks
@@ -1201,14 +1201,14 @@ export default class Gantt {
     /**
      * Clear all elements from the parent svg element
      *
-     * @memberof Gantt
+     * @memberof Scheduler
      */
     clear() {
         this.$svg.innerHTML = '';
     }
 }
 
-Gantt.VIEW_MODE = VIEW_MODE;
+Scheduler.VIEW_MODE = VIEW_MODE;
 
 function generate_id(task) {
     return task.name + '_' + Math.random().toString(36).slice(2, 12);

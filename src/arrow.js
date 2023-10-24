@@ -1,8 +1,8 @@
 import { createSVG } from './svg_utils';
 
 export default class Arrow {
-    constructor(gantt, from_task, to_task) {
-        this.gantt = gantt;
+    constructor(scheduler, from_task, to_task) {
+        this.scheduler = scheduler;
         this.from_task = from_task;
         this.to_task = to_task;
 
@@ -15,43 +15,43 @@ export default class Arrow {
             this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
 
         const condition = () =>
-            this.to_task.$bar.getX() < start_x + this.gantt.options.padding &&
-            start_x > this.from_task.$bar.getX() + this.gantt.options.padding;
+            this.to_task.$bar.getX() < start_x + this.scheduler.options.padding &&
+            start_x > this.from_task.$bar.getX() + this.scheduler.options.padding;
 
         while (condition()) {
             start_x -= 10;
         }
 
         const start_y =
-            this.from_task.$bar.getY() + this.gantt.options.bar_height;
+            this.from_task.$bar.getY() + this.scheduler.options.bar_height;
 
-        const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
+        const end_x = this.to_task.$bar.getX() - this.scheduler.options.padding / 2;
         const end_y =
-            this.to_task.$bar.getY() + this.gantt.options.bar_height / 2;
+            this.to_task.$bar.getY() + this.scheduler.options.bar_height / 2;
         // ======= TODO Da capire come gestirlo
-        //             this.gantt.options.header_height +
-        //             this.gantt.options.bar_height +
-        //             (this.gantt.options.padding + this.gantt.options.bar_height) *
+        //             this.scheduler.options.header_height +
+        //             this.scheduler.options.bar_height +
+        //             (this.scheduler.options.padding + this.scheduler.options.bar_height) *
         //             this.from_task.task._index +
-        //             this.gantt.options.padding;
+        //             this.scheduler.options.padding;
 
-        //         const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
+        //         const end_x = this.to_task.$bar.getX() - this.scheduler.options.padding / 2;
         //         const end_y =
-        //             this.gantt.options.header_height +
-        //             this.gantt.options.bar_height / 2 +
-        //             (this.gantt.options.padding + this.gantt.options.bar_height) *
+        //             this.scheduler.options.header_height +
+        //             this.scheduler.options.bar_height / 2 +
+        //             (this.scheduler.options.padding + this.scheduler.options.bar_height) *
         //             this.to_task.task._index +
-        //             this.gantt.options.padding;
+        //             this.scheduler.options.padding;
         // >>>>>>> 5ec8c1cf7d6f126a89a5e5db096915fb66cda0a4
 
         const from_is_below_to =
             this.from_task.$bar.getY() > this.to_task.$bar.getY();
-        const curve = this.gantt.options.arrow_curve;
+        const curve = this.scheduler.options.arrow_curve;
         const clockwise = from_is_below_to ? 1 : 0;
         const curve_y = from_is_below_to ? -curve : curve;
         const offset = from_is_below_to
-            ? end_y + this.gantt.options.arrow_curve
-            : end_y - this.gantt.options.arrow_curve;
+            ? end_y + this.scheduler.options.arrow_curve
+            : end_y - this.scheduler.options.arrow_curve;
 
         this.path = `
             M ${start_x} ${start_y}
@@ -64,14 +64,14 @@ export default class Arrow {
 
         if (
             this.to_task.$bar.getX() <
-            this.from_task.$bar.getX() + this.gantt.options.padding
+            this.from_task.$bar.getX() + this.scheduler.options.padding
         ) {
-            const down_1 = this.gantt.options.padding / 2 - curve;
+            const down_1 = this.scheduler.options.padding / 2 - curve;
             const down_2 =
                 this.to_task.$bar.getY() +
                 this.to_task.$bar.getHeight() / 2 -
                 curve_y;
-            const left = this.to_task.$bar.getX() - this.gantt.options.padding;
+            const left = this.to_task.$bar.getX() - this.scheduler.options.padding;
 
             this.path = `
                 M ${start_x} ${start_y}

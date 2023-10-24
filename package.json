@@ -1,7 +1,7 @@
 {
-  "name": "frappe-gantt",
+  "name": "horsa-scheduler",
   "version": "0.6.1",
-  "description": "A simple, modern, interactive gantt library for the web",
+  "description": "A simple, modern, interactive scheduler library for the web",
   "main": "src/index.js",
   "scripts": {
     "start": "yarn run dev",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/frappe/gantt.git"
+    "url": "https://github.com/horsa-way/scheduler.git"
   },
   "files": [
     "src",
@@ -22,6 +22,7 @@
     "README.md"
   ],
   "keywords": [
+    "scheduler",
     "gantt",
     "svg",
     "simple gantt",
@@ -29,12 +30,12 @@
     "interactive gantt",
     "project management"
   ],
-  "author": "Faris Ansari",
+  "author": "Horsa Way",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/frappe/gantt/issues"
+    "url": "https://github.com/horsa-way/scheduler/issues"
   },
-  "homepage": "https://github.com/frappe/gantt",
+  "homepage": "https://github.com/horsa-way/scheduler",
   "devDependencies": {
     "babel-preset-env": "^1.6.1",
     "eslint": "^4.17.0",
