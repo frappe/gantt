@@ -998,8 +998,8 @@ var Scheduler = (function () {
 
     class Scheduler {
         constructor(wrapper, tasks, cells, options) {
-            this.setup_wrapper(wrapper);
             this.setup_options(options);
+            this.setup_wrapper(wrapper);
             this.setup_cells(cells);
             this.setup_tasks(tasks);
             // initialize with default view mode
@@ -1058,7 +1058,7 @@ var Scheduler = (function () {
 
             this.$container_parent = document.createElement('div');
             this.$container_parent.classList.add('scheduler-container');
-            this.$container_parent.style.height = '300px';
+            this.$container_parent.style.height = this.options.container_height + 'px';
             this.$container_parent.appendChild(this.$column_container);
             this.$container_parent.appendChild(this.$container);
 
@@ -1079,10 +1079,13 @@ var Scheduler = (function () {
 
         setup_options(options) {
             const default_options = {
+                container_height: 300,
                 header_height: 50,
                 column_width: 30,
                 fixed_column_width: 120,
                 step: 24,
+                date_start: null,
+                date_end: null,
                 view_modes: [...Object.values(VIEW_MODE)],
                 bar_height: 20,
                 bar_corner_radius: 3,
@@ -1092,11 +1095,16 @@ var Scheduler = (function () {
                 date_format: 'YYYY-MM-DD',
                 custom_popup_html: null,
                 language: 'en',
-                sortable: false,
+                moveable: false,
                 fixed_columns: [],
                 rows: [],
             };
             this.options = Object.assign({}, default_options, options);
+
+            if (this.options.date_start)
+                this.options.date_start = date_utils.parse(this.options.date_start);
+            if (this.options.date_end)
+                this.options.date_end = date_utils.parse(this.options.date_end);
         }
 
         setup_cells(cells) {
@@ -1164,7 +1172,10 @@ var Scheduler = (function () {
                 }
 
                 return task;
-            });
+            }).filter(t => (
+                (!this.options.date_start || t._start >= this.options.date_start) &&
+                (!this.options.date_end || t._end <= this.options.date_end))
+            );
 
             this.setup_dependencies();
         }
@@ -1179,7 +1190,9 @@ var Scheduler = (function () {
             }
         }
 
-        refresh(tasks) {
+        refresh(tasks, cells = this.cells, options = this.options) {
+            this.setup_options(options);
+            this.setup_cells(cells);
             this.setup_tasks(tasks);
             this.change_view_mode();
         }
@@ -1224,34 +1237,46 @@ var Scheduler = (function () {
         }
 
         setup_scheduler_dates() {
-            this.scheduler_start = this.scheduler_end = null;
+            this.scheduler_start = this.options.date_start;
+            this.scheduler_end = this.options.date_end;
 
-            for (let task of this.tasks) {
-                // set global start and end date
-                if (!this.scheduler_start || task._start < this.scheduler_start) {
-                    this.scheduler_start = task._start;
+            if (!this.scheduler_start || !this.scheduler_end)
+                for (let task of this.tasks) {
+                    // set global start and end date
+                    if (!this.scheduler_start || task._start < this.scheduler_start) {
+                        this.scheduler_start = task._start;
+                    }
+                    if (!this.scheduler_end || task._end > this.scheduler_end) {
+                        this.scheduler_end = task._end;
+                    }
                 }
-                if (!this.scheduler_end || task._end > this.scheduler_end) {
-                    this.scheduler_end = task._end;
-                }
-            }
 
             this.scheduler_start = date_utils.start_of(this.scheduler_start, 'day');
             this.scheduler_end = date_utils.start_of(this.scheduler_end, 'day');
 
             // add date padding on both sides
-            if (this.view_is([VIEW_MODE.HOUR, VIEW_MODE.QUARTER_DAY, VIEW_MODE.HALF_DAY])) {
-                this.scheduler_start = date_utils.add(this.scheduler_start, -7, 'day');
-                this.scheduler_end = date_utils.add(this.scheduler_end, 7, 'day');
-            } else if (this.view_is(VIEW_MODE.MONTH)) {
-                this.scheduler_start = date_utils.start_of(this.scheduler_start, 'year');
-                this.scheduler_end = date_utils.add(this.scheduler_end, 1, 'year');
-            } else if (this.view_is(VIEW_MODE.YEAR)) {
-                this.scheduler_start = date_utils.add(this.scheduler_start, -2, 'year');
-                this.scheduler_end = date_utils.add(this.scheduler_end, 2, 'year');
-            } else {
-                this.scheduler_start = date_utils.add(this.scheduler_start, -1, 'month');
-                this.scheduler_end = date_utils.add(this.scheduler_end, 1, 'month');
+            if (!this.options.date_start) {
+                if (this.view_is([VIEW_MODE.HOUR, VIEW_MODE.QUARTER_DAY, VIEW_MODE.HALF_DAY])) {
+                    this.scheduler_start = date_utils.add(this.scheduler_start, -7, 'day');
+                } else if (this.view_is(VIEW_MODE.MONTH)) {
+                    this.scheduler_start = date_utils.start_of(this.scheduler_start, 'year');
+                } else if (this.view_is(VIEW_MODE.YEAR)) {
+                    this.scheduler_start = date_utils.add(this.scheduler_start, -2, 'year');
+                } else {
+                    this.scheduler_start = date_utils.add(this.scheduler_start, -1, 'month');
+                }
+            }
+
+            if (!this.options.date_end) {
+                if (this.view_is([VIEW_MODE.HOUR, VIEW_MODE.QUARTER_DAY, VIEW_MODE.HALF_DAY])) {
+                    this.scheduler_end = date_utils.add(this.scheduler_end, 7, 'day');
+                } else if (this.view_is(VIEW_MODE.MONTH)) {
+                    this.scheduler_end = date_utils.add(this.scheduler_end, 1, 'year');
+                } else if (this.view_is(VIEW_MODE.YEAR)) {
+                    this.scheduler_end = date_utils.add(this.scheduler_end, 2, 'year');
+                } else {
+                    this.scheduler_end = date_utils.add(this.scheduler_end, 1, 'month');
+                }
             }
         }
 
@@ -1928,7 +1953,7 @@ var Scheduler = (function () {
                             bar_being_dragged.$bar.finaldx,
                     });
                 } else if (is_dragging) {
-                    if (!this.options.sortable) {
+                    if (!this.options.moveable) {
                         bar_being_dragged.update_bar_position({
                             x:
                                 bar_being_dragged.$bar.ox +
@@ -1948,7 +1973,7 @@ var Scheduler = (function () {
                             x:
                                 bar_being_dragged.$bar.ox +
                                 bar_being_dragged.$bar.finaldx,
-                            y: this.options.sortable ?
+                            y: this.options.moveable ?
                                 bar_being_dragged.$bar.oy +
                                 bar_being_dragged.$bar.finaldy
                                 : null,
