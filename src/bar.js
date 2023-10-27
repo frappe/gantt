@@ -177,7 +177,8 @@ export default class Bar {
 
     setup_click_event() {
         $.on(this.group, 'mouseover', '.bar-wrapper', (e) => {
-            this.show_popup();
+            if (!e.target.classList.contains('bar')) return;
+            this.show_popup(e.offsetX);
         });
 
         $.on(this.group, 'mouseleave', '.bar-wrapper', (e) => {
@@ -204,7 +205,7 @@ export default class Bar {
         });
     }
 
-    show_popup() {
+    show_popup(x = 0, y = 0) {
         const start_date = date_utils.format(
             this.task._start,
             'MMM D',
@@ -221,7 +222,9 @@ export default class Bar {
             target_element: this.$bar,
             title: this.task.name,
             subtitle: subtitle,
-            task: this.task
+            task: this.task,
+            x: x,
+            y: y,
         });
     }
 

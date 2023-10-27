@@ -113,6 +113,7 @@ export default class Scheduler {
             padding: 18,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
+            popup_position: 'left',
             custom_popup_html: null,
             language: 'en',
             moveable: false,
@@ -1196,6 +1197,7 @@ export default class Scheduler {
                 this.options.custom_popup_html
             );
         }
+        options.position = this.options.popup_position;
         this.popup.show(options);
     }
 

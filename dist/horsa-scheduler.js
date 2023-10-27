@@ -543,7 +543,8 @@ var Scheduler = (function () {
 
         setup_click_event() {
             $.on(this.group, 'mouseover', '.bar-wrapper', (e) => {
-                this.show_popup();
+                if (!e.target.classList.contains('bar')) return;
+                this.show_popup(e.offsetX);
             });
 
             $.on(this.group, 'mouseleave', '.bar-wrapper', (e) => {
@@ -570,7 +571,7 @@ var Scheduler = (function () {
             });
         }
 
-        show_popup() {
+        show_popup(x = 0, y = 0) {
             const start_date = date_utils.format(
                 this.task._start,
                 'MMM D',
@@ -587,7 +588,9 @@ var Scheduler = (function () {
                 target_element: this.$bar,
                 title: this.task.name,
                 subtitle: subtitle,
-                task: this.task
+                task: this.task,
+                x: x,
+                y: y,
             });
         }
 
@@ -966,12 +969,21 @@ var Scheduler = (function () {
 
             if (options.position === 'left') {
                 this.parent.style.left =
-                    position_meta.x + (position_meta.width + 10) + 'px';
+                    position_meta.x + (position_meta.width + 8) + 'px';
                 this.parent.style.top = position_meta.y + 'px';
 
                 this.pointer.style.transform = 'rotateZ(90deg)';
-                this.pointer.style.left = '-7px';
+                this.pointer.style.left = '-4px';
                 this.pointer.style.top = '2px';
+            }
+            if (options.position === 'bottom') {
+                const middle_popup = this.parent.clientWidth / 2;
+                this.parent.style.left = (options.x - middle_popup) + 'px';
+                this.parent.style.top = (position_meta.y + position_meta.height + 10) + 'px';
+
+                this.pointer.style.transform = 'rotateZ(180deg)';
+                this.pointer.style.left = middle_popup + 'px';
+                this.pointer.style.top = '-10px';
             }
 
             // show
@@ -1093,6 +1105,7 @@ var Scheduler = (function () {
                 padding: 18,
                 view_mode: 'Day',
                 date_format: 'YYYY-MM-DD',
+                popup_position: 'left',
                 custom_popup_html: null,
                 language: 'en',
                 moveable: false,
@@ -2176,6 +2189,7 @@ var Scheduler = (function () {
                     this.options.custom_popup_html
                 );
             }
+            options.position = this.options.popup_position;
             this.popup.show(options);
         }
 

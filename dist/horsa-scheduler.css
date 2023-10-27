@@ -142,7 +142,6 @@
 }
 .scheduler-container .scheduler-grid-container .popup-wrapper .pointer {
   position: absolute;
-  height: 5px;
   margin: 0 0 0 -5px;
   border: 5px solid transparent;
   border-top-color: rgba(0, 0, 0, 0.8);
