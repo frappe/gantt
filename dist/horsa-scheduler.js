@@ -1204,10 +1204,15 @@ var Scheduler = (function () {
         }
 
         refresh(tasks, cells = this.cells, options = this.options) {
+            const scroll_pos = this.$svg.parentElement.scrollLeft;
+            const scroll_width = this.$svg.parentElement.scrollWidth;
+
             this.setup_options(options);
             this.setup_cells(cells);
             this.setup_tasks(tasks);
             this.change_view_mode();
+
+            this.$svg.parentElement.scrollLeft = scroll_pos * (this.$svg.parentElement.scrollWidth / scroll_width);
         }
 
         change_view_mode(mode = this.options.view_mode) {
