@@ -116,7 +116,10 @@ export default class Scheduler {
             popup_position: 'left',
             custom_popup_html: null,
             language: 'en',
-            moveable: false,
+            resize_left: false,
+            resize_right: false,
+            drag_drop_x: false,
+            drag_drop_y: false,
             fixed_columns: [],
             rows: [],
         };
@@ -169,6 +172,11 @@ export default class Scheduler {
             if (task_end_values.slice(3).every((d) => d === 0)) {
                 task._end = date_utils.add(task._end, 24, 'hour');
             }
+
+            task.resize_left = (task.resize_left != null) ? task.resize_left : this.options.resize_left;
+            task.resize_right = (task.resize_right != null) ? task.resize_right : this.options.resize_right;
+            task.drag_drop_x = (task.drag_drop_x != null) ? task.drag_drop_x : this.options.drag_drop_x;
+            task.drag_drop_y = (task.drag_drop_y != null) ? task.drag_drop_y : this.options.drag_drop_y;
 
             // invalid flag
             if (!task.start || !task.end) {
@@ -951,6 +959,10 @@ export default class Scheduler {
                 $bar.finaldy = 0;
                 return bar;
             });
+
+            is_resizing_left = is_resizing_left && this.bar_being_dragged.task.resize_left;
+            is_resizing_right = is_resizing_right && this.bar_being_dragged.task.resize_right;
+            is_dragging = is_dragging && (this.bar_being_dragged.task.drag_drop_x || this.bar_being_dragged.task.drag_drop_y);
         });
 
         $.on(this.$svg, 'mousemove', (e) => {
@@ -962,8 +974,8 @@ export default class Scheduler {
 
             // update the dragged bar
             const bar_being_dragged = this.bar_being_dragged;
-            bar_being_dragged.$bar.finaldx = this.get_snap_x_position(dx);
             if (is_resizing_left) {
+                bar_being_dragged.$bar.finaldx = this.get_snap_x_position(dx);
                 bar_being_dragged.update_bar_position({
                     x:
                         bar_being_dragged.$bar.ox +
@@ -973,20 +985,22 @@ export default class Scheduler {
                         bar_being_dragged.$bar.finaldx,
                 });
             } else if (is_resizing_right) {
+                bar_being_dragged.$bar.finaldx = this.get_snap_x_position(dx);
                 bar_being_dragged.update_bar_position({
                     width:
                         bar_being_dragged.$bar.owidth +
                         bar_being_dragged.$bar.finaldx,
                 });
             } else if (is_dragging) {
-                if (!this.options.moveable) {
+                if (bar_being_dragged.task.drag_drop_x) {
+                    bar_being_dragged.$bar.finaldx = this.get_snap_x_position(dx);
                     bar_being_dragged.update_bar_position({
                         x:
                             bar_being_dragged.$bar.ox +
                             bar_being_dragged.$bar.finaldx
                     });
                 }
-                else {
+                if (bar_being_dragged.task.drag_drop_y) {
                     // TODO improve max_y and get_snap_y_position
                     const y = bar_being_dragged.$bar.oy + dy;
                     if (y < min_y) {
@@ -996,13 +1010,9 @@ export default class Scheduler {
                     }
                     bar_being_dragged.$bar.finaldy = this.get_snap_y_position(dy);
                     bar_being_dragged.update_bar_position({
-                        x:
-                            bar_being_dragged.$bar.ox +
-                            bar_being_dragged.$bar.finaldx,
-                        y: this.options.moveable ?
+                        y:
                             bar_being_dragged.$bar.oy +
                             bar_being_dragged.$bar.finaldy
-                            : null,
                     });
                 }
             }
@@ -1028,7 +1038,7 @@ export default class Scheduler {
         });
 
         $.on(this.$svg, 'mouseup', (e) => {
-            if (is_dragging || is_resizing_left || is_resizing_right) {
+            if (action_in_progress()) {
                 bars.forEach((bar) => {
                     bar.group.classList.remove('active');
 

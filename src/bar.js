@@ -127,27 +127,29 @@ export default class Bar {
         const bar = this.$bar;
         const handle_width = this.handle_width;
 
-        createSVG('rect', {
-            x: bar.getX() + bar.getWidth() - handle_width - 1,
-            y: bar.getY() + 1,
-            width: handle_width,
-            height: this.height - 2,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
-            class: 'handle right',
-            append_to: this.handle_group,
-        });
+        if (this.task.resize_right)
+            createSVG('rect', {
+                x: bar.getX() + bar.getWidth() - handle_width - 1,
+                y: bar.getY() + 1,
+                width: handle_width,
+                height: this.height - 2,
+                rx: this.corner_radius,
+                ry: this.corner_radius,
+                class: 'handle right',
+                append_to: this.handle_group,
+            });
 
-        createSVG('rect', {
-            x: bar.getX() + 1,
-            y: bar.getY() + 1,
-            width: handle_width,
-            height: this.height - 2,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
-            class: 'handle left',
-            append_to: this.handle_group,
-        });
+        if (this.task.resize_left)
+            createSVG('rect', {
+                x: bar.getX() + 1,
+                y: bar.getY() + 1,
+                width: handle_width,
+                height: this.height - 2,
+                rx: this.corner_radius,
+                ry: this.corner_radius,
+                class: 'handle left',
+                append_to: this.handle_group,
+            });
 
         if (this.task.progress && this.task.progress < 100) {
             this.$handle_progress = createSVG('polygon', {
@@ -422,19 +424,18 @@ export default class Bar {
     update_handle_position() {
         if (this.invalid) return;
         const bar = this.$bar;
-        this.handle_group
-            .querySelector('.handle.left')
-            .setAttribute('x', bar.getX() + 1);
-        this.handle_group
-            .querySelector('.handle.left')
-            .setAttribute('y', bar.getY() + 1);
-        this.handle_group
-            .querySelector('.handle.right')
-            .setAttribute('x', bar.getEndX() - this.handle_width - 1);
-        this.handle_group
-            .querySelector('.handle.right')
-            .setAttribute('y', bar.getY() + 1);
-        const handle = this.group.querySelector('.handle.progress');
+
+        let handle = this.handle_group.querySelector('.handle.left');
+        if (handle) {
+            handle.setAttribute('x', bar.getX() + 1)
+            handle.setAttribute('y', bar.getY() + 1)
+        }
+        handle = this.handle_group.querySelector('.handle.right');
+        if (handle) {
+            handle.setAttribute('x', bar.getEndX() - this.handle_width - 1)
+            handle.setAttribute('y', bar.getY() + 1);
+        }
+        handle = this.group.querySelector('.handle.progress');
         handle &&
             handle.setAttribute('points', this.get_progress_polygon_points());
     }
