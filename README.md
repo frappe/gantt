@@ -4,9 +4,9 @@
     <h2>Horsa Scheduler</h2>
     <p align="center">
         <p>A lightweight and interactive svg scheduler library for web applications</p>
-        <a>
+        <!-- <a>
             <b>View the demo »</b>
-        </a>
+        </a> -->
     </p>
 </div>
 
@@ -21,6 +21,7 @@ npm install horsa-scheduler
 
 ### Usage
 TO EDIT
+
 Include it in your HTML:
 ```
 <script src="horsa-scheduler.min.js"></script>
@@ -73,7 +74,7 @@ If you want to contribute enhancements or fixes:
 6. Open `index.html` in your browser, make your code changes and test them.
 
 ### Publishing
-Every times a new version will be pushed, Github Actions will publish it in npm repository.
+Every times a new version is pushed, Github Actions will publish it in npm repository.
 
 License: MIT
 
