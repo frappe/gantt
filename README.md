@@ -1,30 +1,30 @@
+
 <div align="center">
-    <img src="https://github.com/frappe/design/blob/master/logos/logo-2019/frappe-gantt-logo.png" height="128">
-    <h2>Frappe Gantt</h2>
+    <img src="https://github.com/horsa-way/scheduler/assets/11760847/a961ea22-d3c6-49e3-8c5f-357d64dacc2d" height="128">
+    <h2>Horsa Scheduler</h2>
     <p align="center">
-        <p>A simple, interactive, modern gantt chart library for the web</p>
-        <a href="https://frappe.github.io/gantt">
+        <p>A lightweight and interactive svg scheduler library for web applications</p>
+        <a>
             <b>View the demo »</b>
         </a>
     </p>
 </div>
 
 <p align="center">
-    <a href="https://frappe.github.io/gantt">
-        <img src="https://cloud.githubusercontent.com/assets/9355208/21537921/4a38b194-cdbd-11e6-8110-e0da19678a6d.png">
-    </a>
+    <img src="https://github.com/horsa-way/scheduler/assets/11760847/8c8ac467-6549-4112-950f-95500d377d43">
 </p>
 
 ### Install
 ```
-npm install frappe-gantt
+npm install horsa-scheduler
 ```
 
 ### Usage
+TO EDIT
 Include it in your HTML:
 ```
-<script src="frappe-gantt.min.js"></script>
-<link rel="stylesheet" href="frappe-gantt.css">
+<script src="horsa-scheduler.min.js"></script>
+<link rel="stylesheet" href="horsa-scheduler.css">
 ```
 
 And start hacking:
@@ -73,30 +73,9 @@ If you want to contribute enhancements or fixes:
 6. Open `index.html` in your browser, make your code changes and test them.
 
 ### Publishing
-If you have publishing rights (Frappe Team), follow these steps to publish a new version.
-
-Assuming the last commit (or a couple of commits) were enhancements or fixes,
-
-1. Run `yarn build`
-
-   This will generate files in the `dist/` folder. These files need to be committed.
-1. Run `yarn publish`
-1. Type the new version at the prompt
-
-   Depending on the type of change, you can either bump the patch version or the minor version.
-   For e.g.,
-   ```
-   0.5.0 -> 0.6.0 (minor version bump)
-   0.5.0 -> 0.5.1 (patch version bump)
-   ```
-1. Now, there will be a commit named after the version you just entered. Include the generated files in `dist/` folder as part of this commit by running the command:
-   ```
-   git add dist
-   git commit --amend
-   git push origin master
-   ```
+Every times a new version will be pushed, Github Actions will publish it in npm repository.
 
 License: MIT
 
 ------------------
-Project maintained by [frappe](https://github.com/frappe)
+Project maintained by [horsa way](https://github.com/horsa-way)
