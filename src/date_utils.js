@@ -139,6 +139,7 @@ export default {
 
     add(date, qty, scale) {
         qty = parseInt(qty, 10);
+
         const vals = [
             date.getFullYear() + (scale === YEAR ? qty : 0),
             date.getMonth() + (scale === MONTH ? qty : 0),

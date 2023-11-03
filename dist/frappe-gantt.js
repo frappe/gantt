@@ -142,6 +142,7 @@ var Gantt = (function () {
 
         add(date, qty, scale) {
             qty = parseInt(qty, 10);
+
             const vals = [
                 date.getFullYear() + (scale === YEAR ? qty : 0),
                 date.getMonth() + (scale === MONTH ? qty : 0),
@@ -978,7 +979,7 @@ var Gantt = (function () {
             } else {
                 throw new TypeError(
                     'Frappé Gantt only supports usage of a string CSS selector,' +
-                        " HTML DOM element or SVG DOM element for the 'element' parameter"
+                    " HTML DOM element or SVG DOM element for the 'element' parameter"
                 );
             }
 
@@ -1030,8 +1031,24 @@ var Gantt = (function () {
         setup_tasks(tasks) {
             // prepare tasks
             this.tasks = tasks.map((task, i) => {
-                // convert to Date objects
+
+                // convert to Date object
                 task._start = date_utils.parse(task.start);
+
+                if (task.end === undefined && task.duration !== undefined) {
+                    console.log("prepare tasks");
+                    task.end = task._start;
+                    let durations = task.duration.split(" ");
+
+                    console.log(durations);
+
+                    durations.forEach(tmpDuration => {
+                        let {duration, scale} = parse_task_duration(tmpDuration);
+                        task.end = date_utils.add(task.end, duration, scale);
+                    });
+                }
+
+                // convert to Date object
                 task._end = date_utils.parse(task.end);
 
                 // make task invalid if duration too large
@@ -1243,7 +1260,7 @@ var Gantt = (function () {
                 this.options.header_height +
                 this.options.padding +
                 (this.options.bar_height + this.options.padding) *
-                    this.tasks.length;
+                this.tasks.length;
 
             createSVG('rect', {
                 x: 0,
@@ -1261,8 +1278,8 @@ var Gantt = (function () {
         }
 
         make_grid_rows() {
-            const rows_layer = createSVG('g', { append_to: this.layers.grid });
-            const lines_layer = createSVG('g', { append_to: this.layers.grid });
+            const rows_layer = createSVG('g', {append_to: this.layers.grid});
+            const lines_layer = createSVG('g', {append_to: this.layers.grid});
 
             const row_width = this.dates.length * this.options.column_width;
             const row_height = this.options.bar_height + this.options.padding;
@@ -1360,7 +1377,7 @@ var Gantt = (function () {
                 const width = this.options.column_width;
                 const height =
                     (this.options.bar_height + this.options.padding) *
-                        this.tasks.length +
+                    this.tasks.length +
                     this.options.header_height +
                     this.options.padding / 2;
 
@@ -1447,10 +1464,10 @@ var Gantt = (function () {
                     date.getDate() !== last_date.getDate()
                         ? date.getMonth() !== last_date.getMonth()
                             ? date_utils.format(
-                                  date,
-                                  'D MMM',
-                                  this.options.language
-                              )
+                                date,
+                                'D MMM',
+                                this.options.language
+                            )
                             : date_utils.format(date, 'D', this.options.language)
                         : '',
                 Day_upper:
@@ -1564,7 +1581,7 @@ var Gantt = (function () {
 
             const scroll_pos =
                 (hours_before_first_task / this.options.step) *
-                    this.options.column_width -
+                this.options.column_width -
                 this.options.column_width;
 
             parent_element.scrollLeft = scroll_pos;
@@ -1657,7 +1674,7 @@ var Gantt = (function () {
                             });
                         }
                     } else if (is_dragging) {
-                        bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                        bar.update_bar_position({x: $bar.ox + $bar.finaldx});
                     }
                 });
             });
@@ -1864,6 +1881,32 @@ var Gantt = (function () {
 
     function generate_id(task) {
         return task.name + '_' + Math.random().toString(36).slice(2, 12);
+    }
+
+    function parse_task_duration(duration) {
+        const regex = /([0-9])+(y|m|d|h|min|s|ms)/gm;
+
+        console.log(duration);
+        let matches = regex.exec(duration);
+        console.log(matches);
+
+        if (matches !== null) {
+            if (matches[2] === "y") {
+                return {duration: parseInt(matches[1]), scale: `year`};
+            } else if (matches[2] === "m") {
+                return {duration: parseInt(matches[1]), scale: `month`};
+            } else if (matches[2] === "d") {
+                return {duration: parseInt(matches[1]), scale: `day`};
+            } else if (matches[2] === "h") {
+                return {duration: parseInt(matches[1]), scale: `hour`};
+            } else if (matches[2] === "min") {
+                return {duration: parseInt(matches[1]), scale: `minute`};
+            } else if (matches[2] === "s") {
+                return {duration: parseInt(matches[1]), scale: `second`};
+            } else if (matches[2] === "ms") {
+                return {duration: parseInt(matches[1]), scale: `millisecond`};
+            }
+        }
     }
 
     return Gantt;

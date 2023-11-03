@@ -32,7 +32,7 @@
 		var tasks = [
 			{
 				start: '2018-10-01',
-				end: '2018-10-08',
+				duration: '1y 1m 1d 1h 1min 1s 1ms',
 				name: 'Redesign website',
 				id: "Task 0",
 				progress: 20
@@ -77,13 +77,6 @@
 				progress: 0,
 				dependencies: 'Task 4',
 				custom_class: 'bar-milestone'
-			},
-			{
-				start: '2014-01-05',
-				end: '2019-10-12',
-				name: 'Long term task',
-				id: "Task 6",
-				progress: 0
 			}
 		]
 		var gantt_chart = new Gantt(".gantt-target", tasks, {
