@@ -144,7 +144,7 @@ export default class Gantt {
             return task;
         });
 
-        get_start_date_based_on_sub_tasks(tasks);
+        get_start_date_based_on_dependencies(tasks);
 
         this.setup_dependencies();
     }
@@ -792,7 +792,7 @@ function generate_id(task) {
     return task.name + '_' + Math.random().toString(36).slice(2, 12);
 }
 
-function get_start_date_based_on_sub_tasks(tasks) {
+function get_start_date_based_on_dependencies(tasks) {
     tasks.map((task, i) => {
         if (task.dependencies.length <= 0) return true;
 

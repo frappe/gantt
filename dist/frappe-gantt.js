@@ -64,13 +64,13 @@ var Gantt = (function () {
 
         format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
             const dateTimeFormat = new Intl.DateTimeFormat(lang, {
-                month: 'long',
+                month: 'long'
             });
             const month_name = dateTimeFormat.format(date);
             const month_name_capitalized =
                 month_name.charAt(0).toUpperCase() + month_name.slice(1);
 
-            const values = this.get_date_values(date).map((d) => padStart(d, 2, 0));
+            const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
             const format_map = {
                 YYYY: values[0],
                 MM: padStart(+values[1] + 1, 2, 0),
@@ -1080,7 +1080,7 @@ var Gantt = (function () {
                 return task;
             });
 
-            get_start_date_based_on_sub_tasks(tasks);
+            get_start_date_based_on_dependencies(tasks);
 
             this.setup_dependencies();
         }
@@ -1728,7 +1728,7 @@ var Gantt = (function () {
         return task.name + '_' + Math.random().toString(36).slice(2, 12);
     }
 
-    function get_start_date_based_on_sub_tasks(tasks) {
+    function get_start_date_based_on_dependencies(tasks) {
         tasks.map((task, i) => {
             if (task.dependencies.length <= 0) return true;
 
