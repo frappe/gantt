@@ -1,10 +1,10 @@
 export default class Popup {
-    private parent: any;
+    private parent: HTMLDivElement;
     private custom_html: any;
     private title: any;
     private subtitle: any;
     private pointer: any;
-    constructor(parent, custom_html) {
+    constructor(parent : HTMLDivElement, custom_html: HTMLElement) {
         this.parent = parent;
         this.custom_html = custom_html;
         this.make();
@@ -64,11 +64,11 @@ export default class Popup {
         }
 
         // show
-        this.parent.style.opacity = 1;
+        this.parent.style.opacity = '1';
     }
 
     hide() {
-        this.parent.style.opacity = 0;
-        this.parent.style.left = 0;
+        this.parent.style.opacity = '0';
+        this.parent.style.left = '0';
     }
 }

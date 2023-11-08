@@ -5,18 +5,18 @@ export function $(expr, con) {
 }
 
 export function createSVG(tag, attrs) {
-    const elem = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    const svgElement = document.createElementNS('http://www.w3.org/2000/svg', tag);
     for (let attr in attrs) {
         if (attr === 'append_to') {
             const parent = attrs.append_to;
-            parent.appendChild(elem);
+            parent.appendChild(svgElement);
         } else if (attr === 'innerHTML') {
-            elem.innerHTML = attrs.innerHTML;
+            svgElement.innerHTML = attrs.innerHTML;
         } else {
-            elem.setAttribute(attr, attrs[attr]);
+            svgElement.setAttribute(attr, attrs[attr]);
         }
     }
-    return elem;
+    return svgElement;
 }
 
 export function animateSVG(svgElement, attr, from, to) {
@@ -32,6 +32,29 @@ export function animateSVG(svgElement, attr, from, to) {
 
         animatedSvgElement.dispatchEvent(event);
     }
+}
+
+export function getX(element: SVGRectElement) : number {
+    console.log("in getX");
+    console.log(element);
+    console.log(element.x);
+    return  element.x.baseVal.value;
+}
+
+export function getY(element: SVGRectElement) : number {
+    return element.y.baseVal.value;
+}
+
+export function getWidth(element: SVGRectElement) : number {
+    return element.width.baseVal.value;
+}
+
+export function getHeight(element: SVGRectElement) : number {
+    return element.height.baseVal.value;
+}
+
+export function getEndX(element: SVGRectElement) : number {
+    return element.y.baseVal.value + getHeight(element);
 }
 
 function getAnimationElement(

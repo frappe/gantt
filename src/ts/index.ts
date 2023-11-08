@@ -1,26 +1,27 @@
-import Bar from "./bar";
-import Arrow from "./arrow";
-import {$, createSVG} from "./svg_utils";
+import Bar from "./Bar";
+import Arrow from "./Arrow";
+import {$, createSVG, getWidth, getX, getY} from "./svg_utils";
 import date_utils from "./date_utils";
-import Popup from "./popup";
-import {VIEW_MODE} from "./ViewModes";
+import Popup from "./Popup";
+import {VIEW_MODE} from "./enums/VIEW_MODES";
 import '../scss/gantt.scss';
-import Task from "./task";
+import Task from "./Task";
+import GanttOptions from "./GanttOptions";
 
 export default class Gantt {
     private svg: any;
     private container: HTMLDivElement;
     private popup_wrapper: HTMLDivElement;
     private tasks: Task[];
-    options: any;
+    options: GanttOptions;
     private dependency_map: any;
-    private gantt_start: any;
+    gantt_start: any;
     private gantt_end: any;
     private dates: any[];
     private layers: any;
     private bars: Bar[];
     private arrows: Arrow[];
-    private bar_being_dragged: null;
+    bar_being_dragged: null;
     private popup: any;
 
     constructor(wrapper, tasks, options) {
@@ -216,6 +217,8 @@ export default class Gantt {
     }
 
     setup_gantt_dates() {
+        if(this.gantt_start !== undefined && this.gantt_end !== undefined) return;
+
         this.gantt_start = this.gantt_end = null;
 
         for (let task of this.tasks) {
@@ -609,8 +612,8 @@ export default class Gantt {
         for (let bar of this.bars) {
             bar.arrows = this.arrows.filter((arrow) => {
                 return (
-                    arrow.from_task.task.id === bar.task.id ||
-                    arrow.to_task.task.id === bar.task.id
+                    arrow.from_bar.task.id === bar.task.id ||
+                    arrow.to_bar.task.id === bar.task.id
                 );
             });
         }
@@ -696,11 +699,11 @@ export default class Gantt {
             this.bar_being_dragged = parent_bar_id;
 
             bars.forEach((bar) => {
-                const $bar = bar.$bar;
-                $bar.ox = $bar.getX();
-                $bar.oy = $bar.getY();
-                $bar.owidth = $bar.getWidth();
-                $bar.finaldx = 0;
+                const tmpBar = bar.bar;
+                tmpBar.ox = getX(bar);
+                tmpBar.oy = getY(bar);
+                tmpBar.owidth = getWidth(bar);
+                tmpBar.finaldx = 0;
             });
         });
 

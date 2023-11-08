@@ -1,17 +1,18 @@
-import { createSVG } from './svg_utils';
+import {createSVG, getHeight, getWidth, getX, getY} from './svg_utils';
 import Gantt from "./index";
+import Bar from "./Bar";
 
 export default class Arrow {
     public gantt : Gantt;
-    public from_task : any;
-    public to_task : any;
-    private path: any;
+    public from_bar : any;
+    public to_bar : Bar;
+    private path: string;
     element: any;
 
-    constructor(gantt, from_task, to_task) {
+    constructor(gantt : Gantt, from_bar: Bar, to_bar: Bar) {
         this.gantt = gantt;
-        this.from_task = from_task;
-        this.to_task = to_task;
+        this.from_bar = from_bar;
+        this.to_bar = to_bar;
 
         this.calculate_path();
         this.draw();
@@ -19,11 +20,11 @@ export default class Arrow {
 
     calculate_path() {
         let start_x =
-            this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
+            getX(this.from_bar.bar) + getWidth(this.from_bar.bar) / 2;
 
         const condition = () =>
-            this.to_task.$bar.getX() < start_x + this.gantt.options.padding &&
-            start_x > this.from_task.$bar.getX() + this.gantt.options.padding;
+            getX(this.to_bar.bar) < start_x + this.gantt.options.padding &&
+            start_x > getX(this.from_bar.bar) + this.gantt.options.padding;
 
         while (condition()) {
             start_x -= 10;
@@ -33,19 +34,19 @@ export default class Arrow {
             this.gantt.options.header_height +
             this.gantt.options.bar_height +
             (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.from_task.task._index +
+                this.from_bar.task._index +
             this.gantt.options.padding;
 
-        const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
+        const end_x = getX(this.to_bar.bar) - this.gantt.options.padding / 2;
         const end_y =
             this.gantt.options.header_height +
             this.gantt.options.bar_height / 2 +
             (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.to_task.task._index +
+                this.to_bar.task._index +
             this.gantt.options.padding;
 
         const from_is_below_to =
-            this.from_task.task._index > this.to_task.task._index;
+            this.from_bar.task._index > this.to_bar.task._index;
         const curve = this.gantt.options.arrow_curve;
         const clockwise = from_is_below_to ? 1 : 0;
         const curve_y = from_is_below_to ? -curve : curve;
@@ -63,15 +64,15 @@ export default class Arrow {
             l -5 5`;
 
         if (
-            this.to_task.$bar.getX() <
-            this.from_task.$bar.getX() + this.gantt.options.padding
+            getX(this.to_bar.bar) <
+            getX(this.from_bar.bar) + this.gantt.options.padding
         ) {
             const down_1 = this.gantt.options.padding / 2 - curve;
             const down_2 =
-                this.to_task.$bar.getY() +
-                this.to_task.$bar.getHeight() / 2 -
+                getY(this.to_bar.bar) +
+                getHeight(this.to_bar.bar) / 2 -
                 curve_y;
-            const left = this.to_task.$bar.getX() - this.gantt.options.padding;
+            const left = getX(this.to_bar.bar) - this.gantt.options.padding;
 
             this.path = `
                 M ${start_x} ${start_y}
@@ -91,8 +92,8 @@ export default class Arrow {
     draw() {
         this.element = createSVG('path', {
             d: this.path,
-            'data-from': this.from_task.task.id,
-            'data-to': this.to_task.task.id,
+            'data-from': this.from_bar.task.id,
+            'data-to': this.to_bar.task.id,
         });
     }
 

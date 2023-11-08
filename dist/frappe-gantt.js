@@ -245,20 +245,20 @@ var Gantt = (function () {
             : expr || null;
     }
     function createSVG(tag, attrs) {
-        var elem = document.createElementNS('http://www.w3.org/2000/svg', tag);
+        var svgElement = document.createElementNS('http://www.w3.org/2000/svg', tag);
         for (var attr in attrs) {
             if (attr === 'append_to') {
                 var parent_1 = attrs.append_to;
-                parent_1.appendChild(elem);
+                parent_1.appendChild(svgElement);
             }
             else if (attr === 'innerHTML') {
-                elem.innerHTML = attrs.innerHTML;
+                svgElement.innerHTML = attrs.innerHTML;
             }
             else {
-                elem.setAttribute(attr, attrs[attr]);
+                svgElement.setAttribute(attr, attrs[attr]);
             }
         }
-        return elem;
+        return svgElement;
     }
     function animateSVG(svgElement, attr, from, to) {
         var animatedSvgElement = getAnimationElement(svgElement, attr, from, to);
@@ -271,6 +271,24 @@ var Gantt = (function () {
             });
             animatedSvgElement.dispatchEvent(event_1);
         }
+    }
+    function getX(element) {
+        console.log("in getX");
+        console.log(element);
+        console.log(element.x);
+        return element.x.baseVal.value;
+    }
+    function getY(element) {
+        return element.y.baseVal.value;
+    }
+    function getWidth(element) {
+        return element.width.baseVal.value;
+    }
+    function getHeight(element) {
+        return element.height.baseVal.value;
+    }
+    function getEndX(element) {
+        return element.y.baseVal.value + getHeight(element);
     }
     function getAnimationElement(svgElement, attr, from, to, dur, begin) {
         if (dur === void 0) { dur = '0.4s'; }
@@ -359,7 +377,7 @@ var Gantt = (function () {
     var Bar = /** @class */ (function () {
         function Bar(gantt, task) {
             this.set_defaults(gantt, task);
-            this.prepare();
+            this.prepare_values();
             this.draw();
             this.bind();
         }
@@ -367,10 +385,6 @@ var Gantt = (function () {
             this.action_completed = false;
             this.gantt = gantt;
             this.task = task;
-        };
-        Bar.prototype.prepare = function () {
-            this.prepare_values();
-            this.prepare_helpers();
         };
         Bar.prototype.prepare_values = function () {
             this.invalid = this.task.invalid;
@@ -398,48 +412,6 @@ var Gantt = (function () {
                 class: 'handle-group',
                 append_to: this.group,
             });
-        };
-        Bar.prototype.getX = function () {
-            // @ts-ignore
-            return this.getAttribute('x');
-        };
-        Bar.prototype.getY = function () {
-            // @ts-ignore
-            return this.getAttribute('y');
-        };
-        Bar.prototype.getWidth = function () {
-            // @ts-ignore
-            return this.getAttribute('width');
-        };
-        Bar.prototype.getHeight = function () {
-            // @ts-ignore
-            return this.getAttribute('height');
-        };
-        Bar.prototype.getEndX = function () {
-            return this.getX() + this.getWidth();
-        };
-        Bar.prototype.prepare_helpers = function () {
-            /*        // @ts-ignore
-                    SVGElement.prototype.getX = function () {
-                        return +this.getAttribute('x');
-                    };
-                    // @ts-ignore
-                    SVGElement.prototype.getY = function () {
-                        return +this.getAttribute('y');
-                    };
-            
-                    // @ts-ignore
-                    SVGElement.prototype.getWidth = function () {
-                        return +this.getAttribute('width');
-                    };
-                    // @ts-ignore
-                    SVGElement.prototype.getHeight = function () {
-                        return +this.getAttribute('height');
-                    };
-                    // @ts-ignore
-                    SVGElement.prototype.getEndX = function () {
-                        return this.getX() + this.getWidth();
-                    };*/
         };
         Bar.prototype.draw = function () {
             this.draw_bar();
@@ -496,8 +468,8 @@ var Gantt = (function () {
             var bar = this.bar;
             var handle_width = 8;
             createSVG('rect', {
-                x: bar.getX() + bar.getWidth() - 9,
-                y: bar.getY() + 1,
+                x: getX(bar) + bar.width.baseVal.value - 9,
+                y: getY(bar) + 1,
                 width: handle_width,
                 height: this.height - 2,
                 rx: this.corner_radius,
@@ -506,8 +478,8 @@ var Gantt = (function () {
                 append_to: this.handle_group,
             });
             createSVG('rect', {
-                x: bar.getX() + 1,
-                y: bar.getY() + 1,
+                x: getX(bar) + 1,
+                y: getX(bar) + 1,
                 width: handle_width,
                 height: this.height - 2,
                 rx: this.corner_radius,
@@ -526,12 +498,12 @@ var Gantt = (function () {
         Bar.prototype.get_progress_polygon_points = function () {
             var bar_progress = this.bar_progress;
             return [
-                bar_progress.getEndX() - 5,
-                bar_progress.getY() + bar_progress.getHeight(),
-                bar_progress.getEndX() + 5,
-                bar_progress.getY() + bar_progress.getHeight(),
-                bar_progress.getEndX(),
-                bar_progress.getY() + bar_progress.getHeight() - 8.66,
+                getEndX(bar_progress) - 5,
+                getY(bar_progress) + getHeight(bar_progress),
+                getEndX(bar_progress) + 5,
+                getY(bar_progress) + getHeight(bar_progress),
+                getEndX(bar_progress),
+                getY(bar_progress) + getHeight(bar_progress) - 8.66,
             ];
         };
         Bar.prototype.bind = function () {
@@ -541,7 +513,7 @@ var Gantt = (function () {
         };
         Bar.prototype.setup_click_event = function () {
             var _this = this;
-            $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, null, function (e) {
+            $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, null, function () {
                 if (_this.action_completed) {
                     // just finished a move action, wait for a few seconds
                     return;
@@ -550,7 +522,7 @@ var Gantt = (function () {
                 _this.gantt.unselect_all();
                 _this.group.classList.add('active');
             });
-            $.on(this.group, 'dblclick', null, function (e) {
+            $.on(this.group, 'dblclick', null, function () {
                 if (_this.action_completed) {
                     // just finished a move action, wait for a few seconds
                     return;
@@ -576,9 +548,11 @@ var Gantt = (function () {
             var _b = _a.x, x = _b === void 0 ? null : _b, _c = _a.width, width = _c === void 0 ? null : _c;
             var bar = this.bar;
             if (x) {
+                if (!Array.isArray(this.task.dependencies))
+                    return;
                 // get all x values of parent task
                 var xs = this.task.dependencies.map(function (dep) {
-                    return _this.gantt.get_bar(dep).bar.getX();
+                    return getX(_this.gantt.get_bar(dep).bar);
                 });
                 // child task must not go before parent
                 var valid_x = xs.reduce(function (prev, curr) {
@@ -629,15 +603,14 @@ var Gantt = (function () {
         };
         Bar.prototype.compute_start_end_date = function () {
             var bar = this.bar;
-            var x_in_units = bar.getX() / this.gantt.options.column_width;
+            var x_in_units = getX(bar) / this.gantt.options.column_width;
             var new_start_date = date_utils.add(this.gantt.gantt_start, x_in_units * this.gantt.options.step, 'hour');
-            var width_in_units = bar.getWidth() / this.gantt.options.column_width;
+            var width_in_units = getWidth(bar) / this.gantt.options.column_width;
             var new_end_date = date_utils.add(new_start_date, width_in_units * this.gantt.options.step, 'hour');
             return { new_start_date: new_start_date, new_end_date: new_end_date };
         };
         Bar.prototype.compute_progress = function () {
-            var progress = (this.bar_progress.getWidth() / this.bar.getWidth()) * 100;
-            return progress;
+            return (getWidth(this.bar_progress) / getWidth(this.bar)) * 100;
         };
         Bar.prototype.compute_x = function () {
             var _a = this.gantt.options, step = _a.step, column_width = _a.column_width;
@@ -697,18 +670,18 @@ var Gantt = (function () {
         Bar.prototype.update_progressbar_position = function () {
             if (this.invalid)
                 return;
-            this.bar_progress.setAttribute('x', this.bar.getX());
-            this.bar_progress.setAttribute('width', this.bar.getWidth() * (this.task.progress / 100));
+            this.bar_progress.setAttribute('x', String(getX(this.bar)));
+            this.bar_progress.setAttribute('width', String(getWidth(this.bar) * (this.task.progress / 100)));
         };
         Bar.prototype.update_label_position = function () {
             var bar = this.bar, label = this.group.querySelector('.bar-label');
-            if (label.getBBox().width > bar.getWidth()) {
+            if (label.getBBox().width > bar.width.baseVal.value) {
                 label.classList.add('big');
-                label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+                label.setAttribute('x', String(getX(bar) + getWidth(bar) + 5));
             }
             else {
                 label.classList.remove('big');
-                label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+                label.setAttribute('x', String(getX(bar) + getWidth(bar) / 2));
             }
         };
         Bar.prototype.update_handle_position = function () {
@@ -717,13 +690,13 @@ var Gantt = (function () {
             var bar = this.bar;
             this.handle_group
                 .querySelector('.handle.left')
-                .setAttribute('x', bar.getX() + 1);
+                .setAttribute('x', String(getX(bar) + 1));
             this.handle_group
                 .querySelector('.handle.right')
-                .setAttribute('x', bar.getEndX() - 9);
+                .setAttribute('x', String(getEndX(bar) - 9));
             var handle = this.group.querySelector('.handle.progress');
             handle &&
-                handle.setAttribute('points', this.get_progress_polygon_points());
+                handle.setAttribute('points', this.get_progress_polygon_points().join(','));
         };
         Bar.prototype.update_arrow_position = function () {
             this.arrows = this.arrows || [];
@@ -736,19 +709,19 @@ var Gantt = (function () {
     }());
 
     var Arrow = /** @class */ (function () {
-        function Arrow(gantt, from_task, to_task) {
+        function Arrow(gantt, from_bar, to_bar) {
             this.gantt = gantt;
-            this.from_task = from_task;
-            this.to_task = to_task;
+            this.from_bar = from_bar;
+            this.to_bar = to_bar;
             this.calculate_path();
             this.draw();
         }
         Arrow.prototype.calculate_path = function () {
             var _this = this;
-            var start_x = this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
+            var start_x = getX(this.from_bar.bar) + getWidth(this.from_bar.bar) / 2;
             var condition = function () {
-                return _this.to_task.$bar.getX() < start_x + _this.gantt.options.padding &&
-                    start_x > _this.from_task.$bar.getX() + _this.gantt.options.padding;
+                return getX(_this.to_bar.bar) < start_x + _this.gantt.options.padding &&
+                    start_x > getX(_this.from_bar.bar) + _this.gantt.options.padding;
             };
             while (condition()) {
                 start_x -= 10;
@@ -756,15 +729,15 @@ var Gantt = (function () {
             var start_y = this.gantt.options.header_height +
                 this.gantt.options.bar_height +
                 (this.gantt.options.padding + this.gantt.options.bar_height) *
-                    this.from_task.task._index +
+                    this.from_bar.task._index +
                 this.gantt.options.padding;
-            var end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
+            var end_x = getX(this.to_bar.bar) - this.gantt.options.padding / 2;
             var end_y = this.gantt.options.header_height +
                 this.gantt.options.bar_height / 2 +
                 (this.gantt.options.padding + this.gantt.options.bar_height) *
-                    this.to_task.task._index +
+                    this.to_bar.task._index +
                 this.gantt.options.padding;
-            var from_is_below_to = this.from_task.task._index > this.to_task.task._index;
+            var from_is_below_to = this.from_bar.task._index > this.to_bar.task._index;
             var curve = this.gantt.options.arrow_curve;
             var clockwise = from_is_below_to ? 1 : 0;
             var curve_y = from_is_below_to ? -curve : curve;
@@ -772,21 +745,21 @@ var Gantt = (function () {
                 ? end_y + this.gantt.options.arrow_curve
                 : end_y - this.gantt.options.arrow_curve;
             this.path = "\n            M ".concat(start_x, " ").concat(start_y, "\n            V ").concat(offset, "\n            a ").concat(curve, " ").concat(curve, " 0 0 ").concat(clockwise, " ").concat(curve, " ").concat(curve_y, "\n            L ").concat(end_x, " ").concat(end_y, "\n            m -5 -5\n            l 5 5\n            l -5 5");
-            if (this.to_task.$bar.getX() <
-                this.from_task.$bar.getX() + this.gantt.options.padding) {
+            if (getX(this.to_bar.bar) <
+                getX(this.from_bar.bar) + this.gantt.options.padding) {
                 var down_1 = this.gantt.options.padding / 2 - curve;
-                var down_2 = this.to_task.$bar.getY() +
-                    this.to_task.$bar.getHeight() / 2 -
+                var down_2 = getY(this.to_bar.bar) +
+                    getHeight(this.to_bar.bar) / 2 -
                     curve_y;
-                var left = this.to_task.$bar.getX() - this.gantt.options.padding;
+                var left = getX(this.to_bar.bar) - this.gantt.options.padding;
                 this.path = "\n                M ".concat(start_x, " ").concat(start_y, "\n                v ").concat(down_1, "\n                a ").concat(curve, " ").concat(curve, " 0 0 1 -").concat(curve, " ").concat(curve, "\n                H ").concat(left, "\n                a ").concat(curve, " ").concat(curve, " 0 0 ").concat(clockwise, " -").concat(curve, " ").concat(curve_y, "\n                V ").concat(down_2, "\n                a ").concat(curve, " ").concat(curve, " 0 0 ").concat(clockwise, " ").concat(curve, " ").concat(curve_y, "\n                L ").concat(end_x, " ").concat(end_y, "\n                m -5 -5\n                l 5 5\n                l -5 5");
             }
         };
         Arrow.prototype.draw = function () {
             this.element = createSVG('path', {
                 d: this.path,
-                'data-from': this.from_task.task.id,
-                'data-to': this.to_task.task.id,
+                'data-from': this.from_bar.task.id,
+                'data-to': this.to_bar.task.id,
             });
         };
         Arrow.prototype.update = function () {
@@ -846,11 +819,11 @@ var Gantt = (function () {
                 this.pointer.style.top = '2px';
             }
             // show
-            this.parent.style.opacity = 1;
+            this.parent.style.opacity = '1';
         };
         Popup.prototype.hide = function () {
-            this.parent.style.opacity = 0;
-            this.parent.style.left = 0;
+            this.parent.style.opacity = '0';
+            this.parent.style.left = '0';
         };
         return Popup;
     }());
@@ -1042,6 +1015,8 @@ var Gantt = (function () {
             this.setup_date_values();
         };
         Gantt.prototype.setup_gantt_dates = function () {
+            if (this.gantt_start !== undefined && this.gantt_end !== undefined)
+                return;
             this.gantt_start = this.gantt_end = null;
             for (var _i = 0, _a = this.tasks; _i < _a.length; _i++) {
                 var task = _a[_i];
@@ -1383,8 +1358,8 @@ var Gantt = (function () {
         Gantt.prototype.map_arrows_on_bars = function () {
             var _loop_2 = function (bar) {
                 bar.arrows = this_2.arrows.filter(function (arrow) {
-                    return (arrow.from_task.task.id === bar.task.id ||
-                        arrow.to_task.task.id === bar.task.id);
+                    return (arrow.from_bar.task.id === bar.task.id ||
+                        arrow.to_bar.task.id === bar.task.id);
                 });
             };
             var this_2 = this;
@@ -1453,11 +1428,11 @@ var Gantt = (function () {
                 bars = ids.map(function (id) { return _this.get_bar(id); });
                 _this.bar_being_dragged = parent_bar_id;
                 bars.forEach(function (bar) {
-                    var $bar = bar.$bar;
-                    $bar.ox = $bar.getX();
-                    $bar.oy = $bar.getY();
-                    $bar.owidth = $bar.getWidth();
-                    $bar.finaldx = 0;
+                    var tmpBar = bar.bar;
+                    tmpBar.ox = getX(bar);
+                    tmpBar.oy = getY(bar);
+                    tmpBar.owidth = getWidth(bar);
+                    tmpBar.finaldx = 0;
                 });
             });
             $.on(this.svg, 'mousemove', null, function (e) {

@@ -1,4 +1,6 @@
 export default interface Task{
+    custom_class: string;
+    invalid: boolean;
     start: any;
     end: any;
     id: any;
