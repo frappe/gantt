@@ -258,6 +258,7 @@ var Gantt = (function () {
                 svgElement.setAttribute(attr, attrs[attr]);
             }
         }
+        console.log("typeof svgElement: ".concat(svgElement));
         return svgElement;
     }
     function animateSVG(svgElement, attr, from, to) {
@@ -273,22 +274,19 @@ var Gantt = (function () {
         }
     }
     function getX(element) {
-        console.log("in getX");
-        console.log(element);
-        console.log(element.x);
-        return element.x.baseVal.value;
+        return parseInt(element.getAttribute('x'));
     }
     function getY(element) {
-        return element.y.baseVal.value;
+        return parseInt(element.getAttribute('y'));
     }
     function getWidth(element) {
-        return element.width.baseVal.value;
+        return parseInt(element.getAttribute('width'));
     }
     function getHeight(element) {
-        return element.height.baseVal.value;
+        return parseInt(element.getAttribute('height'));
     }
     function getEndX(element) {
-        return element.y.baseVal.value + getHeight(element);
+        return getX(element) + getWidth(element);
     }
     function getAnimationElement(svgElement, attr, from, to, dur, begin) {
         if (dur === void 0) { dur = '0.4s'; }
@@ -468,7 +466,7 @@ var Gantt = (function () {
             var bar = this.bar;
             var handle_width = 8;
             createSVG('rect', {
-                x: getX(bar) + bar.width.baseVal.value - 9,
+                x: getX(bar) + getWidth(bar) - 9,
                 y: getY(bar) + 1,
                 width: handle_width,
                 height: this.height - 2,
@@ -661,8 +659,7 @@ var Gantt = (function () {
             return position;
         };
         Bar.prototype.update_attr = function (element, attr, value) {
-            value = +value;
-            if (!isNaN(value)) {
+            if (value) {
                 element.setAttribute(attr, value);
             }
             return element;
@@ -675,7 +672,7 @@ var Gantt = (function () {
         };
         Bar.prototype.update_label_position = function () {
             var bar = this.bar, label = this.group.querySelector('.bar-label');
-            if (label.getBBox().width > bar.width.baseVal.value) {
+            if (label.getBBox().width > getWidth(bar)) {
                 label.classList.add('big');
                 label.setAttribute('x', String(getX(bar) + getWidth(bar) + 5));
             }
@@ -1240,7 +1237,7 @@ var Gantt = (function () {
                         append_to: this.layers.date,
                     });
                     // remove out-of-bound dates
-                    if ($upper_text.getBBox().x2 > this.layers.grid.getBBox().width) {
+                    if ($upper_text.getBBox().x > this.layers.grid.getBBox().width) {
                         $upper_text.remove();
                     }
                 }
@@ -1249,12 +1246,11 @@ var Gantt = (function () {
         Gantt.prototype.get_dates_to_draw = function () {
             var _this = this;
             var last_date = null;
-            var dates = this.dates.map(function (date, i) {
+            return this.dates.map(function (date, i) {
                 var d = _this.get_date_info(date, last_date, i);
                 last_date = date;
                 return d;
             });
-            return dates;
         };
         Gantt.prototype.get_date_info = function (date, last_date, i) {
             if (!last_date) {
@@ -1382,10 +1378,9 @@ var Gantt = (function () {
             if (!parent_element)
                 return;
             var hours_before_first_task = date_utils.diff(this.get_oldest_starting_date(), this.gantt_start, 'hour');
-            var scroll_pos = (hours_before_first_task / this.options.step) *
+            parent_element.scrollLeft = (hours_before_first_task / this.options.step) *
                 this.options.column_width -
                 this.options.column_width;
-            parent_element.scrollLeft = scroll_pos;
         };
         Gantt.prototype.bind_grid_click = function () {
             var _this = this;
@@ -1428,11 +1423,11 @@ var Gantt = (function () {
                 bars = ids.map(function (id) { return _this.get_bar(id); });
                 _this.bar_being_dragged = parent_bar_id;
                 bars.forEach(function (bar) {
-                    var tmpBar = bar.bar;
-                    tmpBar.ox = getX(bar);
-                    tmpBar.oy = getY(bar);
-                    tmpBar.owidth = getWidth(bar);
-                    tmpBar.finaldx = 0;
+                    var $bar = bar.bar;
+                    $bar.ox = getX(bar);
+                    $bar.oy = getY(bar);
+                    $bar.owidth = getWidth(bar);
+                    $bar.finaldx = 0;
                 });
             });
             $.on(this.svg, 'mousemove', null, function (e) {
@@ -1441,7 +1436,7 @@ var Gantt = (function () {
                 var dx = e.offsetX - x_on_start;
                 e.offsetY - y_on_start;
                 bars.forEach(function (bar) {
-                    var $bar = bar.$bar;
+                    var $bar = bar.bar;
                     $bar.finaldx = _this.get_snap_position(dx);
                     _this.hide_popup();
                     if (is_resizing_left) {
@@ -1469,7 +1464,7 @@ var Gantt = (function () {
                     }
                 });
             });
-            document.addEventListener('mouseup', function (e) {
+            document.addEventListener('mouseup', function () {
                 if (is_dragging || is_resizing_left || is_resizing_right) {
                     bars.forEach(function (bar) { return bar.group.classList.remove('active'); });
                 }
@@ -1477,10 +1472,10 @@ var Gantt = (function () {
                 is_resizing_left = false;
                 is_resizing_right = false;
             });
-            $.on(this.svg, 'mouseup', null, function (e) {
+            $.on(this.svg, 'mouseup', null, function () {
                 _this.bar_being_dragged = null;
                 bars.forEach(function (bar) {
-                    var $bar = bar.$bar;
+                    var $bar = bar.bar;
                     if (!$bar.finaldx)
                         return;
                     bar.date_changed();
@@ -1504,12 +1499,12 @@ var Gantt = (function () {
                 var $bar_wrapper = $.closest('.bar-wrapper', handle);
                 var id = $bar_wrapper.getAttribute('data-id');
                 bar = _this.get_bar(id);
-                $bar_progress = bar.$bar_progress;
-                $bar = bar.$bar;
+                $bar_progress = bar.bar_progress;
+                $bar = bar.bar;
                 $bar_progress.finaldx = 0;
-                $bar_progress.owidth = $bar_progress.getWidth();
-                $bar_progress.min_dx = -$bar_progress.getWidth();
-                $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
+                $bar_progress.owidth = getWidth($bar_progress);
+                $bar_progress.min_dx = getWidth($bar_progress);
+                $bar_progress.max_dx = getWidth($bar) - getWidth($bar_progress);
             });
             $.on(this.svg, 'mousemove', null, function (e) {
                 if (!is_resizing)
@@ -1522,7 +1517,7 @@ var Gantt = (function () {
                 if (dx < $bar_progress.min_dx) {
                     dx = $bar_progress.min_dx;
                 }
-                var $handle = bar.$handle_progress;
+                var $handle = bar.handle_progress;
                 $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
                 $.attr($handle, 'points', bar.get_progress_polygon_points());
                 $bar_progress.finaldx = dx;

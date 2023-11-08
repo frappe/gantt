@@ -17,14 +17,14 @@ export default class Gantt {
     private dependency_map: any;
     gantt_start: any;
     private gantt_end: any;
-    private dates: any[];
+    private dates: Date[];
     private layers: any;
     private bars: Bar[];
     private arrows: Arrow[];
     bar_being_dragged: null;
-    private popup: any;
+    private popup: Popup;
 
-    constructor(wrapper, tasks, options) {
+    constructor(wrapper : HTMLElement | SVGElement, tasks : Task[], options : GanttOptions) {
         this.setup_wrapper(wrapper);
         this.setup_options(options);
         this.setup_tasks(tasks);
@@ -187,7 +187,7 @@ export default class Gantt {
         this.trigger_event('view_change', [mode]);
     }
 
-    update_view_scale(view_mode) {
+    update_view_scale(view_mode: VIEW_MODE) {
         this.options.view_mode = view_mode;
 
         if (view_mode === VIEW_MODE.DAY) {
@@ -460,7 +460,7 @@ export default class Gantt {
             });
 
             if (date.upper_text) {
-                const $upper_text = createSVG('text', {
+                const $upper_text : SVGTextElement = <SVGTextElement>createSVG('text', {
                     x: date.upper_x,
                     y: date.upper_y,
                     innerHTML: date.upper_text,
@@ -470,7 +470,7 @@ export default class Gantt {
 
                 // remove out-of-bound dates
                 if (
-                    $upper_text.getBBox().x2 > this.layers.grid.getBBox().width
+                    $upper_text.getBBox().x> this.layers.grid.getBBox().width
                 ) {
                     $upper_text.remove();
                 }
@@ -480,12 +480,11 @@ export default class Gantt {
 
     get_dates_to_draw() {
         let last_date = null;
-        const dates = this.dates.map((date, i) => {
+        return this.dates.map((date, i) => {
             const d = this.get_date_info(date, last_date, i);
             last_date = date;
             return d;
         });
-        return dates;
     }
 
     get_date_info(date, last_date, i) {
@@ -639,12 +638,9 @@ export default class Gantt {
             'hour'
         );
 
-        const scroll_pos =
-            (hours_before_first_task / this.options.step) *
+        parent_element.scrollLeft = (hours_before_first_task / this.options.step) *
             this.options.column_width -
             this.options.column_width;
-
-        parent_element.scrollLeft = scroll_pos;
     }
 
     bind_grid_click() {
@@ -699,11 +695,11 @@ export default class Gantt {
             this.bar_being_dragged = parent_bar_id;
 
             bars.forEach((bar) => {
-                const tmpBar = bar.bar;
-                tmpBar.ox = getX(bar);
-                tmpBar.oy = getY(bar);
-                tmpBar.owidth = getWidth(bar);
-                tmpBar.finaldx = 0;
+                const $bar = bar.bar;
+                $bar.ox = getX(bar);
+                $bar.oy = getY(bar);
+                $bar.owidth = getWidth(bar);
+                $bar.finaldx = 0;
             });
         });
 
@@ -713,7 +709,7 @@ export default class Gantt {
             const dy = e.offsetY - y_on_start;
 
             bars.forEach((bar) => {
-                const $bar = bar.$bar;
+                const $bar = bar.bar;
                 $bar.finaldx = this.get_snap_position(dx);
                 this.hide_popup();
                 if (is_resizing_left) {
@@ -739,7 +735,7 @@ export default class Gantt {
             });
         });
 
-        document.addEventListener('mouseup', (e) => {
+        document.addEventListener('mouseup', () => {
             if (is_dragging || is_resizing_left || is_resizing_right) {
                 bars.forEach((bar) => bar.group.classList.remove('active'));
             }
@@ -749,10 +745,10 @@ export default class Gantt {
             is_resizing_right = false;
         });
 
-        $.on(this.svg, 'mouseup', null, (e) => {
+        $.on(this.svg, 'mouseup', null, () => {
             this.bar_being_dragged = null;
             bars.forEach((bar) => {
-                const $bar = bar.$bar;
+                const $bar = bar.bar;
                 if (!$bar.finaldx) return;
                 bar.date_changed();
                 bar.set_action_completed();
@@ -779,13 +775,13 @@ export default class Gantt {
             const id = $bar_wrapper.getAttribute('data-id');
             bar = this.get_bar(id);
 
-            $bar_progress = bar.$bar_progress;
-            $bar = bar.$bar;
+            $bar_progress = bar.bar_progress;
+            $bar = bar.bar;
 
             $bar_progress.finaldx = 0;
-            $bar_progress.owidth = $bar_progress.getWidth();
-            $bar_progress.min_dx = -$bar_progress.getWidth();
-            $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
+            $bar_progress.owidth = getWidth($bar_progress);
+            $bar_progress.min_dx = getWidth($bar_progress);
+            $bar_progress.max_dx = getWidth($bar) - getWidth($bar_progress);
         });
 
         $.on(this.svg, 'mousemove', null, (e) => {
@@ -800,7 +796,7 @@ export default class Gantt {
                 dx = $bar_progress.min_dx;
             }
 
-            const $handle = bar.$handle_progress;
+            const $handle = bar.handle_progress;
             $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
             $.attr($handle, 'points', bar.get_progress_polygon_points());
             $bar_progress.finaldx = dx;
@@ -936,7 +932,7 @@ export default class Gantt {
         this.svg.innerHTML = '';
     }
 
-    generate_id(task) {
+    generate_id(task : Task) {
         return task.name + '_' + Math.random().toString(36).slice(2, 12);
     }
 }

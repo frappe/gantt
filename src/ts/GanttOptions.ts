@@ -12,5 +12,4 @@ export default interface GanttOptions {
     column_width: number;
     step: number;
     view_mode: VIEW_MODE;
-
 }

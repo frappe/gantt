@@ -4,8 +4,8 @@ export function $(expr, con) {
         : expr || null;
 }
 
-export function createSVG(tag, attrs) {
-    const svgElement = document.createElementNS('http://www.w3.org/2000/svg', tag);
+export function createSVG(tag:string, attrs) : SVGElement {
+    const svgElement : SVGElement = document.createElementNS('http://www.w3.org/2000/svg', tag);
     for (let attr in attrs) {
         if (attr === 'append_to') {
             const parent = attrs.append_to;
@@ -16,6 +16,7 @@ export function createSVG(tag, attrs) {
             svgElement.setAttribute(attr, attrs[attr]);
         }
     }
+    console.log(`typeof svgElement: ${svgElement}`);
     return svgElement;
 }
 
@@ -34,27 +35,24 @@ export function animateSVG(svgElement, attr, from, to) {
     }
 }
 
-export function getX(element: SVGRectElement) : number {
-    console.log("in getX");
-    console.log(element);
-    console.log(element.x);
-    return  element.x.baseVal.value;
+export function getX(element: SVGElement) : number {
+    return parseInt(element.getAttribute('x'));
 }
 
-export function getY(element: SVGRectElement) : number {
-    return element.y.baseVal.value;
+export function getY(element: SVGElement) : number {
+    return parseInt(element.getAttribute('y'));
 }
 
-export function getWidth(element: SVGRectElement) : number {
-    return element.width.baseVal.value;
+export function getWidth(element: SVGElement) : number {
+    return parseInt(element.getAttribute('width'));
 }
 
-export function getHeight(element: SVGRectElement) : number {
-    return element.height.baseVal.value;
+export function getHeight(element: SVGElement) : number {
+    return parseInt(element.getAttribute('height'));
 }
 
-export function getEndX(element: SVGRectElement) : number {
-    return element.y.baseVal.value + getHeight(element);
+export function getEndX(element: SVGElement) : number {
+    return getX(element) + getWidth(element);
 }
 
 function getAnimationElement(
