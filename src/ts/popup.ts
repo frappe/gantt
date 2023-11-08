@@ -1,4 +1,9 @@
 export default class Popup {
+    private parent: any;
+    private custom_html: any;
+    private title: any;
+    private subtitle: any;
+    private pointer: any;
     constructor(parent, custom_html) {
         this.parent = parent;
         this.custom_html = custom_html;

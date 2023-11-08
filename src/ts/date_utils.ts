@@ -33,6 +33,7 @@ export default {
                 vals = vals.concat(time_parts);
             }
 
+            // @ts-ignore
             return new Date(...vals);
         }
     },
@@ -130,6 +131,7 @@ export default {
 
     today() {
         const vals = this.get_date_values(new Date()).slice(0, 3);
+        // @ts-ignore
         return new Date(...vals);
     },
 
@@ -148,6 +150,7 @@ export default {
             date.getSeconds() + (scale === SECOND ? qty : 0),
             date.getMilliseconds() + (scale === MILLISECOND ? qty : 0),
         ];
+        // @ts-ignore
         return new Date(...vals);
     },
 
@@ -177,10 +180,12 @@ export default {
             should_reset(SECOND) ? 0 : date.getMilliseconds(),
         ];
 
+        // @ts-ignore
         return new Date(...vals);
     },
 
     clone(date) {
+        // @ts-ignore
         return new Date(...this.get_date_values(date));
     },
 

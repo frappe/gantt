@@ -25,9 +25,11 @@ export function animateSVG(svgElement, attr, from, to) {
     if (animatedSvgElement === svgElement) {
         // triggered 2nd time programmatically
         // trigger artificial click event
-        const event = document.createEvent('HTMLEvents');
-        event.initEvent('click', true, true);
-        event.eventName = 'click';
+        const event = new Event('click', {
+            bubbles: true,
+            cancelable: true,
+        });
+
         animatedSvgElement.dispatchEvent(event);
     }
 }
@@ -42,7 +44,7 @@ function getAnimationElement(
 ) {
     const animEl = svgElement.querySelector('animate');
     if (animEl) {
-        $.attr(animEl, {
+        $.attr(animEl, null,{
             attributeName: attr,
             from,
             to,

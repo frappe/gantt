@@ -29,7 +29,7 @@
 		<div class="gantt-target"></div>
 	</div>
 	<script>
-		var tasks = [
+		let tasks = [
 			{
 				start: '2018-10-01',
 				end: '2018-10-08',
@@ -86,7 +86,7 @@
 				progress: 0
 			}
 		]
-		var gantt_chart = new Gantt(".gantt-target", tasks, {
+		let gantt_chart = new Gantt(".gantt-target", tasks, {
 			on_click: task => {
 				console.log(task);
 			},

@@ -1,8 +1,9 @@
 import sass from 'rollup-plugin-sass';
 import { terser } from 'rollup-plugin-terser';
+import typescript from '@rollup/plugin-typescript'
 
 const dev = {
-    input: 'src/index.js',
+    input: 'src/ts/index.ts',
     output: {
         name: 'Gantt',
         file: 'dist/frappe-gantt.js',
@@ -13,10 +14,11 @@ const dev = {
         sass({
             output: true,
         }),
+        typescript()
     ],
 };
 const prod = {
-    input: 'src/index.js',
+    input: 'src/ts/index.ts',
     output: {
         name: 'Gantt',
         file: 'dist/frappe-gantt.min.js',
@@ -31,6 +33,7 @@ const prod = {
             },
         }),
         terser(),
+        typescript()
     ],
 };
 

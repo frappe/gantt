@@ -1,4 +1,4 @@
-import date_utils from '../src/date_utils';
+import date_utils from '../src/ts/date_utils';
 
 test('Parse: parses string date', () => {
     const date = date_utils.parse('2017-09-09');
