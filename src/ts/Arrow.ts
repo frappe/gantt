@@ -7,7 +7,7 @@ export default class Arrow {
     public from_bar : Bar;
     public to_bar : Bar;
     private path: string;
-    element: any;
+    element: SVGPathElement;
 
     constructor(gantt : Gantt, from_bar: Bar, to_bar: Bar) {
         this.gantt = gantt;
@@ -90,7 +90,7 @@ export default class Arrow {
     }
 
     draw() {
-        this.element = createSVG('path', {
+        this.element = <SVGPathElement>createSVG('path', {
             d: this.path,
             'data-from': this.from_bar.task.id,
             'data-to': this.to_bar.task.id,
