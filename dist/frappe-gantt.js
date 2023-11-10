@@ -258,7 +258,6 @@ var Gantt = (function () {
                 svgElement.setAttribute(attr, attrs[attr]);
             }
         }
-        console.log("typeof svgElement: ".concat(svgElement));
         return svgElement;
     }
     function animateSVG(svgElement, attr, from, to) {
@@ -1027,6 +1026,8 @@ var Gantt = (function () {
             }
             this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
             this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
+            console.log("this.gantt_start: ".concat(this.gantt_start));
+            console.log("this.gantt_end: ".concat(this.gantt_end));
             // add date padding on both sides
             if (this.view_is([VIEW_MODE.QUARTER_DAY, VIEW_MODE.HALF_DAY])) {
                 this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
@@ -1147,6 +1148,8 @@ var Gantt = (function () {
             }
         };
         Gantt.prototype.make_grid_header = function () {
+            console.log("this.dates.length: ".concat(this.dates.length));
+            console.log("this.options.column_width: ".concat(this.options.column_width));
             var header_width = this.dates.length * this.options.column_width;
             var header_height = this.options.header_height + 10;
             createSVG('rect', {

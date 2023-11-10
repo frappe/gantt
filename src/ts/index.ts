@@ -80,7 +80,8 @@ export default class Gantt {
         this.container.appendChild(this.popup_wrapper);
     }
 
-    setup_options(options) {
+    //TODO: calculate gantt height
+    setup_options(options: GanttOptions) {
         const default_options = {
             header_height: 50,
             column_width: 30,
@@ -99,9 +100,9 @@ export default class Gantt {
         this.options = Object.assign({}, default_options, options);
     }
 
-    setup_tasks(tasks) {
+    setup_tasks(tasks: Task[]) {
         // prepare tasks
-        this.tasks = tasks.map((task, i) => {
+        this.tasks = tasks.map((task: Task, i : number) => {
             // convert to Date objects
             task._start = date_utils.parse(task.start);
             task._end = date_utils.parse(task.end);
@@ -233,6 +234,9 @@ export default class Gantt {
 
         this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
         this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
+
+        console.log(`this.gantt_start: ${this.gantt_start}`);
+        console.log(`this.gantt_end: ${this.gantt_end}`);
 
         // add date padding on both sides
         if (this.view_is([VIEW_MODE.QUARTER_DAY, VIEW_MODE.HALF_DAY])) {
@@ -367,6 +371,9 @@ export default class Gantt {
     }
 
     make_grid_header() {
+        console.log(`this.dates.length: ${this.dates.length}`);
+        console.log(`this.options.column_width: ${this.options.column_width}`);
+
         const header_width = this.dates.length * this.options.column_width;
         const header_height = this.options.header_height + 10;
         createSVG('rect', {

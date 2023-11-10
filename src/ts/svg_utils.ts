@@ -16,7 +16,6 @@ export function createSVG(tag:string, attrs) : SVGElement {
             svgElement.setAttribute(attr, attrs[attr]);
         }
     }
-    console.log(`typeof svgElement: ${svgElement}`);
     return svgElement;
 }
 

@@ -8,6 +8,8 @@ export default interface GanttOptions {
     language: string;
     bar_height: number;
     padding: number;
+    width: number;
+    height: number;
     header_height: number;
     column_width: number;
     step: number;
