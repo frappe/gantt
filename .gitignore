@@ -29,3 +29,4 @@ node_modules
 .DS_Store
 
 gh-pages
+.idea

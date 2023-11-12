@@ -19,7 +19,7 @@ export function createSVG(tag:string, attrs) : SVGElement {
     return svgElement;
 }
 
-export function animateSVG(svgElement, attr, from, to) {
+export function animateSVG(svgElement: SVGElement, attr: string, from: number, to: number) {
     const animatedSvgElement = getAnimationElement(svgElement, attr, from, to);
 
     if (animatedSvgElement === svgElement) {
@@ -55,14 +55,14 @@ export function getEndX(element: SVGElement) : number {
 }
 
 function getAnimationElement(
-    svgElement,
-    attr,
-    from,
-    to,
+    svgElement: SVGElement,
+    attr: string,
+    from: string | number,
+    to: string | number,
     dur = '0.4s',
     begin = '0.1s'
 ) {
-    const animEl = svgElement.querySelector('animate');
+    const animEl : SVGAnimateElement = svgElement.querySelector('animate');
     if (animEl) {
         $.attr(animEl, null,{
             attributeName: attr,

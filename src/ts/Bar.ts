@@ -3,6 +3,7 @@ import {$, animateSVG, createSVG, getEndX, getHeight, getWidth, getX, getY} from
 import Task from "./Task";
 import Gantt from "./index";
 import Arrow from "./Arrow";
+import {VIEW_MODE} from "./enums/VIEW_MODES";
 
 export default class Bar {
     private gantt: Gantt;
@@ -138,7 +139,7 @@ export default class Bar {
 
         createSVG('rect', {
             x: getX(bar) + 1,
-            y: getX(bar) + 1,
+            y: getY(bar) + 1,
             width: handle_width,
             height: this.height - 2,
             rx: this.corner_radius,
@@ -310,7 +311,7 @@ export default class Bar {
         const diff = date_utils.diff(task_start, gantt_start, 'hour');
         let x = (diff / step) * column_width;
 
-        if (this.gantt.view_is('Month')) {
+        if (this.gantt.view_is(VIEW_MODE.MONTH)) {
             const diff = date_utils.diff(task_start, gantt_start, 'day');
             x = (diff * column_width) / 30;
         }
@@ -330,7 +331,7 @@ export default class Bar {
             rem,
             position;
 
-        if (this.gantt.view_is('Week')) {
+        if (this.gantt.view_is(VIEW_MODE.WEEK)) {
             rem = dx % (this.gantt.options.column_width / 7);
             position =
                 odx -
@@ -338,7 +339,7 @@ export default class Bar {
                 (rem < this.gantt.options.column_width / 14
                     ? 0
                     : this.gantt.options.column_width / 7);
-        } else if (this.gantt.view_is('Month')) {
+        } else if (this.gantt.view_is(VIEW_MODE.MONTH)) {
             rem = dx % (this.gantt.options.column_width / 30);
             position =
                 odx -
