@@ -521,7 +521,13 @@ var Gantt = (function () {
         Bar.prototype.setup_click_event = function () {
             var _this = this;
             this.bar_wrapper.onclick = function (mouseEvent) {
+                if (_this.action_completed) {
+                    // just finished a move action, wait for a few seconds
+                    return;
+                }
                 _this.show_popup();
+                _this.gantt.unselect_all();
+                _this.bar_wrapper.classList.add('active');
             };
             $.on(this.bar_wrapper, 'focus ' + this.gantt.options.popup_trigger, null, function () {
                 if (_this.action_completed) {
