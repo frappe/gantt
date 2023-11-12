@@ -15,7 +15,7 @@ export default class Bar {
     private y: number;
     private corner_radius: number;
     private duration: number;
-    group: SVGGElement;
+    bar_wrapper: SVGGElement;
     private progress_width: number;
     private width: number;
     private bar_group: SVGGElement;
@@ -24,6 +24,10 @@ export default class Bar {
     private bar_progress: SVGRectElement;
     private handle_progress: SVGPolygonElement;
     arrows: Arrow[];
+    ox: number;
+    oy: number;
+    owidth: number;
+    finaldx: number;
 
     constructor(gantt: Gantt, task: Task) {
         this.set_defaults(gantt, task);
@@ -52,17 +56,17 @@ export default class Bar {
             this.gantt.options.column_width *
             this.duration *
             (this.task.progress / 100) || 0;
-        this.group = <SVGGElement>createSVG('g', {
+        this.bar_wrapper = <SVGGElement>createSVG('g', {
             class: 'bar-wrapper ' + (this.task.custom_class || ''),
             'data-id': this.task.id,
         });
         this.bar_group = <SVGGElement>createSVG('g', {
             class: 'bar-group',
-            append_to: this.group,
+            append_to: this.bar_wrapper,
         });
         this.handle_group = <SVGGElement>createSVG('g', {
             class: 'handle-group',
-            append_to: this.group,
+            append_to: this.bar_wrapper,
         });
     }
 
@@ -175,7 +179,11 @@ export default class Bar {
     }
 
     setup_click_event() {
-        $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, null, () => {
+        this.bar_wrapper.onclick = (mouseEvent: MouseEvent) => {
+            this.show_popup();
+        }
+
+        $.on(this.bar_wrapper, 'focus ' + this.gantt.options.popup_trigger, null, () => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
@@ -183,10 +191,10 @@ export default class Bar {
 
             this.show_popup();
             this.gantt.unselect_all();
-            this.group.classList.add('active');
+            this.bar_wrapper.classList.add('active');
         });
 
-        $.on(this.group, 'dblclick', null, () => {
+        $.on(this.bar_wrapper, 'dblclick', null, () => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
@@ -197,8 +205,6 @@ export default class Bar {
     }
 
     show_popup() {
-        if (this.gantt.bar_being_dragged) return;
-
         const start_date = date_utils.format(
             this.task._start,
             'MMM D',
@@ -377,7 +383,7 @@ export default class Bar {
 
     update_label_position() {
         const bar = this.bar,
-            label: SVGTextElement = this.group.querySelector('.bar-label');
+            label: SVGTextElement = this.bar_wrapper.querySelector('.bar-label');
 
         if (label.getBBox().width > getWidth(bar)) {
             label.classList.add('big');
@@ -397,7 +403,7 @@ export default class Bar {
         this.handle_group
             .querySelector('.handle.right')
             .setAttribute('x', String(getEndX(bar) - 9));
-        const handle = this.group.querySelector('.handle.progress');
+        const handle = this.bar_wrapper.querySelector('.handle.progress');
         handle &&
         handle.setAttribute('points', this.get_progress_polygon_points().join(','));
     }

@@ -586,7 +586,7 @@ export default class Gantt {
     make_bars() {
         this.bars = this.tasks.map((task) => {
             const bar = new Bar(this, task);
-            this.layers.bar.appendChild(bar.group);
+            this.layers.bar.appendChild(bar.bar_wrapper);
             return bar;
         });
     }
@@ -670,7 +670,7 @@ export default class Gantt {
         let is_resizing_left = false;
         let is_resizing_right = false;
         let parent_bar_id: string = null;
-        let bars = []; // instanceof Bar
+        let bars : Bar[] = [];
 
         function action_in_progress() {
             return is_dragging || is_resizing_left || is_resizing_right;
@@ -702,7 +702,7 @@ export default class Gantt {
             this.bar_being_dragged = parent_bar_id;
 
             bars.forEach((bar) => {
-                const $bar = bar.bar;
+                const $bar = bar;
                 $bar.ox = getX(bar.bar);
                 $bar.oy = getY(bar.bar);
                 $bar.owidth = getWidth(bar.bar);
@@ -716,7 +716,7 @@ export default class Gantt {
             const dy = e.offsetY - y_on_start;
 
             bars.forEach((bar) => {
-                const $bar = bar.bar;
+                const $bar = bar;
                 $bar.finaldx = this.get_snap_position(dx);
                 this.hide_popup();
                 if (is_resizing_left) {
@@ -744,7 +744,7 @@ export default class Gantt {
 
         document.addEventListener('mouseup', () => {
             if (is_dragging || is_resizing_left || is_resizing_right) {
-                bars.forEach((bar) => bar.group.classList.remove('active'));
+                bars.forEach((bar) => bar.bar_wrapper.classList.remove('active'));
             }
 
             is_dragging = false;
@@ -755,7 +755,7 @@ export default class Gantt {
         $.on(this.svg, 'mouseup', null, () => {
             this.bar_being_dragged = null;
             bars.forEach((bar) => {
-                const $bar = bar.bar;
+                const $bar = bar;
                 if (!$bar.finaldx) return;
                 bar.date_changed();
                 bar.set_action_completed();

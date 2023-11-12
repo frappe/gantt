@@ -407,17 +407,17 @@ var Gantt = (function () {
                 this.gantt.options.column_width *
                     this.duration *
                     (this.task.progress / 100) || 0;
-            this.group = createSVG('g', {
+            this.bar_wrapper = createSVG('g', {
                 class: 'bar-wrapper ' + (this.task.custom_class || ''),
                 'data-id': this.task.id,
             });
             this.bar_group = createSVG('g', {
                 class: 'bar-group',
-                append_to: this.group,
+                append_to: this.bar_wrapper,
             });
             this.handle_group = createSVG('g', {
                 class: 'handle-group',
-                append_to: this.group,
+                append_to: this.bar_wrapper,
             });
         };
         Bar.prototype.draw = function () {
@@ -520,16 +520,19 @@ var Gantt = (function () {
         };
         Bar.prototype.setup_click_event = function () {
             var _this = this;
-            $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, null, function () {
+            this.bar_wrapper.onclick = function (mouseEvent) {
+                _this.show_popup();
+            };
+            $.on(this.bar_wrapper, 'focus ' + this.gantt.options.popup_trigger, null, function () {
                 if (_this.action_completed) {
                     // just finished a move action, wait for a few seconds
                     return;
                 }
                 _this.show_popup();
                 _this.gantt.unselect_all();
-                _this.group.classList.add('active');
+                _this.bar_wrapper.classList.add('active');
             });
-            $.on(this.group, 'dblclick', null, function () {
+            $.on(this.bar_wrapper, 'dblclick', null, function () {
                 if (_this.action_completed) {
                     // just finished a move action, wait for a few seconds
                     return;
@@ -538,8 +541,6 @@ var Gantt = (function () {
             });
         };
         Bar.prototype.show_popup = function () {
-            if (this.gantt.bar_being_dragged)
-                return;
             var start_date = date_utils.format(this.task._start, 'MMM D', this.gantt.options.language);
             var end_date = date_utils.format(date_utils.add(this.task._end, -1, 'second'), 'MMM D', this.gantt.options.language);
             var subtitle = start_date + ' - ' + end_date;
@@ -680,7 +681,7 @@ var Gantt = (function () {
             this.bar_progress.setAttribute('width', String(getWidth(this.bar) * (this.task.progress / 100)));
         };
         Bar.prototype.update_label_position = function () {
-            var bar = this.bar, label = this.group.querySelector('.bar-label');
+            var bar = this.bar, label = this.bar_wrapper.querySelector('.bar-label');
             if (label.getBBox().width > getWidth(bar)) {
                 label.classList.add('big');
                 label.setAttribute('x', String(getX(bar) + getWidth(bar) + 5));
@@ -700,7 +701,7 @@ var Gantt = (function () {
             this.handle_group
                 .querySelector('.handle.right')
                 .setAttribute('x', String(getEndX(bar) - 9));
-            var handle = this.group.querySelector('.handle.progress');
+            var handle = this.bar_wrapper.querySelector('.handle.progress');
             handle &&
                 handle.setAttribute('points', this.get_progress_polygon_points().join(','));
         };
@@ -1326,7 +1327,7 @@ var Gantt = (function () {
             var _this = this;
             this.bars = this.tasks.map(function (task) {
                 var bar = new Bar(_this, task);
-                _this.layers.bar.appendChild(bar.group);
+                _this.layers.bar.appendChild(bar.bar_wrapper);
                 return bar;
             });
         };
@@ -1403,7 +1404,7 @@ var Gantt = (function () {
             var is_resizing_left = false;
             var is_resizing_right = false;
             var parent_bar_id = null;
-            var bars = []; // instanceof Bar
+            var bars = [];
             function action_in_progress() {
                 return is_dragging || is_resizing_left || is_resizing_right;
             }
@@ -1428,7 +1429,7 @@ var Gantt = (function () {
                 bars = ids.map(function (id) { return _this.get_bar(id); });
                 _this.bar_being_dragged = parent_bar_id;
                 bars.forEach(function (bar) {
-                    var $bar = bar.bar;
+                    var $bar = bar;
                     $bar.ox = getX(bar.bar);
                     $bar.oy = getY(bar.bar);
                     $bar.owidth = getWidth(bar.bar);
@@ -1441,7 +1442,7 @@ var Gantt = (function () {
                 var dx = e.offsetX - x_on_start;
                 e.offsetY - y_on_start;
                 bars.forEach(function (bar) {
-                    var $bar = bar.bar;
+                    var $bar = bar;
                     $bar.finaldx = _this.get_snap_position(dx);
                     _this.hide_popup();
                     if (is_resizing_left) {
@@ -1471,7 +1472,7 @@ var Gantt = (function () {
             });
             document.addEventListener('mouseup', function () {
                 if (is_dragging || is_resizing_left || is_resizing_right) {
-                    bars.forEach(function (bar) { return bar.group.classList.remove('active'); });
+                    bars.forEach(function (bar) { return bar.bar_wrapper.classList.remove('active'); });
                 }
                 is_dragging = false;
                 is_resizing_left = false;
@@ -1480,7 +1481,7 @@ var Gantt = (function () {
             $.on(this.svg, 'mouseup', null, function () {
                 _this.bar_being_dragged = null;
                 bars.forEach(function (bar) {
-                    var $bar = bar.bar;
+                    var $bar = bar;
                     if (!$bar.finaldx)
                         return;
                     bar.date_changed();
