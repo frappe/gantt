@@ -520,7 +520,7 @@ var Gantt = (function () {
         };
         Bar.prototype.setup_click_event = function () {
             var _this = this;
-            this.bar_wrapper.onclick = function (mouseEvent) {
+            this.bar_group.onclick = function (mouseEvent) {
                 if (_this.action_completed) {
                     // just finished a move action, wait for a few seconds
                     return;
@@ -529,32 +529,36 @@ var Gantt = (function () {
                 _this.gantt.unselect_all();
                 _this.bar_wrapper.classList.add('active');
             };
-            $.on(this.bar_wrapper, 'focus ' + this.gantt.options.popup_trigger, null, function () {
-                if (_this.action_completed) {
-                    // just finished a move action, wait for a few seconds
-                    return;
-                }
-                _this.show_popup();
-                _this.gantt.unselect_all();
-                _this.bar_wrapper.classList.add('active');
-            });
-            $.on(this.bar_wrapper, 'dblclick', null, function () {
-                if (_this.action_completed) {
-                    // just finished a move action, wait for a few seconds
-                    return;
-                }
-                _this.gantt.trigger_event('click', [_this.task]);
-            });
+            /*        $.on(this.bar_wrapper, 'focus ' + this.gantt.options.popup_trigger, null, () => {
+                        if (this.action_completed) {
+                            // just finished a move action, wait for a few seconds
+                            return;
+                        }
+            
+                        this.show_popup();
+                        this.gantt.unselect_all();
+                        this.bar_wrapper.classList.add('active');
+                    });
+            
+                    $.on(this.bar_wrapper, 'dblclick', null, () => {
+                        if (this.action_completed) {
+                            // just finished a move action, wait for a few seconds
+                            return;
+                        }
+            
+                        this.gantt.trigger_event('click', [this.task]);
+                    });*/
         };
         Bar.prototype.show_popup = function () {
             var start_date = date_utils.format(this.task._start, 'MMM D', this.gantt.options.language);
             var end_date = date_utils.format(date_utils.add(this.task._end, -1, 'second'), 'MMM D', this.gantt.options.language);
             var subtitle = start_date + ' - ' + end_date;
             this.gantt.show_popup({
-                target_element: this.bar,
-                title: this.task.name,
+                position: "left",
                 subtitle: subtitle,
+                target_element: this.bar_group,
                 task: this.task,
+                title: this.task.name
             });
         };
         Bar.prototype.update_bar_position = function (_a) {
@@ -784,6 +788,8 @@ var Gantt = (function () {
 
     var Popup = /** @class */ (function () {
         function Popup(parent, custom_html) {
+            // show
+            this.opacity = '1';
             this.parent = parent;
             this.custom_html = custom_html;
             this.make();
@@ -795,7 +801,7 @@ var Gantt = (function () {
             this.subtitle = this.parent.querySelector('.subtitle');
             this.pointer = this.parent.querySelector('.pointer');
         };
-        Popup.prototype.show = function (options) {
+        Popup.prototype.show = function (options, gantt_height) {
             if (!options.target_element) {
                 throw new Error('target_element is required to show popup');
             }
@@ -823,15 +829,24 @@ var Gantt = (function () {
             else if (target_element instanceof SVGElement) {
                 position_meta = options.target_element.getBBox();
             }
-            if (options.position === 'left') {
-                this.parent.style.left =
-                    position_meta.x + (position_meta.width + 10) + 'px';
+            if (options.position === 'left' || options.position !== "right") {
+                this.parent.style.left = position_meta.x + (position_meta.width + 10) + 'px';
+            }
+            else {
+                this.parent.style.right = position_meta.x + (position_meta.width + 10) + 'px';
+            }
+            if (position_meta.y + this.parent.offsetHeight > gantt_height) {
+                this.parent.style.top = (position_meta.y + position_meta.height - this.parent.offsetHeight) + 'px';
+                this.pointer.style.bottom = '2px';
+                this.pointer.style.top = '';
+            }
+            else {
                 this.parent.style.top = position_meta.y + 'px';
-                this.pointer.style.transform = 'rotateZ(90deg)';
-                this.pointer.style.left = '-7px';
+                this.pointer.style.bottom = '';
                 this.pointer.style.top = '2px';
             }
-            // show
+            this.pointer.style.transform = 'rotateZ(90deg)';
+            this.pointer.style.left = '-7px';
             this.parent.style.opacity = '1';
         };
         Popup.prototype.hide = function () {
@@ -1617,7 +1632,7 @@ var Gantt = (function () {
             if (!this.popup) {
                 this.popup = new Popup(this.popup_wrapper, this.options.custom_popup_html);
             }
-            this.popup.show(options);
+            this.popup.show(options, this.svg.getBoundingClientRect().height);
         };
         Gantt.prototype.hide_popup = function () {
             this.popup && this.popup.hide();

@@ -1,17 +1,17 @@
 import {VIEW_MODE} from "./enums/VIEW_MODES";
 
 export default interface GanttOptions {
-    bar_corner_radius: number;
     arrow_curve: number;
-    custom_popup_html: HTMLElement;
-    popup_trigger: Event;
-    language: string;
+    bar_corner_radius: number;
     bar_height: number;
-    padding: number;
-    width: number;
-    height: number;
-    header_height: number;
     column_width: number;
+    custom_popup_html: HTMLElement;
+    header_height: number;
+    height: number;
+    language: string;
+    padding: number;
+    popup_trigger: Event;
     step: number;
     view_mode: VIEW_MODE;
+    width: number;
 }

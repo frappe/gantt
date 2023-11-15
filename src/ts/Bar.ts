@@ -179,7 +179,7 @@ export default class Bar {
     }
 
     setup_click_event() {
-        this.bar_wrapper.onclick = (mouseEvent: MouseEvent) => {
+        this.bar_group.onclick = (mouseEvent: MouseEvent) => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
@@ -225,10 +225,11 @@ export default class Bar {
         const subtitle = start_date + ' - ' + end_date;
 
         this.gantt.show_popup({
-            target_element: this.bar,
-            title: this.task.name,
+            position: "left",
             subtitle: subtitle,
+            target_element: this.bar_group,
             task: this.task,
+            title: this.task.name
         });
     }
 

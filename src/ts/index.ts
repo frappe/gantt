@@ -7,6 +7,7 @@ import {VIEW_MODE} from "./enums/VIEW_MODES";
 import '../scss/gantt.scss';
 import Task from "./Task";
 import GanttOptions from "./GanttOptions";
+import PopupOptions from "./PopupOptions";
 
 export default class Gantt {
     private svg: SVGElement;
@@ -897,14 +898,14 @@ export default class Gantt {
         });
     }
 
-    show_popup(options) {
+    show_popup(options : PopupOptions) {
         if (!this.popup) {
             this.popup = new Popup(
                 this.popup_wrapper,
                 this.options.custom_popup_html
             );
         }
-        this.popup.show(options);
+        this.popup.show(options, this.svg.getBoundingClientRect().height);
     }
 
     hide_popup() {
