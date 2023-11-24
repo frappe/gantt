@@ -3,6 +3,8 @@ on: workflow_dispatch
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Check out source code
         uses: actions/checkout@v3
