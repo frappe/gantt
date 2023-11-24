@@ -45,13 +45,15 @@
     },
     "release-it": {
         "git": {
+            "requireBranch": "master",
             "tagName": "v${version}"
         },
         "npm": {
             "publish": false
         },
         "github": {
-            "release": true
+            "release": true,
+            "assets": ["dist/*"]
         }
     }
 }
