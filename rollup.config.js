@@ -1,11 +1,12 @@
 import sass from 'rollup-plugin-sass';
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
+
 
 const dev = {
     input: 'src/index.js',
     output: {
         name: 'Scheduler',
-        file: 'dist/horsa-scheduler.js',
+        file: 'dist/dev/horsa-scheduler.js',
         sourcemap: true,
         format: 'iife',
     },
@@ -19,7 +20,7 @@ const prod = {
     input: 'src/index.js',
     output: {
         name: 'Scheduler',
-        file: 'dist/horsa-scheduler.min.js',
+        file: 'dist/prod/horsa-scheduler.min.js',
         sourcemap: true,
         format: 'iife',
     },
