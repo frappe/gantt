@@ -70,11 +70,11 @@ If you want to contribute enhancements or fixes:
 2. `cd` into project directory
 3. Install Yarn by typing `npm install --global yarn` in your terminal
 4. `yarn`
-5. `yarn run dev`
+5. `yarn start`
 6. Open `index.html` in your browser, make your code changes and test them.
 
 ### Publishing
-Every times a new version is pushed, Github Actions will publish it in npm repository.
+Every times a new version is pushed, Github Actions will publish it.
 
 License: MIT
 

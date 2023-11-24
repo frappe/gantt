@@ -6,7 +6,8 @@
     "scripts": {
         "start": "rollup -c -w",
         "build": "rollup -c",
-        "test": "jest"
+        "test": "jest",
+        "release": "release-it --no-increment"
     },
     "repository": {
         "type": "git",
@@ -32,10 +33,25 @@
         "url": "https://github.com/horsa-way/scheduler/issues"
     },
     "homepage": "https://github.com/horsa-way/scheduler",
+    "publishConfig": {
+        "registry": "https://registry.npmjs.org"
+    },    
     "devDependencies": {
         "@rollup/plugin-terser": "^0.4.4",
         "jest": "^22.2.1",
+        "release-it": "^17.0.0",
         "rollup": "^2.70.2",
         "rollup-plugin-sass": "^1.2.12"
+    },
+    "release-it": {
+        "git": {
+            "tagName": "v${version}"
+        },
+        "npm": {
+            "publish": false
+        },
+        "github": {
+            "release": true
+        }
     }
 }

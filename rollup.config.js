@@ -6,7 +6,7 @@ const dev = {
     input: 'src/index.js',
     output: {
         name: 'Scheduler',
-        file: 'dist/dev/horsa-scheduler.js',
+        file: 'dist/horsa-scheduler.js',
         sourcemap: true,
         format: 'iife',
     },
@@ -20,7 +20,7 @@ const prod = {
     input: 'src/index.js',
     output: {
         name: 'Scheduler',
-        file: 'dist/prod/horsa-scheduler.min.js',
+        file: 'dist/horsa-scheduler.min.js',
         sourcemap: true,
         format: 'iife',
     },
