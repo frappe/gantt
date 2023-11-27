@@ -15,20 +15,17 @@
 </p>
 
 ### Install
+Download from [GitHub releases](https://github.com/horsa-way/scheduler/releases/latest)
+
+and include it in your HTML:
 ```
-npm install horsa-scheduler
+<script src="horsa-scheduler.min.js"></script>
+<link rel="stylesheet" href="horsa-scheduler.min.css">
 ```
 
 ### Usage
-TO EDIT
+Look the [HTML index](https://github.com/horsa-way/scheduler/blob/master/index.html) file for a complete example.
 
-Include it in your HTML:
-```
-<script src="horsa-scheduler.min.js"></script>
-<link rel="stylesheet" href="horsa-scheduler.css">
-```
-
-And start hacking:
 ```js
 var tasks = [
   {
@@ -38,14 +35,15 @@ var tasks = [
     end: '2016-12-31',
     progress: 20,
     dependencies: 'Task 2, Task 3',
+    row: 'row_id_1', // row where put the task
     custom_class: 'bar-milestone' // optional
   },
   ...
 ]
-var gantt = new Gantt("#gantt", tasks);
+var scheduler = new Scheduler("#scheduler", tasks);
 ```
 
-You can also pass various options to the Gantt constructor:
+You can also pass various options to the Scheduler constructor:
 ```js
 var gantt = new Gantt("#gantt", tasks, {
     header_height: 50,
@@ -74,7 +72,7 @@ If you want to contribute enhancements or fixes:
 6. Open `index.html` in your browser, make your code changes and test them.
 
 ### Publishing
-Every times a new version is pushed, Github Actions will publish it.
+Every times a new version is pushed, Github Actions will create a release on github releases.
 
 License: MIT
 
