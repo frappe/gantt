@@ -1,5 +1,8 @@
-name: Release
-on: workflow_dispatch
+name: Release to GitHub
+on:
+  push:
+    branches:
+      - master
 jobs:
   release:
     runs-on: ubuntu-latest
