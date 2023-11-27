@@ -45,7 +45,19 @@ var scheduler = new Scheduler("#scheduler", tasks);
 
 You can also pass various options to the Scheduler constructor:
 ```js
-var gantt = new Gantt("#gantt", tasks, {
+var cells = [
+    {
+        row: 'row_id_1',
+        column: 'name',
+        value: 'name cell 1'
+    },
+    {
+        row: 'row_id_1',
+        column: 'description',
+        value: 'description cell 1'
+    },
+]
+var scheduler = new Scheduler("#scheduler", tasks, {
     header_height: 50,
     column_width: 30,
     step: 24,
@@ -57,7 +69,34 @@ var gantt = new Gantt("#gantt", tasks, {
     view_mode: 'Day',
     date_format: 'YYYY-MM-DD',
     language: 'en', // or 'es', 'it', 'ru', 'ptBr', 'fr', 'tr', 'zh', 'de', 'hu'
-    custom_popup_html: null
+    custom_popup_html: null,
+    resize_left: true,
+    resize_right: true,
+    drag_drop_x: true,
+    drag_drop_y: true,
+    popup_position: ['left', 'bottom']
+    date_start: 'YYYY-MM-DD',
+    date_end: 'YYYY-MM-DD',
+    rows: ['row_id_1', 'row_id_2', 'row_id_3'],
+    fixed_columns: ['name', 'description'],
+    on_task_dblclick: task => {
+        console.log(task);
+    },
+    on_grid_dblclick: row_id => {
+        console.log(row_id);
+    },
+    on_cell_dblclick: (row_id, col_id) => {
+        console.log(row_id, col_id);
+    },
+    on_position_change: (task, row, start, end) => {
+        console.log(task, row, start, end);
+    },
+    on_progress_change: (task, progress) => {
+        console.log(task, progress);
+    },
+    on_view_change: (mode) => {
+        console.log(mode);
+    },
 });
 ```
 
