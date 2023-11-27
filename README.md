@@ -24,7 +24,7 @@ and include it in your HTML:
 ```
 
 ### Usage
-Look the [HTML index](https://github.com/horsa-way/scheduler/blob/master/index.html) file for a complete example.
+Look the HTML [index file](https://github.com/horsa-way/scheduler/blob/master/index.html) for a complete example.
 
 ```js
 var tasks = [
@@ -57,7 +57,7 @@ var cells = [
         value: 'description cell 1'
     },
 ]
-var scheduler = new Scheduler("#scheduler", tasks, {
+var scheduler = new Scheduler("#scheduler", tasks, cells, {
     header_height: 50,
     column_width: 30,
     step: 24,
