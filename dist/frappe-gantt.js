@@ -240,9 +240,7 @@ var Gantt = (function () {
     }
 
     function $(expr, con) {
-        return typeof expr === 'string'
-            ? (con || document).querySelector(expr)
-            : expr || null;
+        return typeof expr === 'string' ? (con || document).querySelector(expr) : expr || null;
     }
     function createSVG(tag, attrs) {
         var svgElement = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -266,8 +264,7 @@ var Gantt = (function () {
             // triggered 2nd time programmatically
             // trigger artificial click event
             var event_1 = new Event('click', {
-                bubbles: true,
-                cancelable: true,
+                bubbles: true, cancelable: true,
             });
             animatedSvgElement.dispatchEvent(event_1);
         }
@@ -307,21 +304,14 @@ var Gantt = (function () {
             to: to,
             dur: dur,
             begin: begin,
-            calcMode: 'spline',
-            values: from + ';' + to,
-            keyTimes: '0; 1',
-            keySplines: cubic_bezier('ease-out'),
+            calcMode: 'spline', values: from + ';' + to, keyTimes: '0; 1', keySplines: cubic_bezier('ease-out'),
         });
         svgElement.appendChild(animateElement);
         return svgElement;
     }
     function cubic_bezier(name) {
         return {
-            ease: '.25 .1 .25 1',
-            linear: '0 0 1 1',
-            'ease-in': '.42 0 1 1',
-            'ease-out': '0 0 .58 1',
-            'ease-in-out': '.42 0 .58 1',
+            ease: '.25 .1 .25 1', linear: '0 0 1 1', 'ease-in': '.42 0 1 1', 'ease-out': '0 0 .58 1', 'ease-in-out': '.42 0 .58 1',
         }[name];
     }
     $.on = function (element, event, selector, callback) {
@@ -1432,12 +1422,15 @@ var Gantt = (function () {
             $.on(this.svg, 'mousedown', '.bar-wrapper, .handle', function (e, element) {
                 var bar_wrapper = $.closest('.bar-wrapper', element);
                 if (element.classList.contains('left')) {
+                    console.log("is_resizing_left");
                     is_resizing_left = true;
                 }
                 else if (element.classList.contains('right')) {
+                    console.log("is_resizing_right");
                     is_resizing_right = true;
                 }
                 else if (element.classList.contains('bar-wrapper')) {
+                    console.log("is_dragging");
                     is_dragging = true;
                 }
                 bar_wrapper.classList.add('active');
@@ -1457,7 +1450,8 @@ var Gantt = (function () {
                     $bar.finaldx = 0;
                 });
             });
-            $.on(this.svg, 'mousemove', null, function (e) {
+            $.on(this.svg, 'mousemove', function (e) {
+                console.log("mousemove");
                 if (!action_in_progress())
                     return;
                 var dx = e.offsetX - x_on_start;
@@ -1467,6 +1461,7 @@ var Gantt = (function () {
                     $bar.finaldx = _this.get_snap_position(dx);
                     _this.hide_popup();
                     if (is_resizing_left) {
+                        console.log("is_resizing_left");
                         if (parent_bar_id === bar.task.id) {
                             bar.update_bar_position({
                                 x: $bar.ox + $bar.finaldx,
@@ -1480,6 +1475,7 @@ var Gantt = (function () {
                         }
                     }
                     else if (is_resizing_right) {
+                        console.log("is_resizing_right");
                         if (parent_bar_id === bar.task.id) {
                             bar.update_bar_position({
                                 width: $bar.owidth + $bar.finaldx,
@@ -1487,6 +1483,7 @@ var Gantt = (function () {
                         }
                     }
                     else if (is_dragging) {
+                        console.log("is_dragging");
                         bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
                     }
                 });
@@ -1499,7 +1496,7 @@ var Gantt = (function () {
                 is_resizing_left = false;
                 is_resizing_right = false;
             });
-            $.on(this.svg, 'mouseup', null, function () {
+            $.on(this.svg, 'mouseup', function () {
                 _this.bar_being_dragged = null;
                 bars.forEach(function (bar) {
                     var $bar = bar;
@@ -1533,7 +1530,7 @@ var Gantt = (function () {
                 $bar_progress.min_dx = getWidth($bar_progress);
                 $bar_progress.max_dx = getWidth($bar) - getWidth($bar_progress);
             });
-            $.on(this.svg, 'mousemove', null, function (e) {
+            $.on(this.svg, 'mousemove', function (e) {
                 if (!is_resizing)
                     return;
                 var dx = e.offsetX - x_on_start;
@@ -1549,7 +1546,7 @@ var Gantt = (function () {
                 $.attr($handle, 'points', bar.get_progress_polygon_points());
                 $bar_progress.finaldx = dx;
             });
-            $.on(this.svg, 'mouseup', null, function () {
+            $.on(this.svg, 'mouseup', function () {
                 is_resizing = false;
                 if (!($bar_progress && $bar_progress.finaldx))
                     return;

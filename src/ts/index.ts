@@ -10,20 +10,20 @@ import GanttOptions from "./GanttOptions";
 import PopupOptions from "./PopupOptions";
 
 export default class Gantt {
+    options: GanttOptions;
+    gantt_start: any;
+    bar_being_dragged: string = null;
     private svg: SVGElement;
     private container: HTMLDivElement;
     private popup_wrapper: HTMLDivElement;
     private tasks: Task[];
-    options: GanttOptions;
     private dependency_map: any;
-    gantt_start: any;
     private gantt_end: any;
     private dates: Date[];
     private layers: any;
     private bars: Bar[];
     private arrows: Arrow[];
     private popup: Popup;
-    bar_being_dragged: string = null;
 
     constructor(wrapper: HTMLElement | SVGElement, tasks: Task[], options: GanttOptions) {
         this.setup_tasks(tasks);
@@ -671,7 +671,7 @@ export default class Gantt {
         let is_resizing_left = false;
         let is_resizing_right = false;
         let parent_bar_id: string = null;
-        let bars : Bar[] = [];
+        let bars: Bar[] = [];
 
         function action_in_progress() {
             return is_dragging || is_resizing_left || is_resizing_right;
@@ -681,10 +681,13 @@ export default class Gantt {
             const bar_wrapper = $.closest('.bar-wrapper', element);
 
             if (element.classList.contains('left')) {
+                console.log("is_resizing_left");
                 is_resizing_left = true;
             } else if (element.classList.contains('right')) {
+                console.log("is_resizing_right");
                 is_resizing_right = true;
             } else if (element.classList.contains('bar-wrapper')) {
+                console.log("is_dragging");
                 is_dragging = true;
             }
 
@@ -711,7 +714,8 @@ export default class Gantt {
             });
         });
 
-        $.on(this.svg, 'mousemove', null, (e) => {
+        $.on(this.svg, 'mousemove', (e) => {
+            console.log("mousemove");
             if (!action_in_progress()) return;
             const dx = e.offsetX - x_on_start;
             const dy = e.offsetY - y_on_start;
@@ -721,6 +725,7 @@ export default class Gantt {
                 $bar.finaldx = this.get_snap_position(dx);
                 this.hide_popup();
                 if (is_resizing_left) {
+                    console.log("is_resizing_left");
                     if (parent_bar_id === bar.task.id) {
                         bar.update_bar_position({
                             x: $bar.ox + $bar.finaldx,
@@ -732,12 +737,14 @@ export default class Gantt {
                         });
                     }
                 } else if (is_resizing_right) {
+                    console.log("is_resizing_right");
                     if (parent_bar_id === bar.task.id) {
                         bar.update_bar_position({
                             width: $bar.owidth + $bar.finaldx,
                         });
                     }
                 } else if (is_dragging) {
+                    console.log("is_dragging");
                     bar.update_bar_position({x: $bar.ox + $bar.finaldx});
                 }
             });
@@ -753,7 +760,7 @@ export default class Gantt {
             is_resizing_right = false;
         });
 
-        $.on(this.svg, 'mouseup', null, () => {
+        $.on(this.svg, 'mouseup', () => {
             this.bar_being_dragged = null;
             bars.forEach((bar) => {
                 const $bar = bar;
@@ -792,7 +799,7 @@ export default class Gantt {
             $bar_progress.max_dx = getWidth($bar) - getWidth($bar_progress);
         });
 
-        $.on(this.svg, 'mousemove', null, (e) => {
+        $.on(this.svg, 'mousemove', (e) => {
             if (!is_resizing) return;
             let dx = e.offsetX - x_on_start;
             let dy = e.offsetY - y_on_start;
@@ -810,7 +817,7 @@ export default class Gantt {
             $bar_progress.finaldx = dx;
         });
 
-        $.on(this.svg, 'mouseup', null, () => {
+        $.on(this.svg, 'mouseup', () => {
             is_resizing = false;
             if (!($bar_progress && $bar_progress.finaldx)) return;
             bar.progress_changed();
@@ -898,7 +905,7 @@ export default class Gantt {
         });
     }
 
-    show_popup(options : PopupOptions) {
+    show_popup(options: PopupOptions) {
         if (!this.popup) {
             this.popup = new Popup(
                 this.popup_wrapper,
