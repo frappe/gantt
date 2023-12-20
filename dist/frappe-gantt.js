@@ -942,6 +942,24 @@ var Gantt = (function () {
         }
     }
 
+    function barProgressUpdate(updateColor) {
+        const activeBarWrapper = document.querySelector('.bar-wrapper.active');
+
+        if (activeBarWrapper) {
+            const barProgress = activeBarWrapper.querySelector('.bar-progress');
+            const barProgressWidth = Number(activeBarWrapper.querySelector('.bar').getAttribute('width')) * 0.935;
+            const barProgressUpdatedWidth = Number(barProgress.getAttribute('width')) - 10;
+
+            if (barProgress && barProgressUpdatedWidth >= barProgressWidth) {
+                barProgress.style.fill = updateColor;
+            } else {
+                barProgress.style.fill = '#a3a3ff';
+            }
+        } else {
+            console.error('No .bar-wrapper element with class "active" found.');
+        }
+    }
+
     const VIEW_MODE = {
         QUARTER_DAY: 'Quarter Day',
         HALF_DAY: 'Half Day',
@@ -1732,8 +1750,8 @@ var Gantt = (function () {
             $.on(this.$svg, 'mouseup', () => {
                 is_resizing = false;
                 if (!($bar_progress && $bar_progress.finaldx)) return;
-                bar.progress_changed();
                 bar.set_action_completed();
+                barProgressUpdate('green');
             });
         }
 

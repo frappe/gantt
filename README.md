@@ -62,6 +62,9 @@ var gantt = new Gantt("#gantt", tasks, {
 });
 ```
 
+### Bar Progress Color Update
+You can set the color the bar progress after a percentage progress. 
+
 ### Contributing
 If you want to contribute enhancements or fixes:
 
