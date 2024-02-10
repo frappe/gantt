@@ -887,7 +887,18 @@ export default class Scheduler {
 
         $.on(this.$svg, 'dblclick', '.grid-row', (e) => {
             const data_id = e.target.getAttribute('data-id');
-            this.trigger_event('grid_dblclick', [data_id]);
+            //modifica per stamapare oltre la riga anche la data in cui ci si esegue il dbclick
+            //se non c'è aggiungere il datetime nel file html
+
+            const x_in_units = e.offsetX / this.options.column_width;
+            const new_start_date = date_utils.add(
+                this.scheduler_start,
+                x_in_units * this.options.step,
+                'hour');
+
+            const datetime = new_start_date;
+            
+            this.trigger_event('grid_dblclick', [data_id,datetime]);
         });
 
         $.on(this.$container, 'scroll', e => {
@@ -1046,6 +1057,52 @@ export default class Scheduler {
                     if ($bar.finaldx || $bar.finaldy) {
                         bar.position_changed();
                         bar.set_action_completed();
+
+                        //inizio
+
+                        //CREARE LA FUNZIONE PER POI ATTIVARLA TRAMITE OPZIONE
+
+                        //PER ORA NON SERVE LA SOVRAPPOSIZIONE PER RICALCOLO TUTTE LE RIGHE
+                        // // Trova tutte le barre sovrapposte 
+                        // const overlappingBars = this.bars.filter(otherBar =>
+                        //     // escludi la stessa barra
+                        //     otherBar !== bar && 
+                        //     // barre nella stessa riga
+                        //     otherBar.task.row === bar.task.row && 
+                        //     // verifica la sovrapposizione
+                        //     (bar.x < otherBar.x + otherBar.width && bar.x + bar.width > otherBar.x) ||
+                        //     // verifica la sovrapposizione sull'asse y
+                        //     (bar.y < otherBar.y + otherBar.height && bar.y + bar.height > otherBar.y)
+                        // );
+
+                        //Variabile per avere la y sempre aggiornata
+                        let updated_y = this.options.header_height + this.options.padding / 2;
+                        // Aggiorno tutte le righe
+                        const grid_rows = this.layers.grid.querySelectorAll('rect.grid-row');
+                        grid_rows.forEach((current_row) => {
+                            const row_id = current_row.getAttribute('data-id');
+                            // CAMBIARE L'ALTEZZA DI TUTTE LE RIGHE IN BASE ALLE BARRE
+                            const bars_in_row = this.bars.filter(bar => bar.task.row === row_id);
+                            let num_bars_in_row = bars_in_row.length;
+                            if (num_bars_in_row == 0) {
+                                num_bars_in_row = 1;
+                                updated_y = this.compute_grid_and_line_height(bar , current_row , num_bars_in_row , updated_y , row_id);
+                            } else {
+                                updated_y = this.compute_grid_and_line_height(bar , current_row , num_bars_in_row , updated_y , row_id);                                 
+                            }
+                        });
+
+                        // Sposta le barre dopo aver spostato le righe e le linee
+                        //Questa funzione potrebbe andare subito dopo il riposizionamento delle righe
+                        this.bars.forEach((bar) => {
+                            const fixed_row = this.$column_container.querySelector('g.grid > g > rect[data-id=' + bar.task.row + ']');
+                            const new_y = parseInt(fixed_row.getAttribute('y')) + this.options.padding / 2;
+                            // Aggiorna la posizione della barra
+                            bar.update_bar_position({ y: new_y }); 
+                            // this.scheduler_chart.layers.bar.querySelectorAll('g.bar > g > g.bar-group > rect.bar')
+                        });
+                        //QUANDO LA BARRA SI SPOSTA PRIMA PRENDE LA RIGA SOTTO
+                        //fine
                     }
                 });
             }
@@ -1057,6 +1114,31 @@ export default class Scheduler {
         });
 
         this.bind_bar_progress();
+    }
+
+    compute_grid_and_line_height(bar , current_row , num_bars_in_row , updated_y , row_id){
+        
+        //modifico l'altezza della riga
+        const new_row_height = num_bars_in_row * (bar.height + this.options.padding);
+        $.attr(current_row , 'height', new_row_height);
+        //modifico l'altezza della riga fissa corrispondente
+        const curr_fixed_row = this.$column_container.querySelector('g.grid > g > rect[data-id=' + row_id + ']');
+        $.attr(curr_fixed_row , 'height' , new_row_height);
+        const current_row_y = current_row.getAttribute('y');
+        //modifico la y delle righe
+        $.attr(current_row , 'y', updated_y);
+        $.attr(curr_fixed_row , 'y',updated_y);
+
+        //LA Y DELLA PRIMA RIGA DEVO SCARTARLA PERCHè NON ESISTE LA LINE CORRISPONDENTE
+        if (current_row_y != this.options.header_height + this.options.padding / 2) {
+            const current_line = this.layers.grid.querySelector('line.row-line[y1="' + current_row_y + '"]');
+            const fixed_line = this.$column_container.querySelector('line.row-line[y1="' + current_row_y + '"]');
+            $.attr(current_line, 'y1', updated_y);
+            $.attr(current_line, 'y2', updated_y);
+            $.attr(fixed_line, 'y1', updated_y);
+            $.attr(fixed_line, 'y2', updated_y);
+        }
+        return updated_y += new_row_height;
     }
 
     bind_bar_progress() {

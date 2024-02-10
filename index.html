@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Simple Scheduler2</title>
+    <title>Simple Scheduler</title>
     <style>
         body {
             font-family: sans-serif;
@@ -115,7 +115,7 @@
                 console.log(task);
             },
             on_grid_dblclick: row_id => {
-                console.log(row_id);
+                console.log(row_id, datetime);
             },
             on_cell_dblclick: (row_id, col_id) => {
                 console.log(row_id, col_id);
