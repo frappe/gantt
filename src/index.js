@@ -1096,12 +1096,25 @@ export default class Scheduler {
                         //Questa funzione potrebbe andare subito dopo il riposizionamento delle righe
                         this.bars.forEach((bar) => {
                             const fixed_row = this.$column_container.querySelector('g.grid > g > rect[data-id=' + bar.task.row + ']');
-                            const new_y = parseInt(fixed_row.getAttribute('y')) + this.options.padding / 2;
-                            // Aggiorna la posizione della barra
-                            bar.update_bar_position({ y: new_y }); 
+                            let new_y = parseInt(fixed_row.getAttribute('y')) + this.options.padding / 2;
                             // this.scheduler_chart.layers.bar.querySelectorAll('g.bar > g > g.bar-group > rect.bar')
+                            // Aggiorna la posizione della barra
+                            // Trova tutte le barre nella stessa riga 
+                            const bars_in_same_row = this.bars.filter(otherBar =>
+                                otherBar.task.row === bar.task.row
+                            );
+                            if (bars_in_same_row.length > 1) {
+                                for (let i = 0 ; i < bars_in_same_row.length ; i++)
+                                {
+                                    bars_in_same_row[i].update_bar_position({ y: new_y });
+                                    new_y += bars_in_same_row[i].height + this.options.padding / 2;
+                                }
+                            } else
+                            {
+                                bar.update_bar_position({ y: new_y });
+                            }
                         });
-                        //QUANDO LA BARRA SI SPOSTA PRIMA PRENDE LA RIGA SOTTO
+                        //QUANDO LA BARRA SI SPOSTA PRIMA PRENDE L'ID DELLA RIGA SOTTO
                         //fine
                     }
                 });
