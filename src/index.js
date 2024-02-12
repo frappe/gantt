@@ -1141,6 +1141,18 @@ export default class Scheduler {
         //modifico la y delle righe
         $.attr(current_row , 'y', updated_y);
         $.attr(curr_fixed_row , 'y',updated_y);
+        //modifico altezza e y della cell
+        const curr_cell_rect = this.$column_container.querySelectorAll('g.cell > g.cell-wrapper[data-row-id = ' + row_id + '] > rect');
+        const curr_cell_text = this.$column_container.querySelectorAll('g.cell > g.cell-wrapper[data-row-id = ' + row_id + '] > text');
+        //loop in base a quante fixed columns sono presenti
+        for (let i = 0 ; i < this.options.fixed_columns.length ; i++){
+            $.attr(curr_cell_rect[i] , 'height' , new_row_height);
+            $.attr(curr_cell_rect[i] , 'y' , updated_y);
+            //modifico y del testo prima contollo che ci sia del testo altrimenti va in errore
+            if (curr_cell_text.length != 0){
+                $.attr(curr_cell_text[i] , 'y' , 24 + updated_y );
+            }
+        }
 
         //LA Y DELLA PRIMA RIGA DEVO SCARTARLA PERCHè NON ESISTE LA LINE CORRISPONDENTE
         if (current_row_y != this.options.header_height + this.options.padding / 2) {
