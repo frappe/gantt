@@ -22,6 +22,8 @@ export default class Scheduler {
         this.setup_wrapper(wrapper);
         this.setup_cells(cells);
         this.setup_tasks(tasks);
+        //creare un array per le righe con id e altezza
+        this.setup_rows(tasks);
         // initialize with default view mode
         this.change_view_mode();
         this.bind_events();
@@ -122,6 +124,7 @@ export default class Scheduler {
             drag_drop_y: false,
             fixed_columns: [],
             rows: [],
+            overlap: true,
         };
         this.options = Object.assign({}, default_options, options);
 
@@ -229,6 +232,20 @@ export default class Scheduler {
         this.change_view_mode();
 
         this.$svg.parentElement.scrollLeft = scroll_pos * (this.$svg.parentElement.scrollWidth / scroll_width);
+    }
+
+    setup_rows(){
+        const rowHeights = {};
+
+        // Itera sulle tasks per aggiornare le altezze delle righe
+        tasks.forEach(task => {
+            const row_id = this.tasks.row;
+            // Incrementa l'altezza della riga in base all'altezza della task
+            rowHeights[row_id] += this.options.row;
+        });
+
+        // Converti l'oggetto delle altezze delle righe in un array
+        this.rows = Object.keys(rowHeights).map(rowId => ({ id: rowId, height: rowHeights[rowId] }));
     }
 
     change_view_mode(mode = this.options.view_mode) {
@@ -897,8 +914,8 @@ export default class Scheduler {
                 'hour');
 
             const datetime = new_start_date;
-            
-            this.trigger_event('grid_dblclick', [data_id,datetime]);
+
+            this.trigger_event('grid_dblclick', [data_id, datetime]);
         });
 
         $.on(this.$container, 'scroll', e => {
@@ -1059,62 +1076,9 @@ export default class Scheduler {
                         bar.set_action_completed();
 
                         //inizio
-
-                        //CREARE LA FUNZIONE PER POI ATTIVARLA TRAMITE OPZIONE
-
-                        //PER ORA NON SERVE LA SOVRAPPOSIZIONE PER RICALCOLO TUTTE LE RIGHE
-                        // // Trova tutte le barre sovrapposte 
-                        // const overlappingBars = this.bars.filter(otherBar =>
-                        //     // escludi la stessa barra
-                        //     otherBar !== bar && 
-                        //     // barre nella stessa riga
-                        //     otherBar.task.row === bar.task.row && 
-                        //     // verifica la sovrapposizione
-                        //     (bar.x < otherBar.x + otherBar.width && bar.x + bar.width > otherBar.x) ||
-                        //     // verifica la sovrapposizione sull'asse y
-                        //     (bar.y < otherBar.y + otherBar.height && bar.y + bar.height > otherBar.y)
-                        // );
-
-                        //Variabile per avere la y sempre aggiornata
-                        let updated_y = this.options.header_height + this.options.padding / 2;
-                        // Aggiorno tutte le righe
-                        const grid_rows = this.layers.grid.querySelectorAll('rect.grid-row');
-                        grid_rows.forEach((current_row) => {
-                            const row_id = current_row.getAttribute('data-id');
-                            // CAMBIARE L'ALTEZZA DI TUTTE LE RIGHE IN BASE ALLE BARRE
-                            const bars_in_row = this.bars.filter(bar => bar.task.row === row_id);
-                            let num_bars_in_row = bars_in_row.length;
-                            if (num_bars_in_row == 0) {
-                                num_bars_in_row = 1;
-                                updated_y = this.compute_grid_and_line_height(bar , current_row , num_bars_in_row , updated_y , row_id);
-                            } else {
-                                updated_y = this.compute_grid_and_line_height(bar , current_row , num_bars_in_row , updated_y , row_id);                                 
-                            }
-                        });
-
-                        // Sposta le barre dopo aver spostato le righe e le linee
-                        //Questa funzione potrebbe andare subito dopo il riposizionamento delle righe
-                        this.bars.forEach((bar) => {
-                            const fixed_row = this.$column_container.querySelector('g.grid > g > rect[data-id=' + bar.task.row + ']');
-                            let new_y = parseInt(fixed_row.getAttribute('y')) + this.options.padding / 2;
-                            // this.scheduler_chart.layers.bar.querySelectorAll('g.bar > g > g.bar-group > rect.bar')
-                            // Aggiorna la posizione della barra
-                            // Trova tutte le barre nella stessa riga 
-                            const bars_in_same_row = this.bars.filter(otherBar =>
-                                otherBar.task.row === bar.task.row
-                            );
-                            if (bars_in_same_row.length > 1) {
-                                for (let i = 0 ; i < bars_in_same_row.length ; i++)
-                                {
-                                    bars_in_same_row[i].update_bar_position({ y: new_y });
-                                    new_y += bars_in_same_row[i].height + this.options.padding / 2;
-                                }
-                            } else
-                            {
-                                bar.update_bar_position({ y: new_y });
-                            }
-                        });
-                        //QUANDO LA BARRA SI SPOSTA PRIMA PRENDE L'ID DELLA RIGA SOTTO
+                        if (this.options.overlap) {
+                            this.overlap(bar);
+                        }
                         //fine
                     }
                 });
@@ -1129,28 +1093,81 @@ export default class Scheduler {
         this.bind_bar_progress();
     }
 
-    compute_grid_and_line_height(bar , current_row , num_bars_in_row , updated_y , row_id){
-        
+    overlap(bar) {
+        //PER ORA NON SERVE LA SOVRAPPOSIZIONE PER RICALCOLO TUTTE LE RIGHE
+        // // Trova tutte le barre sovrapposte 
+        // const overlappingBars = this.bars.filter(otherBar =>
+        //     // escludi la stessa barra
+        //     otherBar !== bar && 
+        //     // barre nella stessa riga
+        //     otherBar.task.row === bar.task.row && 
+        //     // verifica la sovrapposizione
+        //     (bar.x < otherBar.x + otherBar.width && bar.x + bar.width > otherBar.x) ||
+        //     // verifica la sovrapposizione sull'asse y
+        //     (bar.y < otherBar.y + otherBar.height && bar.y + bar.height > otherBar.y)
+        // );
+
+        //Variabile per avere la y sempre aggiornata
+        let updated_y = this.options.header_height + this.options.padding / 2;
+        // Aggiorno tutte le righe
+        const grid_rows = this.layers.grid.querySelectorAll('rect.grid-row');
+        grid_rows.forEach((current_row) => {
+            const row_id = current_row.getAttribute('data-id');
+            // CAMBIARE L'ALTEZZA DI TUTTE LE RIGHE IN BASE ALLE BARRE
+            const bars_in_row = this.bars.filter(bar => bar.task.row === row_id);
+            let num_bars_in_row = bars_in_row.length;
+            if (num_bars_in_row == 0) {
+                num_bars_in_row = 1;
+                updated_y = this.compute_grid_and_line_height(bar, current_row, num_bars_in_row, updated_y, row_id);
+            } else {
+                updated_y = this.compute_grid_and_line_height(bar, current_row, num_bars_in_row, updated_y, row_id);
+            }
+        });
+
+        // Sposta le barre dopo aver spostato le righe e le linee
+        //Questa funzione potrebbe andare subito dopo il riposizionamento delle righe
+        this.bars.forEach((bar) => {
+            const fixed_row = this.$column_container.querySelector('g.grid > g > rect[data-id=' + bar.task.row + ']');
+            let new_y = parseInt(fixed_row.getAttribute('y')) + this.options.padding / 2;
+            // this.scheduler_chart.layers.bar.querySelectorAll('g.bar > g > g.bar-group > rect.bar')
+            // Aggiorna la posizione della barra
+            // Trova tutte le barre nella stessa riga 
+            const bars_in_same_row = this.bars.filter(otherBar =>
+                otherBar.task.row === bar.task.row
+            );
+            if (bars_in_same_row.length > 1) {
+                for (let i = 0; i < bars_in_same_row.length; i++) {
+                    bars_in_same_row[i].update_bar_position({ y: new_y });
+                    new_y += bars_in_same_row[i].height + this.options.padding / 2;
+                }
+            } else {
+                bar.update_bar_position({ y: new_y });
+            }
+        });
+    }
+
+    compute_grid_and_line_height(bar, current_row, num_bars_in_row, updated_y, row_id) {
+
         //modifico l'altezza della riga
         const new_row_height = num_bars_in_row * (bar.height + this.options.padding);
-        $.attr(current_row , 'height', new_row_height);
+        $.attr(current_row, 'height', new_row_height);
         //modifico l'altezza della riga fissa corrispondente
         const curr_fixed_row = this.$column_container.querySelector('g.grid > g > rect[data-id=' + row_id + ']');
-        $.attr(curr_fixed_row , 'height' , new_row_height);
+        $.attr(curr_fixed_row, 'height', new_row_height);
         const current_row_y = current_row.getAttribute('y');
         //modifico la y delle righe
-        $.attr(current_row , 'y', updated_y);
-        $.attr(curr_fixed_row , 'y',updated_y);
+        $.attr(current_row, 'y', updated_y);
+        $.attr(curr_fixed_row, 'y', updated_y);
         //modifico altezza e y della cell
         const curr_cell_rect = this.$column_container.querySelectorAll('g.cell > g.cell-wrapper[data-row-id = ' + row_id + '] > rect');
         const curr_cell_text = this.$column_container.querySelectorAll('g.cell > g.cell-wrapper[data-row-id = ' + row_id + '] > text');
         //loop in base a quante fixed columns sono presenti
-        for (let i = 0 ; i < this.options.fixed_columns.length ; i++){
-            $.attr(curr_cell_rect[i] , 'height' , new_row_height);
-            $.attr(curr_cell_rect[i] , 'y' , updated_y);
+        for (let i = 0; i < this.options.fixed_columns.length; i++) {
+            $.attr(curr_cell_rect[i], 'height', new_row_height);
+            $.attr(curr_cell_rect[i], 'y', updated_y);
             //modifico y del testo prima contollo che ci sia del testo altrimenti va in errore
-            if (curr_cell_text.length != 0){
-                $.attr(curr_cell_text[i] , 'y' , 24 + updated_y );
+            if (curr_cell_text.length != 0) {
+                $.attr(curr_cell_text[i], 'y', 24 + updated_y);
             }
         }
 
