@@ -234,18 +234,29 @@ export default class Scheduler {
         this.$svg.parentElement.scrollLeft = scroll_pos * (this.$svg.parentElement.scrollWidth / scroll_width);
     }
 
-    setup_rows(){
+    setup_rows() {
         const rowHeights = {};
+        this.options.rows.forEach(row => {
+            const row_id = row;
+            // Inizializza l'altezza della riga a zero se non è già stata inizializzata
+            if (!rowHeights.hasOwnProperty(row_id)) {
+                rowHeights[row_id] = 0;
+            }
 
-        // Itera sulle tasks per aggiornare le altezze delle righe
-        tasks.forEach(task => {
-            const row_id = this.tasks.row;
-            // Incrementa l'altezza della riga in base all'altezza della task
-            rowHeights[row_id] += this.options.row;
+            const num_tasks = this.tasks.filter(task => {
+                return task.row === row_id;
+            })
+
+            // In base al numero di task definisce l'altezza
+            if (num_tasks.length >= 1) {
+                rowHeights[row_id] += (this.options.bar_height + this.options.padding) * num_tasks.length;
+            } else {
+                rowHeights[row_id] += (this.options.bar_height + this.options.padding);
+            }
         });
 
         // Converti l'oggetto delle altezze delle righe in un array
-        this.rows = Object.keys(rowHeights).map(rowId => ({ id: rowId, height: rowHeights[rowId] }));
+        this.rows = Object.keys(rowHeights).map(row_id => ({ id: row_id, height: rowHeights[row_id] }));
     }
 
     change_view_mode(mode = this.options.view_mode) {
@@ -372,6 +383,7 @@ export default class Scheduler {
         this.map_arrows_on_bars();
         this.set_width();
         this.set_scroll_position();
+        this.move_overlapping_bars();
     }
 
     setup_layers() {
@@ -422,11 +434,13 @@ export default class Scheduler {
         const lines_layer = createSVG('g', { append_to: this.fixed_col_layers.grid });
 
         const row_width = this.options.fixed_columns.length * this.options.fixed_column_width;
-        const row_height = this.options.bar_height + this.options.padding;
+        // const row_height = this.options.bar_height + this.options.padding;
 
         let row_y = this.options.header_height + this.options.padding / 2;
+        let i = 0;
 
         for (let row of this.options.rows) {
+            const row_height = this.rows[i].height;
             createSVG('rect', {
                 x: 0,
                 y: row_y,
@@ -446,7 +460,9 @@ export default class Scheduler {
                 append_to: lines_layer,
             });
 
-            row_y += this.options.bar_height + this.options.padding;
+            row_y += this.rows[i].height;
+            i++;
+            // row_y += this.options.bar_height + this.options.padding;
         }
 
         // make_grid_header
@@ -496,9 +512,10 @@ export default class Scheduler {
     }
 
     make_cells() {
-        const row_height = this.options.bar_height + this.options.padding;
-
+        // const row_height = this.options.bar_height + this.options.padding;
+        let last_y = this.options.header_height + this.options.padding / 2;
         for (let r = 0; r < this.options.rows.length; r++) {
+            const row_height = this.rows[r].height;
             for (let c = 0; c < this.options.fixed_columns.length; c++) {
                 const cell_wrapper = createSVG('g', {
                     class: 'cell-wrapper',
@@ -509,7 +526,8 @@ export default class Scheduler {
 
                 createSVG('rect', {
                     x: c * this.options.fixed_column_width,
-                    y: this.options.header_height + this.options.padding / 2 + (row_height) * r,
+                    y: last_y,
+                    // y: this.options.header_height + this.options.padding / 2 + (row_height) * r,
                     width: this.options.fixed_column_width,
                     height: row_height,
                     append_to: cell_wrapper,
@@ -519,13 +537,15 @@ export default class Scheduler {
                 if (cell) {
                     createSVG('text', {
                         x: this.options.fixed_column_width / 2 + c * this.options.fixed_column_width,
-                        y: 15 + this.options.header_height + this.options.padding + r * row_height,
+                        y: 24 + last_y,
+                        // y: 15 + this.options.header_height + this.options.padding + r * row_height,
                         innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
                         class: 'lower-text',
                         append_to: cell_wrapper
                     });
                 }
             }
+            last_y += row_height;
         }
     }
 
@@ -565,11 +585,13 @@ export default class Scheduler {
         const lines_layer = createSVG('g', { append_to: this.layers.grid });
 
         const row_width = this.dates.length * this.options.column_width;
-        const row_height = this.options.bar_height + this.options.padding;
+        // const row_height = this.options.bar_height + this.options.padding;
 
         let row_y = this.options.header_height + this.options.padding / 2;
+        let i = 0;
 
         for (let row of this.options.rows) {
+            const row_height = this.rows[i].height;
             createSVG('rect', {
                 x: 0,
                 y: row_y,
@@ -588,8 +610,9 @@ export default class Scheduler {
                 class: 'row-line',
                 append_to: lines_layer,
             });
-
-            row_y += this.options.bar_height + this.options.padding;
+            row_y += this.rows[i].height;
+            i++;
+            // row_y += this.options.bar_height + this.options.padding;
         }
     }
 
@@ -1124,12 +1147,15 @@ export default class Scheduler {
             }
         });
 
+        this.move_overlapping_bars();
+
+    }
+
+    move_overlapping_bars() {
         // Sposta le barre dopo aver spostato le righe e le linee
-        //Questa funzione potrebbe andare subito dopo il riposizionamento delle righe
         this.bars.forEach((bar) => {
             const fixed_row = this.$column_container.querySelector('g.grid > g > rect[data-id=' + bar.task.row + ']');
             let new_y = parseInt(fixed_row.getAttribute('y')) + this.options.padding / 2;
-            // this.scheduler_chart.layers.bar.querySelectorAll('g.bar > g > g.bar-group > rect.bar')
             // Aggiorna la posizione della barra
             // Trova tutte le barre nella stessa riga 
             const bars_in_same_row = this.bars.filter(otherBar =>
@@ -1138,7 +1164,7 @@ export default class Scheduler {
             if (bars_in_same_row.length > 1) {
                 for (let i = 0; i < bars_in_same_row.length; i++) {
                     bars_in_same_row[i].update_bar_position({ y: new_y });
-                    new_y += bars_in_same_row[i].height + this.options.padding / 2;
+                    new_y += bars_in_same_row[i].height + this.options.padding;
                 }
             } else {
                 bar.update_bar_position({ y: new_y });
