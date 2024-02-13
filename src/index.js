@@ -22,7 +22,7 @@ export default class Scheduler {
         this.setup_wrapper(wrapper);
         this.setup_cells(cells);
         this.setup_tasks(tasks);
-        //creare un array per le righe con id e altezza
+        //array per le righe con id e altezza
         this.setup_rows(tasks);
         // initialize with default view mode
         this.change_view_mode();
