@@ -322,9 +322,21 @@ export default class Bar {
 
     compute_index() {
         const bar = this.$bar;
-        const row_height = this.scheduler.options.bar_height + this.scheduler.options.padding;
-        const new_index = (bar.getY() - this.scheduler.options.header_height) / row_height;
-        return Math.ceil(new_index) - 1;
+        const barY = bar.getY();
+        let sum_height = this.scheduler.options.header_height + this.scheduler.options.padding / 2;
+
+        for (let i = 0; i <= this.scheduler.rows.length; i++) {
+            const row = this.scheduler.rows[i];
+            const row_height = row.height;
+            const row_start = sum_height;
+            sum_height += row_height;
+
+            // Se la posizione Y del bar è compresa tra l'inizio e la fine della riga corrente
+            if (barY >= row_start && barY <= sum_height) {
+                const new_index = i;
+                return new_index;
+            }
+        }
     }
 
     compute_progress() {
@@ -351,7 +363,7 @@ export default class Bar {
     compute_y() {
         return (
             this.scheduler.options.header_height +
-            this.scheduler.options.padding + 
+            this.scheduler.options.padding +
             this.scheduler.rows[this.task._index].height * this.task._index
             // this.task._index * (this.height + this.scheduler.options.padding)
         );

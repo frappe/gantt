@@ -242,7 +242,7 @@ export default class Scheduler {
             if (!rowHeights.hasOwnProperty(row_id)) {
                 rowHeights[row_id] = 0;
             }
-
+            //mi prendo il numero di task con lo stesso id di riga
             const num_tasks = this.tasks.filter(task => {
                 return task.row === row_id;
             })
@@ -1098,11 +1098,10 @@ export default class Scheduler {
                         bar.position_changed();
                         bar.set_action_completed();
 
-                        //inizio
                         if (this.options.overlap) {
                             this.overlap(bar);
                         }
-                        //fine
+                        this.setup_rows();
                     }
                 });
             }
