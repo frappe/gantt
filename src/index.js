@@ -958,6 +958,7 @@ export default class Scheduler {
     }
 
     bind_bar_events() {
+        var timer = null;
         let is_dragging = false;
         let x_on_start = 0;
         let y_on_start = 0;
@@ -1044,6 +1045,9 @@ export default class Scheduler {
                 });
             } else if (is_dragging) {
                 if (bar_being_dragged.task.drag_drop_x) {
+
+                    this.moving_scroll_bar(e, timer);
+                    
                     bar_being_dragged.$bar.finaldx = this.get_snap_x_position(dx);
                     bar_being_dragged.update_bar_position({
                         x:
@@ -1113,6 +1117,117 @@ export default class Scheduler {
         });
 
         this.bind_bar_progress();
+    }
+
+    moving_scroll_bar(e, timer) {
+        //Variabile che serve per aggiornare la scrollbar
+        var scroll_bar = this.$svg.parentElement;
+        //coordinate x e y del mouse sottraggo i punti da cui
+        var viewportX = e.clientX - this.$container.offsetTop;
+        var viewportY = e.clientY - this.$container.offsetLeft ;
+        //edges del container
+        var edgeTop = this.$container.offsetTop;
+        var edgeLeft = this.$container.offsetLeft;
+        var edgeBottom = this.$container.offsetHeight;
+        var edgeRight = this.$container.offsetWidth;
+        //variabili per capire in quale punto ci si trova
+        //CONTROLLA CON QUESTE IMPOSTAZIONi SEMBRA PRENDE LA TOP EDGE
+        var isInLeftEdge = (viewportX < edgeLeft);
+        var isInRightEdge = (viewportX > edgeRight);
+        var isInTopEdge = (viewportY < edgeTop);
+        var isInBottomEdge = (viewportY > edgeBottom);
+        // If the mouse is not in the viewport edge, there's no need to calculate
+        // anything else.
+        if (!(isInLeftEdge || isInRightEdge || isInTopEdge || isInBottomEdge)) {
+            clearTimeout(timer);
+            return;
+        }
+        // Calculate the maximum scroll offset in each direction. Since you can only
+        // scroll the overflow portion of the document, the maximum represents the
+        // length of the document that is NOT in the viewport.
+        //In questo caso i massimi sono larghezza e atezza del container
+        var maxScrollX = this.$container.scrollWidth;
+        var maxScrollY = this.$container.scrollHeight;
+        // Get the current scroll position of the document.(container)
+        var currentScrollX = this.$container.scrollLeft;
+        var currentScrollY = this.$container.scrollTop;
+        // As we examine the mousemove event, we want to adjust the window scroll in
+        // immediate response to the event; but, we also want to continue adjusting
+        // the window scroll if the user rests their mouse in the edge boundary. To
+        // do this, we'll invoke the adjustment logic immediately. Then, we'll setup
+        // a timer that continues to invoke the adjustment logic while the window can
+        // still be scrolled in a particular direction.
+        (function checkForWindowScroll() {
+
+            clearTimeout(timer);
+
+            if (adjustWindowScroll(currentScrollX, currentScrollY)) {
+
+                timer = setTimeout(checkForWindowScroll, 30);
+
+            }
+
+        })();
+        // Adjust the window scroll based on the user's mouse position. Returns True
+        // or False depending on whether or not the window scroll was changed.
+        function adjustWindowScroll(currentScrollX, currentScrollY) {
+            // Determine if the window can be scrolled in any particular direction.
+            var canScrollUp = (currentScrollY > 0);
+            var canScrollDown = (currentScrollY < maxScrollY);
+            var canScrollLeft = (currentScrollX > 0);
+            var canScrollRight = (currentScrollX < maxScrollX);
+            // Since we can potentially scroll in two directions at the same time,
+            // let's keep track of the next scroll, starting with the current scroll.
+            // Each of these values can then be adjusted independently in the logic
+            // below.
+            var nextScrollX = currentScrollX;
+            var nextScrollY = currentScrollY;
+
+            // As we examine the mouse position within the edge, we want to make the
+            // incremental scroll changes more "intense" the closer that the user
+            // gets the viewport edge. As such, we'll calculate the percentage that
+            // the user has made it "through the edge" when calculating the delta.
+            // Then, that use that percentage to back-off from the "max" step value.
+            var maxStep = 50;
+
+            // Should we scroll left?
+            if (isInLeftEdge && canScrollLeft) {
+                var intensity = ((edgeLeft - viewportX) / edgeLeft);
+                nextScrollX = (nextScrollX - (maxStep * intensity));
+                // Should we scroll right?
+            } else if (isInRightEdge && canScrollRight) {
+                var intensity = ((viewportX - edgeRight) / edgeLeft);
+                nextScrollX = (nextScrollX + (maxStep * intensity));
+            }
+
+            // Should we scroll up?
+            if (isInTopEdge && canScrollUp) {
+                var intensity = ((edgeTop - viewportY) / edgeTop);
+                nextScrollY = (nextScrollY - (maxStep * intensity));
+                // Should we scroll down?
+            } else if (isInBottomEdge && canScrollDown) {
+                var intensity = ((viewportY - edgeBottom) / edgeTop);
+                nextScrollY = (nextScrollY + (maxStep * intensity));
+            }
+
+            // Sanitize invalid maximums. An invalid scroll offset won't break the
+            // subsequent .scrollTo() call; however, it will make it harder to
+            // determine if the .scrollTo() method should have been called in the
+            // first place.
+            nextScrollX = Math.max(0, Math.min(maxScrollX, nextScrollX));
+            nextScrollY = Math.max(0, Math.min(maxScrollY, nextScrollY));
+
+            if (
+                (nextScrollX !== currentScrollX) ||
+                (nextScrollY !== currentScrollY)
+            ) {
+                scroll_bar.scrollLeft = nextScrollX;
+                // scroll_bar.scrollTop = nextScrollY;
+                return (true);
+            } else {
+                return (false);
+            }
+        }
     }
 
     overlap(bar) {
