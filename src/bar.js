@@ -364,8 +364,7 @@ export default class Bar {
         return (
             this.scheduler.options.header_height +
             this.scheduler.options.padding +
-            this.scheduler.rows[this.task._index].height * this.task._index
-            // this.task._index * (this.height + this.scheduler.options.padding)
+            this.scheduler.rows[this.task._index].y
         );
     }
 

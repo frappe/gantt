@@ -235,28 +235,21 @@ export default class Scheduler {
     }
 
     setup_rows() {
-        const rowHeights = {};
-        this.options.rows.forEach(row => {
-            const row_id = row;
-            // Inizializza l'altezza della riga a zero se non è già stata inizializzata
-            if (!rowHeights.hasOwnProperty(row_id)) {
-                rowHeights[row_id] = 0;
-            }
+        this.rows = [];
+        this.options.rows.forEach(row_id => {
+            let row = { id: row_id, height: 0, y: 0 };
+
+            // TODO: Contare gli elementi che sono sovrapposti nella riga
+
             //mi prendo il numero di task con lo stesso id di riga
-            const num_tasks = this.tasks.filter(task => {
+            let num_tasks = this.tasks.filter(task => {
                 return task.row === row_id;
-            })
+            }).length;
+            num_tasks = num_tasks > 0 ? num_tasks : 1;
 
-            // In base al numero di task definisce l'altezza
-            if (num_tasks.length >= 1) {
-                rowHeights[row_id] += (this.options.bar_height + this.options.padding) * num_tasks.length;
-            } else {
-                rowHeights[row_id] += (this.options.bar_height + this.options.padding);
-            }
+            row.height = (this.options.bar_height + this.options.padding) * num_tasks.length;
+            this.rows.push(row);
         });
-
-        // Converti l'oggetto delle altezze delle righe in un array
-        this.rows = Object.keys(rowHeights).map(row_id => ({ id: row_id, height: rowHeights[row_id] }));
     }
 
     change_view_mode(mode = this.options.view_mode) {
@@ -434,12 +427,12 @@ export default class Scheduler {
         const lines_layer = createSVG('g', { append_to: this.fixed_col_layers.grid });
 
         const row_width = this.options.fixed_columns.length * this.options.fixed_column_width;
-        // const row_height = this.options.bar_height + this.options.padding;
 
         let row_y = this.options.header_height + this.options.padding / 2;
         let i = 0;
 
         for (let row of this.options.rows) {
+
             const row_height = this.rows[i].height;
             createSVG('rect', {
                 x: 0,
@@ -460,9 +453,8 @@ export default class Scheduler {
                 append_to: lines_layer,
             });
 
-            row_y += this.rows[i].height;
+            row_y += row_height;
             i++;
-            // row_y += this.options.bar_height + this.options.padding;
         }
 
         // make_grid_header
@@ -512,10 +504,10 @@ export default class Scheduler {
     }
 
     make_cells() {
-        // const row_height = this.options.bar_height + this.options.padding;
         let last_y = this.options.header_height + this.options.padding / 2;
         for (let r = 0; r < this.options.rows.length; r++) {
             const row_height = this.rows[r].height;
+
             for (let c = 0; c < this.options.fixed_columns.length; c++) {
                 const cell_wrapper = createSVG('g', {
                     class: 'cell-wrapper',
@@ -585,13 +577,13 @@ export default class Scheduler {
         const lines_layer = createSVG('g', { append_to: this.layers.grid });
 
         const row_width = this.dates.length * this.options.column_width;
-        // const row_height = this.options.bar_height + this.options.padding;
 
         let row_y = this.options.header_height + this.options.padding / 2;
         let i = 0;
 
         for (let row of this.options.rows) {
             const row_height = this.rows[i].height;
+
             createSVG('rect', {
                 x: 0,
                 y: row_y,
@@ -610,9 +602,9 @@ export default class Scheduler {
                 class: 'row-line',
                 append_to: lines_layer,
             });
-            row_y += this.rows[i].height;
+
+            row_y += row_height;
             i++;
-            // row_y += this.options.bar_height + this.options.padding;
         }
     }
 
@@ -1046,8 +1038,8 @@ export default class Scheduler {
             } else if (is_dragging) {
                 if (bar_being_dragged.task.drag_drop_x) {
 
-                    this.moving_scroll_bar(e, timer);
-                    
+                    // this.moving_scroll_bar(e, timer);
+
                     bar_being_dragged.$bar.finaldx = this.get_snap_x_position(dx);
                     bar_being_dragged.update_bar_position({
                         x:
@@ -1124,7 +1116,7 @@ export default class Scheduler {
         var scroll_bar = this.$svg.parentElement;
         //coordinate x e y del mouse sottraggo i punti da cui
         var viewportX = e.clientX - this.$container.offsetTop;
-        var viewportY = e.clientY - this.$container.offsetLeft ;
+        var viewportY = e.clientY - this.$container.offsetLeft;
         //edges del container
         var edgeTop = this.$container.offsetTop;
         var edgeLeft = this.$container.offsetLeft;
@@ -1230,19 +1222,50 @@ export default class Scheduler {
         }
     }
 
+    recalculate_from_row(row_id) {
+        // calcolare altezza
+    }
+
     overlap(bar) {
         //PER ORA NON SERVE LA SOVRAPPOSIZIONE PER RICALCOLO TUTTE LE RIGHE
         // // Trova tutte le barre sovrapposte 
-        // const overlappingBars = this.bars.filter(otherBar =>
-        //     // escludi la stessa barra
-        //     otherBar !== bar && 
-        //     // barre nella stessa riga
-        //     otherBar.task.row === bar.task.row && 
-        //     // verifica la sovrapposizione
-        //     (bar.x < otherBar.x + otherBar.width && bar.x + bar.width > otherBar.x) ||
-        //     // verifica la sovrapposizione sull'asse y
-        //     (bar.y < otherBar.y + otherBar.height && bar.y + bar.height > otherBar.y)
-        // );
+        const overlappingBars = this.bars.filter(otherBar =>
+            // escludi la stessa barra
+            otherBar !== bar &&
+            // barre nella stessa riga
+            otherBar.task.row === bar.task.row &&
+            // verifica la sovrapposizione
+            (bar.x < otherBar.x + otherBar.width && bar.x + bar.width > otherBar.x)
+        );
+        if (overlappingBars.length > 0) {
+            console.log('Ho una sovrapposizione');
+            this.render();
+        }
+        // console.log(overlappingBars);
+        return;
+
+
+        /*
+        Param: Bar appena mossa 
+        if sovrapposta(Bar) ? allora:
+            start_row = riga da cui parto
+            end_row = riga in cui arrivo
+            // calcola la width
+            recalculate_width(start_row)
+            recalculate_width(end_row)
+
+            // calcola la y
+            if start_row sta prima di end_row ? allora:
+                recalculate_y_from_row(start_row) -> anche delle relative barre
+            else
+                recalculate_y_from_row(end_row)
+
+            Ricalcolare la riga da cui parti
+            ingrandire la riga in cui arrivi
+            Riposizionare la Bar correttamente nella riga
+            Ricalcolare tutte le righe successive alla riga della Bar
+            spostare le row_line
+        */
 
         //Variabile per avere la y sempre aggiornata
         let updated_y = this.options.header_height + this.options.padding / 2;
