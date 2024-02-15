@@ -237,19 +237,46 @@ export default class Scheduler {
     setup_rows() {
         this.rows = [];
         this.options.rows.forEach(row_id => {
-            let row = { id: row_id, height: 0, y: 0 };
+            let row = { id: row_id, height: 0, y: (this.options.header_height + this.options.padding / 2) };
 
             // TODO: Contare gli elementi che sono sovrapposti nella riga
 
-            //mi prendo il numero di task con lo stesso id di riga
-            let num_tasks = this.tasks.filter(task => {
-                return task.row === row_id;
-            }).length;
-            num_tasks = num_tasks > 0 ? num_tasks : 1;
+            // Array temporaneo per tenere traccia delle task già contate
+            let countedTasks = [];
 
-            row.height = (this.options.bar_height + this.options.padding) * num_tasks.length;
+            // Contatore delle task sovrapposte
+            let num_overlap_tasks = 0;
+
+            // Ciclo su tutte le task nella riga
+            this.tasks.filter(task =>
+                task.row === row_id
+            ).forEach(task => {
+                // Verifica se questa task si sovrappone con altre task non ancora contate
+                if (!countedTasks.includes(task.id) && this.tasks.some(other_task =>
+                    //Devo ricontrollare che prenda solo gli elementi sulla stessa riga per fare il confronto
+                    other_task.row === task.row &&
+                    // Evita di confrontare il compito con se stesso
+                    other_task !== task && 
+                    ((task._start < other_task._end && task._end > other_task._start) ||
+                    (other_task._start < task._end && other_task._end > task._start))
+                )) {
+                    num_overlap_tasks++;
+                    countedTasks.push(task.id); // Aggiungi l'id della task al conteggio
+                }
+            });
+
+            num_overlap_tasks = num_overlap_tasks > 0 ? num_overlap_tasks : 1;
+
+            row.height = (this.options.bar_height + this.options.padding) * num_overlap_tasks;
             this.rows.push(row);
         });
+
+        let sum_rows = 0;
+
+        for (let i = 0; i < this.rows.length; i++) {
+            this.rows[i].y += sum_rows;
+            sum_rows += this.rows[i].height;
+        }
     }
 
     change_view_mode(mode = this.options.view_mode) {
@@ -428,12 +455,12 @@ export default class Scheduler {
 
         const row_width = this.options.fixed_columns.length * this.options.fixed_column_width;
 
-        let row_y = this.options.header_height + this.options.padding / 2;
         let i = 0;
 
         for (let row of this.options.rows) {
 
             const row_height = this.rows[i].height;
+            const row_y = this.rows[i].y;
             createSVG('rect', {
                 x: 0,
                 y: row_y,
@@ -453,7 +480,6 @@ export default class Scheduler {
                 append_to: lines_layer,
             });
 
-            row_y += row_height;
             i++;
         }
 
@@ -504,9 +530,9 @@ export default class Scheduler {
     }
 
     make_cells() {
-        let last_y = this.options.header_height + this.options.padding / 2;
         for (let r = 0; r < this.options.rows.length; r++) {
             const row_height = this.rows[r].height;
+            const row_y = this.rows[r].y;
 
             for (let c = 0; c < this.options.fixed_columns.length; c++) {
                 const cell_wrapper = createSVG('g', {
@@ -518,8 +544,7 @@ export default class Scheduler {
 
                 createSVG('rect', {
                     x: c * this.options.fixed_column_width,
-                    y: last_y,
-                    // y: this.options.header_height + this.options.padding / 2 + (row_height) * r,
+                    y: row_y,
                     width: this.options.fixed_column_width,
                     height: row_height,
                     append_to: cell_wrapper,
@@ -529,15 +554,13 @@ export default class Scheduler {
                 if (cell) {
                     createSVG('text', {
                         x: this.options.fixed_column_width / 2 + c * this.options.fixed_column_width,
-                        y: 24 + last_y,
-                        // y: 15 + this.options.header_height + this.options.padding + r * row_height,
+                        y: 24 + row_y,
                         innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
                         class: 'lower-text',
                         append_to: cell_wrapper
                     });
                 }
             }
-            last_y += row_height;
         }
     }
 
@@ -578,11 +601,11 @@ export default class Scheduler {
 
         const row_width = this.dates.length * this.options.column_width;
 
-        let row_y = this.options.header_height + this.options.padding / 2;
         let i = 0;
 
         for (let row of this.options.rows) {
             const row_height = this.rows[i].height;
+            const row_y = this.rows[i].y;
 
             createSVG('rect', {
                 x: 0,
@@ -603,7 +626,6 @@ export default class Scheduler {
                 append_to: lines_layer,
             });
 
-            row_y += row_height;
             i++;
         }
     }
@@ -919,8 +941,6 @@ export default class Scheduler {
 
         $.on(this.$svg, 'dblclick', '.grid-row', (e) => {
             const data_id = e.target.getAttribute('data-id');
-            //modifica per stamapare oltre la riga anche la data in cui ci si esegue il dbclick
-            //se non c'è aggiungere il datetime nel file html
 
             const x_in_units = e.offsetX / this.options.column_width;
             const new_start_date = date_utils.add(
@@ -1095,9 +1115,9 @@ export default class Scheduler {
                         bar.set_action_completed();
 
                         if (this.options.overlap) {
+                            this.setup_rows();
                             this.overlap(bar);
                         }
-                        this.setup_rows();
                     }
                 });
             }
@@ -1222,26 +1242,24 @@ export default class Scheduler {
         }
     }
 
-    recalculate_from_row(row_id) {
-        // calcolare altezza
-    }
-
     overlap(bar) {
-        //PER ORA NON SERVE LA SOVRAPPOSIZIONE PER RICALCOLO TUTTE LE RIGHE
-        // // Trova tutte le barre sovrapposte 
+        // Trova tutte le barre sovrapposte 
         const overlappingBars = this.bars.filter(otherBar =>
             // escludi la stessa barra
             otherBar !== bar &&
             // barre nella stessa riga
             otherBar.task.row === bar.task.row &&
             // verifica la sovrapposizione
-            (bar.x < otherBar.x + otherBar.width && bar.x + bar.width > otherBar.x)
+            ((bar.task._start < otherBar.task._end && bar.task._end > otherBar.task._start) ||
+            (otherBar.task._start < bar.task._end && otherBar.task._end > bar.task._start))
         );
+
         if (overlappingBars.length > 0) {
             console.log('Ho una sovrapposizione');
             this.render();
+        } else {
+            this.render();
         }
-        // console.log(overlappingBars);
         return;
 
 
@@ -1250,9 +1268,9 @@ export default class Scheduler {
         if sovrapposta(Bar) ? allora:
             start_row = riga da cui parto
             end_row = riga in cui arrivo
-            // calcola la width
-            recalculate_width(start_row)
-            recalculate_width(end_row)
+            // calcola la height
+            recalculate_height(start_row)
+            recalculate_height(end_row)
 
             // calcola la y
             if start_row sta prima di end_row ? allora:
@@ -1267,84 +1285,89 @@ export default class Scheduler {
             spostare le row_line
         */
 
-        //Variabile per avere la y sempre aggiornata
-        let updated_y = this.options.header_height + this.options.padding / 2;
-        // Aggiorno tutte le righe
-        const grid_rows = this.layers.grid.querySelectorAll('rect.grid-row');
-        grid_rows.forEach((current_row) => {
-            const row_id = current_row.getAttribute('data-id');
-            // CAMBIARE L'ALTEZZA DI TUTTE LE RIGHE IN BASE ALLE BARRE
-            const bars_in_row = this.bars.filter(bar => bar.task.row === row_id);
-            let num_bars_in_row = bars_in_row.length;
-            if (num_bars_in_row == 0) {
-                num_bars_in_row = 1;
-                updated_y = this.compute_grid_and_line_height(bar, current_row, num_bars_in_row, updated_y, row_id);
-            } else {
-                updated_y = this.compute_grid_and_line_height(bar, current_row, num_bars_in_row, updated_y, row_id);
-            }
-        });
+        // //Variabile per avere la y sempre aggiornata
+        // let updated_y = this.options.header_height + this.options.padding / 2;
+        // // Aggiorno tutte le righe
+        // const grid_rows = this.layers.grid.querySelectorAll('rect.grid-row');
+        // grid_rows.forEach((current_row) => {
+        //     const row_id = current_row.getAttribute('data-id');
+        //     // CAMBIARE L'ALTEZZA DI TUTTE LE RIGHE IN BASE ALLE BARRE
+        //     const bars_in_row = this.bars.filter(bar => bar.task.row === row_id);
+        //     let num_bars_in_row = bars_in_row.length;
+        //     if (num_bars_in_row == 0) {
+        //         num_bars_in_row = 1;
+        //         updated_y = this.compute_grid_and_line_height(bar, current_row, num_bars_in_row, updated_y, row_id);
+        //     } else {
+        //         updated_y = this.compute_grid_and_line_height(bar, current_row, num_bars_in_row, updated_y, row_id);
+        //     }
+        // });
 
-        this.move_overlapping_bars();
+        // this.move_overlapping_bars();
 
     }
 
     move_overlapping_bars() {
+
         // Sposta le barre dopo aver spostato le righe e le linee
         this.bars.forEach((bar) => {
-            const fixed_row = this.$column_container.querySelector('g.grid > g > rect[data-id=' + bar.task.row + ']');
-            let new_y = parseInt(fixed_row.getAttribute('y')) + this.options.padding / 2;
-            // Aggiorna la posizione della barra
-            // Trova tutte le barre nella stessa riga 
-            const bars_in_same_row = this.bars.filter(otherBar =>
-                otherBar.task.row === bar.task.row
+            //cerco tutte le barre sovrapposte
+            const overlappingBars = this.bars.filter(otherBar =>
+                // barre nella stessa riga
+                otherBar.task.row === bar.task.row &&
+                // verifica la sovrapposizione
+                (bar.x < otherBar.x + otherBar.width && bar.x + bar.width > otherBar.x)
             );
-            if (bars_in_same_row.length > 1) {
-                for (let i = 0; i < bars_in_same_row.length; i++) {
-                    bars_in_same_row[i].update_bar_position({ y: new_y });
-                    new_y += bars_in_same_row[i].height + this.options.padding;
+            if (overlappingBars.length > 1) {
+                //cerco la y relativa a quella riga
+                let new_y = this.rows.find(row => row.id === bar.task.row).y + this.options.padding / 2;
+                for (let i = 0; i < overlappingBars.length; i++) {
+                    //modifico le y delle barre sovrpposte
+                    overlappingBars[i].update_bar_position({ y: new_y });
+                    new_y += overlappingBars[i].height + this.options.padding;
                 }
             } else {
+                let new_y = this.rows.find(row => row.id === bar.task.row).y + (this.options.padding / 2);
                 bar.update_bar_position({ y: new_y });
             }
         });
     }
 
-    compute_grid_and_line_height(bar, current_row, num_bars_in_row, updated_y, row_id) {
+    // compute_grid_and_line_height(bar, current_row, num_bars_in_row, updated_y, row_id) {
 
-        //modifico l'altezza della riga
-        const new_row_height = num_bars_in_row * (bar.height + this.options.padding);
-        $.attr(current_row, 'height', new_row_height);
-        //modifico l'altezza della riga fissa corrispondente
-        const curr_fixed_row = this.$column_container.querySelector('g.grid > g > rect[data-id=' + row_id + ']');
-        $.attr(curr_fixed_row, 'height', new_row_height);
-        const current_row_y = current_row.getAttribute('y');
-        //modifico la y delle righe
-        $.attr(current_row, 'y', updated_y);
-        $.attr(curr_fixed_row, 'y', updated_y);
-        //modifico altezza e y della cell
-        const curr_cell_rect = this.$column_container.querySelectorAll('g.cell > g.cell-wrapper[data-row-id = ' + row_id + '] > rect');
-        const curr_cell_text = this.$column_container.querySelectorAll('g.cell > g.cell-wrapper[data-row-id = ' + row_id + '] > text');
-        //loop in base a quante fixed columns sono presenti
-        for (let i = 0; i < this.options.fixed_columns.length; i++) {
-            $.attr(curr_cell_rect[i], 'height', new_row_height);
-            $.attr(curr_cell_rect[i], 'y', updated_y);
-            //modifico y del testo prima contollo che ci sia del testo altrimenti va in errore
-            if (curr_cell_text.length != 0) {
-                $.attr(curr_cell_text[i], 'y', 24 + updated_y);
-            }
-        }
+    //     //modifico l'altezza della riga
+    //     const new_row_height = num_bars_in_row * (bar.height + this.options.padding);
+    //     $.attr(current_row, 'height', new_row_height);
+    //     //modifico l'altezza della riga fissa corrispondente
+    //     const curr_fixed_row = this.$column_container.querySelector('g.grid > g > rect[data-id=' + row_id + ']');
+    //     $.attr(curr_fixed_row, 'height', new_row_height);
+    //     const current_row_y = current_row.getAttribute('y');
+    //     //modifico la y delle righe
+    //     $.attr(current_row, 'y', updated_y);
+    //     $.attr(curr_fixed_row, 'y', updated_y);
+    //     //modifico altezza e y della cell
+    //     const curr_cell_rect = this.$column_container.querySelectorAll('g.cell > g.cell-wrapper[data-row-id = ' + row_id + '] > rect');
+    //     const curr_cell_text = this.$column_container.querySelectorAll('g.cell > g.cell-wrapper[data-row-id = ' + row_id + '] > text');
+    //     //loop in base a quante fixed columns sono presenti
+    //     for (let i = 0; i < this.options.fixed_columns.length; i++) {
+    //         $.attr(curr_cell_rect[i], 'height', new_row_height);
+    //         $.attr(curr_cell_rect[i], 'y', updated_y);
+    //         //modifico y del testo prima contollo che ci sia del testo altrimenti va in errore
+    //         if (curr_cell_text.length != 0) {
+    //             $.attr(curr_cell_text[i], 'y', 24 + updated_y);
+    //         }
+    //     }
 
-        //LA Y DELLA PRIMA RIGA DEVO SCARTARLA PERCHè NON ESISTE LA LINE CORRISPONDENTE
-        if (current_row_y != this.options.header_height + this.options.padding / 2) {
-            const current_line = this.layers.grid.querySelector('line.row-line[y1="' + current_row_y + '"]');
-            const fixed_line = this.$column_container.querySelector('line.row-line[y1="' + current_row_y + '"]');
-            $.attr(current_line, 'y1', updated_y);
-            $.attr(current_line, 'y2', updated_y);
-            $.attr(fixed_line, 'y1', updated_y);
-            $.attr(fixed_line, 'y2', updated_y);
-        }
-        return updated_y += new_row_height;
-    }
+    //     //LA Y DELLA PRIMA RIGA DEVO SCARTARLA PERCHè NON ESISTE LA LINE CORRISPONDENTE
+    //     if (current_row_y != this.options.header_height + this.options.padding / 2) {
+    //         const current_line = this.layers.grid.querySelector('line.row-line[y1="' + current_row_y + '"]');
+    //         const fixed_line = this.$column_container.querySelector('line.row-line[y1="' + current_row_y + '"]');
+    //         $.attr(current_line, 'y1', updated_y);
+    //         $.attr(current_line, 'y2', updated_y);
+    //         $.attr(fixed_line, 'y1', updated_y);
+    //         $.attr(fixed_line, 'y2', updated_y);
+    //     }
+    //     return updated_y += new_row_height;
+    // }
 
     bind_bar_progress() {
         let x_on_start = 0;

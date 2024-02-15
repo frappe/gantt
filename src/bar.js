@@ -325,7 +325,7 @@ export default class Bar {
         const barY = bar.getY();
         let sum_height = this.scheduler.options.header_height + this.scheduler.options.padding / 2;
 
-        for (let i = 0; i <= this.scheduler.rows.length; i++) {
+        for (let i = 0; i < this.scheduler.rows.length; i++) {
             const row = this.scheduler.rows[i];
             const row_height = row.height;
             const row_start = sum_height;
