@@ -241,29 +241,20 @@ export default class Scheduler {
 
             // TODO: Contare gli elementi che sono sovrapposti nella riga
 
-            // Array temporaneo per tenere traccia delle task già contate
-            let countedTasks = [];
-
-            // Contatore delle task sovrapposte
-            let num_overlap_tasks = 0;
-
             // Ciclo su tutte le task nella riga
-            this.tasks.filter(task =>
-                task.row === row_id
-            ).forEach(task => {
+            let num_overlap_tasks = this.tasks.filter(task =>
+                task.row === row_id &&
                 // Verifica se questa task si sovrappone con altre task non ancora contate
-                if (!countedTasks.includes(task.id) && this.tasks.some(other_task =>
+                this.tasks.some(other_task =>
                     //Devo ricontrollare che prenda solo gli elementi sulla stessa riga per fare il confronto
-                    other_task.row === task.row &&
+                    task.row === other_task.row &&
                     // Evita di confrontare il compito con se stesso
-                    other_task !== task &&
+                    task !== other_task &&
+                    //Controllo effettivamente l asovrapposizione
                     ((task._start < other_task._end && task._end > other_task._start) ||
                         (other_task._start < task._end && other_task._end > task._start))
-                )) {
-                    num_overlap_tasks++;
-                    countedTasks.push(task.id); // Aggiungi l'id della task al conteggio
-                }
-            });
+                )
+            ).length;
 
             num_overlap_tasks = num_overlap_tasks > 0 ? num_overlap_tasks : 1;
 
