@@ -256,9 +256,9 @@ export default class Scheduler {
                     //Devo ricontrollare che prenda solo gli elementi sulla stessa riga per fare il confronto
                     other_task.row === task.row &&
                     // Evita di confrontare il compito con se stesso
-                    other_task !== task && 
+                    other_task !== task &&
                     ((task._start < other_task._end && task._end > other_task._start) ||
-                    (other_task._start < task._end && other_task._end > task._start))
+                        (other_task._start < task._end && other_task._end > task._start))
                 )) {
                     num_overlap_tasks++;
                     countedTasks.push(task.id); // Aggiungi l'id della task al conteggio
@@ -403,7 +403,9 @@ export default class Scheduler {
         this.map_arrows_on_bars();
         this.set_width();
         this.set_scroll_position();
-        this.move_overlapping_bars();
+        if (this.options.overlap) {
+            this.move_overlapping_bars();
+        }
     }
 
     setup_layers() {
@@ -1116,7 +1118,8 @@ export default class Scheduler {
 
                         if (this.options.overlap) {
                             this.setup_rows();
-                            this.overlap(bar);
+                            this.render();
+                            // this.overlap(bar);
                         }
                     }
                 });
@@ -1241,7 +1244,9 @@ export default class Scheduler {
             }
         }
     }
-
+    //Per adesso la lascio però in realtà lanciando il render a prescindere non serve
+    //(lo rilancio dato che devo riaggiornare sempre le righe soprattutto se da una riga ingrndita vado in una normale
+    // senza sovrapporre rimarrebbe ingrandita)
     overlap(bar) {
         // Trova tutte le barre sovrapposte 
         const overlappingBars = this.bars.filter(otherBar =>
@@ -1251,13 +1256,11 @@ export default class Scheduler {
             otherBar.task.row === bar.task.row &&
             // verifica la sovrapposizione
             ((bar.task._start < otherBar.task._end && bar.task._end > otherBar.task._start) ||
-            (otherBar.task._start < bar.task._end && otherBar.task._end > bar.task._start))
+                (otherBar.task._start < bar.task._end && otherBar.task._end > bar.task._start))
         );
 
         if (overlappingBars.length > 0) {
             console.log('Ho una sovrapposizione');
-            this.render();
-        } else {
             this.render();
         }
         return;
@@ -1308,14 +1311,14 @@ export default class Scheduler {
 
     move_overlapping_bars() {
 
-        // Sposta le barre dopo aver spostato le righe e le linee
         this.bars.forEach((bar) => {
             //cerco tutte le barre sovrapposte
             const overlappingBars = this.bars.filter(otherBar =>
                 // barre nella stessa riga
                 otherBar.task.row === bar.task.row &&
                 // verifica la sovrapposizione
-                (bar.x < otherBar.x + otherBar.width && bar.x + bar.width > otherBar.x)
+                ((bar.task._start < otherBar.task._end && bar.task._end > otherBar.task._start) ||
+                    (otherBar.task._start < bar.task._end && otherBar.task._end > bar.task._start))
             );
             if (overlappingBars.length > 1) {
                 //cerco la y relativa a quella riga
@@ -1326,6 +1329,7 @@ export default class Scheduler {
                     new_y += overlappingBars[i].height + this.options.padding;
                 }
             } else {
+                //modifico la y delle barre non sovrapposte
                 let new_y = this.rows.find(row => row.id === bar.task.row).y + (this.options.padding / 2);
                 bar.update_bar_position({ y: new_y });
             }
