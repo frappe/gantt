@@ -1063,7 +1063,7 @@ export default class Scheduler {
             } else if (is_dragging) {
                 if (bar_being_dragged.task.drag_drop_x) {
 
-                    // this.moving_scroll_bar(e);
+                    this.moving_scroll_bar(e);
 
                     bar_being_dragged.$bar.finaldx = this.get_snap_x_position(dx);
                     bar_being_dragged.update_bar_position({
@@ -1153,12 +1153,12 @@ export default class Scheduler {
         //Variabile che serve per aggiornare la scrollbar
         var scroll_bar = this.$svg.parentElement;
         //coordinate x e y del mouse a cui devo sottrarre la parte di schermo non utilizzata come container ?
-        var viewportX = e.clientX - this.$container.offsetLeft - this.options.column_width;
+        var viewportX = e.clientX /*- this.$container.offsetLeft + this.options.column_width*/;
         //dovrei aver messo apposto le coordinate del mouse
-        var viewportY = e.clientY - this.$container.offsetTop - this.options.header_height;
+        var viewportY = e.clientY /*- this.$container.offsetTop + this.options.header_height*/;
         //edges del container
-        var edgeTop = this.$container.offsetTop;
-        var edgeLeft = this.$container.offsetLeft;
+        var edgeTop = this.$container.offsetTop + this.options.header_height;
+        var edgeLeft = this.$container.offsetLeft + this.options.fixed_column_width * 2;
         var edgeBottom = this.$container.offsetHeight;
         var edgeRight = this.$container.offsetWidth;
         //variabili per capire in quale punto ci si trova
@@ -1170,14 +1170,14 @@ export default class Scheduler {
         // anything else.
         var timer;
 
-        if (!(isInLeftEdge || isInRightEdge || isInTopEdge || isInBottomEdge)) {
-            //rimane solo capire la questione del timer
-            // clearTimeout(timer);
-            return;
-        }
+        // if (!(isInLeftEdge || isInRightEdge || isInTopEdge || isInBottomEdge)) {
+        //     //rimane solo capire la questione del timer
+        //     clearTimeout(timer);
+        //     return;
+        // }
         //I massimi sono larghezza e atezza del container
-        var maxScrollX = this.$container.scrollWidth - viewportX;
-        var maxScrollY = this.$container.scrollHeight - viewportY;
+        var maxScrollX = this.$container.scrollWidth;
+        var maxScrollY = this.$container.scrollHeight;
         // Get the current scroll position of the document.(container)
         var currentScrollX = this.$container.scrollLeft;     //queste variabili erano dentro adjustment ma non potevo prendere il valore this.
         var currentScrollY = this.$container.scrollTop;
@@ -1188,13 +1188,13 @@ export default class Scheduler {
         // a timer that continues to invoke the adjustment logic while the window can
         // still be scrolled in a particular direction.
         (function checkForWindowScroll() {
-            clearTimeout(timer);
+            // clearTimeout(timer);
             if (adjustWindowScroll(currentScrollX, currentScrollY)) {
-                timer = setTimeout(checkForWindowScroll, 30);
+                // timer = setTimeout(checkForWindowScroll, 300);
             }
         })();
-        // Adjust the window scroll based on the user's mouse position. Returns True
-        // or False depending on whether or not the window scroll was changed.
+        // // Adjust the window scroll based on the user's mouse position. Returns True
+        // // or False depending on whether or not the window scroll was changed.
         function adjustWindowScroll(currentScrollX, currentScrollY) {
             // Determine if the window can be scrolled in any particular direction.
             var canScrollUp = (currentScrollY > 0);
@@ -1206,7 +1206,7 @@ export default class Scheduler {
             var nextScrollY = currentScrollY;
 
             //Serve a calcolare la velocità con cui scrollare
-            var maxStep = 50;
+            var maxStep = 30;
 
             // Should we scroll left?
             if (isInLeftEdge && canScrollLeft) {
@@ -1252,6 +1252,8 @@ export default class Scheduler {
         let is_ending_row_updated = false;
 
         const bar_y = bar.y + bar.$bar.finaldy;
+        //PER LA ROW HEIGHT MI CONVIENE NON USARE LA STESSA FUNZIONE DELL'INIZIO
+        //MEGLIO SE USO LA OVERLAPPINGBARS (PRIMA DEVO CAPIRE LA QUESTIONE DELLE Y PERCHè NON ME LE DA PRECISE)
 
         //controllo che l'altezza della riga iniziale sia diversa da quella standard 
         //se si controllo che il numero di overlap nella riga non sia cambiato
@@ -1268,15 +1270,15 @@ export default class Scheduler {
         //posso provare ad entrare solo se ci sono barre sulla stessa y e con giorni che coincidono
 
         //cerco tutte le barre sovrapposte controllare perchè le y delle barre sono diverse dalla realtà
-        const overlappingBars = this.bars.filter(otherBar =>
-            //controllo che siano sulla stessa y
-            otherBar.y === bar_y &&
-            // verifica la sovrapposizione
-            ((bar.task._start < otherBar.task._end && bar.task._end > otherBar.task._start) ||
-                (otherBar.task._start < bar.task._end && otherBar.task._end > bar.task._start))
-        );
+        // const overlappingBars = this.bars.filter(otherBar =>
+        //     //controllo che siano sulla stessa y
+        //     otherBar.y === bar_y &&
+        //     // verifica la sovrapposizione
+        //     ((bar.task._start < otherBar.task._end && bar.task._end > otherBar.task._start) ||
+        //         (otherBar.task._start < bar.task._end && otherBar.task._end > bar.task._start))
+        // );
 
-        if (ending_num_overlap > 0 && overlappingBars.length > 0) {
+        if (ending_num_overlap > 0 /*&& overlappingBars.length > 0*/) {
             const row_height = this.compute_row_height(ending_num_overlap);
             ending_row.height = row_height;
             is_ending_row_updated = true;
