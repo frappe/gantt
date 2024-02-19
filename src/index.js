@@ -22,8 +22,7 @@ export default class Scheduler {
         this.setup_wrapper(wrapper);
         this.setup_cells(cells);
         this.setup_tasks(tasks);
-        //array per le righe con id e altezza
-        this.setup_rows(tasks);
+        this.setup_rows();
         // initialize with default view mode
         this.change_view_mode();
         this.bind_events();
@@ -236,38 +235,52 @@ export default class Scheduler {
 
     setup_rows() {
         this.rows = [];
+        let y_sum = 0;
         this.options.rows.forEach(row_id => {
             let row = { id: row_id, height: 0, y: (this.options.header_height + this.options.padding / 2) };
 
-            // TODO: Contare gli elementi che sono sovrapposti nella riga
+            const num_overlap_tasks = this.compute_overlap_num_task(row_id);
 
-            // Ciclo su tutte le task nella riga
-            let num_overlap_tasks = this.tasks.filter(task =>
-                task.row === row_id &&
-                // Verifica se questa task si sovrappone con altre task non ancora contate
-                this.tasks.some(other_task =>
-                    //Devo ricontrollare che prenda solo gli elementi sulla stessa riga per fare il confronto
-                    task.row === other_task.row &&
-                    // Evita di confrontare il compito con se stesso
-                    task !== other_task &&
-                    //Controllo effettivamente l asovrapposizione
-                    ((task._start < other_task._end && task._end > other_task._start) ||
-                        (other_task._start < task._end && other_task._end > task._start))
-                )
-            ).length;
+            row.height = this.compute_row_height(num_overlap_tasks);
 
-            num_overlap_tasks = num_overlap_tasks > 0 ? num_overlap_tasks : 1;
-
-            row.height = (this.options.bar_height + this.options.padding) * num_overlap_tasks;
+            row.y += y_sum;
             this.rows.push(row);
+            y_sum += row.height;
         });
+    }
 
-        let sum_rows = 0;
+    compute_overlap_num_task(row_id) {
 
-        for (let i = 0; i < this.rows.length; i++) {
-            this.rows[i].y += sum_rows;
-            sum_rows += this.rows[i].height;
-        }
+        // Ciclo su tutte le task nella riga
+        const num_overlap_tasks = this.tasks.filter(task =>
+            task.row === row_id &&
+            // Verifica se questa task si sovrappone con altre task non ancora contate
+            this.tasks.some(other_task =>
+                //Devo ricontrollare che prenda solo gli elementi sulla stessa riga per fare il confronto
+                task.row === other_task.row &&
+                // Evita di confrontare la task con se stessa
+                task !== other_task &&
+                //Controllo effettivamente la asovrapposizione
+                ((task._start < other_task._end && task._end > other_task._start) ||
+                    (other_task._start < task._end && other_task._end > task._start))
+            )
+        ).length;
+
+        return num_overlap_tasks;
+    }
+
+    compute_row_height(num_overlap_tasks) {
+        num_overlap_tasks = num_overlap_tasks > 0 ? num_overlap_tasks : 1;
+        const row_height = (this.options.bar_height + this.options.padding) * num_overlap_tasks;
+        return row_height;
+    }
+
+    compute_row_y() {
+        let sum_y = this.options.header_height + this.options.padding / 2;
+        this.rows.forEach(row => {
+            row.y = sum_y;
+            sum_y += row.height;
+        });
     }
 
     change_view_mode(mode = this.options.view_mode) {
@@ -963,7 +976,6 @@ export default class Scheduler {
     }
 
     bind_bar_events() {
-        var timer = null;
         let is_dragging = false;
         let x_on_start = 0;
         let y_on_start = 0;
@@ -1051,7 +1063,7 @@ export default class Scheduler {
             } else if (is_dragging) {
                 if (bar_being_dragged.task.drag_drop_x) {
 
-                    // this.moving_scroll_bar(e, timer);
+                    // this.moving_scroll_bar(e);
 
                     bar_being_dragged.$bar.finaldx = this.get_snap_x_position(dx);
                     bar_being_dragged.update_bar_position({
@@ -1103,14 +1115,26 @@ export default class Scheduler {
                     bar.group.classList.remove('active');
 
                     const $bar = bar.$bar;
+                    //salvo le informazioni di partenza
+                    const starting_row_id = bar.task.row;
+                    const starting_num_overlap = this.compute_overlap_num_task(starting_row_id);
+
                     if ($bar.finaldx || $bar.finaldy) {
                         bar.position_changed();
                         bar.set_action_completed();
+                        console.log(bar);
+                        //e quelle di arrivo
+                        const ending_row_id = bar.task.row;
+                        const ending_num_overlap = this.compute_overlap_num_task(ending_row_id);
+                        //questo serve a verificare che gli overlap non siano cambiati
+                        const new_starting_num_overlap = this.compute_overlap_num_task(starting_row_id);
 
                         if (this.options.overlap) {
-                            this.setup_rows();
-                            this.render();
-                            // this.overlap(bar);
+                            this.overlap(bar, starting_row_id,
+                                ending_row_id,
+                                starting_num_overlap,
+                                ending_num_overlap,
+                                new_starting_num_overlap);
                         }
                     }
                 });
@@ -1125,37 +1149,37 @@ export default class Scheduler {
         this.bind_bar_progress();
     }
 
-    moving_scroll_bar(e, timer) {
+    moving_scroll_bar(e) {
         //Variabile che serve per aggiornare la scrollbar
         var scroll_bar = this.$svg.parentElement;
-        //coordinate x e y del mouse sottraggo i punti da cui
-        var viewportX = e.clientX - this.$container.offsetTop;
-        var viewportY = e.clientY - this.$container.offsetLeft;
+        //coordinate x e y del mouse a cui devo sottrarre la parte di schermo non utilizzata come container ?
+        var viewportX = e.clientX - this.$container.offsetLeft - this.options.column_width;
+        //dovrei aver messo apposto le coordinate del mouse
+        var viewportY = e.clientY - this.$container.offsetTop - this.options.header_height;
         //edges del container
         var edgeTop = this.$container.offsetTop;
         var edgeLeft = this.$container.offsetLeft;
         var edgeBottom = this.$container.offsetHeight;
         var edgeRight = this.$container.offsetWidth;
         //variabili per capire in quale punto ci si trova
-        //CONTROLLA CON QUESTE IMPOSTAZIONi SEMBRA PRENDE LA TOP EDGE
         var isInLeftEdge = (viewportX < edgeLeft);
         var isInRightEdge = (viewportX > edgeRight);
         var isInTopEdge = (viewportY < edgeTop);
         var isInBottomEdge = (viewportY > edgeBottom);
         // If the mouse is not in the viewport edge, there's no need to calculate
         // anything else.
+        var timer;
+
         if (!(isInLeftEdge || isInRightEdge || isInTopEdge || isInBottomEdge)) {
-            clearTimeout(timer);
+            //rimane solo capire la questione del timer
+            // clearTimeout(timer);
             return;
         }
-        // Calculate the maximum scroll offset in each direction. Since you can only
-        // scroll the overflow portion of the document, the maximum represents the
-        // length of the document that is NOT in the viewport.
-        //In questo caso i massimi sono larghezza e atezza del container
-        var maxScrollX = this.$container.scrollWidth;
-        var maxScrollY = this.$container.scrollHeight;
+        //I massimi sono larghezza e atezza del container
+        var maxScrollX = this.$container.scrollWidth - viewportX;
+        var maxScrollY = this.$container.scrollHeight - viewportY;
         // Get the current scroll position of the document.(container)
-        var currentScrollX = this.$container.scrollLeft;
+        var currentScrollX = this.$container.scrollLeft;     //queste variabili erano dentro adjustment ma non potevo prendere il valore this.
         var currentScrollY = this.$container.scrollTop;
         // As we examine the mousemove event, we want to adjust the window scroll in
         // immediate response to the event; but, we also want to continue adjusting
@@ -1164,15 +1188,10 @@ export default class Scheduler {
         // a timer that continues to invoke the adjustment logic while the window can
         // still be scrolled in a particular direction.
         (function checkForWindowScroll() {
-
             clearTimeout(timer);
-
             if (adjustWindowScroll(currentScrollX, currentScrollY)) {
-
                 timer = setTimeout(checkForWindowScroll, 30);
-
             }
-
         })();
         // Adjust the window scroll based on the user's mouse position. Returns True
         // or False depending on whether or not the window scroll was changed.
@@ -1182,18 +1201,11 @@ export default class Scheduler {
             var canScrollDown = (currentScrollY < maxScrollY);
             var canScrollLeft = (currentScrollX > 0);
             var canScrollRight = (currentScrollX < maxScrollX);
-            // Since we can potentially scroll in two directions at the same time,
-            // let's keep track of the next scroll, starting with the current scroll.
-            // Each of these values can then be adjusted independently in the logic
-            // below.
+
             var nextScrollX = currentScrollX;
             var nextScrollY = currentScrollY;
 
-            // As we examine the mouse position within the edge, we want to make the
-            // incremental scroll changes more "intense" the closer that the user
-            // gets the viewport edge. As such, we'll calculate the percentage that
-            // the user has made it "through the edge" when calculating the delta.
-            // Then, that use that percentage to back-off from the "max" step value.
+            //Serve a calcolare la velocità con cui scrollare
             var maxStep = 50;
 
             // Should we scroll left?
@@ -1216,10 +1228,6 @@ export default class Scheduler {
                 nextScrollY = (nextScrollY + (maxStep * intensity));
             }
 
-            // Sanitize invalid maximums. An invalid scroll offset won't break the
-            // subsequent .scrollTo() call; however, it will make it harder to
-            // determine if the .scrollTo() method should have been called in the
-            // first place.
             nextScrollX = Math.max(0, Math.min(maxScrollX, nextScrollX));
             nextScrollY = Math.max(0, Math.min(maxScrollY, nextScrollY));
 
@@ -1228,76 +1236,57 @@ export default class Scheduler {
                 (nextScrollY !== currentScrollY)
             ) {
                 scroll_bar.scrollLeft = nextScrollX;
-                // scroll_bar.scrollTop = nextScrollY;
+                scroll_bar.scrollTop = nextScrollY;
                 return (true);
             } else {
                 return (false);
             }
         }
     }
-    //Per adesso la lascio però in realtà lanciando il render a prescindere non serve
-    //(lo rilancio dato che devo riaggiornare sempre le righe soprattutto se da una riga ingrndita vado in una normale
-    // senza sovrapporre rimarrebbe ingrandita)
-    overlap(bar) {
-        // Trova tutte le barre sovrapposte 
+
+    overlap(bar, starting_row_id, ending_row_id, starting_num_overlap, ending_num_overlap, new_starting_num_overlap) {
+        //queste variabili è meglio crearle prima o è indifferente?
+        const starting_row = this.rows.find(row => row.id === starting_row_id);
+        const ending_row = this.rows.find(row => row.id === ending_row_id);
+        let is_start_row_updated = false;
+        let is_ending_row_updated = false;
+
+        const bar_y = bar.y + bar.$bar.finaldy;
+
+        //controllo che l'altezza della riga iniziale sia diversa da quella standard 
+        //se si controllo che il numero di overlap nella riga non sia cambiato
+        if ((starting_row.height > (this.options.bar_height + this.options.padding)) &&
+            (starting_num_overlap != new_starting_num_overlap)) {
+            const row_height = this.compute_row_height(new_starting_num_overlap);
+            starting_row.height = row_height;
+            is_start_row_updated = true;
+        };
+
+        //controllo che ci siano sovrapposizioni alla fine
+        // TODO::
+        //se nella riga finale c'è già una sovrapposizione farà partire il render a prescindere (sistemato ?)
+        //posso provare ad entrare solo se ci sono barre sulla stessa y e con giorni che coincidono
+
+        //cerco tutte le barre sovrapposte controllare perchè le y delle barre sono diverse dalla realtà
         const overlappingBars = this.bars.filter(otherBar =>
-            // escludi la stessa barra
-            otherBar !== bar &&
-            // barre nella stessa riga
-            otherBar.task.row === bar.task.row &&
+            //controllo che siano sulla stessa y
+            otherBar.y === bar_y &&
             // verifica la sovrapposizione
             ((bar.task._start < otherBar.task._end && bar.task._end > otherBar.task._start) ||
                 (otherBar.task._start < bar.task._end && otherBar.task._end > bar.task._start))
         );
 
-        if (overlappingBars.length > 0) {
-            console.log('Ho una sovrapposizione');
+        if (ending_num_overlap > 0 && overlappingBars.length > 0) {
+            const row_height = this.compute_row_height(ending_num_overlap);
+            ending_row.height = row_height;
+            is_ending_row_updated = true;
+        }
+
+        if (is_ending_row_updated || is_start_row_updated) {
+            this.compute_row_y();
             this.render();
         }
         return;
-
-
-        /*
-        Param: Bar appena mossa 
-        if sovrapposta(Bar) ? allora:
-            start_row = riga da cui parto
-            end_row = riga in cui arrivo
-            // calcola la height
-            recalculate_height(start_row)
-            recalculate_height(end_row)
-
-            // calcola la y
-            if start_row sta prima di end_row ? allora:
-                recalculate_y_from_row(start_row) -> anche delle relative barre
-            else
-                recalculate_y_from_row(end_row)
-
-            Ricalcolare la riga da cui parti
-            ingrandire la riga in cui arrivi
-            Riposizionare la Bar correttamente nella riga
-            Ricalcolare tutte le righe successive alla riga della Bar
-            spostare le row_line
-        */
-
-        // //Variabile per avere la y sempre aggiornata
-        // let updated_y = this.options.header_height + this.options.padding / 2;
-        // // Aggiorno tutte le righe
-        // const grid_rows = this.layers.grid.querySelectorAll('rect.grid-row');
-        // grid_rows.forEach((current_row) => {
-        //     const row_id = current_row.getAttribute('data-id');
-        //     // CAMBIARE L'ALTEZZA DI TUTTE LE RIGHE IN BASE ALLE BARRE
-        //     const bars_in_row = this.bars.filter(bar => bar.task.row === row_id);
-        //     let num_bars_in_row = bars_in_row.length;
-        //     if (num_bars_in_row == 0) {
-        //         num_bars_in_row = 1;
-        //         updated_y = this.compute_grid_and_line_height(bar, current_row, num_bars_in_row, updated_y, row_id);
-        //     } else {
-        //         updated_y = this.compute_grid_and_line_height(bar, current_row, num_bars_in_row, updated_y, row_id);
-        //     }
-        // });
-
-        // this.move_overlapping_bars();
-
     }
 
     move_overlapping_bars() {
@@ -1307,62 +1296,26 @@ export default class Scheduler {
             const overlappingBars = this.bars.filter(otherBar =>
                 // barre nella stessa riga
                 otherBar.task.row === bar.task.row &&
+                //controllo che siano sulla stessa y
+                // otherBar.y === bar.y &&
+                // otherBar !== bar &&
                 // verifica la sovrapposizione
                 ((bar.task._start < otherBar.task._end && bar.task._end > otherBar.task._start) ||
                     (otherBar.task._start < bar.task._end && otherBar.task._end > bar.task._start))
             );
+
+            let new_y = bar.y;
+
             if (overlappingBars.length > 1) {
-                //cerco la y relativa a quella riga
-                let new_y = this.rows.find(row => row.id === bar.task.row).y + this.options.padding / 2;
+                //modifico la y delle barre sovrapposte
                 for (let i = 0; i < overlappingBars.length; i++) {
                     //modifico le y delle barre sovrpposte
                     overlappingBars[i].update_bar_position({ y: new_y });
-                    new_y += overlappingBars[i].height + this.options.padding;
+                    new_y += this.options.bar_height + this.options.padding;
                 }
-            } else {
-                //modifico la y delle barre non sovrapposte
-                let new_y = this.rows.find(row => row.id === bar.task.row).y + (this.options.padding / 2);
-                bar.update_bar_position({ y: new_y });
             }
         });
     }
-
-    // compute_grid_and_line_height(bar, current_row, num_bars_in_row, updated_y, row_id) {
-
-    //     //modifico l'altezza della riga
-    //     const new_row_height = num_bars_in_row * (bar.height + this.options.padding);
-    //     $.attr(current_row, 'height', new_row_height);
-    //     //modifico l'altezza della riga fissa corrispondente
-    //     const curr_fixed_row = this.$column_container.querySelector('g.grid > g > rect[data-id=' + row_id + ']');
-    //     $.attr(curr_fixed_row, 'height', new_row_height);
-    //     const current_row_y = current_row.getAttribute('y');
-    //     //modifico la y delle righe
-    //     $.attr(current_row, 'y', updated_y);
-    //     $.attr(curr_fixed_row, 'y', updated_y);
-    //     //modifico altezza e y della cell
-    //     const curr_cell_rect = this.$column_container.querySelectorAll('g.cell > g.cell-wrapper[data-row-id = ' + row_id + '] > rect');
-    //     const curr_cell_text = this.$column_container.querySelectorAll('g.cell > g.cell-wrapper[data-row-id = ' + row_id + '] > text');
-    //     //loop in base a quante fixed columns sono presenti
-    //     for (let i = 0; i < this.options.fixed_columns.length; i++) {
-    //         $.attr(curr_cell_rect[i], 'height', new_row_height);
-    //         $.attr(curr_cell_rect[i], 'y', updated_y);
-    //         //modifico y del testo prima contollo che ci sia del testo altrimenti va in errore
-    //         if (curr_cell_text.length != 0) {
-    //             $.attr(curr_cell_text[i], 'y', 24 + updated_y);
-    //         }
-    //     }
-
-    //     //LA Y DELLA PRIMA RIGA DEVO SCARTARLA PERCHè NON ESISTE LA LINE CORRISPONDENTE
-    //     if (current_row_y != this.options.header_height + this.options.padding / 2) {
-    //         const current_line = this.layers.grid.querySelector('line.row-line[y1="' + current_row_y + '"]');
-    //         const fixed_line = this.$column_container.querySelector('line.row-line[y1="' + current_row_y + '"]');
-    //         $.attr(current_line, 'y1', updated_y);
-    //         $.attr(current_line, 'y2', updated_y);
-    //         $.attr(fixed_line, 'y1', updated_y);
-    //         $.attr(fixed_line, 'y2', updated_y);
-    //     }
-    //     return updated_y += new_row_height;
-    // }
 
     bind_bar_progress() {
         let x_on_start = 0;
