@@ -1152,10 +1152,9 @@ export default class Scheduler {
     moving_scroll_bar(e) {
         //Variabile che serve per aggiornare la scrollbar
         var scroll_bar = this.$svg.parentElement;
-        //coordinate x e y del mouse a cui devo sottrarre la parte di schermo non utilizzata come container ?
-        var viewportX = e.clientX /*- this.$container.offsetLeft + this.options.column_width*/;
-        //dovrei aver messo apposto le coordinate del mouse
-        var viewportY = e.clientY /*- this.$container.offsetTop + this.options.header_height*/;
+        //coordinate x e y del mouse
+        var viewportX = e.clientX;
+        var viewportY = e.clientY;
         //edges del container
         var edgeTop = this.$container.offsetTop + this.options.header_height;
         var edgeLeft = this.$container.offsetLeft + this.options.fixed_column_width * 2;
@@ -1168,33 +1167,23 @@ export default class Scheduler {
         var isInBottomEdge = (viewportY > edgeBottom);
         // If the mouse is not in the viewport edge, there's no need to calculate
         // anything else.
-        var timer;
 
-        // if (!(isInLeftEdge || isInRightEdge || isInTopEdge || isInBottomEdge)) {
-        //     //rimane solo capire la questione del timer
-        //     clearTimeout(timer);
-        //     return;
-        // }
         //I massimi sono larghezza e atezza del container
         var maxScrollX = this.$container.scrollWidth;
         var maxScrollY = this.$container.scrollHeight;
         // Get the current scroll position of the document.(container)
-        var currentScrollX = this.$container.scrollLeft;     //queste variabili erano dentro adjustment ma non potevo prendere il valore this.
+        var currentScrollX = this.$container.scrollLeft;
         var currentScrollY = this.$container.scrollTop;
         // As we examine the mousemove event, we want to adjust the window scroll in
         // immediate response to the event; but, we also want to continue adjusting
         // the window scroll if the user rests their mouse in the edge boundary. To
-        // do this, we'll invoke the adjustment logic immediately. Then, we'll setup
-        // a timer that continues to invoke the adjustment logic while the window can
-        // still be scrolled in a particular direction.
+        // do this, we'll invoke the adjustment logic immediately.
         (function checkForWindowScroll() {
-            // clearTimeout(timer);
             if (adjustWindowScroll(currentScrollX, currentScrollY)) {
-                // timer = setTimeout(checkForWindowScroll, 300);
             }
         })();
-        // // Adjust the window scroll based on the user's mouse position. Returns True
-        // // or False depending on whether or not the window scroll was changed.
+        // Adjust the window scroll based on the user's mouse position. Returns True
+        // or False depending on whether or not the window scroll was changed.
         function adjustWindowScroll(currentScrollX, currentScrollY) {
             // Determine if the window can be scrolled in any particular direction.
             var canScrollUp = (currentScrollY > 0);
