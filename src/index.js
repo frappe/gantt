@@ -1247,6 +1247,7 @@ export default class Scheduler {
         // variabile che servono per capire se fare o no il render
         let is_start_row_updated = false;
         let is_ending_row_updated = false;
+        let need_to_render = false;
 
         //ricalcolo i sotto livelli della nuova riga finale
         const new_ending_sub_level = this.compute_row_sub_level(ending_row_id);
@@ -1272,9 +1273,11 @@ export default class Scheduler {
                 starting_row.height = row_height;
                 is_start_row_updated = true;
             };
+        } else if (delta_y != 0 || delta_x != 0){
+            need_to_render = true;
         }
 
-        if (is_ending_row_updated || is_start_row_updated || delta_y != 0 || delta_x != 0) {
+        if (is_ending_row_updated || is_start_row_updated || need_to_render) {
             this.compute_row_y();
             this.render();
         }
