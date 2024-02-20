@@ -35,58 +35,859 @@
     </div>
     <script>
         var tasks = [
+            // {
+            //     start: '2018-10-01',
+            //     end: '2018-10-08',
+            //     name: 'Redesign website',
+            //     id: "Task 0",
+            //     progress: 20,
+            //     row: 'machine_1',
+            //     resize_left: false,
+            //     resize_right: false,
+            // },
+            // {
+            //     start: '2018-10-03',
+            //     end: '2018-10-06',
+            //     name: 'Write new content',
+            //     id: "Task 1",
+            //     progress: 5,
+            //     row: 'machine_3',
+            // },
+            // {
+            //     start: '2018-10-04',
+            //     end: '2018-10-08',
+            //     name: 'Apply new styles',
+            //     id: "Task 2",
+            //     progress: 10,
+            //     row: 'machine_2',
+            // },
+            // {
+            //     start: '2018-10-08',
+            //     end: '2018-10-09',
+            //     name: 'Review',
+            //     id: "Task 3",
+            //     progress: 5,
+            //     row: 'machine_4',
+            // },
+            // {
+            //     start: '2018-10-08',
+            //     end: '2018-10-10',
+            //     name: 'Deploy',
+            //     id: "Task 4",
+            //     progress: 0,
+            //     row: 'machine_5',
+            // },
+            // {
+            //     start: '2018-10-11',
+            //     end: '2018-10-11',
+            //     name: 'Go Live!',
+            //     id: "Task 5",
+            //     progress: 0,
+            //     dependencies: 'Task 4',
+            //     row: 'machine_6',
+            //     custom_class: 'bar-milestone'
+            // },//inizio task per testing
             {
-                start: '2018-10-01',
-                end: '2018-10-08',
-                name: 'Redesign website',
+                start: "2018-10-01",
+                end: "2018-10-08",
+                name: "Redesign website",
                 id: "Task 0",
                 progress: 20,
-                row: 'machine_1',
-                resize_left: false,
-                resize_right: false,
+                row: "machine_1"
             },
             {
-                start: '2018-10-03',
-                end: '2018-10-06',
-                name: 'Write new content',
+                start: "2018-10-02",
+                end: "2018-10-09",
+                name: "Develop new feature",
                 id: "Task 1",
-                progress: 5,
-                row: 'machine_3',
+                progress: 30,
+                row: "machine_2"
             },
             {
-                start: '2018-10-04',
-                end: '2018-10-08',
-                name: 'Apply new styles',
+                start: "2018-10-03",
+                end: "2018-10-10",
+                name: "Write documentation",
                 id: "Task 2",
-                progress: 10,
-                row: 'machine_2',
+                progress: 40,
+                row: "machine_3"
             },
             {
-                start: '2018-10-08',
-                end: '2018-10-09',
-                name: 'Review',
+                start: "2018-10-04",
+                end: "2018-10-11",
+                name: "Test software",
                 id: "Task 3",
-                progress: 5,
-                row: 'machine_4',
+                progress: 50,
+                row: "machine_4"
             },
             {
-                start: '2018-10-08',
-                end: '2018-10-10',
-                name: 'Deploy',
+                start: "2018-10-05",
+                end: "2018-10-12",
+                name: "Prepare presentation",
                 id: "Task 4",
-                progress: 0,
-                row: 'machine_5',
+                progress: 60,
+                row: "machine_5"
             },
             {
-                start: '2018-10-11',
-                end: '2018-10-11',
-                name: 'Go Live!',
+                start: "2018-10-06",
+                end: "2018-10-13",
+                name: "Review code",
                 id: "Task 5",
-                progress: 0,
-                dependencies: 'Task 4',
-                row: 'machine_6',
-                custom_class: 'bar-milestone'
+                progress: 70,
+                row: "machine_6"
+            },
+            {
+                start: "2018-10-07",
+                end: "2018-10-14",
+                name: "Deploy application",
+                id: "Task 6",
+                progress: 80,
+                row: "machine_7"
+            },
+            {
+                start: "2018-10-08",
+                end: "2018-10-15",
+                name: "Optimize performance",
+                id: "Task 7",
+                progress: 90,
+                row: "machine_8"
+            },
+            {
+                start: "2018-10-09",
+                end: "2018-10-16",
+                name: "Fix bugs",
+                id: "Task 8",
+                progress: 100,
+                row: "machine_9"
+            },
+            {
+                start: "2018-10-10",
+                end: "2018-10-17",
+                name: "Create user interface",
+                id: "Task 9",
+                progress: 10,
+                row: "machine_10"
+            },
+            {
+                start: "2018-10-11",
+                end: "2018-10-18",
+                name: "Implement security measures",
+                id: "Task 10",
+                progress: 20,
+                row: "machine_11"
+            },
+            {
+                start: "2018-10-12",
+                end: "2018-10-19",
+                name: "Conduct user testing",
+                id: "Task 11",
+                progress: 30,
+                row: "machine_12"
+            },
+            {
+                start: "2018-10-13",
+                end: "2018-10-20",
+                name: "Gather requirements",
+                id: "Task 12",
+                progress: 40,
+                row: "machine_13"
+            },
+            {
+                start: "2018-10-14",
+                end: "2018-10-21",
+                name: "Create database schema",
+                id: "Task 13",
+                progress: 50,
+                row: "machine_14"
+            },
+            {
+                start: "2018-10-15",
+                end: "2018-10-22",
+                name: "Design wireframes",
+                id: "Task 14",
+                progress: 60,
+                row: "machine_15"
+            },
+            {
+                start: "2018-10-16",
+                end: "2018-10-23",
+                name: "Setup development environment",
+                id: "Task 15",
+                progress: 70,
+                row: "machine_16"
+            },
+            {
+                start: "2018-10-17",
+                end: "2018-10-24",
+                name: "Prepare release notes",
+                id: "Task 16",
+                progress: 80,
+                row: "machine_17"
+            },
+            {
+                start: "2018-10-18",
+                end: "2018-10-25",
+                name: "Refactor code",
+                id: "Task 17",
+                progress: 90,
+                row: "machine_18"
+            },
+            {
+                start: "2018-10-19",
+                end: "2018-10-26",
+                name: "Plan marketing strategy",
+                id: "Task 18",
+                progress: 100,
+                row: "machine_19"
+            },
+            {
+                start: "2018-10-20",
+                end: "2018-10-27",
+                name: "Document APIs",
+                id: "Task 19",
+                progress: 10,
+                row: "machine_20"
+            },
+            {
+                start: "2018-10-21",
+                end: "2018-10-28",
+                name: "Create test cases",
+                id: "Task 20",
+                progress: 20,
+                row: "machine_21"
+            },
+            {
+                start: "2018-10-22",
+                end: "2018-10-29",
+                name: "Implement backend functionality",
+                id: "Task 21",
+                progress: 30,
+                row: "machine_22"
+            },
+            {
+                start: "2018-10-23",
+                end: "2018-10-30",
+                name: "Design user experience",
+                id: "Task 22",
+                progress: 40,
+                row: "machine_23"
+            },
+            {
+                start: "2018-10-24",
+                end: "2018-10-31",
+                name: "Test scalability",
+                id: "Task 23",
+                progress: 50,
+                row: "machine_24"
+            },
+            {
+                start: "2018-10-25",
+                end: "2018-11-01",
+                name: "Create style guide",
+                id: "Task 24",
+                progress: 60,
+                row: "machine_25"
+            },
+            {
+                start: "2018-10-26",
+                end: "2018-11-02",
+                name: "Review documentation",
+                id: "Task 25",
+                progress: 70,
+                row: "machine_26"
+            },
+            {
+                start: "2018-10-27",
+                end: "2018-11-03",
+                name: "Implement front-end design",
+                id: "Task 26",
+                progress: 80,
+                row: "machine_27"
+            },
+            {
+                start: "2018-10-28",
+                end: "2018-11-04",
+                name: "Finalize feature set",
+                id: "Task 27",
+                progress: 90,
+                row: "machine_28"
+            },
+            {
+                start: "2018-10-29",
+                end: "2018-11-05",
+                name: "Refine user interface",
+                id: "Task 28",
+                progress: 100,
+                row: "machine_29"
+            },
+            {
+                start: "2018-10-30",
+                end: "2018-11-06",
+                name: "Write unit tests",
+                id: "Task 29",
+                progress: 10,
+                row: "machine_30"
+            },
+            {
+                start: "2018-10-31",
+                end: "2018-11-07",
+                name: "Integrate third-party APIs",
+                id: "Task 30",
+                progress: 20,
+                row: "machine_31"
+            },
+            {
+                start: "2018-11-01",
+                end: "2018-11-08",
+                name: "Conduct code review",
+                id: "Task 31",
+                progress: 30,
+                row: "machine_32"
+            },
+            {
+                start: "2018-11-02",
+                end: "2018-11-09",
+                name: "Create demo version",
+                id: "Task 32",
+                progress: 40,
+                row: "machine_33"
+            },
+            {
+                start: "2018-11-03",
+                end: "2018-11-10",
+                name: "Plan deployment strategy",
+                id: "Task 33",
+                progress: 50,
+                row: "machine_34"
+            },
+            {
+                start: "2018-11-04",
+                end: "2018-11-11",
+                name: "Optimize database queries",
+                id: "Task 34",
+                progress: 60,
+                row: "machine_35"
+            },
+            {
+                start: "2018-11-05",
+                end: "2018-11-12",
+                name: "Setup continuous integration",
+                id: "Task 35",
+                progress: 70,
+                row: "machine_36"
+            },
+            {
+                start: "2018-11-06",
+                end: "2018-11-13",
+                name: "Conduct user interviews",
+                id: "Task 36",
+                progress: 80,
+                row: "machine_37"
+            },
+            {
+                start: "2018-11-07",
+                end: "2018-11-14",
+                name: "Design database structure",
+                id: "Task 37",
+                progress: 90,
+                row: "machine_38"
+            },
+            {
+                start: "2018-11-08",
+                end: "2018-11-15",
+                name: "Update documentation",
+                id: "Task 38",
+                progress: 100,
+                row: "machine_39"
+            },
+            {
+                start: "2018-11-09",
+                end: "2018-11-16",
+                name: "Create deployment script",
+                id: "Task 39",
+                progress: 10,
+                row: "machine_40"
+            },
+            {
+                start: "2018-11-10",
+                end: "2018-11-17",
+                name: "Test cross-browser compatibility",
+                id: "Task 40",
+                progress: 20,
+                row: "machine_41"
+            },
+            {
+                start: "2018-11-11",
+                end: "2018-11-18",
+                name: "Implement error handling",
+                id: "Task 41",
+                progress: 30,
+                row: "machine_42"
+            },
+            {
+                start: "2018-11-12",
+                end: "2018-11-19",
+                name: "Prepare training materials",
+                id: "Task 42",
+                progress: 40,
+                row: "machine_43"
+            },
+            {
+                start: "2018-11-13",
+                end: "2018-11-20",
+                name: "Review user feedback",
+                id: "Task 43",
+                progress: 50,
+                row: "machine_44"
+            },
+            {
+                start: "2018-11-14",
+                end: "2018-11-21",
+                name: "Create help documentation",
+                id: "Task 44",
+                progress: 60,
+                row: "machine_45"
+            },
+            {
+                start: "2018-11-15",
+                end: "2018-11-22",
+                name: "Design landing page",
+                id: "Task 45",
+                progress: 70,
+                row: "machine_46"
+            },
+            {
+                start: "2018-11-16",
+                end: "2018-11-23",
+                name: "Implement search functionality",
+                id: "Task 46",
+                progress: 80,
+                row: "machine_47"
+            },
+            {
+                start: "2018-11-17",
+                end: "2018-11-24",
+                name: "Finalize deployment plan",
+                id: "Task 47",
+                progress: 90,
+                row: "machine_48"
+            },
+            {
+                start: "2018-11-18",
+                end: "2018-11-25",
+                name: "Conduct security audit",
+                id: "Task 48",
+                progress: 100,
+                row: "machine_49"
+            },
+            {
+                start: "2018-11-19",
+                end: "2018-11-26",
+                name: "Optimize frontend performance",
+                id: "Task 49",
+                progress: 10,
+                row: "machine_50"
+            },
+            {
+                start: "2018-09-20",
+                end: "2018-09-27",
+                name: "Plan project",
+                id: "Task 50",
+                progress: 20,
+                row: "machine_1"
+            },
+            {
+                start: "2018-09-21",
+                end: "2018-09-28",
+                name: "Gather requirements",
+                id: "Task 51",
+                progress: 30,
+                row: "machine_2"
+            },
+            {
+                start: "2018-09-22",
+                end: "2018-09-29",
+                name: "Design prototype",
+                id: "Task 52",
+                progress: 40,
+                row: "machine_3"
+            },
+            {
+                start: "2018-09-23",
+                end: "2018-09-30",
+                name: "Develop backend",
+                id: "Task 53",
+                progress: 50,
+                row: "machine_4"
+            },
+            {
+                start: "2018-09-24",
+                end: "2018-10-01",
+                name: "Implement frontend",
+                id: "Task 54",
+                progress: 60,
+                row: "machine_5"
+            },
+            {
+                start: "2018-09-25",
+                end: "2018-10-02",
+                name: "Test functionality",
+                id: "Task 55",
+                progress: 70,
+                row: "machine_6"
+            },
+            {
+                start: "2018-09-26",
+                end: "2018-10-03",
+                name: "Create user profile management",
+                id: "Task 56",
+                progress: 80,
+                row: "machine_7"
+            },
+            {
+                start: "2018-09-27",
+                end: "2018-10-04",
+                name: "Develop content moderation system",
+                id: "Task 57",
+                progress: 90,
+                row: "machine_8"
+            },
+            {
+                start: "2018-09-28",
+                end: "2018-10-05",
+                name: "Optimize database queries",
+                id: "Task 58",
+                progress: 100,
+                row: "machine_9"
+            },
+            {
+                start: "2018-09-29",
+                end: "2018-10-06",
+                name: "Design user interface",
+                id: "Task 59",
+                progress: 10,
+                row: "machine_10"
+            },
+            {
+                start: "2018-09-30",
+                end: "2018-10-07",
+                name: "Create database schema",
+                id: "Task 60",
+                progress: 20,
+                row: "machine_11"
+            },
+            {
+                start: "2018-10-01",
+                end: "2018-10-08",
+                name: "Test software",
+                id: "Task 61",
+                progress: 30,
+                row: "machine_12"
+            },
+            {
+                start: "2018-10-02",
+                end: "2018-10-09",
+                name: "Review code",
+                id: "Task 62",
+                progress: 40,
+                row: "machine_13"
+            },
+            {
+                start: "2018-10-03",
+                end: "2018-10-10",
+                name: "Deploy application",
+                id: "Task 63",
+                progress: 50,
+                row: "machine_14"
+            },
+            {
+                start: "2018-10-04",
+                end: "2018-10-11",
+                name: "Optimize performance",
+                id: "Task 64",
+                progress: 60,
+                row: "machine_15"
+            },
+            {
+                start: "2018-10-05",
+                end: "2018-10-12",
+                name: "Fix bugs",
+                id: "Task 65",
+                progress: 70,
+                row: "machine_16"
+            },
+            {
+                start: "2018-10-06",
+                end: "2018-10-13",
+                name: "Create user interface",
+                id: "Task 66",
+                progress: 80,
+                row: "machine_17"
+            },
+            {
+                start: "2018-10-07",
+                end: "2018-10-14",
+                name: "Implement security measures",
+                id: "Task 67",
+                progress: 90,
+                row: "machine_18"
+            },
+            {
+                start: "2018-10-08",
+                end: "2018-10-15",
+                name: "Conduct user testing",
+                id: "Task 68",
+                progress: 100,
+                row: "machine_19"
+            },
+            {
+                start: "2018-10-09",
+                end: "2018-10-16",
+                name: "Gather requirements",
+                id: "Task 69",
+                progress: 10,
+                row: "machine_20"
+            },
+            {
+                start: "2018-10-10",
+                end: "2018-10-17",
+                name: "Create database schema",
+                id: "Task 70",
+                progress: 20,
+                row: "machine_21"
+            },
+            {
+                start: "2018-10-11",
+                end: "2018-10-18",
+                name: "Design wireframes",
+                id: "Task 71",
+                progress: 30,
+                row: "machine_22"
+            },
+            {
+                start: "2018-10-12",
+                end: "2018-10-19",
+                name: "Setup development environment",
+                id: "Task 72",
+                progress: 40,
+                row: "machine_23"
+            },
+            {
+                start: "2018-10-13",
+                end: "2018-10-20",
+                name: "Prepare release notes",
+                id: "Task 73",
+                progress: 50,
+                row: "machine_24"
+            },
+            {
+                start: "2018-10-14",
+                end: "2018-10-21",
+                name: "Refactor code",
+                id: "Task 74",
+                progress: 60,
+                row: "machine_25"
+            },
+            {
+                start: "2018-10-15",
+                end: "2018-10-22",
+                name: "Test functionality",
+                id: "Task 75",
+                progress: 70,
+                row: "machine_26"
+            },
+            {
+                start: "2018-10-16",
+                end: "2018-10-23",
+                name: "Create user profile management",
+                id: "Task 76",
+                progress: 80,
+                row: "machine_27"
+            },
+            {
+                start: "2018-10-17",
+                end: "2018-10-24",
+                name: "Develop content moderation system",
+                id: "Task 77",
+                progress: 90,
+                row: "machine_28"
+            },
+            {
+                start: "2018-10-18",
+                end: "2018-10-25",
+                name: "Optimize database queries",
+                id: "Task 78",
+                progress: 100,
+                row: "machine_29"
+            },
+            {
+                start: "2018-10-19",
+                end: "2018-10-26",
+                name: "Design user interface",
+                id: "Task 79",
+                progress: 10,
+                row: "machine_30"
+            },
+            {
+                start: "2018-10-20",
+                end: "2018-10-27",
+                name: "Create database schema",
+                id: "Task 80",
+                progress: 20,
+                row: "machine_31"
+            },
+            {
+                start: "2018-10-21",
+                end: "2018-10-28",
+                name: "Test software",
+                id: "Task 81",
+                progress: 30,
+                row: "machine_32"
+            },
+            {
+                start: "2018-10-22",
+                end: "2018-10-29",
+                name: "Review code",
+                id: "Task 82",
+                progress: 40,
+                row: "machine_33"
+            },
+            {
+                start: "2018-10-23",
+                end: "2018-10-30",
+                name: "Deploy application",
+                id: "Task 83",
+                progress: 50,
+                row: "machine_34"
+            },
+            {
+                start: "2018-10-24",
+                end: "2018-10-31",
+                name: "Optimize performance",
+                id: "Task 84",
+                progress: 60,
+                row: "machine_35"
+            },
+            {
+                start: "2018-10-25",
+                end: "2018-11-01",
+                name: "Fix bugs",
+                id: "Task 85",
+                progress: 70,
+                row: "machine_36"
+            },
+            {
+                start: "2018-10-26",
+                end: "2018-11-02",
+                name: "Create user interface",
+                id: "Task 86",
+                progress: 80,
+                row: "machine_37"
+            },
+            {
+                start: "2018-10-27",
+                end: "2018-11-03",
+                name: "Implement security measures",
+                id: "Task 87",
+                progress: 90,
+                row: "machine_38"
+            },
+            {
+                start: "2018-10-28",
+                end: "2018-11-04",
+                name: "Conduct user testing",
+                id: "Task 88",
+                progress: 100,
+                row: "machine_39"
+            },
+            {
+                start: "2018-10-29",
+                end: "2018-11-05",
+                name: "Gather requirements",
+                id: "Task 89",
+                progress: 10,
+                row: "machine_40"
+            },
+            {
+                start: "2018-10-30",
+                end: "2018-11-06",
+                name: "Create database schema",
+                id: "Task 90",
+                progress: 20,
+                row: "machine_41"
+            },
+            {
+                start: "2018-10-31",
+                end: "2018-11-07",
+                name: "Design wireframes",
+                id: "Task 91",
+                progress: 30,
+                row: "machine_42"
+            },
+            {
+                start: "2018-11-01",
+                end: "2018-11-08",
+                name: "Setup development environment",
+                id: "Task 92",
+                progress: 40,
+                row: "machine_43"
+            },
+            {
+                start: "2018-11-02",
+                end: "2018-11-09",
+                name: "Prepare release notes",
+                id: "Task 93",
+                progress: 50,
+                row: "machine_44"
+            },
+            {
+                start: "2018-11-03",
+                end: "2018-11-10",
+                name: "Refactor code",
+                id: "Task 94",
+                progress: 60,
+                row: "machine_45"
+            },
+            {
+                start: "2018-11-04",
+                end: "2018-11-11",
+                name: "Test functionality",
+                id: "Task 95",
+                progress: 70,
+                row: "machine_46"
+            },
+            {
+                start: "2018-11-05",
+                end: "2018-11-12",
+                name: "Create user profile management",
+                id: "Task 96",
+                progress: 80,
+                row: "machine_47"
+            },
+            {
+                start: "2018-11-06",
+                end: "2018-11-13",
+                name: "Develop content moderation system",
+                id: "Task 97",
+                progress: 90,
+                row: "machine_48"
+            },
+            {
+                start: "2018-11-07",
+                end: "2018-11-14",
+                name: "Optimize database queries",
+                id: "Task 98",
+                progress: 100,
+                row: "machine_49"
+            },
+            {
+                start: "2018-11-08",
+                end: "2018-11-15",
+                name: "Design user interface",
+                id: "Task 99",
+                progress: 10,
+                row: "machine_50"
             }
+
         ]
         var cells = [
             {
@@ -138,7 +939,59 @@
             overlap: true,
             popup_position: 'left', //or bottom
             date_start: '2018-09-15',
-            rows: ['machine_1', 'machine_2', 'machine_3', 'machine_4', 'machine_5', 'machine_6', 'machine_7', 'machine_8', 'machine_9', 'machine_10'],
+            // rows: ['machine_1', 'machine_2', 'machine_3', 'machine_4', 'machine_5', 'machine_6', 'machine_7', 'machine_8', 'machine_9', 'machine_10'],
+            rows: [
+                "machine_1",
+                "machine_2",
+                "machine_3",
+                "machine_4",
+                "machine_5",
+                "machine_6",
+                "machine_7",
+                "machine_8",
+                "machine_9",
+                "machine_10",
+                "machine_11",
+                "machine_12",
+                "machine_13",
+                "machine_14",
+                "machine_15",
+                "machine_16",
+                "machine_17",
+                "machine_18",
+                "machine_19",
+                "machine_20",
+                "machine_21",
+                "machine_22",
+                "machine_23",
+                "machine_24",
+                "machine_25",
+                "machine_26",
+                "machine_27",
+                "machine_28",
+                "machine_29",
+                "machine_30",
+                "machine_31",
+                "machine_32",
+                "machine_33",
+                "machine_34",
+                "machine_35",
+                "machine_36",
+                "machine_37",
+                "machine_38",
+                "machine_39",
+                "machine_40",
+                "machine_41",
+                "machine_42",
+                "machine_43",
+                "machine_44",
+                "machine_45",
+                "machine_46",
+                "machine_47",
+                "machine_48",
+                "machine_49",
+                "machine_50"
+            ],
             fixed_columns: ['name', 'description']
         });
         console.log(scheduler_chart);

@@ -125,6 +125,7 @@ export default class Scheduler {
             rows: [],
             overlap: true,
             moving_scroll_bar: false,
+            // set_scroll_position
         };
         this.options = Object.assign({}, default_options, options);
 
@@ -1263,7 +1264,7 @@ export default class Scheduler {
             const new_starting_sub_level = this.compute_row_sub_level(starting_row_id);
             const starting_row = this.rows.find(row => row.id === starting_row_id);
             //controllo se l'altezza della riga iniziale sia cambiata
-            if ((new_starting_sub_level.length != starting_row.sub_level.length)) {
+            if (new_starting_sub_level.length != 0 && (new_starting_sub_level.length != starting_row.sub_level.length)) {
                 starting_row.sub_level = new_starting_sub_level;
                 const row_height = this.compute_row_height(starting_row.sub_level.length);
                 starting_row.height = row_height;
