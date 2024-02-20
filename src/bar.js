@@ -362,7 +362,7 @@ export default class Bar {
 
     compute_y() {
         return (
-            (this.scheduler.options.padding / 2) +
+            this.scheduler.rows[this.task._index].sub_level[this.task._sub_level_index].task_y +
             this.scheduler.rows[this.task._index].y
         );
     }

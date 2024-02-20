@@ -124,6 +124,7 @@ export default class Scheduler {
             fixed_columns: [],
             rows: [],
             overlap: true,
+            moving_scroll_bar: false,
         };
         this.options = Object.assign({}, default_options, options);
 
@@ -235,13 +236,13 @@ export default class Scheduler {
 
     setup_rows() {
         this.rows = [];
-        let y_sum = 0;
+        let y_sum = (this.options.header_height + this.options.padding / 2);
         this.options.rows.forEach(row_id => {
-            let row = { id: row_id, height: 0, y: (this.options.header_height + this.options.padding / 2) };
+            let row = { id: row_id, height: 0, y: 0, sub_level: [] };
 
-            const num_overlap_tasks = this.compute_overlap_num_task(row_id);
+            row.sub_level = this.compute_row_sub_level(row_id);
 
-            row.height = this.compute_row_height(num_overlap_tasks);
+            row.height = this.compute_row_height(row.sub_level.length);
 
             row.y += y_sum;
             this.rows.push(row);
@@ -249,24 +250,37 @@ export default class Scheduler {
         });
     }
 
-    compute_overlap_num_task(row_id) {
+    compute_row_sub_level(row_id) {
 
-        // Ciclo su tutte le task nella riga
-        const num_overlap_tasks = this.tasks.filter(task =>
-            task.row === row_id &&
-            // Verifica se questa task si sovrappone con altre task non ancora contate
-            this.tasks.some(other_task =>
-                //Devo ricontrollare che prenda solo gli elementi sulla stessa riga per fare il confronto
-                task.row === other_task.row &&
-                // Evita di confrontare la task con se stessa
-                task !== other_task &&
-                //Controllo effettivamente la asovrapposizione
-                ((task._start < other_task._end && task._end > other_task._start) ||
-                    (other_task._start < task._end && other_task._end > task._start))
-            )
-        ).length;
+        const task_in_same_row = this.tasks.filter(task => task.row === row_id);
+        //ordina per data le task in quella riga
+        task_in_same_row.sort((a, b) => a._start - b._start);
 
-        return num_overlap_tasks;
+        let sub_levels = [];
+
+        let sub_level_y = this.options.padding / 2;
+
+        task_in_same_row.forEach(task => {
+            let i = 0;
+            // Trova l'indice del sotto livello in cui inserire questa task
+            for (i = 0; i < sub_levels.length; i++) {
+                const last_task_in_sub_level = sub_levels[i][sub_levels[i].length - 1];
+                if (task._start >= last_task_in_sub_level._end) {
+                    task._sub_level_index = i;
+                    break;
+                }
+            }
+
+            if (!sub_levels[i]) {
+                task._sub_level_index = i;
+                sub_levels[i] = [];
+                sub_levels[i].task_y = sub_level_y;
+                sub_level_y += this.options.padding + this.options.bar_height;
+            }
+            sub_levels[i].push(task);
+        });
+
+        return sub_levels;
     }
 
     compute_row_height(num_overlap_tasks) {
@@ -407,9 +421,6 @@ export default class Scheduler {
         this.map_arrows_on_bars();
         this.set_width();
         this.set_scroll_position();
-        if (this.options.overlap) {
-            this.move_overlapping_bars();
-        }
     }
 
     setup_layers() {
@@ -1063,7 +1074,9 @@ export default class Scheduler {
             } else if (is_dragging) {
                 if (bar_being_dragged.task.drag_drop_x) {
 
-                    this.moving_scroll_bar(e);
+                    if (this.options.moving_scroll_bar) {
+                        this.moving_scroll_bar(e);
+                    }
 
                     bar_being_dragged.$bar.finaldx = this.get_snap_x_position(dx);
                     bar_being_dragged.update_bar_position({
@@ -1115,26 +1128,22 @@ export default class Scheduler {
                     bar.group.classList.remove('active');
 
                     const $bar = bar.$bar;
-                    //salvo le informazioni di partenza
+
+                    //salvo l'id di partenza
                     const starting_row_id = bar.task.row;
-                    const starting_num_overlap = this.compute_overlap_num_task(starting_row_id);
 
                     if ($bar.finaldx || $bar.finaldy) {
                         bar.position_changed();
                         bar.set_action_completed();
-                        console.log(bar);
-                        //e quelle di arrivo
+
+                        //salvo l'id d'arrivo
                         const ending_row_id = bar.task.row;
-                        const ending_num_overlap = this.compute_overlap_num_task(ending_row_id);
-                        //questo serve a verificare che gli overlap non siano cambiati
-                        const new_starting_num_overlap = this.compute_overlap_num_task(starting_row_id);
+                        //mi servono per capire se le barre si sono mosse all'interno della riga e poter ricalcolare la loro posizione
+                        const delta_x = $bar.finaldx;
+                        const delta_y = $bar.finaldy;
 
                         if (this.options.overlap) {
-                            this.overlap(bar, starting_row_id,
-                                ending_row_id,
-                                starting_num_overlap,
-                                ending_num_overlap,
-                                new_starting_num_overlap);
+                            this.overlap(ending_row_id, starting_row_id, delta_x, delta_y);
                         }
                     }
                 });
@@ -1233,79 +1242,43 @@ export default class Scheduler {
         }
     }
 
-    overlap(bar, starting_row_id, ending_row_id, starting_num_overlap, ending_num_overlap, new_starting_num_overlap) {
-        //queste variabili è meglio crearle prima o è indifferente?
-        const starting_row = this.rows.find(row => row.id === starting_row_id);
-        const ending_row = this.rows.find(row => row.id === ending_row_id);
+    overlap(ending_row_id, starting_row_id, delta_x, delta_y) {
+
+        // variabile che servono per capire se fare o no il render
         let is_start_row_updated = false;
         let is_ending_row_updated = false;
 
-        const bar_y = bar.y + bar.$bar.finaldy;
-        //PER LA ROW HEIGHT MI CONVIENE NON USARE LA STESSA FUNZIONE DELL'INIZIO
-        //MEGLIO SE USO LA OVERLAPPINGBARS (PRIMA DEVO CAPIRE LA QUESTIONE DELLE Y PERCHè NON ME LE DA PRECISE)
+        //ricalcolo i sotto livelli della nuova riga finale
+        const new_ending_sub_level = this.compute_row_sub_level(ending_row_id);
+        const ending_row = this.rows.find(row => row.id === ending_row_id);
 
-        //controllo che l'altezza della riga iniziale sia diversa da quella standard 
-        //se si controllo che il numero di overlap nella riga non sia cambiato
-        if ((starting_row.height > (this.options.bar_height + this.options.padding)) &&
-            (starting_num_overlap != new_starting_num_overlap)) {
-            const row_height = this.compute_row_height(new_starting_num_overlap);
-            starting_row.height = row_height;
-            is_start_row_updated = true;
-        };
-
-        //controllo che ci siano sovrapposizioni alla fine
-        // TODO::
-        //se nella riga finale c'è già una sovrapposizione farà partire il render a prescindere (sistemato ?)
-        //posso provare ad entrare solo se ci sono barre sulla stessa y e con giorni che coincidono
-
-        //cerco tutte le barre sovrapposte controllare perchè le y delle barre sono diverse dalla realtà
-        // const overlappingBars = this.bars.filter(otherBar =>
-        //     //controllo che siano sulla stessa y
-        //     otherBar.y === bar_y &&
-        //     // verifica la sovrapposizione
-        //     ((bar.task._start < otherBar.task._end && bar.task._end > otherBar.task._start) ||
-        //         (otherBar.task._start < bar.task._end && otherBar.task._end > bar.task._start))
-        // );
-
-        if (ending_num_overlap > 0 /*&& overlappingBars.length > 0*/) {
-            const row_height = this.compute_row_height(ending_num_overlap);
+        //controllo se l'altezza della riga finale sia cambiata
+        if (new_ending_sub_level.length != ending_row.sub_level.length) {
+            ending_row.sub_level = new_ending_sub_level;
+            const row_height = this.compute_row_height(ending_row.sub_level.length);
             ending_row.height = row_height;
             is_ending_row_updated = true;
         }
 
-        if (is_ending_row_updated || is_start_row_updated) {
+        //se la starting row è uguale alla ending row non faccio altri calcoli
+        if (starting_row_id != ending_row_id) {
+            //ricalcolo i sotto livelli della nuova riga iniziale
+            const new_starting_sub_level = this.compute_row_sub_level(starting_row_id);
+            const starting_row = this.rows.find(row => row.id === starting_row_id);
+            //controllo se l'altezza della riga iniziale sia cambiata
+            if ((starting_row.sub_level.length != starting_row.sub_level.length)) {
+                starting_row.sub_level = new_starting_sub_level;
+                const row_height = this.compute_row_height(starting_row.sub_level.length);
+                starting_row.height = row_height;
+                is_start_row_updated = true;
+            };
+        }
+
+        if (is_ending_row_updated || is_start_row_updated || delta_y != 0 || delta_x != 0) {
             this.compute_row_y();
             this.render();
         }
         return;
-    }
-
-    move_overlapping_bars() {
-
-        this.bars.forEach((bar) => {
-            //cerco tutte le barre sovrapposte
-            const overlappingBars = this.bars.filter(otherBar =>
-                // barre nella stessa riga
-                otherBar.task.row === bar.task.row &&
-                //controllo che siano sulla stessa y
-                // otherBar.y === bar.y &&
-                // otherBar !== bar &&
-                // verifica la sovrapposizione
-                ((bar.task._start < otherBar.task._end && bar.task._end > otherBar.task._start) ||
-                    (otherBar.task._start < bar.task._end && otherBar.task._end > bar.task._start))
-            );
-
-            let new_y = bar.y;
-
-            if (overlappingBars.length > 1) {
-                //modifico la y delle barre sovrapposte
-                for (let i = 0; i < overlappingBars.length; i++) {
-                    //modifico le y delle barre sovrpposte
-                    overlappingBars[i].update_bar_position({ y: new_y });
-                    new_y += this.options.bar_height + this.options.padding;
-                }
-            }
-        });
     }
 
     bind_bar_progress() {
