@@ -1138,9 +1138,6 @@ export default class Scheduler {
 
                         //salvo l'id d'arrivo
                         const ending_row_id = bar.task.row;
-                        //mi servono per capire se le barre si sono mosse all'interno della riga e poter ricalcolare la loro posizione
-                        const delta_x = $bar.finaldx;
-                        const delta_y = $bar.finaldy;
 
                         if (this.options.overlap) {
                             this.overlap(ending_row_id, starting_row_id, delta_x, delta_y);
@@ -1242,12 +1239,11 @@ export default class Scheduler {
         }
     }
 
-    overlap(ending_row_id, starting_row_id, delta_x, delta_y) {
+    overlap(ending_row_id, starting_row_id) {
 
         // variabile che servono per capire se fare o no il render
         let is_start_row_updated = false;
         let is_ending_row_updated = false;
-        let need_to_render = false;
 
         //ricalcolo i sotto livelli della nuova riga finale
         const new_ending_sub_level = this.compute_row_sub_level(ending_row_id);
@@ -1273,11 +1269,9 @@ export default class Scheduler {
                 starting_row.height = row_height;
                 is_start_row_updated = true;
             };
-        } else if (delta_y != 0 || delta_x != 0){
-            need_to_render = true;
         }
 
-        if (is_ending_row_updated || is_start_row_updated || need_to_render) {
+        if (is_ending_row_updated || is_start_row_updated) {
             this.compute_row_y();
             this.render();
         }
