@@ -125,9 +125,6 @@ export default class Scheduler {
             rows: [],
             overlap: true,
             moving_scroll_bar: true,
-            set_scroll_position_onstar: true,
-            scroll_postion_left: 0,
-            scroll_position_top: 0,
         };
         this.options = Object.assign({}, default_options, options);
 
@@ -239,16 +236,16 @@ export default class Scheduler {
 
     setup_rows() {
         this.rows = [];
-        let y_sum = (this.options.header_height + this.options.padding / 2);
+        let sum_y = (this.options.header_height + this.options.padding / 2);
         this.options.rows.forEach(row_id => {
             let row = { id: row_id, height: 0, y: 0, sub_level: [] };
 
             row.sub_level = this.compute_row_sub_level(row_id);
             row.height = this.compute_row_height(row.sub_level.length);
 
-            row.y += y_sum;
+            row.y += sum_y;
             this.rows.push(row);
-            y_sum += row.height;
+            sum_y += row.height;
         });
     }
 
@@ -375,13 +372,7 @@ export default class Scheduler {
         this.make_arrows();
         this.map_arrows_on_bars();
         this.set_width();
-        if (this.options.set_scroll_position_onstar) {
-            this.set_scroll_position();
-            this.options.set_scroll_position_onstar = false;
-        } else {
-            this.$container.scrollLeft = this.options.scroll_postion_left;
-            this.$container.scrollTop = this.options.scroll_position_top;
-        }
+        this.set_scroll_position();
     }
 
     setup_layers() {
@@ -408,8 +399,8 @@ export default class Scheduler {
     make_fixed_columns() {
         // make_grid_background
         const column_grid_width = this.options.fixed_columns.length * this.options.fixed_column_width;
-        const sumHeight = this.rows.reduce((accumulator, currentValue) => accumulator + currentValue.height, 0);
-        const grid_height = sumHeight + this.options.header_height + (this.options.padding / 2);
+        const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
+        const grid_height = sum_rows_height + this.options.header_height + (this.options.padding / 2);
 
         createSVG('rect', {
             x: 0,
@@ -474,7 +465,7 @@ export default class Scheduler {
         let tick_x = this.options.fixed_column_width;
         let tick_y = this.options.header_height + this.options.padding / 2;
         let tick_height =
-            (this.options.bar_height + this.options.padding) * sumHeight;
+            (this.options.bar_height + this.options.padding) * sum_rows_height;
         for (let _ of this.options.fixed_columns) {
             createSVG('path', {
                 d: `M ${tick_x} ${tick_y} v ${tick_height}`,
@@ -548,8 +539,8 @@ export default class Scheduler {
 
     make_grid_background() {
         const grid_width = this.dates.length * this.options.column_width;
-        const sumHeight = this.rows.reduce((accumulator, currentValue) => accumulator + currentValue.height, 0);
-        const grid_height = sumHeight + this.options.header_height + (this.options.padding / 2);
+        const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
+        const grid_height = sum_rows_height + this.options.header_height + (this.options.padding / 2);
 
         createSVG('rect', {
             x: 0,
@@ -615,11 +606,11 @@ export default class Scheduler {
     }
 
     make_grid_ticks() {
-        const sumHeight = this.rows.reduce((accumulator, currentValue) => accumulator + currentValue.height, 0);
+        const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
         let tick_x = 0;
         let tick_y = this.options.header_height + this.options.padding / 2;
         let tick_height =
-            (this.options.bar_height + this.options.padding) * sumHeight;
+            (this.options.bar_height + this.options.padding) * sum_rows_height;
 
         for (let date of this.dates) {
             let tick_class = 'tick';
@@ -914,12 +905,10 @@ export default class Scheduler {
             const data_id = e.target.getAttribute('data-id');
 
             const x_in_units = e.offsetX / this.options.column_width;
-            const new_start_date = date_utils.add(
+            const datetime = date_utils.add(
                 this.scheduler_start,
                 x_in_units * this.options.step,
                 'hour');
-
-            const datetime = new_start_date;
 
             this.trigger_event('grid_dblclick', [data_id, datetime]);
         });
@@ -948,6 +937,7 @@ export default class Scheduler {
         let is_resizing_right = false;
         let parent_bar_id = null;
         let bars = []; // instanceof Bars, the dragged bar and its children
+        let max_y = 0;
         const min_y = this.options.header_height + (this.options.padding / 2);
         this.bar_being_dragged = null; // instanceof dragged bar
 
@@ -993,6 +983,7 @@ export default class Scheduler {
             is_resizing_left = is_resizing_left && this.bar_being_dragged.task.resize_left;
             is_resizing_right = is_resizing_right && this.bar_being_dragged.task.resize_right;
             is_dragging = is_dragging && (this.bar_being_dragged.task.drag_drop_x || this.bar_being_dragged.task.drag_drop_y);
+            max_y = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height + this.options.bar_height;
         });
 
         $.on(this.$svg, 'mousemove', (e) => {
@@ -1036,8 +1027,6 @@ export default class Scheduler {
                     });
                 }
                 if (bar_being_dragged.task.drag_drop_y) {
-                    const max_y = this.rows.reduce((accumulator, currentValue) => accumulator + currentValue.height, 0) + this.options.bar_height;
-                    // TODO improve max_y and get_snap_y_position
                     const y = bar_being_dragged.$bar.oy + dy;
                     if (y < min_y) {
                         dy = min_y - bar_being_dragged.$bar.oy;
@@ -1079,19 +1068,13 @@ export default class Scheduler {
                     bar.group.classList.remove('active');
 
                     const $bar = bar.$bar;
-
-                    //salvo l'id di partenza
-                    const starting_row_id = bar.task.row;
+                    const start_row_index = bar.task._index;
 
                     if ($bar.finaldx || $bar.finaldy) {
                         bar.position_changed();
                         bar.set_action_completed();
-
-                        //salvo l'id d'arrivo
-                        const ending_row_id = bar.task.row;
-
                         if (this.options.overlap) {
-                            this.overlap(ending_row_id, starting_row_id);
+                            this.overlap(start_row_index, bar.task._index);
                         }
                     }
                 });
@@ -1184,9 +1167,9 @@ export default class Scheduler {
         return sub_levels;
     }
 
-    compute_row_height(num_overlap_tasks) {
-        num_overlap_tasks = num_overlap_tasks > 0 ? num_overlap_tasks : 1;
-        const row_height = (this.options.bar_height + this.options.padding) * num_overlap_tasks;
+    compute_row_height(nlevels) {
+        nlevels = nlevels > 0 ? nlevels : 1;
+        const row_height = (this.options.bar_height + this.options.padding) * nlevels;
         return row_height;
     }
 
@@ -1198,45 +1181,37 @@ export default class Scheduler {
         });
     }
 
-    overlap(ending_row_id, starting_row_id) {
+    overlap(start_row_index, end_row_index) {
+        let render = false;
 
-        // variabile che servono per capire se fare o no il render
-        let is_start_row_updated = false;
-        let is_ending_row_updated = false;
-
-        //ricalcolo i sotto livelli della nuova riga finale
-        const new_ending_sub_level = this.compute_row_sub_level(ending_row_id);
-        const ending_row = this.rows.find(row => row.id === ending_row_id);
-
+        const end_row = this.rows[end_row_index];
+        const new_end_sub_level = this.compute_row_sub_level(end_row.id);
         //controllo se l'altezza della riga finale sia cambiata
-        if ((new_ending_sub_level !== ending_row.sub_level)) {
-            ending_row.sub_level = new_ending_sub_level;
-            const row_height = this.compute_row_height(ending_row.sub_level.length);
-            ending_row.height = row_height;
-            is_ending_row_updated = true;
+        if (new_end_sub_level !== end_row.sub_level) {
+            end_row.sub_level = new_end_sub_level;
+            end_row.height = this.compute_row_height(end_row.sub_level.length);
+            render = true;
         }
 
-        //se la starting row è uguale alla ending row non faccio altri calcoli
-        if (starting_row_id != ending_row_id) {
-            //ricalcolo i sotto livelli della nuova riga iniziale
-            const new_starting_sub_level = this.compute_row_sub_level(starting_row_id);
-            const starting_row = this.rows.find(row => row.id === starting_row_id);
+        if (start_row_index != end_row_index) {
+            const start_row = this.rows[start_row_index];
+            const new_start_sub_level = this.compute_row_sub_level(start_row.id);
             //controllo se l'altezza della riga iniziale sia cambiata
-            if (new_starting_sub_level.length != 0 && (new_starting_sub_level.length != starting_row.sub_level.length)) {
-                starting_row.sub_level = new_starting_sub_level;
-                const row_height = this.compute_row_height(starting_row.sub_level.length);
-                starting_row.height = row_height;
-                is_start_row_updated = true;
-            };
+            if (new_start_sub_level.length != 0 && (new_start_sub_level.length != start_row.sub_level.length)) {
+                start_row.sub_level = new_start_sub_level;
+                start_row.height = this.compute_row_height(start_row.sub_level.length);
+                render = true;
+            }
         }
 
-        if (is_ending_row_updated || is_start_row_updated) {
+        if (render) {
             this.compute_row_y();
-            this.options.scroll_postion_left = this.$container.scrollLeft;
-            this.options.scroll_position_top = this.$container.scrollTop;
+            const scrollLeft = this.$container.scrollLeft;
+            const scrollTop = this.$container.scrollTop;
             this.render();
+            this.$container.scrollLeft = scrollLeft;
+            this.$container.scrollTop = scrollTop;
         }
-        return;
     }
 
     moving_scroll_bar(e) {
@@ -1377,21 +1352,12 @@ export default class Scheduler {
             rem,
             position;
         const row_height = this.options.bar_height + this.options.padding;
-        rem = Math.abs(ody) % row_height; // Prendi il resto assoluto della divisione
+        rem = Math.abs(ody) % row_height;
         position = ody - rem + (rem < row_height / 2 ? 0 : row_height);
         if (ody < 0) {
             position = Math.abs(ody) - rem + (rem < row_height / 2 ? 0 : row_height);
-            position = -position; // Se stiamo muovendo sopra, invertiamo la posizione
+            position = -position;
         }
-        // rem = ody % row_height;
-        // position = ody - rem + (Math.abs(rem) < row_height / 2 ? 0 : row_height);
-        // if (ody < 0) { position = -position};
-        // // position =
-        // //     ody -
-        // //     rem +
-        // //     (rem < row_height / 2
-        // //         ? 0
-        // //         : row_height);
         return position;
     }
 
