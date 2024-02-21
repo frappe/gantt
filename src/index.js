@@ -124,7 +124,7 @@ export default class Scheduler {
             fixed_columns: [],
             rows: [],
             overlap: true,
-            moving_scroll_bar: false,
+            moving_scroll_bar: true,
             set_scroll_position_onstar: true,
             scroll_postion_left: 0,
             scroll_position_top: 0,
@@ -522,8 +522,7 @@ export default class Scheduler {
         let tick_x = this.options.fixed_column_width;
         let tick_y = this.options.header_height + this.options.padding / 2;
         let tick_height =
-            (this.options.bar_height + this.options.padding) *
-            this.options.rows.length;
+            (this.options.bar_height + this.options.padding) * sumHeight;
         for (let _ of this.options.fixed_columns) {
             createSVG('path', {
                 d: `M ${tick_x} ${tick_y} v ${tick_height}`,
@@ -664,11 +663,11 @@ export default class Scheduler {
     }
 
     make_grid_ticks() {
+        const sumHeight = this.rows.reduce((accumulator, currentValue) => accumulator + currentValue.height, 0);
         let tick_x = 0;
         let tick_y = this.options.header_height + this.options.padding / 2;
         let tick_height =
-            (this.options.bar_height + this.options.padding) *
-            this.options.rows.length;
+            (this.options.bar_height + this.options.padding) * sumHeight;
 
         for (let date of this.dates) {
             let tick_class = 'tick';
