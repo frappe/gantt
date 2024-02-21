@@ -26,7 +26,6 @@ export default class Scheduler {
         // initialize with default view mode
         this.change_view_mode();
         this.bind_events();
-        this.options.set_scroll_position_onstar = false;
     }
 
     setup_wrapper(element) {
@@ -426,6 +425,7 @@ export default class Scheduler {
         this.set_width();
         if (this.options.set_scroll_position_onstar) {
             this.set_scroll_position();
+            this.options.set_scroll_position_onstar = false;
         } else {
             this.$container.scrollLeft = this.options.scroll_postion_left;
             this.$container.scrollTop = this.options.scroll_position_top;
@@ -1250,7 +1250,7 @@ export default class Scheduler {
         const ending_row = this.rows.find(row => row.id === ending_row_id);
 
         //controllo se l'altezza della riga finale sia cambiata
-        if ((new_ending_sub_level != ending_row.sub_level) && (new_ending_sub_level.length != ending_row.sub_level.length)) {
+        if ((new_ending_sub_level !== ending_row.sub_level)) {
             ending_row.sub_level = new_ending_sub_level;
             const row_height = this.compute_row_height(ending_row.sub_level.length);
             ending_row.height = row_height;
