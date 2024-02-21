@@ -1250,7 +1250,7 @@ export default class Scheduler {
         const ending_row = this.rows.find(row => row.id === ending_row_id);
 
         //controllo se l'altezza della riga finale sia cambiata
-        if (new_ending_sub_level !== ending_row.sub_level) {
+        if ((new_ending_sub_level != ending_row.sub_level) && (new_ending_sub_level.length != ending_row.sub_level.length)) {
             ending_row.sub_level = new_ending_sub_level;
             const row_height = this.compute_row_height(ending_row.sub_level.length);
             ending_row.height = row_height;
