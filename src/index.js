@@ -244,59 +244,11 @@ export default class Scheduler {
             let row = { id: row_id, height: 0, y: 0, sub_level: [] };
 
             row.sub_level = this.compute_row_sub_level(row_id);
-
             row.height = this.compute_row_height(row.sub_level.length);
 
             row.y += y_sum;
             this.rows.push(row);
             y_sum += row.height;
-        });
-    }
-
-    compute_row_sub_level(row_id) {
-
-        const task_in_same_row = this.tasks.filter(task => task.row === row_id);
-        //ordina per data le task in quella riga
-        task_in_same_row.sort((a, b) => a._start - b._start);
-
-        let sub_levels = [];
-
-        let sub_level_y = this.options.padding / 2;
-
-        task_in_same_row.forEach(task => {
-            let i = 0;
-            // Trova l'indice del sotto livello in cui inserire questa task
-            for (i = 0; i < sub_levels.length; i++) {
-                const last_task_in_sub_level = sub_levels[i][sub_levels[i].length - 1];
-                if (task._start >= last_task_in_sub_level._end) {
-                    task._sub_level_index = i;
-                    break;
-                }
-            }
-
-            if (!sub_levels[i]) {
-                task._sub_level_index = i;
-                sub_levels[i] = [];
-                sub_levels[i].task_y = sub_level_y;
-                sub_level_y += this.options.padding + this.options.bar_height;
-            }
-            sub_levels[i].push(task);
-        });
-
-        return sub_levels;
-    }
-
-    compute_row_height(num_overlap_tasks) {
-        num_overlap_tasks = num_overlap_tasks > 0 ? num_overlap_tasks : 1;
-        const row_height = (this.options.bar_height + this.options.padding) * num_overlap_tasks;
-        return row_height;
-    }
-
-    compute_row_y() {
-        let sum_y = this.options.header_height + this.options.padding / 2;
-        this.rows.forEach(row => {
-            row.y = sum_y;
-            sum_y += row.height;
         });
     }
 
@@ -1154,6 +1106,139 @@ export default class Scheduler {
         this.bind_bar_progress();
     }
 
+    bind_bar_progress() {
+        let x_on_start = 0;
+        let y_on_start = 0;
+        let is_resizing = null;
+        let bar = null;
+        let $bar_progress = null;
+        let $bar = null;
+
+        $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
+            is_resizing = true;
+            x_on_start = e.offsetX;
+            y_on_start = e.offsetY;
+
+            const $bar_wrapper = $.closest('.bar-wrapper', handle);
+            const id = $bar_wrapper.getAttribute('data-id');
+            bar = this.get_bar(id);
+
+            $bar_progress = bar.$bar_progress;
+            $bar = bar.$bar;
+
+            $bar_progress.finaldx = 0;
+            $bar_progress.owidth = $bar_progress.getWidth();
+            $bar_progress.min_dx = -$bar_progress.getWidth();
+            $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
+        });
+
+        $.on(this.$svg, 'mousemove', (e) => {
+            if (!is_resizing) return;
+            let dx = e.offsetX - x_on_start;
+            let dy = e.offsetY - y_on_start;
+
+            if (dx > $bar_progress.max_dx) {
+                dx = $bar_progress.max_dx;
+            }
+            if (dx < $bar_progress.min_dx) {
+                dx = $bar_progress.min_dx;
+            }
+
+            const $handle = bar.$handle_progress;
+            $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
+            $.attr($handle, 'points', bar.get_progress_polygon_points());
+            $bar_progress.finaldx = dx;
+        });
+
+        $.on(this.$svg, 'mouseup', () => {
+            is_resizing = false;
+            if (!($bar_progress && $bar_progress.finaldx)) return;
+            bar.progress_changed();
+            bar.set_action_completed();
+        });
+    }
+
+    compute_row_sub_level(row_id) {
+        const task_in_same_row = this.tasks.filter(task => task.row === row_id);
+        //ordina per data le task in quella riga
+        task_in_same_row.sort((a, b) => a._start - b._start);
+
+        let sub_levels = [];
+
+        task_in_same_row.forEach(task => {
+            let i = 0;
+            // Trova l'indice del sotto livello in cui inserire questa task
+            for (i = 0; i < sub_levels.length; i++) {
+                const last_task_in_sub_level = sub_levels[i][sub_levels[i].length - 1];
+                if (task._start >= last_task_in_sub_level._end)
+                    break;
+            }
+
+            task._sub_level_index = i;
+            if (!sub_levels[task._sub_level_index])
+                sub_levels[task._sub_level_index] = [];
+
+            sub_levels[task._sub_level_index].push(task);
+        });
+
+        return sub_levels;
+    }
+
+    compute_row_height(num_overlap_tasks) {
+        num_overlap_tasks = num_overlap_tasks > 0 ? num_overlap_tasks : 1;
+        const row_height = (this.options.bar_height + this.options.padding) * num_overlap_tasks;
+        return row_height;
+    }
+
+    compute_row_y() {
+        let sum_y = this.options.header_height + this.options.padding / 2;
+        this.rows.forEach(row => {
+            row.y = sum_y;
+            sum_y += row.height;
+        });
+    }
+
+    overlap(ending_row_id, starting_row_id) {
+
+        // variabile che servono per capire se fare o no il render
+        let is_start_row_updated = false;
+        let is_ending_row_updated = false;
+
+        //ricalcolo i sotto livelli della nuova riga finale
+        const new_ending_sub_level = this.compute_row_sub_level(ending_row_id);
+        const ending_row = this.rows.find(row => row.id === ending_row_id);
+
+        //controllo se l'altezza della riga finale sia cambiata
+        if ((new_ending_sub_level !== ending_row.sub_level)) {
+            ending_row.sub_level = new_ending_sub_level;
+            const row_height = this.compute_row_height(ending_row.sub_level.length);
+            ending_row.height = row_height;
+            is_ending_row_updated = true;
+        }
+
+        //se la starting row è uguale alla ending row non faccio altri calcoli
+        if (starting_row_id != ending_row_id) {
+            //ricalcolo i sotto livelli della nuova riga iniziale
+            const new_starting_sub_level = this.compute_row_sub_level(starting_row_id);
+            const starting_row = this.rows.find(row => row.id === starting_row_id);
+            //controllo se l'altezza della riga iniziale sia cambiata
+            if (new_starting_sub_level.length != 0 && (new_starting_sub_level.length != starting_row.sub_level.length)) {
+                starting_row.sub_level = new_starting_sub_level;
+                const row_height = this.compute_row_height(starting_row.sub_level.length);
+                starting_row.height = row_height;
+                is_start_row_updated = true;
+            };
+        }
+
+        if (is_ending_row_updated || is_start_row_updated) {
+            this.compute_row_y();
+            this.options.scroll_postion_left = this.$container.scrollLeft;
+            this.options.scroll_position_top = this.$container.scrollTop;
+            this.render();
+        }
+        return;
+    }
+
     moving_scroll_bar(e) {
         //Variabile che serve per aggiornare la scrollbar
         var scroll_bar = this.$svg.parentElement;
@@ -1236,99 +1321,6 @@ export default class Scheduler {
                 return (false);
             }
         }
-    }
-
-    overlap(ending_row_id, starting_row_id) {
-
-        // variabile che servono per capire se fare o no il render
-        let is_start_row_updated = false;
-        let is_ending_row_updated = false;
-
-        //ricalcolo i sotto livelli della nuova riga finale
-        const new_ending_sub_level = this.compute_row_sub_level(ending_row_id);
-        const ending_row = this.rows.find(row => row.id === ending_row_id);
-
-        //controllo se l'altezza della riga finale sia cambiata
-        if ((new_ending_sub_level !== ending_row.sub_level)) {
-            ending_row.sub_level = new_ending_sub_level;
-            const row_height = this.compute_row_height(ending_row.sub_level.length);
-            ending_row.height = row_height;
-            is_ending_row_updated = true;
-        }
-
-        //se la starting row è uguale alla ending row non faccio altri calcoli
-        if (starting_row_id != ending_row_id) {
-            //ricalcolo i sotto livelli della nuova riga iniziale
-            const new_starting_sub_level = this.compute_row_sub_level(starting_row_id);
-            const starting_row = this.rows.find(row => row.id === starting_row_id);
-            //controllo se l'altezza della riga iniziale sia cambiata
-            if (new_starting_sub_level.length != 0 && (new_starting_sub_level.length != starting_row.sub_level.length)) {
-                starting_row.sub_level = new_starting_sub_level;
-                const row_height = this.compute_row_height(starting_row.sub_level.length);
-                starting_row.height = row_height;
-                is_start_row_updated = true;
-            };
-        }
-
-        if (is_ending_row_updated || is_start_row_updated) {
-            this.compute_row_y();
-            this.options.scroll_postion_left = this.$container.scrollLeft;
-            this.options.scroll_position_top = this.$container.scrollTop;
-            this.render();
-        }
-        return;
-    }
-
-    bind_bar_progress() {
-        let x_on_start = 0;
-        let y_on_start = 0;
-        let is_resizing = null;
-        let bar = null;
-        let $bar_progress = null;
-        let $bar = null;
-
-        $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
-            is_resizing = true;
-            x_on_start = e.offsetX;
-            y_on_start = e.offsetY;
-
-            const $bar_wrapper = $.closest('.bar-wrapper', handle);
-            const id = $bar_wrapper.getAttribute('data-id');
-            bar = this.get_bar(id);
-
-            $bar_progress = bar.$bar_progress;
-            $bar = bar.$bar;
-
-            $bar_progress.finaldx = 0;
-            $bar_progress.owidth = $bar_progress.getWidth();
-            $bar_progress.min_dx = -$bar_progress.getWidth();
-            $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
-        });
-
-        $.on(this.$svg, 'mousemove', (e) => {
-            if (!is_resizing) return;
-            let dx = e.offsetX - x_on_start;
-            let dy = e.offsetY - y_on_start;
-
-            if (dx > $bar_progress.max_dx) {
-                dx = $bar_progress.max_dx;
-            }
-            if (dx < $bar_progress.min_dx) {
-                dx = $bar_progress.min_dx;
-            }
-
-            const $handle = bar.$handle_progress;
-            $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
-            $.attr($handle, 'points', bar.get_progress_polygon_points());
-            $bar_progress.finaldx = dx;
-        });
-
-        $.on(this.$svg, 'mouseup', () => {
-            is_resizing = false;
-            if (!($bar_progress && $bar_progress.finaldx)) return;
-            bar.progress_changed();
-            bar.set_action_completed();
-        });
     }
 
     get_all_dependent_tasks(task_id) {
