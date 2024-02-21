@@ -1386,15 +1386,21 @@ export default class Scheduler {
             rem,
             position;
         const row_height = this.options.bar_height + this.options.padding;
-        rem = ody % row_height;
-        position = ody - rem + (Math.abs(rem) < row_height / 2 ? 0 : row_height);
-        if (ody < 0) { position = -position };
-        // position =
-        //     ody -
-        //     rem +
-        //     (rem < row_height / 2
-        //         ? 0
-        //         : row_height);
+        rem = Math.abs(ody) % row_height; // Prendi il resto assoluto della divisione
+        position = ody - rem + (rem < row_height / 2 ? 0 : row_height);
+        if (ody < 0) {
+            position = Math.abs(ody) - rem + (rem < row_height / 2 ? 0 : row_height);
+            position = -position; // Se stiamo muovendo sopra, invertiamo la posizione
+        }
+        // rem = ody % row_height;
+        // position = ody - rem + (Math.abs(rem) < row_height / 2 ? 0 : row_height);
+        // if (ody < 0) { position = -position};
+        // // position =
+        // //     ody -
+        // //     rem +
+        // //     (rem < row_height / 2
+        // //         ? 0
+        // //         : row_height);
         return position;
     }
 
