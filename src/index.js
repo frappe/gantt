@@ -26,6 +26,7 @@ export default class Scheduler {
         // initialize with default view mode
         this.change_view_mode();
         this.bind_events();
+        this.options.set_scroll_position_onstar = false;
     }
 
     setup_wrapper(element) {
@@ -125,7 +126,9 @@ export default class Scheduler {
             rows: [],
             overlap: true,
             moving_scroll_bar: false,
-            // set_scroll_position
+            set_scroll_position_onstar: true,
+            scroll_postion_left: 0,
+            scroll_position_top: 0,
         };
         this.options = Object.assign({}, default_options, options);
 
@@ -421,7 +424,12 @@ export default class Scheduler {
         this.make_arrows();
         this.map_arrows_on_bars();
         this.set_width();
-        this.set_scroll_position();
+        if (this.options.set_scroll_position_onstar) {
+            this.set_scroll_position();
+        } else {
+            this.$container.scrollLeft = this.options.scroll_postion_left;
+            this.$container.scrollTop = this.options.scroll_position_top;
+        }
     }
 
     setup_layers() {
@@ -448,11 +456,8 @@ export default class Scheduler {
     make_fixed_columns() {
         // make_grid_background
         const column_grid_width = this.options.fixed_columns.length * this.options.fixed_column_width;
-        const grid_height =
-            this.options.header_height +
-            this.options.padding +
-            (this.options.bar_height + this.options.padding) *
-            this.options.rows.length;
+        const sumHeight = this.rows.reduce((accumulator, currentValue) => accumulator + currentValue.height, 0);
+        const grid_height = sumHeight + this.options.header_height + (this.options.padding / 2);
 
         createSVG('rect', {
             x: 0,
@@ -592,11 +597,8 @@ export default class Scheduler {
 
     make_grid_background() {
         const grid_width = this.dates.length * this.options.column_width;
-        const grid_height =
-            this.options.header_height +
-            this.options.padding +
-            (this.options.bar_height + this.options.padding) *
-            this.options.rows.length;
+        const sumHeight = this.rows.reduce((accumulator, currentValue) => accumulator + currentValue.height, 0);
+        const grid_height = sumHeight + this.options.header_height + (this.options.padding / 2);
 
         createSVG('rect', {
             x: 0,
@@ -995,11 +997,7 @@ export default class Scheduler {
         let is_resizing_right = false;
         let parent_bar_id = null;
         let bars = []; // instanceof Bars, the dragged bar and its children
-        const min_y = this.options.header_height;
-        const max_y =
-            this.options.header_height +
-            this.options.rows.length *
-            (this.options.bar_height + this.options.padding);
+        const min_y = this.options.header_height + (this.options.padding / 2);
         this.bar_being_dragged = null; // instanceof dragged bar
 
         function action_in_progress() {
@@ -1087,6 +1085,7 @@ export default class Scheduler {
                     });
                 }
                 if (bar_being_dragged.task.drag_drop_y) {
+                    const max_y = this.rows.reduce((accumulator, currentValue) => accumulator + currentValue.height, 0) + this.options.bar_height;
                     // TODO improve max_y and get_snap_y_position
                     const y = bar_being_dragged.$bar.oy + dy;
                     if (y < min_y) {
@@ -1274,6 +1273,8 @@ export default class Scheduler {
 
         if (is_ending_row_updated || is_start_row_updated) {
             this.compute_row_y();
+            this.options.scroll_postion_left = this.$container.scrollLeft;
+            this.options.scroll_position_top = this.$container.scrollTop;
             this.render();
         }
         return;
@@ -1386,12 +1387,14 @@ export default class Scheduler {
             position;
         const row_height = this.options.bar_height + this.options.padding;
         rem = ody % row_height;
-        position =
-            ody -
-            rem +
-            (rem < row_height / 2
-                ? 0
-                : row_height);
+        position = ody - rem + (Math.abs(rem) < row_height / 2 ? 0 : row_height);
+        if (ody < 0) { position = -position };
+        // position =
+        //     ody -
+        //     rem +
+        //     (rem < row_height / 2
+        //         ? 0
+        //         : row_height);
         return position;
     }
 
