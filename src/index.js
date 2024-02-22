@@ -1184,7 +1184,7 @@ export default class Scheduler {
         const end_row = this.rows[end_row_index];
         const new_end_sub_level = this.compute_row_sub_level(end_row.id);
         //controllo se l'altezza della riga finale sia cambiata
-        if (new_end_sub_level !== end_row.sub_level) {
+        if ((new_end_sub_level !== end_row.sub_level) && start_row_index === end_row_index) {
             end_row.sub_level = new_end_sub_level;
             end_row.height = this.compute_row_height(end_row.sub_level.length);
             render = true;
