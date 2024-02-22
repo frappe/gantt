@@ -463,9 +463,8 @@ export default class Scheduler {
 
         // make_grid_ticks
         let tick_x = this.options.fixed_column_width;
-        let tick_y = 0;//this.options.header_height + this.options.padding / 2;
-        let tick_height =
-            (this.options.bar_height + this.options.padding) + sum_rows_height - this.options.header_height + this.options.padding / 2;
+        let tick_y = 0;
+        let tick_height = sum_rows_height;
         for (let _ of this.options.fixed_columns) {
             createSVG('path', {
                 d: `M ${tick_x} ${tick_y} v ${tick_height}`,
@@ -608,9 +607,8 @@ export default class Scheduler {
     make_grid_ticks() {
         const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
         let tick_x = 0;
-        let tick_y = 0; //this.options.header_height + this.options.padding / 2;
-        let tick_height =
-                (this.options.bar_height + this.options.padding) + sum_rows_height - this.options.header_height + this.options.padding / 2;
+        let tick_y = 0;
+        let tick_height = sum_rows_height;
 
         for (let date of this.dates) {
             let tick_class = 'tick';
@@ -1432,6 +1430,7 @@ export default class Scheduler {
      */
     clear() {
         this.$svg.innerHTML = '';
+        this.$column_svg.innerHTML = '';
     }
 }
 
