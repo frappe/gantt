@@ -659,7 +659,7 @@ export default class Scheduler {
             const width = this.options.column_width;
             const height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height -
                 (this.options.header_height +
-                this.options.padding / 2);
+                    this.options.padding / 2);
 
             createSVG('rect', {
                 x,
