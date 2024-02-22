@@ -1218,7 +1218,7 @@ export default class Scheduler {
         var viewportX = e.clientX;
         var viewportY = e.clientY;
         //edges del container
-        var edgeTop = this.$container.offsetTop + this.options.header_height + this.options.padding;
+        var edgeTop = this.$container.offsetTop + this.options.header_height + this.options.padding + (this.options.padding / 2);
         var edgeLeft = this.$container.offsetLeft + this.options.fixed_column_width * 2;
         var edgeBottom = this.$container.offsetHeight - this.options.padding;
         var edgeRight = this.$container.offsetWidth;
@@ -1232,7 +1232,7 @@ export default class Scheduler {
 
         //I massimi sono larghezza e atezza del container
         var maxScrollX = this.$container.scrollWidth;
-        var maxScrollY = this.$container.scrollHeight;
+        var maxScrollY = this.$container.scrollHeight - this.$container.offsetHeight - this.options.padding - 5;
         // Get the current scroll position of the document.(container)
         var currentScrollX = this.$container.scrollLeft;
         var currentScrollY = this.$container.scrollTop;
