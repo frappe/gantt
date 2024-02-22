@@ -655,13 +655,13 @@ export default class Scheduler {
                 (date_utils.diff(date_utils.today(), this.scheduler_start, 'hour') /
                     this.options.step) +
                 this.options.column_width;
-            const y = 0;
+            const y = (this.options.header_height +
+                this.options.padding / 2);
 
             const width = this.options.column_width;
-            const height =
-            this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height +
-                this.options.header_height +
-                this.options.padding / 2;
+            const height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height -
+                (this.options.header_height +
+                this.options.padding / 2);
 
             createSVG('rect', {
                 x,
