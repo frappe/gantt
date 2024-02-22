@@ -400,7 +400,7 @@ export default class Scheduler {
         // make_grid_background
         const column_grid_width = this.options.fixed_columns.length * this.options.fixed_column_width;
         const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
-        const grid_height = sum_rows_height + this.options.header_height + (this.options.padding / 2);
+        const grid_height = sum_rows_height; //+ this.options.header_height + (this.options.padding / 2);
 
         createSVG('rect', {
             x: 0,
@@ -463,9 +463,9 @@ export default class Scheduler {
 
         // make_grid_ticks
         let tick_x = this.options.fixed_column_width;
-        let tick_y = this.options.header_height + this.options.padding / 2;
+        let tick_y = 0;//this.options.header_height + this.options.padding / 2;
         let tick_height =
-            (this.options.bar_height + this.options.padding) * sum_rows_height;
+            (this.options.bar_height + this.options.padding) + sum_rows_height - this.options.header_height + this.options.padding / 2;
         for (let _ of this.options.fixed_columns) {
             createSVG('path', {
                 d: `M ${tick_x} ${tick_y} v ${tick_height}`,
@@ -540,7 +540,7 @@ export default class Scheduler {
     make_grid_background() {
         const grid_width = this.dates.length * this.options.column_width;
         const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
-        const grid_height = sum_rows_height + this.options.header_height + (this.options.padding / 2);
+        const grid_height = sum_rows_height; //+ this.options.header_height + (this.options.padding / 2);
 
         createSVG('rect', {
             x: 0,
@@ -608,9 +608,9 @@ export default class Scheduler {
     make_grid_ticks() {
         const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
         let tick_x = 0;
-        let tick_y = this.options.header_height + this.options.padding / 2;
+        let tick_y = 0; //this.options.header_height + this.options.padding / 2;
         let tick_height =
-            (this.options.bar_height + this.options.padding) * sum_rows_height;
+                (this.options.bar_height + this.options.padding) + sum_rows_height - this.options.header_height + this.options.padding / 2;
 
         for (let date of this.dates) {
             let tick_class = 'tick';
@@ -653,14 +653,13 @@ export default class Scheduler {
         if (this.view_is(VIEW_MODE.DAY)) {
             const x =
                 (date_utils.diff(date_utils.today(), this.scheduler_start, 'hour') /
-                    this.options.step) *
+                    this.options.step) +
                 this.options.column_width;
             const y = 0;
 
             const width = this.options.column_width;
             const height =
-                (this.options.bar_height + this.options.padding) *
-                this.options.rows.length +
+            this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height +
                 this.options.header_height +
                 this.options.padding / 2;
 
