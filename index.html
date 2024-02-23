@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, height=device-height">
     <title>Simple Scheduler</title>
     <style>
         body {
@@ -31,9 +32,21 @@
 <body>
     <div class="container">
         <h2 class="heading">Interactive Scheduler Chart entirely made in SVG!</h2>
+        <button id="toggle_button">Toggle Container</button>
         <div class="scheduler-target"></div>
     </div>
     <script>
+        let container_height = 0;
+        let fixed_column_width = 0;
+
+        if (window.innerWidth <= 600){
+            container_height = window.innerHeight * 0.75;
+            fixed_column_width = 60;
+        } else {
+            container_height = 300;
+            fixed_column_width = 120;
+        }
+
         var tasks = [
             // {
             //     start: '2018-10-01',
@@ -873,7 +886,7 @@
             },
             {
                 start: "2018-11-07",
-                end: "2018-11-14",
+                end: "2018-11-13",
                 name: "Optimize database queries",
                 id: "Task 98",
                 progress: 100,
@@ -886,8 +899,47 @@
                 id: "Task 99",
                 progress: 10,
                 row: "machine_50"
-            }
-
+            },
+            {
+                start: "2018-11-09",
+                end: "2018-11-16",
+                name: "Create database schema",
+                id: "Task 100",
+                progress: 20,
+                row: "machine_1"
+            },
+            {
+                start: "2018-11-10",
+                end: "2018-11-17",
+                name: "Test software",
+                id: "Task 101",
+                progress: 30,
+                row: "machine_2"
+            },
+            {
+                start: "2018-11-11",
+                end: "2018-11-18",
+                name: "Review code",
+                id: "Task 102",
+                progress: 40,
+                row: "machine_3"
+            },
+            {
+                start: "2018-11-12",
+                end: "2018-11-19",
+                name: "Deploy application",
+                id: "Task 103",
+                progress: 50,
+                row: "machine_4"
+            },
+            {
+                start: "2018-11-13",
+                end: "2018-11-20",
+                name: "Optimize performance",
+                id: "Task 104",
+                progress: 60,
+                row: "machine_5"
+            },
         ]
         var cells = [
             {
@@ -936,6 +988,8 @@
             resize_right: true,
             drag_drop_x: true,
             drag_drop_y: true,
+            container_height,
+            fixed_column_width,
             overlap: true,
             popup_position: 'left', //or bottom
             date_start: '2018-09-15',
@@ -995,6 +1049,19 @@
             fixed_columns: ['name', 'description']
         });
         console.log(scheduler_chart);
+
+        function toggle_button() {
+            const toggle_button = document.getElementById('toggle_button');
+            const column_svg = document.getElementById('columnSvg');
+
+            toggle_button.addEventListener('click', function () {
+                if (column_svg.getAttribute('width') != '0')
+                    column_svg.setAttribute('width', '0');
+                else
+                    column_svg.setAttribute('width', fixed_column_width * 2);
+            });
+        }
+        toggle_button();
     </script>
 </body>
 
