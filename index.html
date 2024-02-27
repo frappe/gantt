@@ -6,6 +6,66 @@
     <meta name="viewport" content="width=device-width">
     <title>Simple Scheduler</title>
     <style>
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgb(160, 123, 234);
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #2196F3;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
         body {
             font-family: sans-serif;
             background: #ccc;
@@ -32,7 +92,10 @@
 <body>
     <div class="container">
         <h2 class="heading">Interactive Scheduler Chart entirely made in SVG!</h2>
-        <button id="toggle_button">Toggle Container</button>
+        <label class="switch">
+            <input id="toggle" type="checkbox" onclick="bind_toggle_event()"> 
+            <span class="slider round"></span>
+        </label>
         <div class="scheduler-target"></div>
     </div>
     <script>
@@ -991,6 +1054,7 @@
             container_height,
             fixed_column_width,
             overlap: true,
+            moving_scroll_bar: true,
             popup_position: 'left', //or bottom
             date_start: '2018-09-15',
             // rows: ['machine_1', 'machine_2', 'machine_3', 'machine_4', 'machine_5', 'machine_6', 'machine_7', 'machine_8', 'machine_9', 'machine_10'],
@@ -1050,18 +1114,27 @@
         });
         console.log(scheduler_chart);
 
-        function toggle_button() {
-            const toggle_button = document.getElementById('toggle_button');
-            const column_svg = document.getElementById('columnSvg');
-
-            toggle_button.addEventListener('click', function () {
-                if (column_svg.getAttribute('width') != '0')
-                    column_svg.setAttribute('width', '0');
-                else
-                    column_svg.setAttribute('width', fixed_column_width * 2);
-            });
+        if (window.innerWidth <= 600) {
+            let lower_text = this.scheduler_chart.$column_svg.querySelectorAll('g.cell > g.cell-wrapper > text');
+            for (let i = 0; i < lower_text.length; i++) {
+                lower_text[i].style.fontSize = '8px';
+            }
         }
-        toggle_button();
+
+        // function toggle_button() {
+        //     const toggle_button = document.getElementById('toggle_button');
+        //     const column_svg = document.getElementById('columnSvg');
+        //     // const column_container = document.getElementsByClassName('scheduler-columns-container');
+
+        //     toggle_button.addEventListener('click', function () {
+        //         if (column_svg.getAttribute('width') != '0')
+        //             column_svg.setAttribute('width', '0');
+        //         else
+        //             column_svg.setAttribute('width', fixed_column_width * 2);
+        //         // column_container[0].overflow = 'hidden';
+        //     });
+        // }
+        // toggle_button();
     </script>
 </body>
 
