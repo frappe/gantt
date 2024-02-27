@@ -93,7 +93,7 @@
     <div class="container">
         <h2 class="heading">Interactive Scheduler Chart entirely made in SVG!</h2>
         <label class="switch">
-            <input id="toggle" type="checkbox" onclick="bind_toggle_event()"> 
+            <input id="toggle" type="checkbox" onclick="bind_toggle_event()">
             <span class="slider round"></span>
         </label>
         <div class="scheduler-target"></div>
@@ -1121,20 +1121,16 @@
             }
         }
 
-        // function toggle_button() {
-        //     const toggle_button = document.getElementById('toggle_button');
-        //     const column_svg = document.getElementById('columnSvg');
-        //     // const column_container = document.getElementsByClassName('scheduler-columns-container');
+        function bind_toggle_event() {
+            const toggle = document.getElementById('toggle');
 
-        //     toggle_button.addEventListener('click', function () {
-        //         if (column_svg.getAttribute('width') != '0')
-        //             column_svg.setAttribute('width', '0');
-        //         else
-        //             column_svg.setAttribute('width', fixed_column_width * 2);
-        //         // column_container[0].overflow = 'hidden';
-        //     });
-        // }
-        // toggle_button();
+            if (toggle.checked) {
+                this.scheduler_chart.hide_fixed_columns();
+            } else {
+                this.scheduler_chart.show_fixed_columns();
+            }
+            this.scheduler_chart.refresh(tasks);
+        }
     </script>
 </body>
 
