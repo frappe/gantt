@@ -398,6 +398,10 @@ export default class Scheduler {
 
     // TODO refactor with single functions?
     make_fixed_columns() {
+        if (!this.options.hide_fixed_columns)
+            this.options.fixed_column_width = 120;
+        else
+            this.options.fixed_column_width = 0;
         // make_grid_background
         const column_grid_width = this.options.fixed_columns.length * this.options.fixed_column_width;
         const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
@@ -1277,6 +1281,35 @@ export default class Scheduler {
         } else {
             return (false);
         }
+    }
+
+    hide_fixed_columns() {
+        this.options.hide_fixed_columns = true;
+        this.refresh();
+    }
+
+    show_fixed_columns() {
+        this.options.hide_fixed_columns = false;
+        this.refresh();
+    }
+
+    bind_toggle_event() {
+        const toggle = document.getElementById('toggle');
+    
+        toggle.addEventListener('onclick', () => {
+            if (toggle.checked) {
+                this.hide_fixed_columns();
+            } else {
+                this.show_fixed_columns();
+            }
+        });
+        // $.on(document.getElementById('toggle'), 'change', () => {
+        //     if (toggle.checked) {
+        //         this.hide_fixed_columns();
+        //     } else {
+        //         this.show_fixed_columns();
+        //     }
+        // });
     }
 
     get_all_dependent_tasks(task_id) {
