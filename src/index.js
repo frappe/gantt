@@ -985,7 +985,7 @@ export default class Scheduler {
             is_resizing_left = is_resizing_left && this.bar_being_dragged.task.resize_left;
             is_resizing_right = is_resizing_right && this.bar_being_dragged.task.resize_right;
             is_dragging = is_dragging && (this.bar_being_dragged.task.drag_drop_x || this.bar_being_dragged.task.drag_drop_y);
-            max_y = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height + this.options.bar_height;
+            max_y = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height - this.options.bar_height - (this.options.padding / 2);
         });
 
         $.on(this.$svg, 'mousemove', (e) => {
@@ -1221,7 +1221,7 @@ export default class Scheduler {
         var viewportX = e.clientX;
         var viewportY = e.clientY;
         //edges del container
-        var edgeTop = this.$container.offsetTop + this.options.header_height + this.options.padding + (this.options.padding / 2);
+        var edgeTop = this.$container.offsetTop + this.options.header_height + (this.options.padding * 4);
         var edgeLeft = this.$container.offsetLeft + this.options.fixed_column_width * 2;
         var edgeBottom = this.$container.offsetHeight;
         var edgeRight = this.$container.offsetWidth;
@@ -1232,7 +1232,7 @@ export default class Scheduler {
         var isInBottomEdge = (viewportY > edgeBottom);
         //I massimi sono larghezza e atezza del container
         var maxScrollX = this.$container.scrollWidth;
-        var maxScrollY = this.$container.scrollHeight - this.$container.offsetHeight - this.options.padding;
+        var maxScrollY = this.$container.scrollHeight - this.$container.offsetHeight;
         // Get the current scroll position of the document.(container)
         var currentScrollX = this.$container.scrollLeft;
         var currentScrollY = this.$container.scrollTop;
