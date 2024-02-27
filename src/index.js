@@ -125,6 +125,7 @@ export default class Scheduler {
             rows: [],
             overlap: true,
             moving_scroll_bar: true,
+            hide_fixed_columns: false,
         };
         this.options = Object.assign({}, default_options, options);
 
@@ -1183,8 +1184,7 @@ export default class Scheduler {
 
         const end_row = this.rows[end_row_index];
         const new_end_sub_level = this.compute_row_sub_level(end_row.id);
-        //controllo se l'altezza della riga finale sia cambiata
-        if ((new_end_sub_level !== end_row.sub_level) && start_row_index === end_row_index) {
+        if (new_end_sub_level !== end_row.sub_level) {
             end_row.sub_level = new_end_sub_level;
             end_row.height = this.compute_row_height(end_row.sub_level.length);
             render = true;
@@ -1193,7 +1193,6 @@ export default class Scheduler {
         if (start_row_index != end_row_index) {
             const start_row = this.rows[start_row_index];
             const new_start_sub_level = this.compute_row_sub_level(start_row.id);
-            //controllo se l'altezza della riga iniziale sia cambiata
             if (new_start_sub_level.length != 0 && (new_start_sub_level.length != start_row.sub_level.length)) {
                 start_row.sub_level = new_start_sub_level;
                 start_row.height = this.compute_row_height(start_row.sub_level.length);
@@ -1220,78 +1219,63 @@ export default class Scheduler {
         //edges del container
         var edgeTop = this.$container.offsetTop + this.options.header_height + this.options.padding + (this.options.padding / 2);
         var edgeLeft = this.$container.offsetLeft + this.options.fixed_column_width * 2;
-        var edgeBottom = this.$container.offsetHeight - this.options.padding;
+        var edgeBottom = this.$container.offsetHeight;
         var edgeRight = this.$container.offsetWidth;
         //variabili per capire in quale punto ci si trova
         var isInLeftEdge = (viewportX < edgeLeft);
         var isInRightEdge = (viewportX > edgeRight);
         var isInTopEdge = (viewportY < edgeTop);
         var isInBottomEdge = (viewportY > edgeBottom);
-        // If the mouse is not in the viewport edge, there's no need to calculate
-        // anything else.
-
         //I massimi sono larghezza e atezza del container
         var maxScrollX = this.$container.scrollWidth;
-        var maxScrollY = this.$container.scrollHeight - this.$container.offsetHeight - this.options.padding - 5;
+        var maxScrollY = this.$container.scrollHeight - this.$container.offsetHeight - this.options.padding;
         // Get the current scroll position of the document.(container)
         var currentScrollX = this.$container.scrollLeft;
         var currentScrollY = this.$container.scrollTop;
-        // As we examine the mousemove event, we want to adjust the window scroll in
-        // immediate response to the event; but, we also want to continue adjusting
-        // the window scroll if the user rests their mouse in the edge boundary. To
-        // do this, we'll invoke the adjustment logic immediately.
-        (function checkForWindowScroll() {
-            if (adjustWindowScroll(currentScrollX, currentScrollY)) {
-            }
-        })();
-        // Adjust the window scroll based on the user's mouse position. Returns True
-        // or False depending on whether or not the window scroll was changed.
-        function adjustWindowScroll(currentScrollX, currentScrollY) {
-            // Determine if the window can be scrolled in any particular direction.
-            var canScrollUp = (currentScrollY > 0);
-            var canScrollDown = (currentScrollY < maxScrollY);
-            var canScrollLeft = (currentScrollX > 0);
-            var canScrollRight = (currentScrollX < maxScrollX);
+        // Determine if the window can be scrolled in any particular direction.
+        var canScrollUp = (currentScrollY > 0);
+        var canScrollDown = (currentScrollY < maxScrollY);
+        var canScrollLeft = (currentScrollX > 0);
+        var canScrollRight = (currentScrollX < maxScrollX);
 
-            var nextScrollX = currentScrollX;
-            var nextScrollY = currentScrollY;
+        var nextScrollX = currentScrollX;
+        var nextScrollY = currentScrollY;
 
-            //Serve a calcolare la velocità con cui scrollare
-            var maxStep = 30;
+        //Serve a calcolare la velocità con cui scrollare
+        var maxStep = 30;
 
-            // Should we scroll left?
-            if (isInLeftEdge && canScrollLeft) {
-                var intensity = ((edgeLeft - viewportX) / edgeLeft);
-                nextScrollX = (nextScrollX - (maxStep * intensity));
-                // Should we scroll right?
-            } else if (isInRightEdge && canScrollRight) {
-                var intensity = ((viewportX - edgeRight) / edgeLeft);
-                nextScrollX = (nextScrollX + (maxStep * intensity));
-            }
+        // Should we scroll left?
+        if (isInLeftEdge && canScrollLeft) {
+            var intensity = ((edgeLeft - viewportX) / edgeLeft);
+            nextScrollX = (nextScrollX - (maxStep * intensity));
+            // Should we scroll right?
+        } else if (isInRightEdge && canScrollRight) {
+            var intensity = ((viewportX - edgeRight) / edgeLeft);
+            nextScrollX = (nextScrollX + (maxStep * intensity));
+        }
 
-            // Should we scroll up?
-            if (isInTopEdge && canScrollUp) {
-                var intensity = ((edgeTop - viewportY) / edgeTop);
-                nextScrollY = (nextScrollY - (maxStep * intensity));
-                // Should we scroll down?
-            } else if (isInBottomEdge && canScrollDown) {
-                var intensity = ((viewportY - edgeBottom) / edgeTop);
-                nextScrollY = (nextScrollY + (maxStep * intensity));
-            }
+        // Should we scroll up?
+        if (isInTopEdge && canScrollUp) {
+            var intensity = ((edgeTop - viewportY) / edgeTop);
+            nextScrollY = (nextScrollY - (maxStep * intensity));
+            // Should we scroll down?
+        } else if (isInBottomEdge && canScrollDown) {
+            var intensity = ((viewportY - edgeBottom) / edgeTop);
+            nextScrollY = (nextScrollY + (maxStep * intensity));
+        }
 
-            nextScrollX = Math.max(0, Math.min(maxScrollX, nextScrollX));
-            nextScrollY = Math.max(0, Math.min(maxScrollY, nextScrollY));
+        nextScrollX = Math.max(0, Math.min(maxScrollX, nextScrollX));
+        nextScrollY = Math.max(0, Math.min(maxScrollY, nextScrollY));
 
-            if (
-                (nextScrollX !== currentScrollX) ||
-                (nextScrollY !== currentScrollY)
-            ) {
-                scroll_bar.scrollLeft = nextScrollX;
-                scroll_bar.scrollTop = nextScrollY;
-                return (true);
-            } else {
-                return (false);
-            }
+        if (
+            (nextScrollX !== currentScrollX) ||
+            (nextScrollY !== currentScrollY)
+        ) {
+            scroll_bar.scrollLeft = nextScrollX;
+            scroll_bar.scrollTop = nextScrollY;
+            return (true);
+        } else {
+            return (false);
         }
     }
 
