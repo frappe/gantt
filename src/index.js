@@ -1232,7 +1232,7 @@ export default class Scheduler {
         var isInBottomEdge = (viewportY > edgeBottom);
         //I massimi sono larghezza e atezza del container
         var maxScrollX = this.$container.scrollWidth;
-        var maxScrollY = this.$container.scrollHeight - this.$container.offsetHeight;
+        var maxScrollY = this.$svg.getAttribute('height') - this.$container.clientHeight;
         // Get the current scroll position of the document.(container)
         var currentScrollX = this.$container.scrollLeft;
         var currentScrollY = this.$container.scrollTop;
