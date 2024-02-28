@@ -1210,7 +1210,10 @@ export default class Scheduler {
             const scrollTop = this.$container.scrollTop;
             this.render();
             this.$container.scrollLeft = scrollLeft;
-            this.$container.scrollTop = scrollTop;
+            if (scrollTop > (this.$svg.getAttribute('height') - this.$container.clientHeight))
+                this.$container.scrollTop = scrollTop - (this.options.bar_height * 2);
+            else
+                this.$container.scrollTop = scrollTop;
         }
     }
 
