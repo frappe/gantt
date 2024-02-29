@@ -310,11 +310,6 @@ export default class Bar {
             x_in_units * this.scheduler.options.step,
             'hour'
         );
-
-        if (new_start_date.getHours() !== 0 && this.scheduler.options.view_mode !== 'Hour') {
-            new_start_date.setHours(0);
-        }
-
         const width_in_units = bar.getWidth() / this.scheduler.options.column_width;
         const new_end_date = date_utils.add(
             new_start_date,
