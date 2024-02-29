@@ -1090,7 +1090,7 @@ export default class Scheduler {
                         bar.position_changed();
                         bar.set_action_completed();
                         if (this.options.overlap) {
-                            this.overlap(start_row_index, bar);
+                            this.overlap(start_row_index, bar.task._index);
                         }
                     }
                 });
@@ -1211,9 +1211,8 @@ export default class Scheduler {
         }
     }
 
-    overlap(start_row_index, bar) {
+    overlap(start_row_index, end_row_index) {
         let render = false;
-        const end_row_index = bar.task._index;
         let update_from_this_row_index = end_row_index;
 
         const end_row = this.rows[end_row_index];
@@ -1230,8 +1229,13 @@ export default class Scheduler {
 
             render = true;
         } else {
-            const new_y = bar.compute_y();
-            bar.update_bar_position({y: new_y});
+            const bars_in_same_row = this.bars.filter(bar =>
+                bar.task._index === end_row_index
+            );
+            bars_in_same_row.forEach(bar => {
+                const new_y = bar.compute_y();
+                bar.update_bar_position({y: new_y});
+            });
         }
 
         if (start_row_index != end_row_index) {
