@@ -223,7 +223,7 @@ export default class Scheduler {
         }
     }
 
-    refresh(tasks, cells = this.cells, options = this.options) {
+    refresh(tasks = this.tasks, cells = this.cells, options = this.options) {
         const scroll_pos = this.$svg.parentElement.scrollLeft;
         const scroll_width = this.$svg.parentElement.scrollWidth;
 
