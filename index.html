@@ -66,6 +66,7 @@
             border-radius: 50%;
         }
 
+        /* Fine toggle*/
         body {
             font-family: sans-serif;
             background: #ccc;
@@ -1115,10 +1116,10 @@
         console.log(scheduler_chart);
 
         if (window.innerWidth <= 600) {
-            let lower_text = this.scheduler_chart.$column_svg.querySelectorAll('g.cell > g.cell-wrapper > text');
-            for (let i = 0; i < lower_text.length; i++) {
-                lower_text[i].style.fontSize = '8px';
-            }
+            const lower_text = Array.from(this.scheduler_chart.$column_svg.querySelectorAll('g.cell > g.cell-wrapper > text'));
+            lower_text.forEach((text) => {
+                text.style.fontSize = '8px';
+            });
         }
 
         function bind_toggle_event() {
@@ -1129,7 +1130,13 @@
             } else {
                 this.scheduler_chart.show_fixed_columns();
             }
-            this.scheduler_chart.refresh(tasks);
+            this.scheduler_chart.refresh();
+            if (window.innerWidth <= 600) {
+                const lower_text = Array.from(this.scheduler_chart.$column_svg.querySelectorAll('g.cell > g.cell-wrapper > text'));
+                lower_text.forEach((text) => {
+                    text.style.fontSize = '8px';
+                });
+            }
         }
     </script>
 </body>
