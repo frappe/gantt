@@ -1217,7 +1217,7 @@ export default class Scheduler {
 
         const end_row = this.rows[end_row_index];
         const new_end_sub_level = this.compute_row_sub_level(end_row.id);
-        if (new_end_sub_level.length !== end_row.sub_level.length || start_row_index != end_row_index) {
+        if (new_end_sub_level.length !== end_row.sub_level.length) {
             end_row.sub_level = new_end_sub_level;
             end_row.height = this.compute_row_height(end_row.sub_level.length);
 
@@ -1241,7 +1241,7 @@ export default class Scheduler {
         if (start_row_index != end_row_index) {
             const start_row = this.rows[start_row_index];
             const new_start_sub_level = this.compute_row_sub_level(start_row.id);
-            if (new_start_sub_level.length != 0 && (new_start_sub_level.length != start_row.sub_level.length)) {
+            if (new_start_sub_level.length != start_row.sub_level.length) {
                 start_row.sub_level = new_start_sub_level;
                 start_row.height = this.compute_row_height(start_row.sub_level.length);
 
@@ -1258,17 +1258,10 @@ export default class Scheduler {
         }
 
         if (render) {
-            // this.compute_row_y();
-            // const scrollLeft = this.$container.scrollLeft;
             const scrollTop = this.$container.scrollTop;
-            // this.render();
             this.update_from_row(update_from_this_row_index);
-
-            // this.$container.scrollLeft = scrollLeft;
             if (scrollTop > (this.$svg.getAttribute('height') - this.$container.clientHeight))
                 this.$container.scrollTop = scrollTop - (this.options.bar_height * 2);
-            // else
-            //     this.$container.scrollTop = scrollTop;
         }
     }
 
@@ -1301,8 +1294,8 @@ export default class Scheduler {
             $.attr(tick, 'd', new_d);
         });
         //highlight
-        // const highlight = this.$svg.getElementsByClassName('today-highlight');
-        // $.attr(highlight, 'height', max_height);
+        const highlight = this.$svg.getElementsByClassName('today-highlight');
+        $.attr(highlight[0], 'height', max_height);
         //bars
         const bars_to_move = this.bars.filter(bar =>
             bar.task._index >= row_index
@@ -1321,7 +1314,7 @@ export default class Scheduler {
         var viewportY = e.clientY;
         //edges del container
         var edgeTop = this.$container.offsetTop + this.options.header_height + (this.options.padding * 4);
-        var edgeLeft = this.$container.offsetLeft + this.options.fixed_column_width * 2;
+        var edgeLeft = this.$container.offsetLeft + (this.options.fixed_column_width * 2);
         var edgeBottom = this.$container.offsetHeight;
         var edgeRight = this.$container.offsetWidth;
         //variabili per capire in quale punto ci si trova
@@ -1376,9 +1369,6 @@ export default class Scheduler {
         ) {
             scroll_bar.scrollLeft = nextScrollX;
             scroll_bar.scrollTop = nextScrollY;
-            return (true);
-        } else {
-            return (false);
         }
     }
 
