@@ -1294,8 +1294,8 @@ export default class Scheduler {
             $.attr(tick, 'd', new_d);
         });
         //highlight
-        const highlight = this.$svg.getElementsByClassName('today-highlight');
-        $.attr(highlight[0], 'height', max_height);
+        // const highlight = this.$svg.getElementsByClassName('today-highlight');
+        // $.attr(highlight[0], 'height', max_height);
         //bars
         const bars_to_move = this.bars.filter(bar =>
             bar.task._index >= row_index
