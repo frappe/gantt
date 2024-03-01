@@ -1272,13 +1272,14 @@ export default class Scheduler {
         const max_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
 
         //background
-        const grid_background = this.$svg.querySelector('g.grid > rect');
-        const fixed_background = this.$column_svg.querySelector('g.grid > rect');
-        $.attr(grid_background, 'height', max_height);
-        $.attr(fixed_background, 'height', max_height);
         this.$svg.setAttribute('height', max_height);
+        const grid_background = this.$svg.querySelector('g.grid > rect');
+        $.attr(grid_background, 'height', max_height);
+        //fixed background
         this.$column_svg.setAttribute('height', max_height);
-        //ticks
+        const fixed_background = this.$column_svg.querySelector('g.grid > rect');
+        $.attr(fixed_background, 'height', max_height);
+        //fixed ticks
         const fixed_ticks = Array.from(this.$column_svg.querySelectorAll('g.grid > path'));
         fixed_ticks.forEach(tick => {
             const curr_d = tick.getAttribute('d');
@@ -1286,6 +1287,7 @@ export default class Scheduler {
 
             $.attr(tick, 'd', new_d);
         });
+        //ticks
         const ticks = Array.from(this.$svg.querySelectorAll('g.grid > path'));
         ticks.forEach(tick => {
             const curr_d = tick.getAttribute('d');
