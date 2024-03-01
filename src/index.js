@@ -1234,7 +1234,7 @@ export default class Scheduler {
             );
             bars_in_same_row.forEach(bar => {
                 const new_y = bar.compute_y();
-                bar.update_bar_position({y: new_y});
+                bar.update_bar_position({ y: new_y });
             });
         }
 
@@ -1294,15 +1294,17 @@ export default class Scheduler {
             $.attr(tick, 'd', new_d);
         });
         //highlight
-        // const highlight = this.$svg.getElementsByClassName('today-highlight');
-        // $.attr(highlight[0], 'height', max_height);
+        if (this.view_is(VIEW_MODE.DAY)) {
+            const highlight = this.$svg.getElementsByClassName('today-highlight');
+            $.attr(highlight[0], 'height', max_height);
+        }
         //bars
         const bars_to_move = this.bars.filter(bar =>
             bar.task._index >= row_index
         );
         bars_to_move.forEach(bar => {
             const new_y = bar.compute_y();
-            bar.update_bar_position({y: new_y});
+            bar.update_bar_position({ y: new_y });
         });
     }
 
