@@ -179,7 +179,7 @@ export default class Bar {
 
     setup_click_event() {
         $.on(this.group, 'mouseover', '.bar-wrapper', (e) => {
-            if (!e.target.classList.contains('bar')) return;
+            // if (!e.target.classList.contains('bar')) return;
             this.show_popup(e.offsetX);
         });
 
@@ -304,7 +304,7 @@ export default class Bar {
 
     compute_start_end_date() {
         const bar = this.$bar;
-        const x_in_units = Math.round((bar.getX() / this.scheduler.options.column_width)*1000/1000);
+        const x_in_units = Math.round((bar.getX() / this.scheduler.options.column_width) * 1000 / 1000);
         const new_start_date = date_utils.add(
             this.scheduler.scheduler_start,
             x_in_units * this.scheduler.options.step,
@@ -419,13 +419,24 @@ export default class Bar {
         const bar = this.$bar,
             label = this.group.querySelector('.bar-label');
 
-        if (label.getBBox().width > bar.getWidth()) {
-            label.classList.add('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+        const handle_width = this.handle_group.querySelector('.handle.left').getWidth();
+
+        const max_width = bar.getWidth() - (handle_width * 2);
+        const text = label.textContent;
+        const text_width = label.getBBox().width;
+        const original_text = this.task.name;
+
+        if (text_width + (handle_width * 2) > max_width) {
+            const reduction_percentage = (text_width - max_width) / text_width;
+            const visible_characters = Math.max(0, Math.round((text.length - 1) * (1 - reduction_percentage)));
+            label.textContent = text.substring(0, visible_characters);
         } else {
-            label.classList.remove('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+            const expansion_percentage = (max_width - text_width) / original_text.length;
+            const visible_characters = Math.min(original_text.length, Math.round(original_text.length * (1 + expansion_percentage)));
+            label.textContent = original_text.substring(0, visible_characters);
         }
+
+        label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
         label.setAttribute('y', bar.getY() + bar.getHeight() / 2);
     }
 
