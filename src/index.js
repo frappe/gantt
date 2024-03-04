@@ -241,8 +241,12 @@ export default class Scheduler {
         this.options.rows.forEach(row_id => {
             let row = { id: row_id, height: 0, y: 0, sub_level: [], cell_wrapper: [] };
 
-            row.sub_level = this.compute_row_sub_level(row_id);
-            row.height = this.compute_row_height(row.sub_level.length);
+            if (this.options.overlap) {
+                row.sub_level = this.compute_row_sub_level(row_id);
+                row.height = this.compute_row_height(row.sub_level.length);
+            } else {
+                row.height = this.options.bar_height + this.options.padding;
+            }
 
             for (let i = 0; i < this.options.fixed_columns.length; i++)
                 row.cell_wrapper[i] = [];
@@ -377,6 +381,8 @@ export default class Scheduler {
         this.map_arrows_on_bars();
         this.set_width();
         this.set_scroll_position();
+        if (!this.options.overlap)
+            this.red_border();
     }
 
     setup_layers() {
@@ -1089,9 +1095,10 @@ export default class Scheduler {
                     if ($bar.finaldx || $bar.finaldy) {
                         bar.position_changed();
                         bar.set_action_completed();
-                        if (this.options.overlap) {
+                        if (this.options.overlap)
                             this.overlap(start_row_index, bar.task._index);
-                        }
+                        else
+                            this.red_border();
                     }
                 });
             }
@@ -1384,6 +1391,29 @@ export default class Scheduler {
 
     show_fixed_columns() {
         this.options.hide_fixed_columns = false;
+    }
+
+    red_border() {
+        if (!this.options.overlap) {
+            this.rows.forEach(row => {
+                const bars_in_same_row = this.bars.filter(bar => bar.task.row === row.id);
+                bars_in_same_row.forEach(bar => {
+                    const overlapped_bars = this.bars.filter(other_bar => {
+                        return other_bar.task.row === bar.task.row &&
+                            bar.task._start < other_bar.task._end && bar.task._end > other_bar.task._start;
+                    });
+                    if (overlapped_bars.length > 1)
+                        overlapped_bars.forEach(bar => {
+                            bar.$bar.style.stroke = 'red';
+                            bar.$bar.style.strokeWidth = '2';
+                        });
+                    else {
+                        bar.$bar.style.stroke = '';
+                        bar.$bar.style.strokeWidth = '';
+                    }
+                });
+            })
+        }
     }
 
     get_all_dependent_tasks(task_id) {

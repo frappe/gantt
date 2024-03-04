@@ -357,11 +357,15 @@ export default class Bar {
     }
 
     compute_y() {
-        return (
-            (this.scheduler.options.padding / 2) +
-            (this.scheduler.options.padding + this.scheduler.options.bar_height) * this.task._sub_level_index +
-            this.scheduler.rows[this.task._index].y
-        );
+        let bar_y;
+        if (this.scheduler.options.overlap) {
+            bar_y = (this.scheduler.options.padding / 2) +
+                (this.scheduler.options.padding + this.scheduler.options.bar_height) * this.task._sub_level_index +
+                this.scheduler.rows[this.task._index].y;
+        } else {
+            bar_y = ((this.scheduler.options.padding / 2) + this.scheduler.rows[this.task._index].y);
+        }
+        return bar_y;
     }
 
     get_snap_position(dx) {
