@@ -114,7 +114,7 @@ export default class Scheduler {
             padding: 18,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
-            popup_position: 'left',
+            // popup_position: 'left',
             custom_popup_html: null,
             language: 'en',
             resize_left: false,
@@ -1484,8 +1484,8 @@ export default class Scheduler {
                 this.options.custom_popup_html
             );
         }
-        options.position = this.options.popup_position;
-        this.popup.show(options);
+        const off_set = this.$container.scrollTop + this.$container.offsetHeight;
+        this.popup.show(options, off_set);
     }
 
     hide_popup() {

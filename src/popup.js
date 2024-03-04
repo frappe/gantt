@@ -20,14 +20,12 @@ export default class Popup {
         this.pointer = this.parent.querySelector('.pointer');
     }
 
-    show(options) {
+    show(options, off_set_height) {
         if (this.is_showing) return;
         if (!options.target_element) {
             throw new Error('target_element is required to show popup');
         }
-        if (!options.position) {
-            options.position = 'left';
-        }
+        
         const target_element = options.target_element;
 
         if (this.custom_html) {
@@ -50,16 +48,14 @@ export default class Popup {
             position_meta = options.target_element.getBBox();
         }
 
-        if (options.position === 'left') {
-            this.parent.style.left =
-                position_meta.x + (position_meta.width + 8) + 'px';
-            this.parent.style.top = position_meta.y + 'px';
-
-            this.pointer.style.transform = 'rotateZ(90deg)';
-            this.pointer.style.left = '-4px';
-            this.pointer.style.top = '2px';
-        }
-        if (options.position === 'bottom') {
+        if (position_meta.y + this.parent.clientHeight + 60 > off_set_height) {
+            this.parent.style.top = (position_meta.y - this.parent.offsetHeight - 10) + 'px';
+            this.pointer.style.transform = 'rotateZ(0deg)';
+            this.pointer.style.top = (this.parent.offsetHeight - 4) + 'px';
+            const middle_popup = this.parent.clientWidth / 2;
+            this.parent.style.left = (options.x - middle_popup) + 'px';
+            this.pointer.style.left = middle_popup + 'px';
+        } else {
             const middle_popup = this.parent.clientWidth / 2;
             this.parent.style.left = (options.x - middle_popup) + 'px';
             this.parent.style.top = (position_meta.y + position_meta.height + 10) + 'px';
