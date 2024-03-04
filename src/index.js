@@ -1148,12 +1148,14 @@ export default class Scheduler {
             $.attr($handle, 'points', bar.get_progress_polygon_points());
             $bar_progress.finaldx = dx;
         });
-
+        // aggiornato altrimenti con qualsiasi evento avrebbe mostrato il console log del progresso
         $.on(this.$svg, 'mouseup', () => {
+            if (is_resizing) {
+                if (!($bar_progress && $bar_progress.finaldx)) return;
+                bar.progress_changed();
+                bar.set_action_completed();
+            }
             is_resizing = false;
-            if (!($bar_progress && $bar_progress.finaldx)) return;
-            bar.progress_changed();
-            bar.set_action_completed();
         });
     }
 
@@ -1317,7 +1319,7 @@ export default class Scheduler {
         var viewportX = e.clientX;
         var viewportY = e.clientY;
         //edges del container
-        var edgeTop = this.$container.offsetTop + this.options.header_height + (this.options.padding * 4);
+        var edgeTop = this.$container.offsetTop + this.options.header_height + (this.options.padding * 3);
         var edgeLeft = this.$container.offsetLeft + (this.options.fixed_column_width * 2);
         var edgeBottom = this.$container.offsetHeight;
         var edgeRight = this.$container.offsetWidth;
