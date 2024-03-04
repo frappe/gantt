@@ -47,16 +47,15 @@ export default class Popup {
         } else if (target_element instanceof SVGElement) {
             position_meta = options.target_element.getBBox();
         }
+        const middle_popup = this.parent.clientWidth / 2;
 
         if (position_meta.y + this.parent.clientHeight + 60 > off_set_height) {
             this.parent.style.top = (position_meta.y - this.parent.offsetHeight - 10) + 'px';
             this.pointer.style.transform = 'rotateZ(0deg)';
             this.pointer.style.top = (this.parent.offsetHeight - 4) + 'px';
-            const middle_popup = this.parent.clientWidth / 2;
             this.parent.style.left = (options.x - middle_popup) + 'px';
             this.pointer.style.left = middle_popup + 'px';
         } else {
-            const middle_popup = this.parent.clientWidth / 2;
             this.parent.style.left = (options.x - middle_popup) + 'px';
             this.parent.style.top = (position_meta.y + position_meta.height + 10) + 'px';
 
