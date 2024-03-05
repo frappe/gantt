@@ -71,11 +71,12 @@ export default class Popup {
 
     compute_width(title_length) {
         let width;
+        const char_width = 6;
 
         if (title_length < 20) 
-            width = 20 * 6;
+            width = 20 * char_width;
         else
-            width = title_length * 6;
+            width = title_length * char_width;
 
         return width;
     }
