@@ -1394,23 +1394,21 @@ export default class Scheduler {
     }
 
     red_border() {
-        if (!this.options.overlap) {
-                this.bars.forEach(bar => {
-                    const overlapped_bars = this.bars.filter(other_bar => {
-                        return other_bar.task.row === bar.task.row &&
-                            bar.task._start < other_bar.task._end && bar.task._end > other_bar.task._start;
-                    });
-                    if (overlapped_bars.length > 1)
-                        overlapped_bars.forEach(bar => {
-                            bar.$bar.style.stroke = 'red';
-                            bar.$bar.style.strokeWidth = '2';
-                        });
-                    else {
-                        bar.$bar.style.stroke = '';
-                        bar.$bar.style.strokeWidth = '';
-                    }
-                });
-        }
+        this.bars.forEach(bar => {
+            const bar_wrapper = $.closest('.bar-wrapper', bar.$bar);
+
+            if (this.bars.some(other_bar => {
+                return other_bar.task.id !== bar.task.id &&
+                    other_bar.task.row === bar.task.row &&
+                    bar.task._start < other_bar.task._end &&
+                    bar.task._end > other_bar.task._start;
+            })) {
+                bar_wrapper.classList.add('overlap');
+            }
+            else {
+                bar_wrapper.classList.remove('overlap');
+            }
+        });
     }
 
     get_all_dependent_tasks(task_id) {

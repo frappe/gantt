@@ -127,6 +127,13 @@ $handle-color: #ddd !default;
                 fill: darken($blue, 5);
             }
         }
+
+        &.overlap {
+            .bar {
+                stroke: red;
+                stroke-width: 2;
+            }
+        }
     }
 
     .lower-text,
