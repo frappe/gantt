@@ -1395,9 +1395,7 @@ export default class Scheduler {
 
     red_border() {
         if (!this.options.overlap) {
-            this.rows.forEach(row => {
-                const bars_in_same_row = this.bars.filter(bar => bar.task.row === row.id);
-                bars_in_same_row.forEach(bar => {
+                this.bars.forEach(bar => {
                     const overlapped_bars = this.bars.filter(other_bar => {
                         return other_bar.task.row === bar.task.row &&
                             bar.task._start < other_bar.task._end && bar.task._end > other_bar.task._start;
@@ -1412,7 +1410,6 @@ export default class Scheduler {
                         bar.$bar.style.strokeWidth = '';
                     }
                 });
-            })
         }
     }
 
