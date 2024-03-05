@@ -304,10 +304,10 @@ export default class Bar {
 
     compute_start_end_date() {
         const bar = this.$bar;
-        const x_in_units = Math.floor(bar.getX()) / this.scheduler.options.column_width;
+        const x_in_units = bar.getX() / this.scheduler.options.column_width;
         const new_start_date = date_utils.add(
             this.scheduler.scheduler_start,
-            Math.round(x_in_units * this.scheduler.options.step),
+            x_in_units * this.scheduler.options.step,
             'hour'
         );
         const width_in_units = bar.getWidth() / this.scheduler.options.column_width;
