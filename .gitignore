@@ -32,3 +32,4 @@ node_modules
 # custom
 .snapshots/
 branches.txt
+.vscode/

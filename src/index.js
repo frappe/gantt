@@ -1327,7 +1327,7 @@ export default class Scheduler {
         var viewportY = e.clientY;
         //edges del container
         var edgeTop = this.$container.offsetTop + this.options.header_height + (this.options.padding * 3);
-        var edgeLeft = this.$container.offsetLeft + (this.options.fixed_column_width * 2);
+        var edgeLeft = this.$container.offsetLeft + (this.options.padding * 8);
         var edgeBottom = this.$container.offsetHeight;
         var edgeRight = this.$container.offsetWidth;
         //variabili per capire in quale punto ci si trova
