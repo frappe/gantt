@@ -22,6 +22,7 @@ export default class Scheduler {
         this.setup_wrapper(wrapper);
         this.setup_cells(cells);
         this.setup_tasks(tasks);
+        this.setup_rows();
         // initialize with default view mode
         this.change_view_mode();
         this.bind_events();
@@ -113,7 +114,7 @@ export default class Scheduler {
             padding: 18,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
-            popup_position: 'left',
+            // popup_position: 'left',
             custom_popup_html: null,
             language: 'en',
             resize_left: false,
@@ -122,6 +123,9 @@ export default class Scheduler {
             drag_drop_y: false,
             fixed_columns: [],
             rows: [],
+            overlap: true,
+            moving_scroll_bar: true,
+            hide_fixed_columns: false,
         };
         this.options = Object.assign({}, default_options, options);
 
@@ -219,7 +223,7 @@ export default class Scheduler {
         }
     }
 
-    refresh(tasks, cells = this.cells, options = this.options) {
+    refresh(tasks = this.tasks, cells = this.cells, options = this.options) {
         const scroll_pos = this.$svg.parentElement.scrollLeft;
         const scroll_width = this.$svg.parentElement.scrollWidth;
 
@@ -229,6 +233,28 @@ export default class Scheduler {
         this.change_view_mode();
 
         this.$svg.parentElement.scrollLeft = scroll_pos * (this.$svg.parentElement.scrollWidth / scroll_width);
+    }
+
+    setup_rows() {
+        this.rows = [];
+        let sum_y = (this.options.header_height + this.options.padding / 2);
+        this.options.rows.forEach(row_id => {
+            let row = { id: row_id, height: 0, y: 0, sub_level: [], cell_wrapper: [] };
+
+            if (this.options.overlap) {
+                row.sub_level = this.compute_row_sub_level(row_id);
+                row.height = this.compute_row_height(row.sub_level.length);
+            } else {
+                row.height = this.options.bar_height + this.options.padding;
+            }
+
+            for (let i = 0; i < this.options.fixed_columns.length; i++)
+                row.cell_wrapper[i] = [];
+
+            row.y += sum_y;
+            this.rows.push(row);
+            sum_y += row.height;
+        });
     }
 
     change_view_mode(mode = this.options.view_mode) {
@@ -355,6 +381,8 @@ export default class Scheduler {
         this.map_arrows_on_bars();
         this.set_width();
         this.set_scroll_position();
+        if (!this.options.overlap)
+            this.red_border();
     }
 
     setup_layers() {
@@ -379,13 +407,14 @@ export default class Scheduler {
 
     // TODO refactor with single functions?
     make_fixed_columns() {
+        if (this.options.hide_fixed_columns) {
+            this.$column_svg.setAttribute('width', 0);
+            return;
+        }
         // make_grid_background
         const column_grid_width = this.options.fixed_columns.length * this.options.fixed_column_width;
-        const grid_height =
-            this.options.header_height +
-            this.options.padding +
-            (this.options.bar_height + this.options.padding) *
-            this.options.rows.length;
+        const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
+        const grid_height = sum_rows_height;
 
         createSVG('rect', {
             x: 0,
@@ -396,7 +425,7 @@ export default class Scheduler {
             append_to: this.fixed_col_layers.grid
         });
         $.attr(this.$column_svg, {
-            height: grid_height + 30,
+            height: grid_height, //+ 30,
             width: column_grid_width,
         });
 
@@ -405,12 +434,14 @@ export default class Scheduler {
         const lines_layer = createSVG('g', { append_to: this.fixed_col_layers.grid });
 
         const row_width = this.options.fixed_columns.length * this.options.fixed_column_width;
-        const row_height = this.options.bar_height + this.options.padding;
 
-        let row_y = this.options.header_height + this.options.padding / 2;
+        let i = 0;
 
         for (let row of this.options.rows) {
-            createSVG('rect', {
+
+            const row_height = this.rows[i].height;
+            const row_y = this.rows[i].y;
+            const rect = createSVG('rect', {
                 x: 0,
                 y: row_y,
                 width: row_width,
@@ -420,7 +451,9 @@ export default class Scheduler {
                 append_to: rows_layer,
             });
 
-            createSVG('line', {
+            this.rows[i].fixed_rect = rect;
+
+            const fixed_line = createSVG('line', {
                 x1: 0,
                 y1: row_y + row_height,
                 x2: row_width,
@@ -429,7 +462,9 @@ export default class Scheduler {
                 append_to: lines_layer,
             });
 
-            row_y += this.options.bar_height + this.options.padding;
+            this.rows[i].fixed_line = fixed_line;
+
+            i++;
         }
 
         // make_grid_header
@@ -446,10 +481,8 @@ export default class Scheduler {
 
         // make_grid_ticks
         let tick_x = this.options.fixed_column_width;
-        let tick_y = this.options.header_height + this.options.padding / 2;
-        let tick_height =
-            (this.options.bar_height + this.options.padding) *
-            this.options.rows.length;
+        let tick_y = 0;
+        let tick_height = sum_rows_height;
         for (let _ of this.options.fixed_columns) {
             createSVG('path', {
                 d: `M ${tick_x} ${tick_y} v ${tick_height}`,
@@ -479,9 +512,10 @@ export default class Scheduler {
     }
 
     make_cells() {
-        const row_height = this.options.bar_height + this.options.padding;
-
         for (let r = 0; r < this.options.rows.length; r++) {
+            const row_height = this.rows[r].height;
+            const row_y = this.rows[r].y;
+
             for (let c = 0; c < this.options.fixed_columns.length; c++) {
                 const cell_wrapper = createSVG('g', {
                     class: 'cell-wrapper',
@@ -490,23 +524,26 @@ export default class Scheduler {
                     append_to: this.fixed_col_layers.cell,
                 });
 
-                createSVG('rect', {
+                const fixed_cell = createSVG('rect', {
                     x: c * this.options.fixed_column_width,
-                    y: this.options.header_height + this.options.padding / 2 + (row_height) * r,
+                    y: row_y,
                     width: this.options.fixed_column_width,
                     height: row_height,
                     append_to: cell_wrapper,
                 });
+                this.rows[r].cell_wrapper[c].fixed_cell = fixed_cell;
+
 
                 const cell = this.cells.find(t => t.row === this.options.rows[r] && t.column === this.options.fixed_columns[c]);
                 if (cell) {
-                    createSVG('text', {
+                    const text = createSVG('text', {
                         x: this.options.fixed_column_width / 2 + c * this.options.fixed_column_width,
-                        y: 15 + this.options.header_height + this.options.padding + r * row_height,
+                        y: 24 + row_y,
                         innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
                         class: 'lower-text',
                         append_to: cell_wrapper
                     });
+                    this.rows[r].cell_wrapper[c].text = text;
                 }
             }
         }
@@ -522,11 +559,8 @@ export default class Scheduler {
 
     make_grid_background() {
         const grid_width = this.dates.length * this.options.column_width;
-        const grid_height =
-            this.options.header_height +
-            this.options.padding +
-            (this.options.bar_height + this.options.padding) *
-            this.options.rows.length;
+        const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
+        const grid_height = sum_rows_height; //+ this.options.header_height + (this.options.padding / 2);
 
         createSVG('rect', {
             x: 0,
@@ -548,12 +582,14 @@ export default class Scheduler {
         const lines_layer = createSVG('g', { append_to: this.layers.grid });
 
         const row_width = this.dates.length * this.options.column_width;
-        const row_height = this.options.bar_height + this.options.padding;
 
-        let row_y = this.options.header_height + this.options.padding / 2;
+        let i = 0;
 
         for (let row of this.options.rows) {
-            createSVG('rect', {
+            const row_height = this.rows[i].height;
+            const row_y = this.rows[i].y;
+
+            const rect = createSVG('rect', {
                 x: 0,
                 y: row_y,
                 width: row_width,
@@ -563,7 +599,9 @@ export default class Scheduler {
                 append_to: rows_layer,
             });
 
-            createSVG('line', {
+            this.rows[i].rect = rect;
+
+            const line = createSVG('line', {
                 x1: 0,
                 y1: row_y + row_height,
                 x2: row_width,
@@ -572,7 +610,9 @@ export default class Scheduler {
                 append_to: lines_layer,
             });
 
-            row_y += this.options.bar_height + this.options.padding;
+            this.rows[i].line = line;
+
+            i++;
         }
     }
 
@@ -590,11 +630,10 @@ export default class Scheduler {
     }
 
     make_grid_ticks() {
+        const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
         let tick_x = 0;
-        let tick_y = this.options.header_height + this.options.padding / 2;
-        let tick_height =
-            (this.options.bar_height + this.options.padding) *
-            this.options.rows.length;
+        let tick_y = 0;
+        let tick_height = sum_rows_height;
 
         for (let date of this.dates) {
             let tick_class = 'tick';
@@ -637,16 +676,15 @@ export default class Scheduler {
         if (this.view_is(VIEW_MODE.DAY)) {
             const x =
                 (date_utils.diff(date_utils.today(), this.scheduler_start, 'hour') /
-                    this.options.step) *
+                    this.options.step) +
                 this.options.column_width;
-            const y = 0;
+            const y = (this.options.header_height +
+                this.options.padding / 2);
 
             const width = this.options.column_width;
-            const height =
-                (this.options.bar_height + this.options.padding) *
-                this.options.rows.length +
-                this.options.header_height +
-                this.options.padding / 2;
+            const height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height -
+                (this.options.header_height +
+                    this.options.padding / 2);
 
             createSVG('rect', {
                 x,
@@ -887,7 +925,14 @@ export default class Scheduler {
 
         $.on(this.$svg, 'dblclick', '.grid-row', (e) => {
             const data_id = e.target.getAttribute('data-id');
-            this.trigger_event('grid_dblclick', [data_id]);
+
+            const x_in_units = e.offsetX / this.options.column_width;
+            const datetime = date_utils.add(
+                this.scheduler_start,
+                x_in_units * this.options.step,
+                'hour');
+
+            this.trigger_event('grid_dblclick', [data_id, datetime]);
         });
 
         $.on(this.$container, 'scroll', e => {
@@ -914,11 +959,8 @@ export default class Scheduler {
         let is_resizing_right = false;
         let parent_bar_id = null;
         let bars = []; // instanceof Bars, the dragged bar and its children
-        const min_y = this.options.header_height;
-        const max_y =
-            this.options.header_height +
-            this.options.rows.length *
-            (this.options.bar_height + this.options.padding);
+        let max_y = 0;
+        const min_y = this.options.header_height + (this.options.padding / 2);
         this.bar_being_dragged = null; // instanceof dragged bar
 
         function action_in_progress() {
@@ -963,6 +1005,7 @@ export default class Scheduler {
             is_resizing_left = is_resizing_left && this.bar_being_dragged.task.resize_left;
             is_resizing_right = is_resizing_right && this.bar_being_dragged.task.resize_right;
             is_dragging = is_dragging && (this.bar_being_dragged.task.drag_drop_x || this.bar_being_dragged.task.drag_drop_y);
+            max_y = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height - this.options.bar_height - (this.options.padding / 2);
         });
 
         $.on(this.$svg, 'mousemove', (e) => {
@@ -993,6 +1036,11 @@ export default class Scheduler {
                 });
             } else if (is_dragging) {
                 if (bar_being_dragged.task.drag_drop_x) {
+
+                    if (this.options.moving_scroll_bar) {
+                        this.moving_scroll_bar(e);
+                    }
+
                     bar_being_dragged.$bar.finaldx = this.get_snap_x_position(dx);
                     bar_being_dragged.update_bar_position({
                         x:
@@ -1001,7 +1049,6 @@ export default class Scheduler {
                     });
                 }
                 if (bar_being_dragged.task.drag_drop_y) {
-                    // TODO improve max_y and get_snap_y_position
                     const y = bar_being_dragged.$bar.oy + dy;
                     if (y < min_y) {
                         dy = min_y - bar_being_dragged.$bar.oy;
@@ -1043,9 +1090,15 @@ export default class Scheduler {
                     bar.group.classList.remove('active');
 
                     const $bar = bar.$bar;
+                    const start_row_index = bar.task._index;
+
                     if ($bar.finaldx || $bar.finaldy) {
                         bar.position_changed();
                         bar.set_action_completed();
+                        if (this.options.overlap)
+                            this.overlap(start_row_index, bar.task._index);
+                        else
+                            this.red_border();
                     }
                 });
             }
@@ -1102,12 +1155,259 @@ export default class Scheduler {
             $.attr($handle, 'points', bar.get_progress_polygon_points());
             $bar_progress.finaldx = dx;
         });
-
+        // aggiornato altrimenti con qualsiasi evento avrebbe mostrato il console log del progresso
         $.on(this.$svg, 'mouseup', () => {
+            if (is_resizing) {
+                if (!($bar_progress && $bar_progress.finaldx)) return;
+                bar.progress_changed();
+                bar.set_action_completed();
+            }
             is_resizing = false;
-            if (!($bar_progress && $bar_progress.finaldx)) return;
-            bar.progress_changed();
-            bar.set_action_completed();
+        });
+    }
+
+    compute_row_sub_level(row_id) {
+        const task_in_same_row = this.tasks.filter(task => task.row === row_id);
+        //ordina per data le task in quella riga
+        task_in_same_row.sort((a, b) => a._start - b._start);
+
+        let sub_levels = [];
+
+        task_in_same_row.forEach(task => {
+            let i = 0;
+            // Trova l'indice del sotto livello in cui inserire questa task
+            for (i = 0; i < sub_levels.length; i++) {
+                const last_task_in_sub_level = sub_levels[i][sub_levels[i].length - 1];
+                if (task._start >= last_task_in_sub_level._end)
+                    break;
+            }
+
+            task._sub_level_index = i;
+            if (!sub_levels[task._sub_level_index])
+                sub_levels[task._sub_level_index] = [];
+
+            sub_levels[task._sub_level_index].push(task);
+        });
+
+        return sub_levels;
+    }
+
+    compute_row_height(nlevels) {
+        nlevels = nlevels > 0 ? nlevels : 1;
+        const row_height = (this.options.bar_height + this.options.padding) * nlevels;
+        return row_height;
+    }
+
+    compute_row_y(row_index) {
+        let sum_y = this.rows[row_index].y;
+        for (let i = row_index; i < this.rows.length; i++) {
+            $.attr(this.rows[i].rect, 'y', sum_y);
+            $.attr(this.rows[i].fixed_rect, 'y', sum_y);
+            //cell
+            for (let c = 0; c < this.options.fixed_columns.length; c++) {
+                $.attr(this.rows[i].cell_wrapper[c].fixed_cell, 'y', sum_y);
+                if (this.rows[i].cell_wrapper[c].text)
+                    $.attr(this.rows[i].cell_wrapper[c].text, 'y', sum_y + 24);
+            }
+
+            this.rows[i].y = sum_y;
+            sum_y += this.rows[i].height;
+            //line
+            $.attr(this.rows[i].fixed_line, 'y1', sum_y);
+            $.attr(this.rows[i].fixed_line, 'y2', sum_y);
+            $.attr(this.rows[i].line, 'y1', sum_y);
+            $.attr(this.rows[i].line, 'y2', sum_y);
+        }
+    }
+
+    overlap(start_row_index, end_row_index) {
+        let render = false;
+        let update_from_this_row_index = end_row_index;
+
+        const end_row = this.rows[end_row_index];
+        const new_end_sub_level = this.compute_row_sub_level(end_row.id);
+        if (new_end_sub_level.length !== end_row.sub_level.length) {
+            end_row.sub_level = new_end_sub_level;
+            end_row.height = this.compute_row_height(end_row.sub_level.length);
+
+            $.attr(end_row.rect, 'height', end_row.height);
+            $.attr(end_row.fixed_rect, 'height', end_row.height);
+            for (let i = 0; i < this.options.fixed_columns.length; i++) {
+                $.attr(end_row.cell_wrapper[i].fixed_cell, 'height', end_row.height);
+            }
+
+            render = true;
+        } else {
+            const bars_in_same_row = this.bars.filter(bar =>
+                bar.task._index === end_row_index
+            );
+            bars_in_same_row.forEach(bar => {
+                const new_y = bar.compute_y();
+                bar.update_bar_position({ y: new_y });
+            });
+        }
+
+        if (start_row_index != end_row_index) {
+            const start_row = this.rows[start_row_index];
+            const new_start_sub_level = this.compute_row_sub_level(start_row.id);
+            if (new_start_sub_level.length != start_row.sub_level.length) {
+                start_row.sub_level = new_start_sub_level;
+                start_row.height = this.compute_row_height(start_row.sub_level.length);
+
+                $.attr(start_row.rect, 'height', start_row.height);
+                $.attr(start_row.fixed_rect, 'height', start_row.height);
+                for (let i = 0; i < this.options.fixed_columns.length; i++) {
+                    $.attr(start_row.cell_wrapper[i].fixed_cell, 'height', start_row.height);
+                }
+
+                render = true;
+                if (start_row_index < end_row_index)
+                    update_from_this_row_index = start_row_index;
+            }
+        }
+
+        if (render) {
+            const scrollTop = this.$container.scrollTop;
+            this.update_from_row(update_from_this_row_index);
+            if (scrollTop > (this.$svg.getAttribute('height') - this.$container.clientHeight))
+                this.$container.scrollTop = scrollTop - (this.options.bar_height * 2);
+        }
+    }
+
+    update_from_row(row_index) {
+
+        this.compute_row_y(row_index);
+
+        const max_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
+
+        //background
+        this.$svg.setAttribute('height', max_height);
+        const grid_background = this.$svg.querySelector('g.grid > rect');
+        $.attr(grid_background, 'height', max_height);
+        //fixed background
+        this.$column_svg.setAttribute('height', max_height);
+        const fixed_background = this.$column_svg.querySelector('g.grid > rect');
+        $.attr(fixed_background, 'height', max_height);
+        //fixed ticks
+        const fixed_ticks = Array.from(this.$column_svg.querySelectorAll('g.grid > path'));
+        fixed_ticks.forEach(tick => {
+            const curr_d = tick.getAttribute('d');
+            const new_d = curr_d.replace(/v\s*[^v]*$/, `v ${max_height}`);
+
+            $.attr(tick, 'd', new_d);
+        });
+        //ticks
+        const ticks = Array.from(this.$svg.querySelectorAll('g.grid > path'));
+        ticks.forEach(tick => {
+            const curr_d = tick.getAttribute('d');
+            const new_d = curr_d.replace(/v\s*[^v]*$/, `v ${max_height}`);
+
+            $.attr(tick, 'd', new_d);
+        });
+        //highlight
+        if (this.view_is(VIEW_MODE.DAY)) {
+            const highlight = this.$svg.getElementsByClassName('today-highlight');
+            $.attr(highlight[0], 'height', max_height);
+        }
+        //bars
+        const bars_to_move = this.bars.filter(bar =>
+            bar.task._index >= row_index
+        );
+        bars_to_move.forEach(bar => {
+            const new_y = bar.compute_y();
+            bar.update_bar_position({ y: new_y });
+        });
+    }
+
+    moving_scroll_bar(e) {
+        //Variabile che serve per aggiornare la scrollbar
+        var scroll_bar = this.$svg.parentElement;
+        //coordinate x e y del mouse
+        var viewportX = e.clientX;
+        var viewportY = e.clientY;
+        //edges del container
+        var edgeTop = this.$container.offsetTop + this.options.header_height + (this.options.padding * 3);
+        var edgeLeft = this.$container.offsetLeft + (this.options.padding * 8);
+        var edgeBottom = this.$container.offsetHeight;
+        var edgeRight = this.$container.offsetWidth;
+        //variabili per capire in quale punto ci si trova
+        var isInLeftEdge = (viewportX < edgeLeft);
+        var isInRightEdge = (viewportX > edgeRight);
+        var isInTopEdge = (viewportY < edgeTop);
+        var isInBottomEdge = (viewportY > edgeBottom);
+        //I massimi sono larghezza e atezza del container
+        var maxScrollX = this.$container.scrollWidth;
+        var maxScrollY = this.$svg.getAttribute('height') - this.$container.clientHeight;
+        // Get the current scroll position of the document.(container)
+        var currentScrollX = this.$container.scrollLeft;
+        var currentScrollY = this.$container.scrollTop;
+        // Determine if the window can be scrolled in any particular direction.
+        var canScrollUp = (currentScrollY > 0);
+        var canScrollDown = (currentScrollY < maxScrollY);
+        var canScrollLeft = (currentScrollX > 0);
+        var canScrollRight = (currentScrollX < maxScrollX);
+
+        var nextScrollX = currentScrollX;
+        var nextScrollY = currentScrollY;
+
+        //Serve a calcolare la velocità con cui scrollare
+        var maxStep = 30;
+
+        // Should we scroll left?
+        if (isInLeftEdge && canScrollLeft) {
+            var intensity = ((edgeLeft - viewportX) / edgeLeft);
+            nextScrollX = (nextScrollX - (maxStep * intensity));
+            // Should we scroll right?
+        } else if (isInRightEdge && canScrollRight) {
+            var intensity = ((viewportX - edgeRight) / edgeLeft);
+            nextScrollX = (nextScrollX + (maxStep * intensity));
+        }
+
+        // Should we scroll up?
+        if (isInTopEdge && canScrollUp) {
+            var intensity = ((edgeTop - viewportY) / edgeTop);
+            nextScrollY = (nextScrollY - (maxStep * intensity));
+            // Should we scroll down?
+        } else if (isInBottomEdge && canScrollDown) {
+            var intensity = ((viewportY - edgeBottom) / edgeTop);
+            nextScrollY = (nextScrollY + (maxStep * intensity));
+        }
+
+        nextScrollX = Math.max(0, Math.min(maxScrollX, nextScrollX));
+        nextScrollY = Math.max(0, Math.min(maxScrollY, nextScrollY));
+
+        if (
+            (nextScrollX !== currentScrollX) ||
+            (nextScrollY !== currentScrollY)
+        ) {
+            scroll_bar.scrollLeft = nextScrollX;
+            scroll_bar.scrollTop = nextScrollY;
+        }
+    }
+
+    hide_fixed_columns() {
+        this.options.hide_fixed_columns = true;
+    }
+
+    show_fixed_columns() {
+        this.options.hide_fixed_columns = false;
+    }
+
+    red_border() {
+        this.bars.forEach(bar => {
+            const bar_wrapper = $.closest('.bar-wrapper', bar.$bar);
+
+            if (this.bars.some(other_bar => {
+                return other_bar.task.id !== bar.task.id &&
+                    other_bar.task.row === bar.task.row &&
+                    bar.task._start < other_bar.task._end &&
+                    bar.task._end > other_bar.task._start;
+            })) {
+                bar_wrapper.classList.add('overlap');
+            }
+            else {
+                bar_wrapper.classList.remove('overlap');
+            }
         });
     }
 
@@ -1165,13 +1465,12 @@ export default class Scheduler {
             rem,
             position;
         const row_height = this.options.bar_height + this.options.padding;
-        rem = ody % row_height;
-        position =
-            ody -
-            rem +
-            (rem < row_height / 2
-                ? 0
-                : row_height);
+        rem = Math.abs(ody) % row_height;
+        position = ody - rem + (rem < row_height / 2 ? 0 : row_height);
+        if (ody < 0) {
+            position = Math.abs(ody) - rem + (rem < row_height / 2 ? 0 : row_height);
+            position = -position;
+        }
         return position;
     }
 
@@ -1212,8 +1511,8 @@ export default class Scheduler {
                 this.options.custom_popup_html
             );
         }
-        options.position = this.options.popup_position;
-        this.popup.show(options);
+        const off_set = this.$container.scrollTop + this.$container.offsetHeight;
+        this.popup.show(options, off_set);
     }
 
     hide_popup() {
@@ -1247,6 +1546,7 @@ export default class Scheduler {
      */
     clear() {
         this.$svg.innerHTML = '';
+        this.$column_svg.innerHTML = '';
     }
 }
 

@@ -179,7 +179,7 @@ export default class Bar {
 
     setup_click_event() {
         $.on(this.group, 'mouseover', '.bar-wrapper', (e) => {
-            if (!e.target.classList.contains('bar')) return;
+            // if (!e.target.classList.contains('bar')) return;
             this.show_popup(e.offsetX);
         });
 
@@ -322,9 +322,17 @@ export default class Bar {
 
     compute_index() {
         const bar = this.$bar;
-        const row_height = this.scheduler.options.bar_height + this.scheduler.options.padding;
-        const new_index = (bar.getY() - this.scheduler.options.header_height) / row_height;
-        return Math.ceil(new_index) - 1;
+        const barY = bar.getY();
+        let sum_height = this.scheduler.options.header_height + this.scheduler.options.padding / 2;
+
+        for (let i = 0; i < this.scheduler.rows.length; i++) {
+            const row_start = sum_height;
+            const row = this.scheduler.rows[i];
+            sum_height += row.height;
+
+            if (barY >= row_start && barY <= sum_height)
+                return i;
+        }
     }
 
     compute_progress() {
@@ -349,11 +357,15 @@ export default class Bar {
     }
 
     compute_y() {
-        return (
-            this.scheduler.options.header_height +
-            this.scheduler.options.padding +
-            this.task._index * (this.height + this.scheduler.options.padding)
-        );
+        let bar_y;
+        if (this.scheduler.options.overlap) {
+            bar_y = (this.scheduler.options.padding / 2) +
+                (this.scheduler.options.padding + this.scheduler.options.bar_height) * this.task._sub_level_index +
+                this.scheduler.rows[this.task._index].y;
+        } else {
+            bar_y = ((this.scheduler.options.padding / 2) + this.scheduler.rows[this.task._index].y);
+        }
+        return bar_y;
     }
 
     get_snap_position(dx) {
@@ -411,13 +423,24 @@ export default class Bar {
         const bar = this.$bar,
             label = this.group.querySelector('.bar-label');
 
-        if (label.getBBox().width > bar.getWidth()) {
-            label.classList.add('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+        const handle_width = this.handle_group.querySelector('.handle.left').getWidth();
+
+        const max_width = bar.getWidth() - (handle_width * 2);
+        const text = label.textContent;
+        const text_width = label.getBBox().width;
+        const original_text = this.task.name;
+
+        if (text_width + (handle_width * 2) > max_width) {
+            const reduction_percentage = (text_width - max_width) / text_width;
+            const visible_characters = Math.max(0, Math.round((text.length - 1) * (1 - reduction_percentage)));
+            label.textContent = text.substring(0, visible_characters);
         } else {
-            label.classList.remove('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
+            const expansion_percentage = (max_width - text_width) / original_text.length;
+            const visible_characters = Math.min(original_text.length, Math.round(original_text.length * (1 + expansion_percentage)));
+            label.textContent = original_text.substring(0, visible_characters);
         }
+
+        label.setAttribute('x', bar.getX() + bar.getWidth() / 2);
         label.setAttribute('y', bar.getY() + bar.getHeight() / 2);
     }
 

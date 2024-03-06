@@ -20,15 +20,14 @@ export default class Popup {
         this.pointer = this.parent.querySelector('.pointer');
     }
 
-    show(options) {
+    show(options, off_set_height) {
         if (this.is_showing) return;
         if (!options.target_element) {
             throw new Error('target_element is required to show popup');
         }
-        if (!options.position) {
-            options.position = 'left';
-        }
+
         const target_element = options.target_element;
+        const width = this.compute_width(options.title.length);
 
         if (this.custom_html) {
             let html = this.custom_html(options.task);
@@ -39,7 +38,7 @@ export default class Popup {
             // set data
             this.title.innerHTML = options.title;
             this.subtitle.innerHTML = options.subtitle;
-            this.parent.style.width = this.parent.clientWidth + 'px';
+            this.parent.style.width = width + 'px';
         }
 
         // set position
@@ -49,21 +48,17 @@ export default class Popup {
         } else if (target_element instanceof SVGElement) {
             position_meta = options.target_element.getBBox();
         }
+        const middle_popup = width / 2;
 
-        if (options.position === 'left') {
-            this.parent.style.left =
-                position_meta.x + (position_meta.width + 8) + 'px';
-            this.parent.style.top = position_meta.y + 'px';
-
-            this.pointer.style.transform = 'rotateZ(90deg)';
-            this.pointer.style.left = '-4px';
-            this.pointer.style.top = '2px';
-        }
-        if (options.position === 'bottom') {
-            const middle_popup = this.parent.clientWidth / 2;
+        if (position_meta.y + this.parent.clientHeight + 60 > off_set_height) {
+            this.parent.style.left = (options.x - middle_popup) + 'px';
+            this.parent.style.top = (position_meta.y - this.parent.offsetHeight - 10) + 'px';
+            this.pointer.style.transform = 'rotateZ(0deg)';
+            this.pointer.style.left = middle_popup + 'px';
+            this.pointer.style.top = (this.parent.offsetHeight) + 'px';
+        } else {
             this.parent.style.left = (options.x - middle_popup) + 'px';
             this.parent.style.top = (position_meta.y + position_meta.height + 10) + 'px';
-
             this.pointer.style.transform = 'rotateZ(180deg)';
             this.pointer.style.left = middle_popup + 'px';
             this.pointer.style.top = '-10px';
@@ -72,6 +67,18 @@ export default class Popup {
         // show
         this.parent.style.opacity = 1;
         this.is_showing = true;
+    }
+
+    compute_width(title_length) {
+        let width;
+        const char_width = 6;
+
+        if (title_length < 20) 
+            width = 20 * char_width;
+        else
+            width = title_length * char_width;
+
+        return width;
     }
 
     hide() {
