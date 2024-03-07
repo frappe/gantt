@@ -1,6 +1,6 @@
 {
     "name": "horsa-scheduler",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "A lightweight and interactive svg scheduler library for web applications",
     "main": "src/index.js",
     "scripts": {
@@ -35,7 +35,7 @@
     "homepage": "https://github.com/horsa-way/scheduler",
     "publishConfig": {
         "registry": "https://registry.npmjs.org"
-    },    
+    },
     "devDependencies": {
         "@rollup/plugin-terser": "^0.4.4",
         "jest": "^22.2.1",
@@ -53,7 +53,9 @@
         },
         "github": {
             "release": true,
-            "assets": ["dist/*"]
+            "assets": [
+                "dist/*"
+            ]
         }
     }
 }
