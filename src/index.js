@@ -230,6 +230,7 @@ export default class Scheduler {
         this.setup_options(options);
         this.setup_cells(cells);
         this.setup_tasks(tasks);
+        this.setup_rows();
         this.change_view_mode();
 
         this.$svg.parentElement.scrollLeft = scroll_pos * (this.$svg.parentElement.scrollWidth / scroll_width);
@@ -1383,14 +1384,6 @@ export default class Scheduler {
             scroll_bar.scrollLeft = nextScrollX;
             scroll_bar.scrollTop = nextScrollY;
         }
-    }
-
-    hide_fixed_columns() {
-        this.options.hide_fixed_columns = true;
-    }
-
-    show_fixed_columns() {
-        this.options.hide_fixed_columns = false;
     }
 
     red_border() {
