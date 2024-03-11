@@ -103,7 +103,7 @@ export default class Scheduler {
             container_height: 300,
             header_height: 50,
             column_width: 30,
-            fixed_column_width: 120,
+            // fixed_column_width: 120,
             step: 24,
             date_start: null,
             date_end: null,
@@ -203,6 +203,9 @@ export default class Scheduler {
             if (!task.id) {
                 task.id = generate_id(task);
             }
+            //description
+            if (!task.description)
+                task.description = '';
 
             return task;
         }).filter(t => (
@@ -412,7 +415,7 @@ export default class Scheduler {
             return;
         }
         // make_grid_background
-        const column_grid_width = this.options.fixed_columns.length * this.options.fixed_column_width;
+        const column_grid_width = this.options.fixed_columns.reduce((acc, curr) => acc + curr.width, 0);
         const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
         const grid_height = sum_rows_height;
 
@@ -425,15 +428,13 @@ export default class Scheduler {
             append_to: this.fixed_col_layers.grid
         });
         $.attr(this.$column_svg, {
-            height: grid_height, //+ 30,
+            height: grid_height,
             width: column_grid_width,
         });
 
         // make_grid_rows // praticamente è identica, cambia solo il layer e la width
         const rows_layer = createSVG('g', { append_to: this.fixed_col_layers.grid });
         const lines_layer = createSVG('g', { append_to: this.fixed_col_layers.grid });
-
-        const row_width = this.options.fixed_columns.length * this.options.fixed_column_width;
 
         let i = 0;
 
@@ -444,7 +445,7 @@ export default class Scheduler {
             const rect = createSVG('rect', {
                 x: 0,
                 y: row_y,
-                width: row_width,
+                width: column_grid_width,
                 height: row_height,
                 class: 'grid-row',
                 'data-id': row,
@@ -456,7 +457,7 @@ export default class Scheduler {
             const fixed_line = createSVG('line', {
                 x1: 0,
                 y1: row_y + row_height,
-                x2: row_width,
+                x2: column_grid_width,
                 y2: row_y + row_height,
                 class: 'row-line',
                 append_to: lines_layer,
@@ -468,43 +469,38 @@ export default class Scheduler {
         }
 
         // make_grid_header
-        const header_width = this.options.fixed_columns.length * this.options.fixed_column_width;
         const header_height = this.options.header_height + 10;
         createSVG('rect', {
             x: 0,
             y: 0,
-            width: header_width,
+            width: column_grid_width,
             height: header_height,
             class: 'grid-header',
             append_to: this.fixed_col_layers.header
         });
 
-        // make_grid_ticks
-        let tick_x = this.options.fixed_column_width;
-        let tick_y = 0;
-        let tick_height = sum_rows_height;
-        for (let _ of this.options.fixed_columns) {
-            createSVG('path', {
-                d: `M ${tick_x} ${tick_y} v ${tick_height}`,
-                class: 'tick thick',
-                append_to: this.fixed_col_layers.grid,
-            });
-
-            tick_x += this.options.fixed_column_width;
-        }
-
         // make_dates -> header
         const pos_y = this.options.header_height;
-        let pos_x = this.options.fixed_column_width / 2;
+        let pos_x = 0;
         for (let column of this.options.fixed_columns) {
+            pos_x += column.width / 2;
             createSVG('text', {
                 x: pos_x,
                 y: pos_y,
-                innerHTML: column,
+                innerHTML: column.header,
                 class: 'lower-text',
                 append_to: this.fixed_col_layers.header
             });
-            pos_x += (pos_x * 2);
+            pos_x += column.width / 2;
+
+            // make_grid_ticks
+            let tick_y = 0;
+            let tick_height = sum_rows_height;
+            createSVG('path', {
+                d: `M ${pos_x} ${tick_y} v ${tick_height}`,
+                class: 'tick thick',
+                append_to: this.fixed_col_layers.grid,
+            });
         }
 
         // make_bars
@@ -515,29 +511,29 @@ export default class Scheduler {
         for (let r = 0; r < this.options.rows.length; r++) {
             const row_height = this.rows[r].height;
             const row_y = this.rows[r].y;
-
+            let pos_x = 0;
             for (let c = 0; c < this.options.fixed_columns.length; c++) {
                 const cell_wrapper = createSVG('g', {
                     class: 'cell-wrapper',
                     'data-row-id': this.options.rows[r],
-                    'data-col-id': this.options.fixed_columns[c],
+                    'data-col-id': this.options.fixed_columns[c].id,
                     append_to: this.fixed_col_layers.cell,
                 });
 
                 const fixed_cell = createSVG('rect', {
-                    x: c * this.options.fixed_column_width,
+                    x: pos_x,
                     y: row_y,
-                    width: this.options.fixed_column_width,
+                    width: this.options.fixed_columns[c].width,
                     height: row_height,
                     append_to: cell_wrapper,
                 });
                 this.rows[r].cell_wrapper[c].fixed_cell = fixed_cell;
 
 
-                const cell = this.cells.find(t => t.row === this.options.rows[r] && t.column === this.options.fixed_columns[c]);
+                const cell = this.cells.find(t => t.row === this.options.rows[r] && t.column === this.options.fixed_columns[c].id);
                 if (cell) {
                     const text = createSVG('text', {
-                        x: this.options.fixed_column_width / 2 + c * this.options.fixed_column_width,
+                        x: (this.options.fixed_columns[c].width / 2) + pos_x,
                         y: 24 + row_y,
                         innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
                         class: 'lower-text',
@@ -545,6 +541,7 @@ export default class Scheduler {
                     });
                     this.rows[r].cell_wrapper[c].text = text;
                 }
+                pos_x += this.options.fixed_columns[c].width;
             }
         }
     }
