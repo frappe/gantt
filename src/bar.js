@@ -223,6 +223,7 @@ export default class Bar {
         this.scheduler.show_popup({
             target_element: this.$bar,
             title: this.task.name,
+            description: this.task.description,
             subtitle: subtitle,
             task: this.task,
             x: x,

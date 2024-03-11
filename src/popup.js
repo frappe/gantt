@@ -9,6 +9,7 @@ export default class Popup {
     make() {
         this.parent.innerHTML = `
             <div class="title"></div>
+            <div class="description"></div>
             <div class="subtitle"></div>
             <div class="pointer"></div>
         `;
@@ -16,6 +17,7 @@ export default class Popup {
         this.hide();
 
         this.title = this.parent.querySelector('.title');
+        this.description =  this.parent.querySelector('.description');
         this.subtitle = this.parent.querySelector('.subtitle');
         this.pointer = this.parent.querySelector('.pointer');
     }
@@ -37,6 +39,7 @@ export default class Popup {
         } else {
             // set data
             this.title.innerHTML = options.title;
+            this.description.innerHTML = options.description;
             this.subtitle.innerHTML = options.subtitle;
             this.parent.style.width = width + 'px';
         }
