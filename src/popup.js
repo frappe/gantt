@@ -17,7 +17,7 @@ export default class Popup {
         this.hide();
 
         this.title = this.parent.querySelector('.title');
-        this.description =  this.parent.querySelector('.description');
+        this.description = this.parent.querySelector('.description');
         this.subtitle = this.parent.querySelector('.subtitle');
         this.pointer = this.parent.querySelector('.pointer');
     }
@@ -40,6 +40,10 @@ export default class Popup {
             // set data
             this.title.innerHTML = options.title;
             this.description.innerHTML = options.description;
+            if (options.description === '')
+                this.description.classList.remove('description');
+            else
+                this.description.classList.add('description');
             this.subtitle.innerHTML = options.subtitle;
             this.parent.style.width = width + 'px';
         }
@@ -76,7 +80,7 @@ export default class Popup {
         let width;
         const char_width = 6;
 
-        if (title_length < 20) 
+        if (title_length < 20)
             width = 20 * char_width;
         else
             width = title_length * char_width;

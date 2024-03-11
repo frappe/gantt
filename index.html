@@ -100,16 +100,16 @@
         <div class="scheduler-target"></div>
     </div>
     <script>
-        let container_height = 0;
-        let fixed_column_width = 0;
+        // let container_height = 0;
+        // let fixed_column_width = 0;
 
-        if (window.innerWidth <= 600) { //da capire se rendere adattabile anche con tablet a 768
-            container_height = window.innerHeight * 0.75;
-            fixed_column_width = 60;
-        } else {
-            container_height = 300;
-            fixed_column_width = 120;
-        }
+        // if (window.innerWidth <= 600) { //da capire se rendere adattabile anche con tablet a 768
+        //     container_height = window.innerHeight * 0.75;
+        //     fixed_column_width = 60;
+        // } else {
+        //     container_height = 300;
+        //     fixed_column_width = 120;
+        // }
 
         var tasks = [
             {
@@ -1093,8 +1093,8 @@
             resize_right: true,
             drag_drop_x: true,
             drag_drop_y: true,
-            container_height,
-            fixed_column_width,
+            // container_height,
+            // fixed_column_width,
             overlap: false,
             moving_scroll_bar: true,
             date_start: '2018-09-15',
