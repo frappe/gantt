@@ -179,6 +179,8 @@ export default class Bar {
 
     setup_click_event() {
         $.on(this.group, 'mouseover', '.bar-wrapper', (e) => {
+            if (this.scheduler.bar_being_dragged)
+                return;
             // if (!e.target.classList.contains('bar')) return;
             this.show_popup(e.offsetX);
         });
