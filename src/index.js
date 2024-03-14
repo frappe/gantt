@@ -137,6 +137,9 @@ export default class Scheduler {
 
     setup_cells(cells) {
         this.cells = cells.filter(t => t.row && t.column);
+
+        if (!this.cells.style)
+            this.cells.style = [];
     }
 
     setup_tasks(tasks) {
@@ -206,6 +209,9 @@ export default class Scheduler {
             //description
             if (!task.description)
                 task.description = '';
+
+            if (!task.style)
+                task.style = [];
 
             return task;
         }).filter(t => (
@@ -508,40 +514,42 @@ export default class Scheduler {
     }
 
     make_cells() {
-        for (let r = 0; r < this.options.rows.length; r++) {
-            const row_height = this.rows[r].height;
-            const row_y = this.rows[r].y;
+        for (let row of this.rows) {
+            const row_height = row.height;
+            const row_y = row.y;
             let pos_x = 0;
-            for (let c = 0; c < this.options.fixed_columns.length; c++) {
+            let c = 0;
+            for (let column of this.options.fixed_columns) {
                 const cell_wrapper = createSVG('g', {
                     class: 'cell-wrapper',
-                    'data-row-id': this.options.rows[r],
-                    'data-col-id': this.options.fixed_columns[c].id,
+                    'data-row-id': row.id,
+                    'data-col-id': column.id,
                     append_to: this.fixed_col_layers.cell,
                 });
 
                 const fixed_cell = createSVG('rect', {
                     x: pos_x,
                     y: row_y,
-                    width: this.options.fixed_columns[c].width,
+                    width: column.width,
                     height: row_height,
                     append_to: cell_wrapper,
                 });
-                this.rows[r].cell_wrapper[c].fixed_cell = fixed_cell;
+                row.cell_wrapper[c].fixed_cell = fixed_cell;
 
 
-                const cell = this.cells.find(t => t.row === this.options.rows[r] && t.column === this.options.fixed_columns[c].id);
+                const cell = this.cells.find(t => t.row === row.id && t.column === column.id);
                 if (cell) {
                     const text = createSVG('text', {
-                        x: (this.options.fixed_columns[c].width / 2) + pos_x,
+                        x: (column.width / 2) + pos_x,
                         y: 24 + row_y,
                         innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
                         class: 'lower-text',
                         append_to: cell_wrapper
                     });
-                    this.rows[r].cell_wrapper[c].text = text;
+                    row.cell_wrapper[c].text = text;
                 }
-                pos_x += this.options.fixed_columns[c].width;
+                pos_x += column.width;
+                c++;
             }
         }
     }
@@ -1152,7 +1160,6 @@ export default class Scheduler {
             $.attr($handle, 'points', bar.get_progress_polygon_points());
             $bar_progress.finaldx = dx;
         });
-        // aggiornato altrimenti con qualsiasi evento avrebbe mostrato il console log del progresso
         $.on(this.$svg, 'mouseup', () => {
             if (is_resizing) {
                 if (!($bar_progress && $bar_progress.finaldx)) return;
@@ -1283,16 +1290,19 @@ export default class Scheduler {
         $.attr(grid_background, 'height', max_height);
         //fixed background
         this.$column_svg.setAttribute('height', max_height);
-        const fixed_background = this.$column_svg.querySelector('g.grid > rect');
-        $.attr(fixed_background, 'height', max_height);
-        //fixed ticks
-        const fixed_ticks = Array.from(this.$column_svg.querySelectorAll('g.grid > path'));
-        fixed_ticks.forEach(tick => {
-            const curr_d = tick.getAttribute('d');
-            const new_d = curr_d.replace(/v\s*[^v]*$/, `v ${max_height}`);
+        if (parseInt(this.$column_svg.getAttribute('width')) !== 0) {
+            const fixed_background = this.$column_svg.querySelector('g.grid > rect');
+            $.attr(fixed_background, 'height', max_height);
 
-            $.attr(tick, 'd', new_d);
-        });
+            //fixed ticks
+            const fixed_ticks = Array.from(this.$column_svg.querySelectorAll('g.grid > path'));
+            fixed_ticks.forEach(tick => {
+                const curr_d = tick.getAttribute('d');
+                const new_d = curr_d.replace(/v\s*[^v]*$/, `v ${max_height}`);
+
+                $.attr(tick, 'd', new_d);
+            });
+        }
         //ticks
         const ticks = Array.from(this.$svg.querySelectorAll('g.grid > path'));
         ticks.forEach(tick => {
