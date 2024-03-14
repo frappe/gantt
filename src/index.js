@@ -137,9 +137,6 @@ export default class Scheduler {
 
     setup_cells(cells) {
         this.cells = cells.filter(t => t.row && t.column);
-
-        if (!this.cells.style)
-            this.cells.style = [];
     }
 
     setup_tasks(tasks) {
@@ -209,9 +206,6 @@ export default class Scheduler {
             //description
             if (!task.description)
                 task.description = '';
-
-            if (!task.style)
-                task.style = [];
 
             return task;
         }).filter(t => (
