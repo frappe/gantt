@@ -6,67 +6,6 @@
     <meta name="viewport" content="width=device-width">
     <title>Simple Scheduler</title>
     <style>
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgb(160, 123, 234);
-            -webkit-transition: .4s;
-            transition: .4s;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            -webkit-transition: .4s;
-            transition: .4s;
-        }
-
-        input:checked+.slider {
-            background-color: #2196F3;
-        }
-
-        input:focus+.slider {
-            box-shadow: 0 0 1px #2196F3;
-        }
-
-        input:checked+.slider:before {
-            -webkit-transform: translateX(26px);
-            -ms-transform: translateX(26px);
-            transform: translateX(26px);
-        }
-
-        /* Rounded sliders */
-        .slider.round {
-            border-radius: 34px;
-        }
-
-        .slider.round:before {
-            border-radius: 50%;
-        }
-
-        /* Fine toggle*/
         body {
             font-family: sans-serif;
             background: #ccc;
@@ -85,6 +24,67 @@
         .heading {
             text-align: center;
         }
+
+        /* Toggle */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 47px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #f32121;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: rgb(160, 123, 234);
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 20px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
     </style>
     <link rel="stylesheet" href="dist/horsa-scheduler.css" />
     <script src="dist/horsa-scheduler.js"></script>
@@ -93,14 +93,33 @@
 <body>
     <div class="container">
         <h2 class="heading">Interactive Scheduler Chart entirely made in SVG!</h2>
-        <label class="switch">
-            <input id="toggle" type="checkbox" onclick="bind_toggle_event()">
-            <span class="slider round"></span>
-        </label>
+
+        <div style="margin-bottom: 15px">
+            <label>Nascondi colonne fisse</label>
+            <label class="switch">
+                <input id="toggle_column" type="checkbox" onclick="hide_column_event()">
+                <span class="slider round"></span>
+            </label>
+
+            <label>Attiva sovrapposizione</label>
+            <label class="switch">
+                <input id="toggle_overlap" type="checkbox" onclick="overlap_event()">
+                <span class="slider round"></span>
+            </label>
+
+            <label>Cambia visualizzazione</label>
+            <select name="view" id="view-select" onchange="view_change_event()">
+                <option value="Day">Giorno</option>
+                <option value="Hour">Ore</option>
+                <option value="Week">Settimana</option>
+                <option value="Month">Mese</option>
+                <option value="Year">Anno</option>
+            </select>
+        </div>
+
         <div class="scheduler-target"></div>
     </div>
     <script>
-
         var tasks = [
             {
                 start: "2018-10-01",
@@ -1091,14 +1110,31 @@
         });
         console.log(scheduler_chart);
 
-        function bind_toggle_event() {
-            const toggle = document.getElementById('toggle');
+        function hide_column_event() {
+            const toggle = document.getElementById('toggle_column');
 
             if (toggle.checked) {
-                this.scheduler_chart.hide_fixed_columns();
+                this.scheduler_chart.options.hide_fixed_columns = true;
             } else {
-                this.scheduler_chart.show_fixed_columns();
+                this.scheduler_chart.options.hide_fixed_columns = false;
             }
+            this.scheduler_chart.refresh();
+        }
+
+        function overlap_event() {
+            const toggle = document.getElementById('toggle_overlap');
+
+            if (toggle.checked) {
+                this.scheduler_chart.options.overlap = true;
+            } else {
+                this.scheduler_chart.options.overlap = false;
+            }
+            this.scheduler_chart.refresh();
+        }
+
+        function view_change_event() {
+            const select = document.getElementById('view-select');
+            this.scheduler_chart.options.view_mode = select.value;
             this.scheduler_chart.refresh();
         }
     </script>
