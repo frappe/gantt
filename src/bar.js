@@ -275,7 +275,10 @@ export default class Bar {
         if (Number(this.task._end) !== Number(new_end_date)) {
             changed = true;
             this.task._end = new_end_date;
-            this.task.end = date_utils.format(date_utils.add(new_end_date, -1, 'second'), 'YYYY-MM-DD');
+            if (new_end_date.getHours() === 0)
+                this.task.end = date_utils.format(date_utils.add(new_end_date, -1, 'second'), 'YYYY-MM-DD');
+            else
+            this.task.end = new_end_date;
         }
 
         const new_index = this.compute_index();
