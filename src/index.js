@@ -253,7 +253,7 @@ export default class Scheduler {
             }
 
             for (let i = 0; i < this.options.fixed_columns.length; i++)
-                row.cell_wrapper[i] = [];
+                row.cell_wrapper[i] = {};
 
             row.y += sum_y;
             this.rows.push(row);
