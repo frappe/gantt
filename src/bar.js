@@ -269,16 +269,16 @@ export default class Bar {
         if (Number(this.task._start) !== Number(new_start_date)) {
             changed = true;
             this.task._start = new_start_date;
-            this.task.start = date_utils.format(new_start_date, 'YYYY-MM-DD');
+            this.task.start = new_start_date;
         }
 
         if (Number(this.task._end) !== Number(new_end_date)) {
             changed = true;
             this.task._end = new_end_date;
             if (new_end_date.getHours() === 0)
-                this.task.end = date_utils.format(date_utils.add(new_end_date, -1, 'second'), 'YYYY-MM-DD');
+                this.task.end = date_utils.add(new_end_date, -1, 'second');
             else
-            this.task.end = new_end_date;
+                this.task.end = new_end_date;
         }
 
         const new_index = this.compute_index();

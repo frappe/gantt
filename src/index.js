@@ -742,6 +742,8 @@ export default class Scheduler {
             last_date = last_date_info.date;
         } else {
             last_date = date_utils.add(date, 1, 'year');
+            last_date = date_utils.add(last_date, 1, 'month');
+            last_date = date_utils.add(last_date, 1, 'day');
         }
         const date_text = {
             Hour_lower: date_utils.format(
@@ -822,10 +824,10 @@ export default class Scheduler {
         const x_pos = {
             Hour_lower: 0,
             Hour_upper: column_width * 24 / 2,
-            'Quarter Day_lower': (column_width * 4) / 2,
-            'Quarter Day_upper': 0,
-            'Half Day_lower': (column_width * 2) / 2,
-            'Half Day_upper': 0,
+            'Quarter Day_lower': 0,
+            'Quarter Day_upper': column_width + (column_width / 2),
+            'Half Day_lower': 0,
+            'Half Day_upper': column_width,
             Day_lower: column_width / 2,
             Day_upper: (column_width * 30) / 2,
             Week_lower: 0,
@@ -1197,23 +1199,27 @@ export default class Scheduler {
         return row_height;
     }
 
-    compute_row_y(row_index) {
+    compute_row_y(row_index, fixed_column_width) {
         let sum_y = this.rows[row_index].y;
         for (let i = row_index; i < this.rows.length; i++) {
             $.attr(this.rows[i].rect, 'y', sum_y);
-            $.attr(this.rows[i].fixed_rect, 'y', sum_y);
-            //cell
-            for (let c = 0; c < this.options.fixed_columns.length; c++) {
-                $.attr(this.rows[i].cell_wrapper[c].fixed_cell, 'y', sum_y);
-                if (this.rows[i].cell_wrapper[c].text)
-                    $.attr(this.rows[i].cell_wrapper[c].text, 'y', sum_y + 24);
+            if (fixed_column_width !== 0) {
+                $.attr(this.rows[i].fixed_rect, 'y', sum_y);
+                //cell
+                for (let c = 0; c < this.options.fixed_columns.length; c++) {
+                    $.attr(this.rows[i].cell_wrapper[c].fixed_cell, 'y', sum_y);
+                    if (this.rows[i].cell_wrapper[c].text)
+                        $.attr(this.rows[i].cell_wrapper[c].text, 'y', sum_y + 24);
+                }
             }
 
             this.rows[i].y = sum_y;
             sum_y += this.rows[i].height;
             //line
-            $.attr(this.rows[i].fixed_line, 'y1', sum_y);
-            $.attr(this.rows[i].fixed_line, 'y2', sum_y);
+            if (fixed_column_width !== 0) {
+                $.attr(this.rows[i].fixed_line, 'y1', sum_y);
+                $.attr(this.rows[i].fixed_line, 'y2', sum_y);
+            }
             $.attr(this.rows[i].line, 'y1', sum_y);
             $.attr(this.rows[i].line, 'y2', sum_y);
         }
@@ -1222,6 +1228,7 @@ export default class Scheduler {
     overlap(start_row_index, end_row_index) {
         let render = false;
         let update_from_this_row_index = end_row_index;
+        const fixed_column_width = parseInt(this.$column_svg.getAttribute('width'));
 
         const end_row = this.rows[end_row_index];
         const new_end_sub_level = this.compute_row_sub_level(end_row.id);
@@ -1230,11 +1237,12 @@ export default class Scheduler {
             end_row.height = this.compute_row_height(end_row.sub_level.length);
 
             $.attr(end_row.rect, 'height', end_row.height);
-            $.attr(end_row.fixed_rect, 'height', end_row.height);
-            for (let i = 0; i < this.options.fixed_columns.length; i++) {
-                $.attr(end_row.cell_wrapper[i].fixed_cell, 'height', end_row.height);
+            if (fixed_column_width !== 0) {
+                $.attr(end_row.fixed_rect, 'height', end_row.height);
+                for (let i = 0; i < this.options.fixed_columns.length; i++) {
+                    $.attr(end_row.cell_wrapper[i].fixed_cell, 'height', end_row.height);
+                }
             }
-
             render = true;
         } else {
             const bars_in_same_row = this.bars.filter(bar =>
@@ -1254,11 +1262,12 @@ export default class Scheduler {
                 start_row.height = this.compute_row_height(start_row.sub_level.length);
 
                 $.attr(start_row.rect, 'height', start_row.height);
-                $.attr(start_row.fixed_rect, 'height', start_row.height);
-                for (let i = 0; i < this.options.fixed_columns.length; i++) {
-                    $.attr(start_row.cell_wrapper[i].fixed_cell, 'height', start_row.height);
+                if (fixed_column_width !== 0) {
+                    $.attr(start_row.fixed_rect, 'height', start_row.height);
+                    for (let i = 0; i < this.options.fixed_columns.length; i++) {
+                        $.attr(start_row.cell_wrapper[i].fixed_cell, 'height', start_row.height);
+                    }
                 }
-
                 render = true;
                 if (start_row_index < end_row_index)
                     update_from_this_row_index = start_row_index;
@@ -1267,15 +1276,14 @@ export default class Scheduler {
 
         if (render) {
             const scrollTop = this.$container.scrollTop;
-            this.update_from_row(update_from_this_row_index);
+            this.compute_row_y(update_from_this_row_index, fixed_column_width);
+            this.update_from_row(update_from_this_row_index, fixed_column_width);
             if (scrollTop > (this.$svg.getAttribute('height') - this.$container.clientHeight))
                 this.$container.scrollTop = scrollTop - (this.options.bar_height * 2);
         }
     }
 
-    update_from_row(row_index) {
-
-        this.compute_row_y(row_index);
+    update_from_row(row_index, fixed_column_width) {
 
         const max_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
 
@@ -1283,9 +1291,10 @@ export default class Scheduler {
         this.$svg.setAttribute('height', max_height);
         const grid_background = this.$svg.querySelector('g.grid > rect');
         $.attr(grid_background, 'height', max_height);
-        //fixed background
-        this.$column_svg.setAttribute('height', max_height);
-        if (parseInt(this.$column_svg.getAttribute('width')) !== 0) {
+
+        if (fixed_column_width !== 0) {
+            //fixed background
+            this.$column_svg.setAttribute('height', max_height);
             const fixed_background = this.$column_svg.querySelector('g.grid > rect');
             $.attr(fixed_background, 'height', max_height);
 

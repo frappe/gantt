@@ -57,12 +57,12 @@ export default class Popup {
         }
         const middle_popup = width / 2;
 
-        if (position_meta.y + this.parent.clientHeight + 60 > off_set_height) {
+        if (position_meta.y + this.parent.clientHeight + 50 > off_set_height) {
             this.parent.style.left = (options.x - middle_popup) + 'px';
             this.parent.style.top = (position_meta.y - this.parent.offsetHeight - 10) + 'px';
             this.pointer.style.transform = 'rotateZ(0deg)';
             this.pointer.style.left = middle_popup + 'px';
-            this.pointer.style.top = (this.parent.offsetHeight) + 'px';
+            this.pointer.style.top = (this.parent.offsetHeight + 0.5) + 'px';
         } else {
             this.parent.style.left = (options.x - middle_popup) + 'px';
             this.parent.style.top = (position_meta.y + position_meta.height + 10) + 'px';
