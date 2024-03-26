@@ -94,6 +94,18 @@ export default class Gantt {
     setup_tasks(tasks) {
         // prepare tasks
         this.tasks = tasks.map((task, i) => {
+            // dependencies
+            if (typeof task.dependencies === 'string' || !task.dependencies) {
+                let deps = [];
+                if (task.dependencies) {
+                    deps = task.dependencies
+                        .split(',')
+                        .map((d) => d.trim())
+                        .filter((d) => d);
+                }
+                task.dependencies = deps;
+            }
+
             // convert to Date objects
             task._start = date_utils.parse(task.start);
             task._end = date_utils.parse(task.end);
@@ -133,18 +145,6 @@ export default class Gantt {
                 task.invalid = true;
             }
 
-            // dependencies
-            if (typeof task.dependencies === 'string' || !task.dependencies) {
-                let deps = [];
-                if (task.dependencies) {
-                    deps = task.dependencies
-                        .split(',')
-                        .map((d) => d.trim())
-                        .filter((d) => d);
-                }
-                task.dependencies = deps;
-            }
-
             // uids
             if (!task.id) {
                 task.id = generate_id(task);
@@ -152,6 +152,8 @@ export default class Gantt {
 
             return task;
         });
+
+        get_start_date_based_on_dependencies(tasks);
 
         this.setup_dependencies();
     }
@@ -974,4 +976,27 @@ Gantt.VIEW_MODE = VIEW_MODE;
 
 function generate_id(task) {
     return task.name + '_' + Math.random().toString(36).slice(2, 12);
+}
+
+function get_start_date_based_on_dependencies(tasks) {
+    tasks.map((task, i) => {
+        if (task.dependencies.length <= 0) return true;
+
+        if (task.start !== undefined) return true;
+
+        task.dependencies.forEach((dependency_id) => {
+            let dependency = tasks.find(
+                (tmpTask) => tmpTask.id === dependency_id
+            );
+
+            if (dependency === undefined) return true;
+
+            if (task.start === undefined) {
+                task._start = dependency._end;
+            } else if (task._start < dependency._end) {
+                task._start = dependency._end;
+            }
+        });
+        tasks[i] = task;
+    });
 }

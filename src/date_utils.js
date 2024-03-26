@@ -61,13 +61,13 @@ export default {
 
     format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
         const dateTimeFormat = new Intl.DateTimeFormat(lang, {
-            month: 'long'
+            month: 'long',
         });
         const month_name = dateTimeFormat.format(date);
         const month_name_capitalized =
             month_name.charAt(0).toUpperCase() + month_name.slice(1);
 
-        const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
+        const values = this.get_date_values(date).map((d) => padStart(d, 2, 0));
         const format_map = {
             YYYY: values[0],
             MM: padStart(+values[1] + 1, 2, 0),
