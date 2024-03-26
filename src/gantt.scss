@@ -40,6 +40,21 @@ $handle-color: #ddd !default;
 		opacity: 0.5;
 	}
 
+	.week-highlight {
+		fill: $light-yellow;
+		opacity: 0.5;
+	}
+
+	.month-highlight {
+		fill: $light-yellow;
+		opacity: 0.5;
+	}
+
+	.year-highlight {
+		fill: $light-yellow;
+		opacity: 0.5;
+	}
+
 	.arrow {
 		fill: none;
 		stroke: $text-muted;
