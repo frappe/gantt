@@ -412,6 +412,7 @@ export default class Gantt {
         }
     }
 
+    //compute the horizontal x distance
     computeGridHighlightDimensions(view_mode) {
         let xDist = 0;
 
@@ -424,7 +425,7 @@ export default class Gantt {
         for (let date of this.dates) {
             const todayDate = new Date();
             const startDate = new Date(date);
-            let endDate = new Date(date);
+            const endDate = new Date(date);
             switch (view_mode) {
                 case VIEW_MODE.WEEK:
                     endDate.setDate(date.getDate() + 7);
@@ -436,7 +437,6 @@ export default class Gantt {
                     endDate.setFullYear(date.getFullYear() + 1);
                     break;
             }
-
             if (todayDate >= startDate && todayDate <= endDate) {
                 break;
             } else {
@@ -447,13 +447,11 @@ export default class Gantt {
     }
 
     make_grid_highlights() {
-        // highlight today's | week's date
+        // highlight today's | week's | month's | year's
         if (this.view_is(VIEW_MODE.DAY) || this.view_is(VIEW_MODE.WEEK) || this.view_is(VIEW_MODE.MONTH) || this.view_is(VIEW_MODE.YEAR)) {
 
-            let x = this.computeGridHighlightDimensions(this.options.view_mode);
-
+            const x = this.computeGridHighlightDimensions(this.options.view_mode);
             const y = 0;
-
             const width = this.options.column_width;
             const height =
                 (this.options.bar_height + this.options.padding) *
