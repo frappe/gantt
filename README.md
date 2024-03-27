@@ -62,6 +62,12 @@ var gantt = new Gantt("#gantt", tasks, {
 });
 ```
 
+You can add `dark` class to the container element to apply dark theme.
+
+```html
+<div class="gantt-target dark"></div>
+```
+
 ### Contributing
 If you want to contribute enhancements or fixes:
 
