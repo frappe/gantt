@@ -7,8 +7,9 @@ $light-yellow: #fcf8e3 !default;
 $text-muted: #666 !default;
 $text-light: #555 !default;
 $text-color: #333 !default;
-$blue: #a3a3ff !default;
+$blue: #acacfa !default;
 $handle-color: #ddd !default;
+$light-blue: #c4c4e9 !default;
 
 .gantt {
 	.grid-background {
@@ -70,6 +71,9 @@ $handle-color: #ddd !default;
 	}
 	.bar-progress {
 		fill: $blue;
+	}
+	.bar-expected-progress {
+		fill: $light-blue;
 	}
 	.bar-invalid {
 		fill: transparent;

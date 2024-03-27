@@ -23,12 +23,10 @@ export default class Bar {
     prepare_values() {
         this.invalid = this.task.invalid;
         this.height = this.gantt.options.bar_height;
-        this.x = this.compute_x();
-        this.y = this.compute_y();
+        this.compute_x();
+        this.compute_y();
+        this.compute_duration();
         this.corner_radius = this.gantt.options.bar_corner_radius;
-        this.duration =
-            date_utils.diff(this.task._end, this.task._start, 'hour') /
-            this.gantt.options.step;
         this.width = this.gantt.options.column_width * this.duration;
         this.progress_width =
             this.gantt.options.column_width *
@@ -66,8 +64,20 @@ export default class Bar {
         };
     }
 
+    prepare_expected_progress_values() {
+        this.compute_expected_progress();
+        this.expected_progress_width =
+            this.gantt.options.column_width *
+                this.duration *
+                (this.expected_progress / 100) || 0;
+    }
+
     draw() {
         this.draw_bar();
+        if (this.gantt.options.show_expected_progress) {
+            this.prepare_expected_progress_values();
+            this.draw_expected_progress_bar();
+        }
         this.draw_progress_bar();
         this.draw_label();
         this.draw_resize_handles();
@@ -90,6 +100,22 @@ export default class Bar {
         if (this.invalid) {
             this.$bar.classList.add('bar-invalid');
         }
+    }
+
+    draw_expected_progress_bar() {
+        if (this.invalid) return;
+        this.$expected_bar_progress = createSVG('rect', {
+            x: this.x,
+            y: this.y,
+            width: this.expected_progress_width,
+            height: this.height,
+            rx: this.corner_radius,
+            ry: this.corner_radius,
+            class: 'bar-expected-progress',
+            append_to: this.bar_group,
+        });
+
+        animateSVG(this.$expected_bar_progress, 'width', 0, this.expected_progress_width);
     }
 
     draw_progress_bar() {
@@ -241,6 +267,11 @@ export default class Bar {
         }
         this.update_label_position();
         this.update_handle_position();
+        if (this.gantt.options.show_expected_progress){
+            this.date_changed();
+            this.compute_duration();
+            this.update_expected_progressbar_position();
+        }
         this.update_progressbar_position();
         this.update_arrow_position();
     }
@@ -303,6 +334,11 @@ export default class Bar {
         return parseInt(progress, 10);
     }
 
+    compute_expected_progress() {
+        this.expected_progress = date_utils.diff(date_utils.today(), this.task._start, 'hour') / this.gantt.options.step;
+        this.expected_progress = ((this.expected_progress < this.duration) ? this.expected_progress : this.duration) * 100 / this.duration;
+    }
+
     compute_x() {
         const { step, column_width } = this.gantt.options;
         const task_start = this.task._start;
@@ -315,15 +351,20 @@ export default class Bar {
             const diff = date_utils.diff(task_start, gantt_start, 'day');
             x = (diff * column_width) / 30;
         }
-        return x;
+        this.x = x;
     }
 
     compute_y() {
-        return (
+        this.y = (
             this.gantt.options.header_height +
             this.gantt.options.padding +
             this.task._index * (this.height + this.gantt.options.padding)
         );
+    }
+
+    compute_duration() {
+        this.duration = date_utils.diff(this.task._end, this.task._start, 'hour') /
+            this.gantt.options.step;
     }
 
     get_snap_position(dx) {
@@ -365,6 +406,16 @@ export default class Bar {
             element.setAttribute(attr, value);
         }
         return element;
+    }
+
+    update_expected_progressbar_position() {
+        if (this.invalid) return;
+        this.$expected_bar_progress.setAttribute('x', this.$bar.getX());
+        this.compute_expected_progress();
+        this.$expected_bar_progress.setAttribute(
+            'width',
+            this.gantt.options.column_width * this.duration * (this.expected_progress / 100) || 0
+        );
     }
 
     update_progressbar_position() {
