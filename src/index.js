@@ -412,15 +412,46 @@ export default class Gantt {
         }
     }
 
-    make_grid_highlights() {
-        // highlight today's date
-        if (this.view_is(VIEW_MODE.DAY)) {
-            const x =
-                (date_utils.diff(date_utils.today(), this.gantt_start, 'hour') /
-                    this.options.step) *
-                this.options.column_width;
-            const y = 0;
+    //compute the horizontal x distance
+    computeGridHighlightDimensions(view_mode) {
+        let xDist = 0;
 
+        if (this.view_is(VIEW_MODE.DAY)) {
+            return (date_utils.diff(date_utils.today(), this.gantt_start, 'hour') /
+                this.options.step) *
+                this.options.column_width;
+        }
+
+        for (let date of this.dates) {
+            const todayDate = new Date();
+            const startDate = new Date(date);
+            const endDate = new Date(date);
+            switch (view_mode) {
+                case VIEW_MODE.WEEK:
+                    endDate.setDate(date.getDate() + 7);
+                    break;
+                case VIEW_MODE.MONTH:
+                    endDate.setMonth(date.getMonth() + 1);
+                    break;
+                case VIEW_MODE.YEAR:
+                    endDate.setFullYear(date.getFullYear() + 1);
+                    break;
+            }
+            if (todayDate >= startDate && todayDate <= endDate) {
+                break;
+            } else {
+                xDist += this.options.column_width;
+            }
+        }
+        return xDist;
+    }
+
+    make_grid_highlights() {
+        // highlight today's | week's | month's | year's
+        if (this.view_is(VIEW_MODE.DAY) || this.view_is(VIEW_MODE.WEEK) || this.view_is(VIEW_MODE.MONTH) || this.view_is(VIEW_MODE.YEAR)) {
+
+            const x = this.computeGridHighlightDimensions(this.options.view_mode);
+            const y = 0;
             const width = this.options.column_width;
             const height =
                 (this.options.bar_height + this.options.padding) *
@@ -428,12 +459,27 @@ export default class Gantt {
                 this.options.header_height +
                 this.options.padding / 2;
 
+            let className = '';
+            switch (this.options.view_mode) {
+                case VIEW_MODE.DAY:
+                    className = 'today-highlight'
+                    break;
+                case VIEW_MODE.WEEK:
+                    className = 'week-highlight'
+                    break;
+                case VIEW_MODE.MONTH:
+                    className = 'month-highlight'
+                    break;
+                case VIEW_MODE.YEAR:
+                    className = 'year-highlight'
+                    break;
+            }
             createSVG('rect', {
                 x,
                 y,
                 width,
                 height,
-                class: 'today-highlight',
+                class: className,
                 append_to: this.layers.grid,
             });
         }

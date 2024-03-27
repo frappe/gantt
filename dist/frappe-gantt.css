@@ -107,7 +107,10 @@
   user-select: none;
 }
 .gantt .bar-progress {
-  fill: #a3a3ff;
+  fill: #acacfa;
+}
+.gantt .bar-expected-progress {
+  fill: #c4c4e9;
 }
 .gantt .bar-invalid {
   fill: transparent;
@@ -144,7 +147,7 @@
   fill: #a9b5c1;
 }
 .gantt .bar-wrapper:hover .bar-progress {
-  fill: #8a8aff;
+  fill: #9494f9;
 }
 .gantt .bar-wrapper:hover .handle {
   visibility: visible;
@@ -154,7 +157,7 @@
   fill: #a9b5c1;
 }
 .gantt .bar-wrapper.active .bar-progress {
-  fill: #8a8aff;
+  fill: #9494f9;
 }
 .gantt .lower-text, .gantt .upper-text {
   font-size: 12px;
@@ -185,7 +188,7 @@
   border-radius: 3px;
 }
 .gantt-container .popup-wrapper .title {
-  border-bottom: 3px solid #a3a3ff;
+  border-bottom: 3px solid #acacfa;
   padding: 10px;
 }
 .gantt-container .popup-wrapper .subtitle {
