@@ -249,12 +249,15 @@ export default class Bar {
                 return;
             }
             this.update_attr(bar, 'x', x);
+            this.x = x;
         }
         if (width && width >= this.handle_width * 2 + 3) {
             this.update_attr(bar, 'width', width);
+            this.width = width;
         }
         if (y) {
             this.update_attr(bar, 'y', y);
+            this.y = y;
         }
         this.update_label_position();
         this.update_progressbar_position();

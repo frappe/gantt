@@ -142,78 +142,82 @@ export default class Scheduler {
     setup_tasks(tasks) {
         // prepare tasks
         this.tasks = tasks.filter(t => t.row).map((task, i) => {
-            // convert to Date objects
-            task._start = date_utils.parse(task.start);
-            task._end = date_utils.parse(task.end);
-
-            // make task invalid if duration too large
-            if (date_utils.diff(task._end, task._start, 'year') > 10) {
-                task.end = null;
-            }
-
-            // cache index
-            task._index = this.options.rows.indexOf(task.row);
-            if (task._index === -1) task._index = 0;
-
-            // invalid dates
-            if (!task.start && !task.end) {
-                const today = date_utils.today();
-                task._start = today;
-                task._end = date_utils.add(today, 2, 'day');
-            }
-
-            if (!task.start && task.end) {
-                task._start = date_utils.add(task._end, -2, 'day');
-            }
-
-            if (task.start && !task.end) {
-                task._end = date_utils.add(task._start, 2, 'day');
-            }
-
-            // if hours is not set, assume the last day is full day
-            // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
-            const task_end_values = date_utils.get_date_values(task._end);
-            if (task_end_values.slice(3).every((d) => d === 0)) {
-                task._end = date_utils.add(task._end, 24, 'hour');
-            }
-
-            task.resize_left = (task.resize_left != null) ? task.resize_left : this.options.resize_left;
-            task.resize_right = (task.resize_right != null) ? task.resize_right : this.options.resize_right;
-            task.drag_drop_x = (task.drag_drop_x != null) ? task.drag_drop_x : this.options.drag_drop_x;
-            task.drag_drop_y = (task.drag_drop_y != null) ? task.drag_drop_y : this.options.drag_drop_y;
-
-            // invalid flag
-            if (!task.start || !task.end) {
-                task.invalid = true;
-            }
-
-            // dependencies
-            if (typeof task.dependencies === 'string' || !task.dependencies) {
-                let deps = [];
-                if (task.dependencies) {
-                    deps = task.dependencies
-                        .split(',')
-                        .map((d) => d.trim())
-                        .filter((d) => d);
-                }
-                task.dependencies = deps;
-            }
-
-            // uids
-            if (!task.id) {
-                task.id = generate_id(task);
-            }
-            //description
-            if (!task.description)
-                task.description = '';
-
-            return task;
+            return this.setup_task(task);
         }).filter(t => (
             (!this.options.date_start || t._start >= this.options.date_start) &&
             (!this.options.date_end || t._end <= this.options.date_end))
         );
 
         this.setup_dependencies();
+    }
+
+    setup_task(task) {
+        // convert to Date objects
+        task._start = date_utils.parse(task.start);
+        task._end = date_utils.parse(task.end);
+
+        // make task invalid if duration too large
+        if (date_utils.diff(task._end, task._start, 'year') > 10) {
+            task.end = null;
+        }
+
+        // cache index
+        task._index = this.options.rows.indexOf(task.row);
+        if (task._index === -1) task._index = 0;
+
+        // invalid dates
+        if (!task.start && !task.end) {
+            const today = date_utils.today();
+            task._start = today;
+            task._end = date_utils.add(today, 2, 'day');
+        }
+
+        if (!task.start && task.end) {
+            task._start = date_utils.add(task._end, -2, 'day');
+        }
+
+        if (task.start && !task.end) {
+            task._end = date_utils.add(task._start, 2, 'day');
+        }
+
+        // if hours is not set, assume the last day is full day
+        // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
+        const task_end_values = date_utils.get_date_values(task._end);
+        if (task_end_values.slice(3).every((d) => d === 0)) {
+            task._end = date_utils.add(task._end, 24, 'hour');
+        }
+
+        task.resize_left = (task.resize_left != null) ? task.resize_left : this.options.resize_left;
+        task.resize_right = (task.resize_right != null) ? task.resize_right : this.options.resize_right;
+        task.drag_drop_x = (task.drag_drop_x != null) ? task.drag_drop_x : this.options.drag_drop_x;
+        task.drag_drop_y = (task.drag_drop_y != null) ? task.drag_drop_y : this.options.drag_drop_y;
+
+        // invalid flag
+        if (!task.start || !task.end) {
+            task.invalid = true;
+        }
+
+        // dependencies
+        if (typeof task.dependencies === 'string' || !task.dependencies) {
+            let deps = [];
+            if (task.dependencies) {
+                deps = task.dependencies
+                    .split(',')
+                    .map((d) => d.trim())
+                    .filter((d) => d);
+            }
+            task.dependencies = deps;
+        }
+
+        // uids
+        if (!task.id) {
+            task.id = generate_id(task);
+        }
+        //description
+        if (!task.description)
+            task.description = '';
+
+        return task;
     }
 
     setup_dependencies() {
@@ -1339,8 +1343,8 @@ export default class Scheduler {
         //edges del container
         var edgeTop = this.$container.offsetTop + this.options.header_height + (this.options.padding * 3);
         var edgeLeft = this.$container.offsetLeft + (this.options.padding * 8);
-        var edgeBottom = this.$container.clientHeight + (this.options.padding * 2);
-        var edgeRight = this.$container.clientWidth + this.$column_container.offsetWidth - (this.options.padding * 3);
+        var edgeBottom = this.$container.clientHeight - (this.options.padding * 2);
+        var edgeRight = this.$container.clientWidth - (this.options.padding * 2);
         //variabili per capire in quale punto ci si trova
         var isInLeftEdge = (viewportX < edgeLeft);
         var isInRightEdge = (viewportX > edgeRight);
