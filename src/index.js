@@ -588,9 +588,9 @@ export default class Gantt {
         };
 
         const x_pos = {
-            'Quarter Day_lower': 0,
+            'Quarter Day_lower': this.options.column_width / 2,
             'Quarter Day_upper': this.options.column_width * 2,
-            'Half Day_lower': 0,
+            'Half Day_lower': this.options.column_width / 2,
             'Half Day_upper': this.options.column_width,
             Day_lower: this.options.column_width / 2,
             Day_upper: (this.options.column_width * 30) / 2,
