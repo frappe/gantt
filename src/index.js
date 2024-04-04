@@ -526,7 +526,7 @@ export default class Gantt {
 
     get_date_info(date, last_date, i) {
         if (!last_date) {
-            last_date = date_utils.add(date, 1, 'year');
+            last_date = date_utils.add(date, 1, 'day');
         }
         const date_text = {
             'Quarter Day_lower': date_utils.format(
