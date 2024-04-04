@@ -262,7 +262,7 @@ export default class Bar {
             }
             this.update_attr(bar, 'x', x);
         }
-        if (width && width >= this.gantt.options.column_width) {
+        if (width) {
             this.update_attr(bar, 'width', width);
         }
         this.update_label_position();
