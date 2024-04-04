@@ -14,6 +14,9 @@ $handle-color: #ddd !default;
 $light-blue: #c4c4e9 !default;
 
 .gantt {
+	user-select: none;
+	-webkit-user-select: none;
+		
 	.grid-background {
 		fill: none;
 	}
@@ -69,7 +72,6 @@ $light-blue: #c4c4e9 !default;
 		stroke: $bar-stroke;
 		stroke-width: 0;
 		transition: stroke-width .3s ease;
-		user-select: none;
 	}
 	.bar-progress {
 		fill: $blue;
