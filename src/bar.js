@@ -174,7 +174,7 @@ export default class Bar {
             append_to: this.handle_group,
         });
 
-        if (this.task.progress && this.task.progress < 100) {
+        if (this.task.progress < 100) {
             this.$handle_progress = createSVG('polygon', {
                 points: this.get_progress_polygon_points().join(','),
                 class: 'handle progress',
@@ -262,7 +262,7 @@ export default class Bar {
             }
             this.update_attr(bar, 'x', x);
         }
-        if (width && width >= this.gantt.options.column_width) {
+        if (width) {
             this.update_attr(bar, 'width', width);
         }
         this.update_label_position();
