@@ -253,9 +253,12 @@ export default class Gantt {
         this.gantt_end = task._end;
       }
     }
+    let gantt_start, gantt_end;
+    if (!this.gantt_start) gantt_start = new Date();
+    else gantt_start = date_utils.start_of(this.gantt_start, "day");
+    if (!this.gantt_end) gantt_end = new Date();
+    else gantt_end = date_utils.start_of(this.gantt_end, "day");
 
-    let gantt_start = date_utils.start_of(this.gantt_start, "day");
-    let gantt_end = date_utils.start_of(this.gantt_end, "day");
     // add date padding on both sides
     let viewKey;
     for (let [key, value] of Object.entries(VIEW_MODE)) {
@@ -703,9 +706,9 @@ export default class Gantt {
 
   set_width() {
     const cur_width = this.$svg.getBoundingClientRect().width;
-    const actual_width = this.$svg
-      .querySelector(".grid .grid-row")
-      .getAttribute("width");
+    const actual_width = this.$svg.querySelector('.grid .grid-row') ? this.$svg
+      .querySelector('.grid .grid-row')
+      .getAttribute('width') : 0;
     if (cur_width < actual_width) {
       this.$svg.setAttribute("width", actual_width);
     }
@@ -1000,6 +1003,7 @@ export default class Gantt {
    * @memberof Gantt
    */
   get_oldest_starting_date() {
+    if (!this.tasks.length) return new Date()
     return this.tasks
       .map((task) => task._start)
       .reduce((prev_date, cur_date) =>
