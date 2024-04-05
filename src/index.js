@@ -16,6 +16,17 @@ const VIEW_MODE = {
     YEAR: 'Year',
 };
 
+
+const VIEW_MODE_PADDING = {
+    HOUR: ['7d', '7d'],
+    QUARTER_DAY: ['7d', '7d'],
+    HALF_DAY: ['7d', '7d'],
+    DAY: ['1m', '1m'],
+    WEEK: ['1m', '1m'],
+    MONTH: ['1m', '1m'],
+    YEAR: ['2y', '2y'],
+};
+
 export default class Gantt {
     constructor(wrapper, tasks, options) {
         this.setup_wrapper(wrapper);
@@ -90,6 +101,15 @@ export default class Gantt {
             language: 'en',
         };
         this.options = Object.assign({}, default_options, options);
+        for (let [key, value] of Object.entries(options.view_mode_padding)) {
+            if (typeof value === 'string') {
+                // Configure for single value given
+                options.view_mode_padding[key] = [value, value]
+            }
+        }
+
+        console.log(options.view_mode_padding)
+        this.options.view_mode_padding = { ...VIEW_MODE_PADDING, ...options.view_mode_padding }
     }
 
     setup_tasks(tasks) {
@@ -233,23 +253,18 @@ export default class Gantt {
             }
         }
 
-        this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
-        this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
-
+        let gantt_start = date_utils.start_of(this.gantt_start, 'day');
+        let gantt_end = date_utils.start_of(this.gantt_end, 'day');
         // add date padding on both sides
-        if (this.view_is([VIEW_MODE.HOUR, VIEW_MODE.QUARTER_DAY, VIEW_MODE.HALF_DAY])) {
-            this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
-            this.gantt_end = date_utils.add(this.gantt_end, 7, 'day');
-        } else if (this.view_is(VIEW_MODE.MONTH)) {
-            this.gantt_start = date_utils.start_of(this.gantt_start, 'year');
-            this.gantt_end = date_utils.add(this.gantt_end, 1, 'year');
-        } else if (this.view_is(VIEW_MODE.YEAR)) {
-            this.gantt_start = date_utils.add(this.gantt_start, -2, 'year');
-            this.gantt_end = date_utils.add(this.gantt_end, 2, 'year');
-        } else {
-            this.gantt_start = date_utils.add(this.gantt_start, -1, 'month');
-            this.gantt_end = date_utils.add(this.gantt_end, 1, 'month');
+        let viewKey;
+        for (let [key, value] of Object.entries(VIEW_MODE)) {
+            if (value === this.options.view_mode) {
+                viewKey = key
+            }
         }
+        const [padding_start, padding_end] = this.options.view_mode_padding[viewKey].map(date_utils.parse_duration);
+        this.gantt_start = date_utils.add(gantt_start, -padding_start.duration, padding_start.scale);
+        this.gantt_end = date_utils.add(gantt_end, padding_end.duration, padding_end.scale);
     }
 
     setup_date_values() {
