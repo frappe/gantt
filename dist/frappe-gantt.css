@@ -66,6 +66,10 @@
   border-top-color: #333;
 }
 
+.gantt {
+  user-select: none;
+  -webkit-user-select: none;
+}
 .gantt .grid-background {
   fill: none;
 }
@@ -94,6 +98,18 @@
   fill: #fcf8e3;
   opacity: 0.5;
 }
+.gantt .week-highlight {
+  fill: #fcf8e3;
+  opacity: 0.5;
+}
+.gantt .month-highlight {
+  fill: #fcf8e3;
+  opacity: 0.5;
+}
+.gantt .year-highlight {
+  fill: #fcf8e3;
+  opacity: 0.5;
+}
 .gantt .arrow {
   fill: none;
   stroke: #666;
@@ -101,10 +117,9 @@
 }
 .gantt .bar {
   fill: #b8c2cc;
-  stroke: #8D99A6;
+  stroke: #8d99a6;
   stroke-width: 0;
   transition: stroke-width 0.3s ease;
-  user-select: none;
 }
 .gantt .bar-progress {
   fill: #acacfa;
@@ -114,7 +129,7 @@
 }
 .gantt .bar-invalid {
   fill: transparent;
-  stroke: #8D99A6;
+  stroke: #8d99a6;
   stroke-width: 1;
   stroke-dasharray: 5;
 }
@@ -159,7 +174,8 @@
 .gantt .bar-wrapper.active .bar-progress {
   fill: #9494f9;
 }
-.gantt .lower-text, .gantt .upper-text {
+.gantt .lower-text,
+.gantt .upper-text {
   font-size: 12px;
   text-anchor: middle;
 }
