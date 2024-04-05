@@ -290,6 +290,7 @@ export default class Gantt {
         format_string
       )
     );
+    this.gantt_start.setHours(0, 0, 0, 0)
 
     this.gantt_end = date_utils.add(
       gantt_end,
