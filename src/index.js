@@ -53,7 +53,7 @@ export default class Gantt {
     } else {
       throw new TypeError(
         "Frappé Gantt only supports usage of a string CSS selector," +
-          " HTML DOM element or SVG DOM element for the 'element' parameter",
+        " HTML DOM element or SVG DOM element for the 'element' parameter",
       );
     }
 
@@ -107,7 +107,6 @@ export default class Gantt {
       }
     }
 
-    console.log(options.view_mode_padding);
     this.options.view_mode_padding = {
       ...VIEW_MODE_PADDING,
       ...options.view_mode_padding,
@@ -267,11 +266,31 @@ export default class Gantt {
     const [padding_start, padding_end] = this.options.view_mode_padding[
       viewKey
     ].map(date_utils.parse_duration);
+
     this.gantt_start = date_utils.add(
       gantt_start,
       -padding_start.duration,
       padding_start.scale,
     );
+
+    let format_string;
+    if (this.view_is(VIEW_MODE.YEAR)) {
+      format_string = "YYYY"
+    } else if (this.view_is(VIEW_MODE.MONTH)) {
+      format_string = "YYYY-MM"
+    } else if (this.view_is(VIEW_MODE.DAY)) {
+      format_string = "YYYY-MM-DD"
+    } else {
+      format_string = "YYYY-MM-DD HH"
+    }
+
+    this.gantt_start = new Date(
+      date_utils.format(
+        date_utils.add(gantt_start, -padding_end.duration, padding_end.scale),
+        format_string
+      )
+    );
+
     this.gantt_end = date_utils.add(
       gantt_end,
       padding_end.duration,
@@ -703,7 +722,7 @@ export default class Gantt {
 
     const scroll_pos =
       (hours_before_first_task / this.options.step) *
-        this.options.column_width -
+      this.options.column_width -
       this.options.column_width;
 
     parent_element.scrollLeft = scroll_pos;
