@@ -7,6 +7,28 @@ const SECOND = 'second';
 const MILLISECOND = 'millisecond';
 
 export default {
+    parse_duration(duration) {
+        const regex = /([0-9])+(y|m|d|h|min|s|ms)/gm;
+        const matches = regex.exec(duration);
+
+        if (matches !== null) {
+            if (matches[2] === "y") {
+                return { duration: parseInt(matches[1]), scale: `year` };
+            } else if (matches[2] === "m") {
+                return { duration: parseInt(matches[1]), scale: `month` };
+            } else if (matches[2] === "d") {
+                return { duration: parseInt(matches[1]), scale: `day` };
+            } else if (matches[2] === "h") {
+                return { duration: parseInt(matches[1]), scale: `hour` };
+            } else if (matches[2] === "min") {
+                return { duration: parseInt(matches[1]), scale: `minute` };
+            } else if (matches[2] === "s") {
+                return { duration: parseInt(matches[1]), scale: `second` };
+            } else if (matches[2] === "ms") {
+                return { duration: parseInt(matches[1]), scale: `millisecond` };
+            }
+        }
+    },
     parse(date, date_separator = '-', time_separator = /[.:]/) {
         if (date instanceof Date) {
             return date;
