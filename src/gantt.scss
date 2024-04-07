@@ -5,7 +5,8 @@ $bar-stroke: #8d99a6 !default;
 $border-color: #e0e0e0 !default;
 $light-bg: #f5f5f5 !default;
 $light-border-color: #ebeff2 !default;
-$light-yellow: #fcf8e3 !default;
+$light-yellow: #f6e796 !default;
+$holiday-color: #EEE !default;
 $text-muted: #666 !default;
 $text-light: #555 !default;
 $text-color: #333 !default;
@@ -20,27 +21,34 @@ $light-blue: #c4c4e9 !default;
   .grid-background {
     fill: none;
   }
+
   .grid-header {
     fill: #ffffff;
     stroke: $border-color;
     stroke-width: 1.4;
   }
+
   .grid-row {
     fill: #ffffff;
   }
+
   .grid-row:nth-child(even) {
     fill: $light-bg;
   }
+
   .row-line {
     stroke: $light-border-color;
   }
+
   .tick {
     stroke: $border-color;
     stroke-width: 0.2;
+
     &.thick {
       stroke-width: 0.4;
     }
   }
+
   .today-highlight {
     fill: $light-yellow;
     opacity: 0.5;
@@ -48,6 +56,11 @@ $light-blue: #c4c4e9 !default;
 
   .week-highlight {
     fill: $light-yellow;
+    opacity: 0.5;
+  }
+
+  .holiday-highlight {
+    fill: $holiday-color;
     opacity: 0.5;
   }
 
@@ -73,22 +86,26 @@ $light-blue: #c4c4e9 !default;
     stroke-width: 0;
     transition: stroke-width 0.3s ease;
   }
+
   .bar-progress {
     fill: $blue;
   }
+
   .bar-expected-progress {
     fill: $light-blue;
   }
+
   .bar-invalid {
     fill: transparent;
     stroke: $bar-stroke;
     stroke-width: 1;
     stroke-dasharray: 5;
 
-    & ~ .bar-label {
+    &~.bar-label {
       fill: $text-light;
     }
   }
+
   .bar-label {
     fill: #fff;
     dominant-baseline: central;
@@ -145,9 +162,11 @@ $light-blue: #c4c4e9 !default;
     font-size: 12px;
     text-anchor: middle;
   }
+
   .upper-text {
     fill: $text-light;
   }
+
   .lower-text {
     fill: $text-color;
   }

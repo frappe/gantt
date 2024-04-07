@@ -95,19 +95,23 @@
   stroke-width: 0.4;
 }
 .gantt .today-highlight {
-  fill: #fcf8e3;
+  fill: #f6e796;
   opacity: 0.5;
 }
 .gantt .week-highlight {
-  fill: #fcf8e3;
+  fill: #f6e796;
+  opacity: 0.5;
+}
+.gantt .holiday-highlight {
+  fill: #EEE;
   opacity: 0.5;
 }
 .gantt .month-highlight {
-  fill: #fcf8e3;
+  fill: #f6e796;
   opacity: 0.5;
 }
 .gantt .year-highlight {
-  fill: #fcf8e3;
+  fill: #f6e796;
   opacity: 0.5;
 }
 .gantt .arrow {

@@ -540,7 +540,7 @@ var Gantt = (function () {
     }
 
     draw_resize_handles() {
-      if (this.invalid) return;
+      if (this.invalid || this.gantt.options.readonly) return;
 
       const bar = this.$bar;
       const handle_width = 8;
@@ -1071,7 +1071,7 @@ var Gantt = (function () {
       } else {
         throw new TypeError(
           "Frappé Gantt only supports usage of a string CSS selector," +
-            " HTML DOM element or SVG DOM element for the 'element' parameter",
+          " HTML DOM element or SVG DOM element for the 'element' parameter",
         );
       }
 
@@ -1116,8 +1116,11 @@ var Gantt = (function () {
         popup_trigger: "click",
         custom_popup_html: null,
         language: "en",
+        readonly: false,
+        highlight_weekend: true,
       };
       this.options = Object.assign({}, default_options, options);
+      if (!options.view_mode_padding) options.view_mode_padding = {};
       for (let [key, value] of Object.entries(options.view_mode_padding)) {
         if (typeof value === "string") {
           // Configure for single value given
@@ -1125,7 +1128,6 @@ var Gantt = (function () {
         }
       }
 
-      console.log(options.view_mode_padding);
       this.options.view_mode_padding = {
         ...VIEW_MODE_PADDING,
         ...options.view_mode_padding,
@@ -1272,9 +1274,12 @@ var Gantt = (function () {
           this.gantt_end = task._end;
         }
       }
+      let gantt_start, gantt_end;
+      if (!this.gantt_start) gantt_start = new Date();
+      else gantt_start = date_utils.start_of(this.gantt_start, "day");
+      if (!this.gantt_end) gantt_end = new Date();
+      else gantt_end = date_utils.start_of(this.gantt_end, "day");
 
-      let gantt_start = date_utils.start_of(this.gantt_start, "day");
-      let gantt_end = date_utils.start_of(this.gantt_end, "day");
       // add date padding on both sides
       let viewKey;
       for (let [key, value] of Object.entries(VIEW_MODE)) {
@@ -1285,11 +1290,32 @@ var Gantt = (function () {
       const [padding_start, padding_end] = this.options.view_mode_padding[
         viewKey
       ].map(date_utils.parse_duration);
+
       this.gantt_start = date_utils.add(
         gantt_start,
         -padding_start.duration,
         padding_start.scale,
       );
+
+      let format_string;
+      if (this.view_is(VIEW_MODE.YEAR)) {
+        format_string = "YYYY";
+      } else if (this.view_is(VIEW_MODE.MONTH)) {
+        format_string = "YYYY-MM";
+      } else if (this.view_is(VIEW_MODE.DAY)) {
+        format_string = "YYYY-MM-DD";
+      } else {
+        format_string = "YYYY-MM-DD HH";
+      }
+
+      this.gantt_start = new Date(
+        date_utils.format(
+          date_utils.add(gantt_start, -padding_end.duration, padding_end.scale),
+          format_string
+        )
+      );
+      this.gantt_start.setHours(0, 0, 0, 0);
+
       this.gantt_end = date_utils.add(
         gantt_end,
         padding_end.duration,
@@ -1318,6 +1344,7 @@ var Gantt = (function () {
     }
 
     bind_events() {
+      if (this.options.readonly) return
       this.bind_grid_click();
       this.bind_bar_events();
     }
@@ -1461,6 +1488,28 @@ var Gantt = (function () {
       }
     }
 
+    highlightWeekends() {
+      for (let d = new Date(this.gantt_start); d <= this.gantt_end; d.setDate(d.getDate() + 1)) {
+        if (d.getDay() == 0 || d.getDay() == 6) {
+          const x = (date_utils.diff(d, this.gantt_start, 'hour') /
+            this.options.step) *
+            this.options.column_width;
+          const height =
+            (this.options.bar_height + this.options.padding) * this.tasks.length +
+            this.options.header_height +
+            this.options.padding / 2;
+          createSVG('rect', {
+            x,
+            y: 0,
+            width: this.options.column_width,
+            height,
+            class: 'holiday-highlight',
+            append_to: this.layers.grid,
+          });
+        }
+      }
+    }
+
     //compute the horizontal x distance
     computeGridHighlightDimensions(view_mode) {
       let xDist = 0;
@@ -1498,6 +1547,7 @@ var Gantt = (function () {
     }
 
     make_grid_highlights() {
+      if (this.options.highlight_weekend) this.highlightWeekends();
       // highlight today's | week's | month's | year's
       if (
         this.view_is(VIEW_MODE.DAY) ||
@@ -1701,9 +1751,9 @@ var Gantt = (function () {
 
     set_width() {
       const cur_width = this.$svg.getBoundingClientRect().width;
-      const actual_width = this.$svg
-        .querySelector(".grid .grid-row")
-        .getAttribute("width");
+      const actual_width = this.$svg.querySelector('.grid .grid-row') ? this.$svg
+        .querySelector('.grid .grid-row')
+        .getAttribute('width') : 0;
       if (cur_width < actual_width) {
         this.$svg.setAttribute("width", actual_width);
       }
@@ -1721,7 +1771,7 @@ var Gantt = (function () {
 
       const scroll_pos =
         (hours_before_first_task / this.options.step) *
-          this.options.column_width -
+        this.options.column_width -
         this.options.column_width;
 
       parent_element.scrollLeft = scroll_pos;
@@ -1998,6 +2048,7 @@ var Gantt = (function () {
      * @memberof Gantt
      */
     get_oldest_starting_date() {
+      if (!this.tasks.length) return new Date()
       return this.tasks
         .map((task) => task._start)
         .reduce((prev_date, cur_date) =>

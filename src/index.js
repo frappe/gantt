@@ -99,8 +99,10 @@ export default class Gantt {
       custom_popup_html: null,
       language: "en",
       readonly: false,
+      highlight_weekend: true,
     };
     this.options = Object.assign({}, default_options, options);
+    if (!options.view_mode_padding) options.view_mode_padding = {}
     for (let [key, value] of Object.entries(options.view_mode_padding)) {
       if (typeof value === "string") {
         // Configure for single value given
@@ -468,6 +470,28 @@ export default class Gantt {
     }
   }
 
+  highlightWeekends() {
+    for (let d = new Date(this.gantt_start); d <= this.gantt_end; d.setDate(d.getDate() + 1)) {
+      if (d.getDay() == 0 || d.getDay() == 6) {
+        const x = (date_utils.diff(d, this.gantt_start, 'hour') /
+          this.options.step) *
+          this.options.column_width;
+        const height =
+          (this.options.bar_height + this.options.padding) * this.tasks.length +
+          this.options.header_height +
+          this.options.padding / 2;
+        createSVG('rect', {
+          x,
+          y: 0,
+          width: this.options.column_width,
+          height,
+          class: 'holiday-highlight',
+          append_to: this.layers.grid,
+        });
+      }
+    }
+  }
+
   //compute the horizontal x distance
   computeGridHighlightDimensions(view_mode) {
     let xDist = 0;
@@ -505,6 +529,7 @@ export default class Gantt {
   }
 
   make_grid_highlights() {
+    if (this.options.highlight_weekend) this.highlightWeekends()
     // highlight today's | week's | month's | year's
     if (
       this.view_is(VIEW_MODE.DAY) ||
