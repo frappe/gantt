@@ -966,7 +966,7 @@ export default class Gantt {
 
   get_task(id) {
     return this.tasks.find((task) => {
-      return task.id === id;
+      return task.id == id;
     });
   }
 
