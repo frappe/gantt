@@ -98,6 +98,7 @@ export default class Gantt {
       popup_trigger: "click",
       custom_popup_html: null,
       language: "en",
+      readonly: false,
     };
     this.options = Object.assign({}, default_options, options);
     for (let [key, value] of Object.entries(options.view_mode_padding)) {
@@ -323,6 +324,7 @@ export default class Gantt {
   }
 
   bind_events() {
+    if (this.options.readonly) return
     this.bind_grid_click();
     this.bind_bar_events();
   }
