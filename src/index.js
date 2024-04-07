@@ -779,7 +779,7 @@ export default class Gantt {
         parent_bar_id,
         ...this.get_all_dependent_tasks(parent_bar_id),
       ];
-      bars = ids.map((id) => this.get_bar(id));
+      bars = ids.map((id) => this.get_bar(id)).filter(bar => bar !== undefined);
 
       this.bar_being_dragged = parent_bar_id;
 
@@ -972,7 +972,7 @@ export default class Gantt {
 
   get_bar(id) {
     return this.bars.find((bar) => {
-      return bar.task.id === id;
+      return bar.task.id == id;
     });
   }
 
