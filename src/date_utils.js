@@ -48,7 +48,7 @@ export default {
       let vals = date_parts;
 
       if (time_parts && time_parts.length) {
-        if (time_parts.length == 4) {
+        if (time_parts.length === 4) {
           time_parts[3] = "0." + time_parts[3];
           time_parts[3] = parseFloat(time_parts[3]) * 1000;
         }
@@ -229,7 +229,7 @@ export default {
 
     // Feb
     const year = date.getFullYear();
-    if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
+    if ((year % 4 === 0 && year % 100 != 0) || year % 400 === 0) {
       return 29;
     }
     return 28;

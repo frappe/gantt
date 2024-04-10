@@ -476,7 +476,7 @@ export default class Gantt {
 
   highlightWeekends() {
     for (let d = new Date(this.gantt_start); d <= this.gantt_end; d.setDate(d.getDate() + 1)) {
-      if (d.getDay() == 0 || d.getDay() == 6) {
+      if (d.getDay() === 0 || d.getDay() === 6) {
         const x = (date_utils.diff(d, this.gantt_start, 'hour') /
           this.options.step) *
           this.options.column_width;
@@ -1023,13 +1023,13 @@ export default class Gantt {
 
   get_task(id) {
     return this.tasks.find((task) => {
-      return task.id == id;
+      return task.id === id;
     });
   }
 
   get_bar(id) {
     return this.bars.find((bar) => {
-      return bar.task.id == id;
+      return bar.task.id === id;
     });
   }
 
