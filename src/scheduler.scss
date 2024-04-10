@@ -174,38 +174,38 @@ $handle-color: #ddd !default;
     .scheduler-grid-container {
         flex: 1;
         overflow: auto;
-        position: relative;
+        position: relative;    
+    }
 
-        .popup-wrapper {
+    .popup-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 0;
+        color: #959da5;
+        border-radius: 3px;
+
+        .title {
+            border-bottom: 3px solid $blue;
+            padding: 10px;
+        }
+
+        .description {
+            color: #71adea;
+            padding: 5px;
+        }
+
+        .subtitle {
+            padding: 10px;
+            color: #dfe2e5;
+        }
+
+        .pointer {
             position: absolute;
-            top: 0;
-            left: 0;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 0;
-            color: #959da5;
-            border-radius: 3px;
-
-            .title {
-                border-bottom: 3px solid $blue;
-                padding: 10px;
-            }
-
-            .description {
-                color: #71adea;
-                padding: 5px;
-            }
-
-            .subtitle {
-                padding: 10px;
-                color: #dfe2e5;
-            }
-
-            .pointer {
-                position: absolute;
-                margin: 0 0 0 -5px;
-                border: 5px solid transparent;
-                border-top-color: rgba(0, 0, 0, 0.8);
-            }
+            margin: 0 0 0 -5px;
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.8);
         }
     }
 }

@@ -22,13 +22,14 @@ export default class Popup {
         this.pointer = this.parent.querySelector('.pointer');
     }
 
-    show(options, off_set_height) {
+    show(options, off_set_height, off_set_top, scroll) {
         if (this.is_showing) return;
         if (!options.target_element) {
             throw new Error('target_element is required to show popup');
         }
 
         const target_element = options.target_element;
+        this.target_element = options.target_element;
         const width = this.compute_width(options.title.length);
 
         if (this.custom_html) {
@@ -39,12 +40,19 @@ export default class Popup {
         } else {
             // set data
             this.title.innerHTML = options.title;
+            
             this.description.innerHTML = options.description;
             if (options.description === '')
                 this.description.classList.remove('description');
             else
                 this.description.classList.add('description');
+
             this.subtitle.innerHTML = options.subtitle;
+            if (options.subtitle === '')
+                this.subtitle.classList.remove('subtitle');
+            else
+                this.subtitle.classList.add('subtitle');
+
             this.parent.style.width = width + 'px';
         }
 
@@ -57,15 +65,21 @@ export default class Popup {
         }
         const middle_popup = width / 2;
 
-        if (position_meta.y + this.parent.clientHeight + 50 > off_set_height) {
-            this.parent.style.left = (options.x - middle_popup) + 'px';
-            this.parent.style.top = (position_meta.y - this.parent.offsetHeight - 10) + 'px';
+        if (options.e.clientY + this.parent.clientHeight + 20 > off_set_height + off_set_top) {
+            this.parent.style.left = (options.e.clientX - middle_popup) + 'px';
+            if (options.target_element.localName === 'text')
+                this.parent.style.top = (parseInt(options.e.toElement.getAttribute('y')) + off_set_top - scroll - this.parent.offsetHeight - 20) + 'px';
+            else
+                this.parent.style.top = (parseInt(options.e.toElement.getAttribute('y')) + off_set_top - scroll - this.parent.offsetHeight - 10) + 'px';
             this.pointer.style.transform = 'rotateZ(0deg)';
             this.pointer.style.left = middle_popup + 'px';
             this.pointer.style.top = (this.parent.offsetHeight + 0.5) + 'px';
         } else {
-            this.parent.style.left = (options.x - middle_popup) + 'px';
-            this.parent.style.top = (position_meta.y + position_meta.height + 10) + 'px';
+            this.parent.style.left = (options.e.clientX - middle_popup) + 'px';
+            if (options.target_element.localName === 'text')
+                this.parent.style.top = (parseInt(options.e.toElement.getAttribute('y')) + off_set_top + 15 - scroll) + 'px';
+            else
+                this.parent.style.top = (parseInt(options.e.toElement.getAttribute('y')) + off_set_top + 30 - scroll) + 'px';
             this.pointer.style.transform = 'rotateZ(180deg)';
             this.pointer.style.left = middle_popup + 'px';
             this.pointer.style.top = '-10px';

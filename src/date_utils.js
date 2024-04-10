@@ -115,7 +115,7 @@ export default {
             scale += 's';
         }
 
-        return Math.floor(
+        return Math.round(
             {
                 milliseconds,
                 seconds,

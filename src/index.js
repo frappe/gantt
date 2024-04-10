@@ -91,7 +91,7 @@ export default class Scheduler {
         // popup wrapper
         this.popup_wrapper = document.createElement('div');
         this.popup_wrapper.classList.add('popup-wrapper');
-        this.$container.appendChild(this.popup_wrapper);
+        this.$container_parent.appendChild(this.popup_wrapper);
 
         $.on(this.popup_wrapper, 'mouseleave', '.popup-wrapper', (e) => {
             this.hide_popup();
@@ -103,7 +103,6 @@ export default class Scheduler {
             container_height: 300,
             header_height: 50,
             column_width: 30,
-            // fixed_column_width: 120,
             step: 24,
             date_start: null,
             date_end: null,
@@ -114,7 +113,6 @@ export default class Scheduler {
             padding: 18,
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
-            // popup_position: 'left',
             custom_popup_html: null,
             language: 'en',
             resize_left: false,
@@ -184,7 +182,10 @@ export default class Scheduler {
         // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
         const task_end_values = date_utils.get_date_values(task._end);
         if (task_end_values.slice(3).every((d) => d === 0)) {
-            task._end = date_utils.add(task._end, 24, 'hour');
+            // task._end = date_utils.add(task._end, 24, 'hour');
+            task._end = date_utils.add(task._end, 23, 'hour');
+            task._end = date_utils.add(task._end, 59, 'minute');
+            task._end = date_utils.add(task._end, 59, 'second');
         }
 
         task.resize_left = (task.resize_left != null) ? task.resize_left : this.options.resize_left;
@@ -488,11 +489,20 @@ export default class Scheduler {
         const pos_y = this.options.header_height;
         let pos_x = 0;
         for (let column of this.options.fixed_columns) {
+            const max_width = column.width;
+            let text_content = column.header;
+            const text_width = text_content.length * 6;
+
+            if (text_width > max_width) {
+                const reduction_percentage = (text_width - max_width) / text_width;
+                const visible_characters = Math.max(0, Math.round(text_content.length * (1 - reduction_percentage))) - 1;
+                text_content = text_content.substring(0, visible_characters);
+            }
             pos_x += column.width / 2;
             createSVG('text', {
                 x: pos_x,
                 y: pos_y,
-                innerHTML: column.header,
+                innerHTML: text_content,
                 class: 'lower-text',
                 append_to: this.fixed_col_layers.header
             });
@@ -538,10 +548,25 @@ export default class Scheduler {
 
                 const cell = this.cells.find(t => t.row === row.id && t.column === column.id);
                 if (cell) {
+
+                    const max_width = column.width;
+                    let text_content = cell.value;
+                    const text_width = text_content.length * 6;
+                    let tooltip = '';
+                    if (cell.tooltip)
+                        tooltip = cell.tooltip;
+
+                    if (text_width > max_width) {
+                        const reduction_percentage = (text_width - max_width) / text_width;
+                        const visible_characters = Math.max(0, Math.round(text_content.length * (1 - reduction_percentage))) - 1;
+                        text_content = text_content.substring(0, visible_characters);
+                    }
                     const text = createSVG('text', {
                         x: (column.width / 2) + pos_x,
                         y: 24 + row_y,
-                        innerHTML: ((String(cell.value).slice(0, 25)) + (String(cell.value).length > 25 ? "..." : "")),
+                        innerHTML: text_content,
+                        value: String(cell.value),
+                        tooltip: tooltip,
                         class: 'lower-text',
                         append_to: cell_wrapper
                     });
@@ -549,6 +574,14 @@ export default class Scheduler {
                 }
                 pos_x += column.width;
                 c++;
+
+                $.on(cell_wrapper, 'mouseleave', (e) => {
+                    if (e.relatedTarget != null &&
+                        (e.relatedTarget.classList.contains('pointer') ||
+                            e.relatedTarget.classList.contains('title')))
+                        return;
+                    this.hide_popup();
+                });
             }
         }
     }
@@ -949,6 +982,12 @@ export default class Scheduler {
     }
 
     bind_cell_events() {
+        $.on(this.$column_svg, 'mouseover', '.cell-wrapper > text', (e) => {
+            const cell = $.closest('.cell-wrapper > text', e.target);
+            if (cell.getAttribute('value') !== cell.innerHTML || cell.getAttribute('tooltip'))
+                this.show_cell_popup(cell, e);
+        });
+
         $.on(this.$column_svg, 'dblclick', '.cell-wrapper', (e) => {
             const cell_wrapper = $.closest('.cell-wrapper', e.target);
             const data_row_id = cell_wrapper.getAttribute('data-row-id');
@@ -1434,6 +1473,18 @@ export default class Scheduler {
         return out.filter(Boolean);
     }
 
+    show_cell_popup(cell, e) {
+        if (this.bar_being_dragged) return;
+        this.show_popup({
+            target_element: cell,
+            title: cell.getAttribute('value'),
+            description: '',
+            subtitle: cell.getAttribute('tooltip'),
+            task: '',
+            e: e,
+        });
+    }
+
     get_snap_x_position(dx) {
         let odx = dx,
             rem,
@@ -1518,8 +1569,10 @@ export default class Scheduler {
                 this.options.custom_popup_html
             );
         }
-        const off_set = this.$container.scrollTop + this.$container.offsetHeight;
-        this.popup.show(options, off_set);
+        const scroll = this.$container.scrollTop;
+        const off_set_top = this.$container.offsetTop;
+        const off_set_height = this.$container.offsetHeight;
+        this.popup.show(options, off_set_height, off_set_top, scroll);
     }
 
     hide_popup() {

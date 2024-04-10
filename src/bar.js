@@ -21,6 +21,19 @@ export default class Bar {
     }
 
     prepare_values() {
+        let task_end = this.task._end;
+        const task_end_timezone_offset = this.task._end.getTimezoneOffset();
+        const task_start_timezone_offset = this.task._start.getTimezoneOffset();
+        const starting_timezone_offset = this.scheduler.scheduler_start.getTimezoneOffset();
+        if ((task_end_timezone_offset !== starting_timezone_offset &&
+            task_start_timezone_offset === starting_timezone_offset) ||
+            task_end_timezone_offset === starting_timezone_offset &&
+            task_start_timezone_offset !== starting_timezone_offset)
+            if (task_end_timezone_offset === -60)
+                task_end = date_utils.add(task_end, -1, 'hour');
+            else
+                task_end = date_utils.add(task_end, 1, 'hour');
+
         this.invalid = this.task.invalid;
         this.height = this.scheduler.options.bar_height;
         this.handle_width = 8;
@@ -28,7 +41,7 @@ export default class Bar {
         this.y = this.compute_y();
         this.corner_radius = this.scheduler.options.bar_corner_radius;
         this.duration =
-            date_utils.diff(this.task._end, this.task._start, 'hour') /
+            date_utils.diff(task_end, this.task._start, 'hour') /
             this.scheduler.options.step;
         this.width = this.scheduler.options.column_width * this.duration;
         this.progress_width =
@@ -182,7 +195,7 @@ export default class Bar {
             if (this.scheduler.bar_being_dragged)
                 return;
             // if (!e.target.classList.contains('bar')) return;
-            this.show_popup(e.offsetX);
+            this.show_popup(e);
         });
 
         $.on(this.group, 'mouseleave', '.bar-wrapper', (e) => {
@@ -209,7 +222,7 @@ export default class Bar {
         });
     }
 
-    show_popup(x = 0, y = 0) {
+    show_popup(e) {
         const start_date = date_utils.format(
             this.task._start,
             'MMM D',
@@ -228,8 +241,7 @@ export default class Bar {
             description: this.task.description,
             subtitle: subtitle,
             task: this.task,
-            x: x,
-            y: y,
+            e: e,
         });
     }
 
@@ -267,21 +279,43 @@ export default class Bar {
 
     position_changed() {
         let changed = false;
-        const { new_start_date, new_end_date } = this.compute_start_end_date();
-
+        let { new_start_date, new_end_date } = this.compute_start_end_date();
         if (Number(this.task._start) !== Number(new_start_date)) {
             changed = true;
+            if (!(this.scheduler.view_is('Hour') ||
+                this.scheduler.view_is('Quarter Day') ||
+                this.scheduler.view_is('Half Day'))) {
+                const start_hours = this.task._start.getHours();
+                const start_minutes = this.task._start.getMinutes();
+                const start_seconds = this.task._start.getSeconds();
+
+                new_start_date.setHours(start_hours);
+                new_start_date.setMinutes(start_minutes);
+                new_start_date.setSeconds(start_seconds);
+            }
             this.task._start = new_start_date;
             this.task.start = new_start_date;
         }
 
         if (Number(this.task._end) !== Number(new_end_date)) {
             changed = true;
-            this.task._end = new_end_date;
             if (new_end_date.getHours() === 0)
-                this.task.end = date_utils.add(new_end_date, -1, 'second');
-            else
-                this.task.end = new_end_date;
+                new_end_date = date_utils.add(new_end_date, -1, 'second');
+            if (!(this.scheduler.view_is('Hour') ||
+                this.scheduler.view_is('Quarter Day') ||
+                this.scheduler.view_is('Half Day'))) {
+
+                const end_hours = this.task._end.getHours();
+                const end_minutes = this.task._end.getMinutes();
+                const end_seconds = this.task._end.getSeconds();
+
+                new_end_date.setHours(end_hours);
+                new_end_date.setMinutes(end_minutes);
+                new_end_date.setSeconds(end_seconds);
+            }
+
+            this.task._end = new_end_date;
+            this.task.end = new_end_date;
         }
 
         const new_index = this.compute_index();
@@ -298,7 +332,7 @@ export default class Bar {
             this.task,
             new_row,
             new_start_date,
-            date_utils.add(new_end_date, -1, 'second'),
+            new_end_date,
         ]);
     }
 
@@ -354,15 +388,21 @@ export default class Bar {
 
     compute_x() {
         const { step, column_width } = this.scheduler.options;
-        const task_start = this.task._start;
+        let task_start = this.task._start;
         const scheduler_start = this.scheduler.scheduler_start;
 
         const diff = date_utils.diff(task_start, scheduler_start, 'hour');
-        let x = (diff / step) * column_width;
+        let x = Math.floor((diff / step) * column_width * 1000) / 1000;
 
-        if (this.scheduler.view_is('Month')) {
-            const diff = date_utils.diff(task_start, scheduler_start, 'day');
-            x = (diff * column_width) / 30;
+        const task_start_timezone_offset = task_start.getTimezoneOffset();
+        const starting_timezone_offset = scheduler_start.getTimezoneOffset();
+        if (task_start_timezone_offset !== starting_timezone_offset) {
+            if (task_start_timezone_offset === -60)
+                task_start = date_utils.add(task_start, -1, 'hour');
+            else
+                task_start = date_utils.add(task_start, 2, 'hour');
+            const diff = date_utils.diff(task_start, scheduler_start, 'hour');
+            x = Math.floor((diff / step) * column_width * 1000) / 1000;
         }
         return x;
     }
@@ -443,7 +483,7 @@ export default class Bar {
 
         if (text_width + (handle_width * 2) > max_width) {
             const reduction_percentage = (text_width - max_width) / text_width;
-            const visible_characters = Math.max(0, Math.round((text.length - 1) * (1 - reduction_percentage)));
+            const visible_characters = Math.max(0, Math.round(text.length * (1 - reduction_percentage)));
             label.textContent = text.substring(0, visible_characters);
         } else {
             const expansion_percentage = (max_width - text_width) / original_text.length;
