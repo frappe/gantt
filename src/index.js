@@ -89,7 +89,7 @@ export default class Gantt {
       column_width: 30,
       step: 24,
       view_modes: [...Object.values(VIEW_MODE)],
-      bar_height: 20,
+      bar_height: 30,
       bar_corner_radius: 3,
       arrow_curve: 5,
       padding: 18,
@@ -182,6 +182,10 @@ export default class Gantt {
       // uids
       if (!task.id) {
         task.id = generate_id(task);
+      } else if (typeof task.id === 'string') {
+        task.id = task.id.replace(' ', '_')
+      } else {
+        task.id = `${task.id}`
       }
 
       return task;
@@ -345,7 +349,7 @@ export default class Gantt {
 
   setup_layers() {
     this.layers = {};
-    const layers = ["grid", "date", "arrow", "progress", "bar", "details"];
+    const layers = ["grid", "arrow", "progress", "bar", "details", "date"];
     // make group layers
     for (let layer of layers) {
       this.layers[layer] = createSVG("g", {
@@ -376,7 +380,7 @@ export default class Gantt {
       width: grid_width,
       height: grid_height,
       class: "grid-background",
-      append_to: this.layers.grid,
+      append_to: this.layers.date,
     });
 
     $.attr(this.$svg, {
@@ -774,6 +778,7 @@ export default class Gantt {
   bind_bar_events() {
     let is_dragging = false;
     let x_on_start = 0;
+    let x_on_scroll_start = 0;
     let y_on_start = 0;
     let is_resizing_left = false;
     let is_resizing_right = false;
@@ -818,6 +823,31 @@ export default class Gantt {
         $bar.finaldx = 0;
       });
     });
+    $.on(this.$container, 'scroll', e => {
+      let elements = document.querySelectorAll('.bar-wrapper');
+      let localBars = [];
+      const ids = [];
+      let dx;
+
+      this.layers.date.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
+      if (x_on_scroll_start) {
+        dx = e.currentTarget.scrollLeft - x_on_scroll_start;
+      }
+
+      Array.prototype.forEach.call(elements, function (el, i) {
+        ids.push(el.getAttribute('data-id'));
+      });
+
+      if (dx) {
+        localBars = ids.map(id => this.get_bar(id));
+
+        localBars.forEach(bar => {
+          bar.update_label_position_on_horizontal_scroll({ x: dx, sx: e.currentTarget.scrollLeft });
+        });
+      }
+
+      x_on_scroll_start = e.currentTarget.scrollLeft;
+    });
 
     $.on(this.$svg, "mousemove", (e) => {
       if (!action_in_progress()) return;
@@ -845,7 +875,7 @@ export default class Gantt {
               width: $bar.owidth + $bar.finaldx,
             });
           }
-        } else if (is_dragging) {
+        } else if (is_dragging && !this.options.readonly) {
           bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
         }
       });
@@ -993,13 +1023,13 @@ export default class Gantt {
 
   get_task(id) {
     return this.tasks.find((task) => {
-      return task.id === id;
+      return task.id == id;
     });
   }
 
   get_bar(id) {
     return this.bars.find((bar) => {
-      return bar.task.id === id;
+      return bar.task.id == id;
     });
   }
 

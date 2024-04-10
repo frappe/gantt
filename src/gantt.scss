@@ -109,9 +109,9 @@ $light-blue: #c4c4e9 !default;
   .bar-label {
     fill: #fff;
     dominant-baseline: central;
-    text-anchor: middle;
+    // text-anchor: middle;
     font-size: 12px;
-    font-weight: lighter;
+    font-weight: 500;
 
     &.big {
       fill: $text-light;
@@ -180,6 +180,7 @@ $light-blue: #c4c4e9 !default;
   position: relative;
   overflow: auto;
   font-size: 12px;
+  height: 500px;
 
   .popup-wrapper {
     position: absolute;

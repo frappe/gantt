@@ -269,6 +269,8 @@ var Gantt = (function () {
         parent.appendChild(elem);
       } else if (attr === "innerHTML") {
         elem.innerHTML = attrs.innerHTML;
+      } else if (attr === 'clipPath') {
+        elem.setAttribute('clip-path', 'url(#' + attrs[attr] + ')');
       } else {
         elem.setAttribute(attr, attrs[attr]);
       }
@@ -411,6 +413,7 @@ var Gantt = (function () {
     prepare_values() {
       this.invalid = this.task.invalid;
       this.height = this.gantt.options.bar_height;
+      this.image_size = this.height - 5;
       this.compute_x();
       this.compute_y();
       this.compute_duration();
@@ -469,6 +472,10 @@ var Gantt = (function () {
       this.draw_progress_bar();
       this.draw_label();
       this.draw_resize_handles();
+
+      if (this.task.thumbnail) {
+        this.draw_thumbnail();
+      }
     }
 
     draw_bar() {
@@ -528,8 +535,14 @@ var Gantt = (function () {
     }
 
     draw_label() {
+      let x_coord = this.x + 5;
+
+      if (this.task.thumbnail) {
+        x_coord = this.x + this.image_size + 5;
+      }
+
       createSVG("text", {
-        x: this.x + this.width / 2,
+        x: x_coord,
         y: this.y + this.height / 2,
         innerHTML: this.task.name,
         class: "bar-label",
@@ -537,6 +550,46 @@ var Gantt = (function () {
       });
       // labels get BBox in the next tick
       requestAnimationFrame(() => this.update_label_position());
+    }
+    draw_thumbnail() {
+      let x_offset = 10, y_offset = 2;
+      let defs, clipPath;
+
+      defs = createSVG('defs', {
+        append_to: this.bar_group
+      });
+
+      createSVG('rect', {
+        id: 'rect_' + this.task.id,
+        x: this.x + x_offset,
+        y: this.y + y_offset,
+        width: this.image_size,
+        height: this.image_size,
+        rx: '15',
+        class: 'img_mask',
+        append_to: defs
+      });
+
+      clipPath = createSVG('clipPath', {
+        id: 'clip_' + this.task.id,
+        append_to: defs
+      });
+
+      createSVG('use', {
+        href: '#rect_' + this.task.id,
+        append_to: clipPath
+      });
+
+      createSVG('image', {
+        x: this.x + x_offset,
+        y: this.y + y_offset,
+        width: this.image_size,
+        height: this.image_size,
+        class: 'bar-img',
+        href: this.task.thumbnail,
+        clipPath: 'clip_' + this.task.id,
+        append_to: this.bar_group
+      });
     }
 
     draw_resize_handles() {
@@ -665,6 +718,37 @@ var Gantt = (function () {
       }
       this.update_progressbar_position();
       this.update_arrow_position();
+    }
+
+    update_label_position_on_horizontal_scroll({ x, sx }) {
+      const container = document.querySelector('.gantt-container');
+      const label = this.group.querySelector('.bar-label');
+      const img = this.group.querySelector('.bar-img') || '';
+      const img_mask = this.bar_group.querySelector('.img_mask') || '';
+
+      let barWidthLimit = this.$bar.getX() + this.$bar.getWidth();
+      let newLabelX = label.getX() + x;
+      let newImgX = img && img.getX() + x || 0;
+      let imgWidth = img && img.getBBox().width + 7 || 7;
+      let labelEndX = newLabelX + label.getBBox().width + 7;
+      let viewportCentral = sx + container.clientWidth / 2;
+
+      if (label.classList.contains('big')) return;
+
+      if (labelEndX < barWidthLimit && x > 0 && labelEndX < viewportCentral) {
+        label.setAttribute('x', newLabelX);
+        if (img) {
+          img.setAttribute('x', newImgX);
+          img_mask.setAttribute('x', newImgX);
+        }
+      } else if ((newLabelX - imgWidth) > this.$bar.getX() && x < 0 && labelEndX > viewportCentral) {
+        label.setAttribute('x', newLabelX);
+        if (img) {
+          img.setAttribute('x', newImgX);
+          img_mask.setAttribute('x', newImgX);
+        }
+
+      }
     }
 
     date_changed() {
@@ -819,7 +903,7 @@ var Gantt = (function () {
     }
 
     update_progressbar_position() {
-      if (this.invalid) return;
+      if (this.invalid || this.gantt.options.readonly) return;
       this.$bar_progress.setAttribute("x", this.$bar.getX());
       this.$bar_progress.setAttribute(
         "width",
@@ -828,20 +912,37 @@ var Gantt = (function () {
     }
 
     update_label_position() {
+      const img_mask = this.bar_group.querySelector('.img_mask') || '';
       const bar = this.$bar,
-        label = this.group.querySelector(".bar-label");
+        label = this.group.querySelector(".bar-label"),
+        img = this.group.querySelector('.bar-img');
+
+      let padding = 5;
+      let x_offset_label_img = this.image_size + 10;
 
       if (label.getBBox().width > bar.getWidth()) {
         label.classList.add("big");
-        label.setAttribute("x", bar.getX() + bar.getWidth() + 5);
+        if (img) {
+          img.setAttribute('x', bar.getX() + bar.getWidth() + padding);
+          img_mask.setAttribute('x', bar.getX() + bar.getWidth() + padding);
+          label.setAttribute('x', bar.getX() + bar.getWidth() + x_offset_label_img);
+        } else {
+          label.setAttribute('x', bar.getX() + bar.getWidth() + padding);
+        }
       } else {
         label.classList.remove("big");
-        label.setAttribute("x", bar.getX() + bar.getWidth() / 2);
+        if (img) {
+          img.setAttribute('x', bar.getX() + padding);
+          img_mask.setAttribute('x', bar.getX() + padding);
+          label.setAttribute('x', bar.getX() + x_offset_label_img);
+        } else {
+          label.setAttribute('x', bar.getX() + padding);
+        }
       }
     }
 
     update_handle_position() {
-      if (this.invalid) return;
+      if (this.invalid || this.gantt.options.readonly) return;
       const bar = this.$bar;
       this.handle_group
         .querySelector(".handle.left")
@@ -1107,7 +1208,7 @@ var Gantt = (function () {
         column_width: 30,
         step: 24,
         view_modes: [...Object.values(VIEW_MODE)],
-        bar_height: 20,
+        bar_height: 30,
         bar_corner_radius: 3,
         arrow_curve: 5,
         padding: 18,
@@ -1200,6 +1301,10 @@ var Gantt = (function () {
         // uids
         if (!task.id) {
           task.id = generate_id(task);
+        } else if (typeof task.id === 'string') {
+          task.id = task.id.replace(' ', '_');
+        } else {
+          task.id = `${task.id}`;
         }
 
         return task;
@@ -1363,7 +1468,7 @@ var Gantt = (function () {
 
     setup_layers() {
       this.layers = {};
-      const layers = ["grid", "date", "arrow", "progress", "bar", "details"];
+      const layers = ["grid", "arrow", "progress", "bar", "details", "date"];
       // make group layers
       for (let layer of layers) {
         this.layers[layer] = createSVG("g", {
@@ -1394,7 +1499,7 @@ var Gantt = (function () {
         width: grid_width,
         height: grid_height,
         class: "grid-background",
-        append_to: this.layers.grid,
+        append_to: this.layers.date,
       });
 
       $.attr(this.$svg, {
@@ -1792,6 +1897,7 @@ var Gantt = (function () {
     bind_bar_events() {
       let is_dragging = false;
       let x_on_start = 0;
+      let x_on_scroll_start = 0;
       let y_on_start = 0;
       let is_resizing_left = false;
       let is_resizing_right = false;
@@ -1836,6 +1942,31 @@ var Gantt = (function () {
           $bar.finaldx = 0;
         });
       });
+      $.on(this.$container, 'scroll', e => {
+        let elements = document.querySelectorAll('.bar-wrapper');
+        let localBars = [];
+        const ids = [];
+        let dx;
+
+        this.layers.date.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
+        if (x_on_scroll_start) {
+          dx = e.currentTarget.scrollLeft - x_on_scroll_start;
+        }
+
+        Array.prototype.forEach.call(elements, function (el, i) {
+          ids.push(el.getAttribute('data-id'));
+        });
+
+        if (dx) {
+          localBars = ids.map(id => this.get_bar(id));
+
+          localBars.forEach(bar => {
+            bar.update_label_position_on_horizontal_scroll({ x: dx, sx: e.currentTarget.scrollLeft });
+          });
+        }
+
+        x_on_scroll_start = e.currentTarget.scrollLeft;
+      });
 
       $.on(this.$svg, "mousemove", (e) => {
         if (!action_in_progress()) return;
@@ -1863,7 +1994,7 @@ var Gantt = (function () {
                 width: $bar.owidth + $bar.finaldx,
               });
             }
-          } else if (is_dragging) {
+          } else if (is_dragging && !this.options.readonly) {
             bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
           }
         });
@@ -2011,13 +2142,13 @@ var Gantt = (function () {
 
     get_task(id) {
       return this.tasks.find((task) => {
-        return task.id === id;
+        return task.id == id;
       });
     }
 
     get_bar(id) {
       return this.bars.find((bar) => {
-        return bar.task.id === id;
+        return bar.task.id == id;
       });
     }
 
