@@ -173,7 +173,7 @@ export default class Gantt {
         if (task.dependencies) {
           deps = task.dependencies
             .split(",")
-            .map((d) => d.trim())
+            .map((d) => d.trim().replaceAll(' ', '_'))
             .filter((d) => d);
         }
         task.dependencies = deps;
@@ -183,7 +183,7 @@ export default class Gantt {
       if (!task.id) {
         task.id = generate_id(task);
       } else if (typeof task.id === 'string') {
-        task.id = task.id.replace(' ', '_')
+        task.id = task.id.replaceAll(' ', '_')
       } else {
         task.id = `${task.id}`
       }
@@ -953,6 +953,9 @@ export default class Gantt {
       if (!($bar_progress && $bar_progress.finaldx)) return;
 
       $bar_progress.finaldx = 0;
+      bar = null;
+      $bar_progress = null;
+      $bar = null;
       bar.progress_changed();
       bar.set_action_completed();
     });
@@ -1030,6 +1033,7 @@ export default class Gantt {
   }
 
   get_bar(id) {
+    console.log(id, this.bars)
     return this.bars.find((bar) => {
       return bar.task.id === id;
     });

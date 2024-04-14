@@ -110,13 +110,13 @@ export default {
       .sort((a, b) => b.length - a.length) // big string first
       .forEach((key) => {
         if (str.includes(key)) {
-          str = str.replace(key, `$${formatted_values.length}`);
+          str = str.replaceAll(key, `$${formatted_values.length}`);
           formatted_values.push(format_map[key]);
         }
       });
 
     formatted_values.forEach((value, i) => {
-      str = str.replace(`$${i}`, value);
+      str = str.replaceAll(`$${i}`, value);
     });
 
     return str;
