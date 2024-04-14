@@ -32,7 +32,7 @@
       <div class="gantt-target"></div>
     </div>
     <script>
-      var tasks = [
+      let tasks = [
         {
         	start: '2018-10-01',
         	end: '2018-10-08',
@@ -90,7 +90,11 @@
         // 	progress: 0
         // }
       ];
-      var gantt_chart = new Gantt(".gantt-target", tasks, {
+
+      // Uncomment to test fixed header
+      // tasks = [...tasks, ...Array.from({length: tasks.length * 3}, (_, i) => ({...tasks[i % 3], id: i}))]
+      
+      let gantt_chart = new Gantt(".gantt-target", tasks, {
         on_click: (task) => {
           console.log("Double Click", task);
         },
@@ -112,6 +116,7 @@
         view_mode: "Day",
         view_mode_padding: { DAY: "7d" },
         language: "en",
+        // readonly: true
       });
       console.log(gantt_chart);
     </script>

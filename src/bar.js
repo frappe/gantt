@@ -583,7 +583,7 @@ export default class Bar {
 }
 
 function isFunction(functionToCheck) {
-  var getType = {};
+  let getType = {};
   return (
     functionToCheck &&
     getType.toString.call(functionToCheck) === "[object Function]"

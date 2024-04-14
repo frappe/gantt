@@ -39,25 +39,23 @@ var Gantt = (function () {
       if (typeof date === "string") {
         let date_parts, time_parts;
         const parts = date.split(" ");
-
         date_parts = parts[0]
           .split(date_separator)
           .map((val) => parseInt(val, 10));
         time_parts = parts[1] && parts[1].split(time_separator);
 
         // month is 0 indexed
-        date_parts[1] = date_parts[1] - 1;
+        date_parts[1] = date_parts[1] ? date_parts[1] - 1 : 0;
 
         let vals = date_parts;
 
         if (time_parts && time_parts.length) {
-          if (time_parts.length == 4) {
+          if (time_parts.length === 4) {
             time_parts[3] = "0." + time_parts[3];
             time_parts[3] = parseFloat(time_parts[3]) * 1000;
           }
           vals = vals.concat(time_parts);
         }
-
         return new Date(...vals);
       }
     },
@@ -113,13 +111,13 @@ var Gantt = (function () {
         .sort((a, b) => b.length - a.length) // big string first
         .forEach((key) => {
           if (str.includes(key)) {
-            str = str.replace(key, `$${formatted_values.length}`);
+            str = str.replaceAll(key, `$${formatted_values.length}`);
             formatted_values.push(format_map[key]);
           }
         });
 
       formatted_values.forEach((value, i) => {
-        str = str.replace(`$${i}`, value);
+        str = str.replaceAll(`$${i}`, value);
       });
 
       return str;
@@ -232,7 +230,7 @@ var Gantt = (function () {
 
       // Feb
       const year = date.getFullYear();
-      if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
+      if ((year % 4 === 0 && year % 100 != 0) || year % 400 === 0) {
         return 29;
       }
       return 28;
@@ -645,15 +643,25 @@ var Gantt = (function () {
     }
 
     setup_click_event() {
+      let in_action = false;
+      $.on(this.group, "mouseover", (e) => this.gantt.trigger_event("hover", [this.task, e.screenX, e.screenY, e]));
+
       $.on(this.group, "focus " + this.gantt.options.popup_trigger, (e) => {
+        this.gantt.trigger_event("click", [this.task]);
         if (this.action_completed) {
           // just finished a move action, wait for a few seconds
           return;
         }
+        if (in_action) {
+          this.gantt.hide_popup();
+          this.group.classList.remove("active");
+        } else {
+          this.show_popup();
+          this.gantt.unselect_all();
+          this.group.classList.add("active");
+        }
 
-        this.show_popup();
-        this.gantt.unselect_all();
-        this.group.classList.add("active");
+        in_action = !in_action;
       });
 
       $.on(this.group, "dblclick", (e) => {
@@ -662,7 +670,7 @@ var Gantt = (function () {
           return;
         }
 
-        this.gantt.trigger_event("click", [this.task]);
+        this.gantt.trigger_event("double_click", [this.task]);
       });
     }
 
@@ -1292,7 +1300,7 @@ var Gantt = (function () {
           if (task.dependencies) {
             deps = task.dependencies
               .split(",")
-              .map((d) => d.trim())
+              .map((d) => d.trim().replaceAll(' ', '_'))
               .filter((d) => d);
           }
           task.dependencies = deps;
@@ -1302,7 +1310,7 @@ var Gantt = (function () {
         if (!task.id) {
           task.id = generate_id(task);
         } else if (typeof task.id === 'string') {
-          task.id = task.id.replace(' ', '_');
+          task.id = task.id.replaceAll(' ', '_');
         } else {
           task.id = `${task.id}`;
         }
@@ -1395,8 +1403,7 @@ var Gantt = (function () {
       const [padding_start, padding_end] = this.options.view_mode_padding[
         viewKey
       ].map(date_utils.parse_duration);
-
-      this.gantt_start = date_utils.add(
+      gantt_start = date_utils.add(
         gantt_start,
         -padding_start.duration,
         padding_start.scale,
@@ -1412,15 +1419,8 @@ var Gantt = (function () {
       } else {
         format_string = "YYYY-MM-DD HH";
       }
-
-      this.gantt_start = new Date(
-        date_utils.format(
-          date_utils.add(gantt_start, -padding_end.duration, padding_end.scale),
-          format_string
-        )
-      );
+      this.gantt_start = date_utils.parse(date_utils.format(gantt_start, format_string));
       this.gantt_start.setHours(0, 0, 0, 0);
-
       this.gantt_end = date_utils.add(
         gantt_end,
         padding_end.duration,
@@ -1594,8 +1594,9 @@ var Gantt = (function () {
     }
 
     highlightWeekends() {
+      if (!this.view_is('Day') && !this.view_is('Half Day')) return
       for (let d = new Date(this.gantt_start); d <= this.gantt_end; d.setDate(d.getDate() + 1)) {
-        if (d.getDay() == 0 || d.getDay() == 6) {
+        if (d.getDay() === 0 || d.getDay() === 6) {
           const x = (date_utils.diff(d, this.gantt_start, 'hour') /
             this.options.step) *
             this.options.column_width;
@@ -1606,7 +1607,7 @@ var Gantt = (function () {
           createSVG('rect', {
             x,
             y: 0,
-            width: this.options.column_width,
+            width: (this.view_is('Day') ? 1 : 2) * this.options.column_width,
             height,
             class: 'holiday-highlight',
             append_to: this.layers.grid,
@@ -1725,16 +1726,15 @@ var Gantt = (function () {
       let last_date = null;
       const dates = this.dates.map((date, i) => {
         const d = this.get_date_info(date, last_date, i);
-        last_date = date;
+        last_date = d;
         return d;
       });
       return dates;
     }
 
-    get_date_info(date, last_date, i) {
-      if (!last_date) {
-        last_date = date_utils.add(date, 1, "day");
-      }
+    get_date_info(date, last_date_info, i) {
+      let last_date = last_date_info ? last_date_info.date : date_utils.add(date, 1, "day");
+
       const date_text = {
         Hour_lower: date_utils.format(date, "HH", this.options.language),
         "Quarter Day_lower": date_utils.format(date, "HH", this.options.language),
@@ -1780,9 +1780,11 @@ var Gantt = (function () {
             ? date_utils.format(date, "YYYY", this.options.language)
             : "",
       };
-
+      let column_width = this.view_is(VIEW_MODE.MONTH) ? (date_utils.get_days_in_month(date) * this.options.column_width) / 30 : this.options.column_width;
       const base_pos = {
-        x: i * this.options.column_width,
+        x: last_date_info
+          ? last_date_info.base_pos_x + last_date_info.column_width
+          : 0,
         lower_y: this.options.header_height,
         upper_y: this.options.header_height - 25,
       };
@@ -1798,13 +1800,16 @@ var Gantt = (function () {
         Day_upper: (this.options.column_width * 30) / 2,
         Week_lower: 0,
         Week_upper: (this.options.column_width * 4) / 2,
-        Month_lower: this.options.column_width / 2,
-        Month_upper: (this.options.column_width * 12) / 2,
+        Month_lower: column_width / 2,
+        Month_upper: (column_width * 12) / 2,
         Year_lower: this.options.column_width / 2,
         Year_upper: (this.options.column_width * 30) / 2,
       };
 
       return {
+        date,
+        column_width,
+        base_pos_x: base_pos.x,
         upper_text: date_text[`${this.options.view_mode}_upper`],
         lower_text: date_text[`${this.options.view_mode}_lower`],
         upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
@@ -2070,8 +2075,13 @@ var Gantt = (function () {
       $.on(this.$svg, "mouseup", () => {
         is_resizing = false;
         if (!($bar_progress && $bar_progress.finaldx)) return;
+
+        $bar_progress.finaldx = 0;
         bar.progress_changed();
         bar.set_action_completed();
+        bar = null;
+        $bar_progress = null;
+        $bar = null;
       });
     }
 
@@ -2142,13 +2152,13 @@ var Gantt = (function () {
 
     get_task(id) {
       return this.tasks.find((task) => {
-        return task.id == id;
+        return task.id === id;
       });
     }
 
     get_bar(id) {
       return this.bars.find((bar) => {
-        return bar.task.id == id;
+        return bar.task.id === id;
       });
     }
 
