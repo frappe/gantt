@@ -294,10 +294,6 @@ export default class Gantt {
     }
     this.gantt_start = date_utils.parse(date_utils.format(gantt_start, format_string));
     this.gantt_start.setHours(0, 0, 0, 0)
-    console.log(gantt_start, date_utils.parse(date_utils.format(
-      date_utils.add(gantt_start, -padding_end.duration, padding_end.scale),
-      format_string
-    )))
     this.gantt_end = date_utils.add(
       gantt_end,
       padding_end.duration,
@@ -603,16 +599,15 @@ export default class Gantt {
     let last_date = null;
     const dates = this.dates.map((date, i) => {
       const d = this.get_date_info(date, last_date, i);
-      last_date = date;
+      last_date = d;
       return d;
     });
     return dates;
   }
 
-  get_date_info(date, last_date, i) {
-    if (!last_date) {
-      last_date = date_utils.add(date, 1, "day");
-    }
+  get_date_info(date, last_date_info, i) {
+    let last_date = last_date_info ? last_date_info.date : date_utils.add(date, 1, "day")
+
     const date_text = {
       Hour_lower: date_utils.format(date, "HH", this.options.language),
       "Quarter Day_lower": date_utils.format(date, "HH", this.options.language),
@@ -658,9 +653,11 @@ export default class Gantt {
           ? date_utils.format(date, "YYYY", this.options.language)
           : "",
     };
-
+    let column_width = this.view_is(VIEW_MODE.MONTH) ? (date_utils.get_days_in_month(date) * this.options.column_width) / 30 : this.options.column_width;
     const base_pos = {
-      x: i * this.options.column_width,
+      x: last_date_info
+        ? last_date_info.base_pos_x + last_date_info.column_width
+        : 0,
       lower_y: this.options.header_height,
       upper_y: this.options.header_height - 25,
     };
@@ -676,13 +673,16 @@ export default class Gantt {
       Day_upper: (this.options.column_width * 30) / 2,
       Week_lower: 0,
       Week_upper: (this.options.column_width * 4) / 2,
-      Month_lower: this.options.column_width / 2,
-      Month_upper: (this.options.column_width * 12) / 2,
+      Month_lower: column_width / 2,
+      Month_upper: (column_width * 12) / 2,
       Year_lower: this.options.column_width / 2,
       Year_upper: (this.options.column_width * 30) / 2,
     };
 
     return {
+      date,
+      column_width,
+      base_pos_x: base_pos.x,
       upper_text: date_text[`${this.options.view_mode}_upper`],
       lower_text: date_text[`${this.options.view_mode}_lower`],
       upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
