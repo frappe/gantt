@@ -255,15 +255,22 @@ export default class Bar {
   }
 
   setup_click_event() {
+    let in_action = false;
     $.on(this.group, "focus " + this.gantt.options.popup_trigger, (e) => {
       if (this.action_completed) {
         // just finished a move action, wait for a few seconds
         return;
       }
+      if (in_action) {
+        this.gantt.hide_popup();
+        this.group.classList.remove("active");
+      } else {
+        this.show_popup();
+        this.gantt.unselect_all();
+        this.group.classList.add("active");
+      }
 
-      this.show_popup();
-      this.gantt.unselect_all();
-      this.group.classList.add("active");
+      in_action = !in_action
     });
 
     $.on(this.group, "dblclick", (e) => {
