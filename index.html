@@ -38,49 +38,50 @@
         	end: '2018-10-08',
         	name: 'Redesign website',
         	id: "Task 0",
-        	progress: 100
+        	progress: 80
         },
-        // {
-        // 	start: '2018-10-03',
-        // 	duration: '1m 4d',
-        // 	name: 'Write new content',
-        // 	id: "Task 1",
-        // 	progress: 5,
-        // 	dependencies: 'Task 0'
-        // },
-        // {
-        // 	start: '2018-10-04',
-        // 	end: '2018-10-08',
-        // 	name: 'Apply new styles',
-        // 	id: "Task 2",
-        // 	progress: 10,
-        // 	dependencies: 'Task 1'
-        // },
-        // {
-        // 	start: '2018-10-08',
-        // 	end: '2018-10-09',
-        // 	name: 'Review',
-        // 	id: "Task 3",
-        // 	progress: 5,
-        // 	dependencies: 'Task 2'
-        // },
-        // {
-        // 	start: '2018-10-08',
-        // 	end: '2018-10-10',
-        // 	name: 'Deploy',
-        // 	id: "Task 4",
-        // 	progress: 0,
-        // 	dependencies: 'Task 2'
-        // },
-        // {
-        // 	start: '2018-10-11',
-        // 	end: '2018-10-11',
-        // 	name: 'Go Live!',
-        // 	id: "Task 5",
-        // 	progress: 0,
-        // 	dependencies: 'Task 4',
-        // 	custom_class: 'bar-milestone'
-        // },
+        {
+        	start: '2018-09-26',
+          // Utilizes duration
+        	duration: '1m 4d',
+        	name: 'Write new content',
+        	id: "Task 1",
+        	progress: 5,
+        	dependencies: 'Task 0'
+        },
+        {
+        	start: '2018-10-04',
+        	end: '2018-10-08',
+        	name: 'Apply new styles',
+        	id: "Task 2",
+        	progress: 100,
+        	dependencies: 'Task 1'
+        },
+        {
+        	start: '2018-10-08',
+        	end: '2018-10-09',
+        	name: 'Review',
+        	id: "Task 3",
+        	progress: 5,
+        	dependencies: 'Task 2'
+        },
+        {
+        	start: '2018-10-08',
+        	end: '2018-10-10',
+        	name: 'Deploy',
+        	id: "Task 4",
+        	progress: 0,
+        	// dependencies: 'Task 2'
+        },
+        {
+        	start: '2018-10-11',
+        	end: '2018-10-11',
+        	name: 'Go Live!',
+        	id: "Task 5",
+        	progress: 0,
+        	dependencies: 'Task 2',
+        	custom_class: 'bar-milestone'
+        },
         // {
         // 	start: '2014-01-05',
         // 	end: '2019-10-12',
@@ -91,19 +92,25 @@
       ];
       var gantt_chart = new Gantt(".gantt-target", tasks, {
         on_click: (task) => {
-          console.log(task);
+          console.log("Double Click", task);
+        },
+        on_double_click: (task) => {
+          console.log("Double Click", task);
         },
         on_date_change: (task, start, end) => {
-          console.log(task, start, end);
+          console.log("Date change", task, start, end);
         },
         on_progress_change: (task, progress) => {
-          console.log(task, progress);
+          console.log("Progress Change", task, progress);
         },
         on_view_change: (mode) => {
-          console.log(mode);
+          console.log("View Change", mode);
         },
-        view_mode: "Half Day",
-        view_mode_padding: { DAY: "1d" },
+        on_hover: (task, x, y) => {
+          console.log("Hover", x, y);
+        },
+        view_mode: "Day",
+        view_mode_padding: { DAY: "7d" },
         language: "en",
       });
       console.log(gantt_chart);

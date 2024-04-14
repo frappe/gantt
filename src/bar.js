@@ -256,7 +256,10 @@ export default class Bar {
 
   setup_click_event() {
     let in_action = false;
+    $.on(this.group, "mouseover", (e) => this.gantt.trigger_event("hover", [this.task, e.screenX, e.screenY, e]))
+
     $.on(this.group, "focus " + this.gantt.options.popup_trigger, (e) => {
+      this.gantt.trigger_event("click", [this.task]);
       if (this.action_completed) {
         // just finished a move action, wait for a few seconds
         return;
@@ -279,7 +282,7 @@ export default class Bar {
         return;
       }
 
-      this.gantt.trigger_event("click", [this.task]);
+      this.gantt.trigger_event("double_click", [this.task]);
     });
   }
 
