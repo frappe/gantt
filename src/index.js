@@ -260,7 +260,6 @@ export default class Gantt {
         this.gantt_end = task._end;
       }
     }
-    console.log('i', this.gantt_start)
     let gantt_start, gantt_end;
     if (!this.gantt_start) gantt_start = new Date();
     else gantt_start = date_utils.start_of(this.gantt_start, "day");
@@ -293,12 +292,12 @@ export default class Gantt {
     } else {
       format_string = "YYYY-MM-DD HH"
     }
-    this.gantt_start = date_utils.parse(date_utils.format(
+    this.gantt_start = date_utils.parse(date_utils.format(gantt_start, format_string));
+    this.gantt_start.setHours(0, 0, 0, 0)
+    console.log(gantt_start, date_utils.parse(date_utils.format(
       date_utils.add(gantt_start, -padding_end.duration, padding_end.scale),
       format_string
-    ));
-    this.gantt_start.setHours(0, 0, 0, 0)
-
+    )))
     this.gantt_end = date_utils.add(
       gantt_end,
       padding_end.duration,
@@ -312,7 +311,6 @@ export default class Gantt {
 
     while (cur_date === null || cur_date < this.gantt_end) {
       if (!cur_date) {
-        console.log(this.gantt_start)
         cur_date = date_utils.clone(this.gantt_start);
       } else {
         if (this.view_is(VIEW_MODE.YEAR)) {
@@ -473,6 +471,7 @@ export default class Gantt {
   }
 
   highlightWeekends() {
+    if (!this.view_is('Day') && !this.view_is('Half Day')) return
     for (let d = new Date(this.gantt_start); d <= this.gantt_end; d.setDate(d.getDate() + 1)) {
       if (d.getDay() === 0 || d.getDay() === 6) {
         const x = (date_utils.diff(d, this.gantt_start, 'hour') /
@@ -1031,7 +1030,6 @@ export default class Gantt {
   }
 
   get_bar(id) {
-    console.log(id, this.bars)
     return this.bars.find((bar) => {
       return bar.task.id === id;
     });

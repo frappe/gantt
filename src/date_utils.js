@@ -36,14 +36,13 @@ export default {
     if (typeof date === "string") {
       let date_parts, time_parts;
       const parts = date.split(" ");
-
       date_parts = parts[0]
         .split(date_separator)
         .map((val) => parseInt(val, 10));
       time_parts = parts[1] && parts[1].split(time_separator);
 
       // month is 0 indexed
-      date_parts[1] = date_parts[1] - 1;
+      date_parts[1] = date_parts[1] ? date_parts[1] - 1 : 0;
 
       let vals = date_parts;
 
@@ -54,7 +53,6 @@ export default {
         }
         vals = vals.concat(time_parts);
       }
-
       return new Date(...vals);
     }
   },
