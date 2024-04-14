@@ -260,6 +260,7 @@ export default class Gantt {
         this.gantt_end = task._end;
       }
     }
+    console.log('i', this.gantt_start)
     let gantt_start, gantt_end;
     if (!this.gantt_start) gantt_start = new Date();
     else gantt_start = date_utils.start_of(this.gantt_start, "day");
@@ -276,8 +277,7 @@ export default class Gantt {
     const [padding_start, padding_end] = this.options.view_mode_padding[
       viewKey
     ].map(date_utils.parse_duration);
-
-    this.gantt_start = date_utils.add(
+    gantt_start = date_utils.add(
       gantt_start,
       -padding_start.duration,
       padding_start.scale,
@@ -293,13 +293,10 @@ export default class Gantt {
     } else {
       format_string = "YYYY-MM-DD HH"
     }
-
-    this.gantt_start = new Date(
-      date_utils.format(
-        date_utils.add(gantt_start, -padding_end.duration, padding_end.scale),
-        format_string
-      )
-    );
+    this.gantt_start = date_utils.parse(date_utils.format(
+      date_utils.add(gantt_start, -padding_end.duration, padding_end.scale),
+      format_string
+    ));
     this.gantt_start.setHours(0, 0, 0, 0)
 
     this.gantt_end = date_utils.add(
@@ -315,6 +312,7 @@ export default class Gantt {
 
     while (cur_date === null || cur_date < this.gantt_end) {
       if (!cur_date) {
+        console.log(this.gantt_start)
         cur_date = date_utils.clone(this.gantt_start);
       } else {
         if (this.view_is(VIEW_MODE.YEAR)) {
@@ -487,7 +485,7 @@ export default class Gantt {
         createSVG('rect', {
           x,
           y: 0,
-          width: this.options.column_width,
+          width: (this.view_is('Day') ? 1 : 2) * this.options.column_width,
           height,
           class: 'holiday-highlight',
           append_to: this.layers.grid,
