@@ -92,7 +92,8 @@
   stroke-width: 0.2;
 }
 .gantt .tick.thick {
-  stroke-width: 0.4;
+  stroke: #000;
+  stroke-width: 0.5;
 }
 .gantt .today-highlight {
   fill: #f6e796;

@@ -1227,6 +1227,7 @@ var Gantt = (function () {
         language: "en",
         readonly: false,
         highlight_weekend: true,
+        scroll_today: true
       };
       this.options = Object.assign({}, default_options, options);
       if (!options.view_mode_padding) options.view_mode_padding = {};
@@ -1464,6 +1465,7 @@ var Gantt = (function () {
       this.map_arrows_on_bars();
       this.set_width();
       this.set_scroll_position();
+      if (this.options.scroll_today) this.scroll_today();
     }
 
     setup_layers() {
@@ -1869,13 +1871,17 @@ var Gantt = (function () {
       }
     }
 
-    set_scroll_position() {
+    set_scroll_position(date) {
+      if (!date) {
+        date = this.gantt_start;
+      }
+
       const parent_element = this.$svg.parentElement;
       if (!parent_element) return;
 
       const hours_before_first_task = date_utils.diff(
         this.get_oldest_starting_date(),
-        this.gantt_start,
+        date,
         "hour",
       );
 
@@ -1885,6 +1891,12 @@ var Gantt = (function () {
         this.options.column_width;
 
       parent_element.scrollLeft = scroll_pos;
+    }
+
+    scroll_today() {
+      const oldest = this.get_oldest_starting_date().getTime();
+      const t = new Date() - oldest;
+      this.set_scroll_position(new Date(this.gantt_start.getTime() - t));
     }
 
     bind_grid_click() {

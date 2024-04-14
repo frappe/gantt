@@ -45,7 +45,8 @@ $light-blue: #c4c4e9 !default;
     stroke-width: 0.2;
 
     &.thick {
-      stroke-width: 0.4;
+      stroke: #000;
+      stroke-width: 0.5;
     }
   }
 
