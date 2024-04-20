@@ -23,9 +23,6 @@ export default class Popup {
     if (!options.target_element) {
       throw new Error("target_element is required to show popup");
     }
-    if (!options.position) {
-      options.position = "left";
-    }
     const target_element = options.target_element;
 
     if (this.custom_html) {
@@ -48,15 +45,11 @@ export default class Popup {
       position_meta = options.target_element.getBBox();
     }
 
-    if (options.position === "left") {
-      this.parent.style.left =
-        position_meta.x + (position_meta.width + 10) + "px";
-      this.parent.style.top = position_meta.y + "px";
+    this.parent.style.left = options.x - this.parent.clientWidth / 2 + "px";
+    this.parent.style.top = position_meta.y + position_meta.height + 10 + "px";
 
-      this.pointer.style.transform = "rotateZ(90deg)";
-      this.pointer.style.left = "-7px";
-      this.pointer.style.top = "2px";
-    }
+    this.pointer.style.left = this.parent.clientWidth / 2 + "px";
+    this.pointer.style.top = "-15px";
 
     // show
     this.parent.style.opacity = 1;

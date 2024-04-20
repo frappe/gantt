@@ -149,8 +149,7 @@ export default class Bar {
       y: this.gantt.options.header_height - 17,
       width: this.width,
       height: this.height * 0.8,
-      rx: this.corner_radius * 2,
-      ry: this.corner_radius * 2,
+      rx: 12,
       class: "date-highlight",
       append_to: this.bar_group,
     });
@@ -283,7 +282,7 @@ export default class Bar {
         this.gantt.hide_popup();
         this.group.classList.remove("active");
       } else {
-        this.show_popup();
+        this.show_popup(e.offsetX);
         this.gantt.unselect_all();
         this.group.classList.add("active");
       }
@@ -301,7 +300,7 @@ export default class Bar {
     });
   }
 
-  show_popup() {
+  show_popup(x) {
     if (this.gantt.bar_being_dragged) return;
 
     const start_date = date_utils.format(
@@ -317,6 +316,7 @@ export default class Bar {
     const subtitle = start_date + " - " + end_date;
 
     this.gantt.show_popup({
+      x,
       target_element: this.$bar,
       title: this.task.name,
       subtitle: subtitle,

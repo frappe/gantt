@@ -227,14 +227,17 @@ $light-blue: #c4c4e9 !default;
     position: absolute;
     top: 0;
     left: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0);
     padding: 0;
     color: #959da5;
     border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0);
 
     .title {
-      border-bottom: 3px solid $progress;
+      border-bottom: 1px solid $progress;
       padding: 10px;
+      text-align: center;
+      color: $text-light;
     }
 
     .subtitle {
@@ -247,7 +250,7 @@ $light-blue: #c4c4e9 !default;
       height: 5px;
       margin: 0 0 0 -5px;
       border: 5px solid transparent;
-      border-top-color: rgba(0, 0, 0, 0.8);
+      border-bottom-color: rgba(0, 0, 0, 0.8);
     }
   }
 }
