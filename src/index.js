@@ -475,13 +475,10 @@ export default class Gantt {
         const x = (date_utils.diff(d, this.gantt_start, 'hour') /
           this.options.step) *
           this.options.column_width;
-        const height =
-          (this.options.bar_height + this.options.padding) * this.tasks.length +
-          this.options.header_height +
-          this.options.padding / 2;
+        const height = (this.options.bar_height + this.options.padding) * this.tasks.length;
         createSVG('rect', {
           x,
-          y: 0,
+          y: this.options.header_height + this.options.padding / 2,
           width: (this.view_is('Day') ? 1 : 2) * this.options.column_width,
           height,
           class: 'holiday-highlight',
