@@ -34,48 +34,48 @@
     <script>
       let tasks = [
         {
-        	start: '2018-10-01',
-        	end: '2018-10-08',
+        	start: '2024-10-01',
+        	end: '2024-10-08',
         	name: 'Redesign website',
         	id: "Task 0",
-        	progress: 80
+        	progress: 30
         },
         {
-        	start: '2018-09-26',
+        	start: '2024-09-26',
           // Utilizes duration
-        	duration: '1m 4d',
+        	duration: '6d',
         	name: 'Write new content',
         	id: "Task 1",
         	progress: 5,
-        	dependencies: 'Task 0'
+          important: true
         },
         {
-        	start: '2018-10-04',
-        	end: '2018-10-08',
+        	start: '2024-10-04',
+        	end: '2024-10-08',
         	name: 'Apply new styles',
         	id: "Task 2",
-        	progress: 100,
+        	progress: 80,
         	dependencies: 'Task 1'
         },
         {
-        	start: '2018-10-08',
-        	end: '2018-10-09',
+        	start: '2024-10-08',
+        	end: '2024-10-09',
         	name: 'Review',
         	id: "Task 3",
         	progress: 5,
         	dependencies: 'Task 2'
         },
         {
-        	start: '2018-10-08',
-        	end: '2018-10-10',
+        	start: '2024-10-08',
+        	end: '2024-10-10',
         	name: 'Deploy',
         	id: "Task 4",
         	progress: 0,
         	// dependencies: 'Task 2'
         },
         {
-        	start: '2018-10-11',
-        	end: '2018-10-11',
+        	start: '2024-10-11',
+        	end: '2024-10-11',
         	name: 'Go Live!',
         	id: "Task 5",
         	progress: 0,
@@ -95,24 +95,24 @@
       // tasks = [...tasks, ...Array.from({length: tasks.length * 3}, (_, i) => ({...tasks[i % 3], id: i}))]
       
       let gantt_chart = new Gantt(".gantt-target", tasks, {
-        on_click: (task) => {
-          console.log("Double Click", task);
-        },
-        on_double_click: (task) => {
-          console.log("Double Click", task);
-        },
-        on_date_change: (task, start, end) => {
-          console.log("Date change", task, start, end);
-        },
-        on_progress_change: (task, progress) => {
-          console.log("Progress Change", task, progress);
-        },
-        on_view_change: (mode) => {
-          console.log("View Change", mode);
-        },
-        on_hover: (task, x, y) => {
-          console.log("Hover", x, y);
-        },
+        // on_click: (task) => {
+        //   console.log("Double Click", task);
+        // },
+        // on_double_click: (task) => {
+        //   console.log("Double Click", task);
+        // },
+        // on_date_change: (task, start, end) => {
+        //   console.log("Date change", task, start, end);
+        // },
+        // on_progress_change: (task, progress) => {
+        //   console.log("Progress Change", task, progress);
+        // },
+        // on_view_change: (mode) => {
+        //   console.log("View Change", mode);
+        // },
+        // on_hover: (task, x, y) => {
+        //   console.log("Hover", x, y);
+        // },
         view_mode: "Day",
         view_mode_padding: { DAY: "7d" },
         language: "en",
