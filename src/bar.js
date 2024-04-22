@@ -259,11 +259,11 @@ export default class Bar {
     $.on(this.group, "mouseover", (e) => this.gantt.trigger_event("hover", [this.task, e.screenX, e.screenY, e]))
 
     $.on(this.group, "focus " + this.gantt.options.popup_trigger, (e) => {
-      this.gantt.trigger_event("click", [this.task]);
       if (this.action_completed) {
         // just finished a move action, wait for a few seconds
         return;
       }
+      if (!in_action) this.gantt.trigger_event("click", [this.task]);
       if (in_action) {
         this.gantt.hide_popup();
         this.group.classList.remove("active");
