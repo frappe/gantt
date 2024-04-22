@@ -340,9 +340,11 @@ export default class Bar {
         return;
       }
       this.update_attr(bar, "x", x);
+      this.update_attr(this.$date_highlight, "x", x);
     }
     if (width) {
       this.update_attr(bar, "width", width);
+      this.update_attr(this.$date_highlight, "width", width);
     }
     this.update_label_position();
     this.update_handle_position();

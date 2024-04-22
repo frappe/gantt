@@ -101,7 +101,8 @@ export default class Gantt {
       readonly: false,
       highlight_weekend: true,
       scroll_today: true,
-      lines: 'both'
+      lines: 'both',
+      auto_move_label: true,
     };
     this.options = Object.assign({}, default_options, options);
     if (!options.view_mode_padding) options.view_mode_padding = {}
@@ -854,10 +855,11 @@ export default class Gantt {
 
       if (dx) {
         localBars = ids.map(id => this.get_bar(id));
-
-        localBars.forEach(bar => {
-          bar.update_label_position_on_horizontal_scroll({ x: dx, sx: e.currentTarget.scrollLeft });
-        });
+        if (this.options.auto_move_label) {
+          localBars.forEach(bar => {
+            bar.update_label_position_on_horizontal_scroll({ x: dx, sx: e.currentTarget.scrollLeft });
+          });
+        }
       }
 
       x_on_scroll_start = e.currentTarget.scrollLeft;
