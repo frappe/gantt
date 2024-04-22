@@ -807,6 +807,7 @@ export default class Gantt {
 
     $.on(this.$svg, "mousedown", ".bar-wrapper, .handle", (e, element) => {
       const bar_wrapper = $.closest(".bar-wrapper", element);
+      bars.forEach((bar) => bar.group.classList.remove("active"));
 
       if (element.classList.contains("left")) {
         is_resizing_left = true;
@@ -817,6 +818,7 @@ export default class Gantt {
       }
 
       bar_wrapper.classList.add("active");
+      this.popup.parent.classList.add('hidden')
 
       x_on_start = e.offsetX;
       y_on_start = e.offsetY;
@@ -898,9 +900,6 @@ export default class Gantt {
     });
 
     document.addEventListener("mouseup", (e) => {
-      if (is_dragging || is_resizing_left || is_resizing_right) {
-        bars.forEach((bar) => bar.group.classList.remove("active"));
-      }
 
       is_dragging = false;
       is_resizing_left = false;
@@ -1028,6 +1027,7 @@ export default class Gantt {
     [...this.$svg.querySelectorAll(".bar-wrapper")].forEach((el) => {
       el.classList.remove("active");
     });
+    this.popup.parent.classList.remove('hidden')
   }
 
   view_is(modes) {

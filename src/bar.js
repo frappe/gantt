@@ -271,23 +271,12 @@ export default class Bar {
   setup_click_event() {
     let in_action = false;
     $.on(this.group, "mouseover", (e) => this.gantt.trigger_event("hover", [this.task, e.screenX, e.screenY, e]))
+    $.on(this.group, "mouseenter", (e) => this.show_popup(e.offsetX))
+    $.on(this.group, "mouseleave", () => this.gantt.hide_popup())
+
 
     $.on(this.group, "focus " + this.gantt.options.popup_trigger, (e) => {
       this.gantt.trigger_event("click", [this.task]);
-      if (this.action_completed) {
-        // just finished a move action, wait for a few seconds
-        return;
-      }
-      if (in_action) {
-        this.gantt.hide_popup();
-        this.group.classList.remove("active");
-      } else {
-        this.show_popup(e.offsetX);
-        this.gantt.unselect_all();
-        this.group.classList.add("active");
-      }
-
-      in_action = !in_action
     });
 
     $.on(this.group, "dblclick", (e) => {
@@ -313,7 +302,7 @@ export default class Bar {
       "MMM D",
       this.gantt.options.language,
     );
-    const subtitle = start_date + " - " + end_date;
+    const subtitle = `${start_date} -  ${end_date}<br/>Progress: ${this.task.progress}`;
 
     this.gantt.show_popup({
       x,

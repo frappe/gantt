@@ -158,16 +158,16 @@ $light-blue: #c4c4e9 !default;
     transition: opacity 0.3s ease;
   }
 
-  &:hover {
-    .handle {
-      visibility: visible;
-      opacity: 1;
-    }
-  }
-
   .bar-wrapper {
     cursor: pointer;
     outline: none;
+
+    &.active {
+      & .handle {
+        visibility: visible;
+        opacity: 1;
+      }
+    }
 
     .bar {
       -webkit-filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, .7));
@@ -185,6 +185,7 @@ $light-blue: #c4c4e9 !default;
         display: block;
       }
     }
+
 
   }
 
@@ -220,6 +221,11 @@ $light-blue: #c4c4e9 !default;
     color: #959da5;
     border-radius: 3px;
     border: 1px solid rgba(0, 0, 0);
+    width: max-content;
+
+    &.hidden {
+      opacity: 0 !important;
+    }
 
     .title {
       border-bottom: 1px solid $progress;
