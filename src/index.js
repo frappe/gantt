@@ -100,7 +100,8 @@ export default class Gantt {
       language: "en",
       readonly: false,
       highlight_weekend: true,
-      scroll_today: true
+      scroll_today: true,
+      lines: 'both'
     };
     this.options = Object.assign({}, default_options, options);
     if (!options.view_mode_padding) options.view_mode_padding = {}
@@ -132,11 +133,16 @@ export default class Gantt {
         });
       }
       task._end = date_utils.parse(task.end);
-
+      let diff = date_utils.diff(task._end, task._start, "year");
+      if (diff < 0) {
+        console.log(task._end, task._start)
+        throw Error("start of task can't be after end of task: in task #, " + (i + 1))
+      }
       // make task invalid if duration too large
       if (date_utils.diff(task._end, task._start, "year") > 10) {
         task.end = null;
       }
+
 
       // cache index
       task._index = i;
@@ -401,15 +407,16 @@ export default class Gantt {
         class: "grid-row",
         append_to: rows_layer,
       });
-
-      createSVG("line", {
-        x1: 0,
-        y1: row_y + row_height,
-        x2: row_width,
-        y2: row_y + row_height,
-        class: "row-line",
-        append_to: lines_layer,
-      });
+      if (this.options.lines === 'both' || this.options.lines === 'horizontal') {
+        createSVG("line", {
+          x1: 0,
+          y1: row_y + row_height,
+          x2: row_width,
+          y2: row_y + row_height,
+          class: "row-line",
+          append_to: lines_layer,
+        });
+      }
 
       row_y += this.options.bar_height + this.options.padding;
     }
@@ -429,6 +436,7 @@ export default class Gantt {
   }
 
   make_grid_ticks() {
+    if (this.options.lines !== 'both' && this.options.lines !== 'vertical') return
     let tick_x = 0;
     let tick_y = this.options.header_height + this.options.padding / 2;
     let tick_height =
