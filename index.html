@@ -34,14 +34,14 @@
     <script>
       let tasks = [
         {
-        	start: '2024-10-01',
-        	end: '2024-10-08',
+        	start: '2024-04-01',
+        	end: '2024-04-08',
         	name: 'Redesign website',
         	id: "Task 0",
         	progress: 30
         },
         {
-        	start: '2024-09-26',
+        	start: '2024-03-26',
           // Utilizes duration
         	duration: '6d',
         	name: 'Write new content',
@@ -50,32 +50,32 @@
           important: true
         },
         {
-        	start: '2024-10-04',
-        	end: '2024-10-08',
+        	start: '2024-04-04',
+        	end: '2024-04-08',
         	name: 'Apply new styles',
         	id: "Task 2",
         	progress: 80,
         	dependencies: 'Task 1'
         },
         {
-        	start: '2024-10-08',
-        	end: '2024-10-09',
+        	start: '2024-04-08',
+        	end: '2024-04-09',
         	name: 'Review',
         	id: "Task 3",
         	progress: 5,
         	dependencies: 'Task 2'
         },
         {
-        	start: '2024-10-08',
-        	end: '2024-10-10',
+        	start: '2024-04-08',
+        	end: '2024-04-10',
         	name: 'Deploy',
         	id: "Task 4",
         	progress: 0,
         	// dependencies: 'Task 2'
         },
         {
-        	start: '2024-10-11',
-        	end: '2024-10-11',
+        	start: '2024-04-21',
+        	end: '2024-04-29',
         	name: 'Go Live!',
         	id: "Task 5",
         	progress: 0,
@@ -116,6 +116,7 @@
         view_mode: "Day",
         view_mode_padding: { DAY: "7d" },
         language: "en",
+        scroll_today: false,
         // readonly: true
       });
       console.log(gantt_chart);

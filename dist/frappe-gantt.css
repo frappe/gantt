@@ -66,17 +66,41 @@
   border-top-color: #333;
 }
 
+.gantt-container .grid-header {
+  background-color: #ffffff;
+  position: sticky;
+  top: 0;
+  left: 0;
+}
+.gantt-container .lower-text,
+.gantt-container .upper-text {
+  font-size: 14px;
+  text-anchor: middle;
+  color: #666;
+}
+.gantt-container .lower-text {
+  position: absolute;
+  width: fit-content;
+}
+.gantt-container #today-button {
+  position: sticky;
+  left: 10px;
+  top: 5px;
+  background-color: #2c94ec;
+  border: none;
+  color: #fff;
+  padding: 4px 10px;
+  font-size: 14px;
+  border-radius: 2px;
+}
+
 .gantt {
   user-select: none;
   -webkit-user-select: none;
+  position: absolute;
 }
 .gantt .grid-background {
   fill: none;
-}
-.gantt .grid-header {
-  fill: #ffffff;
-  stroke: #e0e0e0;
-  stroke-width: 1.4;
 }
 .gantt .grid-row {
   fill: #ffffff;
@@ -143,14 +167,14 @@
   fill: #fff;
 }
 .gantt .bar-label {
-  fill: #333;
+  fill: #111;
   dominant-baseline: central;
   font-family: Helvetica;
   font-size: 14px;
   font-weight: 400;
 }
 .gantt .bar-label.big {
-  fill: #333;
+  fill: #111;
   text-anchor: start;
 }
 .gantt .bar-wrapper.important .bar {
@@ -172,42 +196,24 @@
   visibility: hidden;
   transition: opacity 0.3s ease;
 }
-.gantt:hover .handle {
+.gantt .bar-wrapper {
+  cursor: pointer;
+  outline: none;
+}
+.gantt .bar-wrapper.active .handle {
   visibility: visible;
   opacity: 1;
 }
-.gantt .bar-wrapper {
-  cursor: pointer;
-}
 .gantt .bar-wrapper .bar {
-  outline: groove 1px black;
+  -webkit-filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.7));
+  filter: drop-shadow(0 0 2px rgba(17, 43, 66, 0.16));
   border-radius: 3px;
 }
-.gantt .bar-wrapper.important .bar {
-  outline: none;
-  outline-width: 1.5px;
-}
-.gantt .bar-wrapper.important .bar:active {
-  outline: 1px dotted;
-}
 .gantt .bar-wrapper:hover .bar {
-  outline-width: 1.5px;
   transition: transform 0.3s ease;
 }
 .gantt .bar-wrapper:hover .date-highlight {
   display: block;
-}
-.gantt .bar-wrapper.active .bar {
-  outline-style: dotted;
-}
-.gantt .lower-text,
-.gantt .upper-text {
-  font-size: 14px;
-  text-anchor: middle;
-}
-.gantt .lower-text,
-.gantt .upper-text {
-  fill: #333;
 }
 .gantt .hide {
   display: none;
@@ -228,6 +234,10 @@
   color: #959da5;
   border-radius: 3px;
   border: 1px solid rgb(0, 0, 0);
+  width: max-content;
+}
+.gantt-container .popup-wrapper.hidden {
+  opacity: 0 !important;
 }
 .gantt-container .popup-wrapper .title {
   border-bottom: 1px solid #dedfe0;

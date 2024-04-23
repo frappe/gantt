@@ -424,13 +424,19 @@ export default class Gantt {
   }
 
   make_grid_header() {
-    let header = document.createElement("div");
+    let $header = document.createElement("div");
 
-    header.style.height = this.options.header_height + 10 + "px";
-    header.style.width = this.dates.length * this.options.column_width + "px";
-    header.classList.add('grid-header')
-    this.$header = header
-    this.$svg.parentElement.appendChild(header)
+    $header.style.height = this.options.header_height + 10 + "px";
+    $header.style.width = this.dates.length * this.options.column_width + "px";
+    $header.classList.add('grid-header')
+    this.$header = $header
+    this.$svg.parentElement.appendChild($header)
+
+    let $today_button = document.createElement('button')
+    $today_button.id = 'today-button'
+    $today_button.textContent = 'Today'
+    $today_button.onclick = this.scroll_today.bind(this)
+    this.$header.appendChild($today_button)
   }
 
   make_grid_ticks() {
@@ -681,7 +687,7 @@ export default class Gantt {
       Year_lower: this.options.column_width / 2,
       Year_upper: (this.options.column_width * 30) / 2,
     };
-
+    console.log(base_pos.x, x_pos[`${this.options.view_mode}_lower`],)
     return {
       date,
       column_width,
@@ -763,8 +769,7 @@ export default class Gantt {
       (hours_before_first_task / this.options.step) *
       this.options.column_width -
       this.options.column_width;
-
-    parent_element.scrollLeft = scroll_pos;
+    console.log(parent_element.scrollTo({ left: scroll_pos, behavior: 'smooth' }))
   }
 
   scroll_today() {
@@ -840,7 +845,6 @@ export default class Gantt {
       let localBars = [];
       const ids = [];
       let dx;
-
       if (x_on_scroll_start) {
         dx = e.currentTarget.scrollLeft - x_on_scroll_start;
       }

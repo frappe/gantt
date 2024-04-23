@@ -36,6 +36,18 @@ $light-blue: #c4c4e9 !default;
     position: absolute;
     width: fit-content;
   }
+
+  #today-button {
+    position: sticky;
+    left: 10px;
+    top: 5px;
+    background-color: $progress-important;
+    border: none;
+    color: $text-light;
+    padding: 4px 10px;
+    font-size: 14px;
+    border-radius: 2px;
+  }
 }
 
 .gantt {
