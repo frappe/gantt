@@ -10,26 +10,44 @@ $light-yellow: #f6e796 !default;
 $holiday-color: #f3f4f7 !default;
 $text-muted: #666 !default;
 $text-light: #fff !default;
-$text-dark: #333 !default;
+$text-dark: #111 !default;
 $progress-important: #2c94ec !default;
 $progress: #dedfe0 !default;
 $handle-color: #dcdce4 !default;
 $handle-color-important: #94c4f4 !default;
 $light-blue: #c4c4e9 !default;
 
+.gantt-container {
+  .grid-header {
+    background-color: #ffffff;
+    position: sticky;
+    top: 0;
+    left: 0;
+  }
+
+  .lower-text,
+  .upper-text {
+    font-size: 14px;
+    text-anchor: middle;
+    color: $text-muted;
+  }
+
+  .lower-text {
+    position: absolute;
+    width: fit-content;
+  }
+}
+
 .gantt {
   user-select: none;
   -webkit-user-select: none;
+  position: absolute;
 
   .grid-background {
     fill: none;
   }
 
-  .grid-header {
-    fill: #ffffff;
-    stroke: $border-color;
-    stroke-width: 1.4;
-  }
+
 
   .grid-row {
     fill: #ffffff;
@@ -171,7 +189,7 @@ $light-blue: #c4c4e9 !default;
 
     .bar {
       -webkit-filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, .7));
-      filter: drop-shadow(0 0 5px rgba(17, 43, 66, .16));
+      filter: drop-shadow(0 0 2px rgba(17, 43, 66, .16));
       border-radius: 3px;
     }
 
@@ -189,17 +207,6 @@ $light-blue: #c4c4e9 !default;
 
   }
 
-  .lower-text,
-  .upper-text {
-    font-size: 14px;
-    text-anchor: middle;
-  }
-
-
-  .lower-text,
-  .upper-text {
-    fill: $text-dark;
-  }
 
   .hide {
     display: none;

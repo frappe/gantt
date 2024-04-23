@@ -350,7 +350,7 @@ export default class Gantt {
 
   setup_layers() {
     this.layers = {};
-    const layers = ["grid", "arrow", "progress", "bar", "details", "date"];
+    const layers = ["grid", "arrow", "progress", "bar", "details"];
     // make group layers
     for (let layer of layers) {
       this.layers[layer] = createSVG("g", {
@@ -381,7 +381,7 @@ export default class Gantt {
       width: grid_width,
       height: grid_height,
       class: "grid-background",
-      append_to: this.layers.date,
+      append_to: this.$svg,
     });
 
     $.attr(this.$svg, {
@@ -424,16 +424,13 @@ export default class Gantt {
   }
 
   make_grid_header() {
-    const header_width = this.dates.length * this.options.column_width;
-    const header_height = this.options.header_height + 10;
-    createSVG("rect", {
-      x: 0,
-      y: 0,
-      width: header_width,
-      height: header_height,
-      class: "grid-header",
-      append_to: this.layers.grid,
-    });
+    let header = document.createElement("div");
+
+    header.style.height = this.options.header_height + 10 + "px";
+    header.style.width = this.dates.length * this.options.column_width + "px";
+    header.classList.add('grid-header')
+    this.$header = header
+    this.$svg.parentElement.appendChild(header)
   }
 
   make_grid_ticks() {
@@ -578,25 +575,23 @@ export default class Gantt {
 
   make_dates() {
     for (let date of this.get_dates_to_draw()) {
-      createSVG("text", {
-        x: date.lower_x,
-        y: date.lower_y,
-        innerHTML: date.lower_text,
-        class: "lower-text",
-        append_to: this.layers.date,
-      });
+      let $lower_text = document.createElement('div');
+      $lower_text.classList.add('lower-text')
+      $lower_text.style.left = date.lower_x + 'px'
+      $lower_text.style.top = date.lower_y + 'px'
+      $lower_text.innerText = date.lower_text
+      this.$header.appendChild($lower_text)
 
       if (date.upper_text) {
-        const $upper_text = createSVG("text", {
-          x: date.upper_x,
-          y: date.upper_y,
-          innerHTML: date.upper_text,
-          class: "upper-text",
-          append_to: this.layers.date,
-        });
+        let $upper_text = document.createElement('div');
+        $upper_text.classList.add('lower-text')
+        $upper_text.style.left = date.upper_x + 'px'
+        $upper_text.style.top = date.upper_y + 'px'
+        $upper_text.innerText = date.upper_text
+        this.$header.appendChild($upper_text)
 
         // remove out-of-bound dates
-        if ($upper_text.getBBox().x2 > this.layers.grid.getBBox().width) {
+        if (date.upper_x > this.layers.grid.getBBox().width) {
           $upper_text.remove();
         }
       }
@@ -666,8 +661,8 @@ export default class Gantt {
       x: last_date_info
         ? last_date_info.base_pos_x + last_date_info.column_width
         : 0,
-      lower_y: this.options.header_height,
-      upper_y: this.options.header_height - 25,
+      lower_y: this.options.header_height - 15,
+      upper_y: this.options.header_height - 35,
     };
 
     const x_pos = {
@@ -846,7 +841,6 @@ export default class Gantt {
       const ids = [];
       let dx;
 
-      this.layers.date.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
       if (x_on_scroll_start) {
         dx = e.currentTarget.scrollLeft - x_on_scroll_start;
       }
