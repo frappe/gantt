@@ -82,16 +82,30 @@
   position: absolute;
   width: fit-content;
 }
-.gantt-container #today-button {
-  position: sticky;
-  left: 10px;
-  top: 5px;
-  background-color: #2c94ec;
-  border: none;
-  color: #fff;
+.gantt-container .upper-text {
+  position: absolute;
+  width: fit-content;
+}
+.gantt-container .current-upper {
+  position: fixed;
+}
+.gantt-container .side-header {
+  position: fixed;
+  padding: 0 10px;
+  background: white;
+}
+.gantt-container .today-button,
+.gantt-container .viewmode-select {
+  background-color: #fff;
+  border: 1px solid black;
+  color: #111;
   padding: 4px 10px;
   font-size: 14px;
-  border-radius: 2px;
+  border-radius: 5px;
+}
+.gantt-container .viewmode-select {
+  padding: 3px 5px;
+  margin-right: 4px;
 }
 
 .gantt {

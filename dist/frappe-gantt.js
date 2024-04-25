@@ -1277,7 +1277,6 @@ var Gantt = (function () {
         task._end = date_utils.parse(task.end);
         let diff = date_utils.diff(task._end, task._start, "year");
         if (diff < 0) {
-          console.log(task._end, task._start);
           throw Error("start of task can't be after end of task: in task #, " + (i + 1))
         }
         // make task invalid if duration too large
@@ -1565,19 +1564,59 @@ var Gantt = (function () {
     }
 
     make_grid_header() {
+      const curHeader = document.querySelector('.grid-header');
+      if (curHeader) {
+        curHeader.remove();
+      }
       let $header = document.createElement("div");
-
       $header.style.height = this.options.header_height + 10 + "px";
       $header.style.width = this.dates.length * this.options.column_width + "px";
       $header.classList.add('grid-header');
       this.$header = $header;
-      this.$svg.parentElement.appendChild($header);
+      this.$container.appendChild($header);
 
+      let $upper_header = document.createElement("div");
+      $upper_header.classList.add('upper-header');
+      this.$upper_header = $upper_header;
+      this.$header.appendChild($upper_header);
+
+      let $lower_header = document.createElement("div");
+      $lower_header.classList.add('lower-header');
+      this.$lower_header = $lower_header;
+      this.$header.appendChild($lower_header);
+
+      let $side_header = document.createElement('div');
+      $side_header.classList.add('side-header');
+
+
+      // Create view mode change select
+      const $select = document.createElement("select");
+      $select.classList.add('viewmode-select');
+
+      for (const key in VIEW_MODE) {
+        const $option = document.createElement("option");
+        $option.value = VIEW_MODE[key];
+        $option.textContent = VIEW_MODE[key];
+        $select.appendChild($option);
+      }
+      $select.value = this.options.view_mode;
+      $select.addEventListener("change", (function () {
+        this.change_view_mode($select.value);
+      }).bind(this));
+      $side_header.appendChild($select);
+
+      // Create today button
       let $today_button = document.createElement('button');
-      $today_button.id = 'today-button';
+      $today_button.classList.add('today-button');
       $today_button.textContent = 'Today';
       $today_button.onclick = this.scroll_today.bind(this);
-      this.$header.appendChild($today_button);
+      $side_header.appendChild($today_button);
+
+      this.$header.appendChild($side_header);
+      const { left, y } = $header.getBoundingClientRect();
+      const width = Math.min(this.$header.clientWidth, this.$container.clientWidth);
+      $side_header.style.left = left + this.$container.scrollLeft + width - $side_header.clientWidth + 'px';
+      $side_header.style.top = y + 5 + 'px';
     }
 
     make_grid_ticks() {
@@ -1721,21 +1760,23 @@ var Gantt = (function () {
     }
 
     make_dates() {
+      this.upper_texts_x = {};
       for (let date of this.get_dates_to_draw()) {
         let $lower_text = document.createElement('div');
         $lower_text.classList.add('lower-text');
         $lower_text.style.left = date.lower_x + 'px';
         $lower_text.style.top = date.lower_y + 'px';
         $lower_text.innerText = date.lower_text;
-        this.$header.appendChild($lower_text);
+        this.$lower_header.appendChild($lower_text);
 
         if (date.upper_text) {
+          this.upper_texts_x[date.upper_text] = date.upper_x;
           let $upper_text = document.createElement('div');
-          $upper_text.classList.add('lower-text');
+          $upper_text.classList.add('upper-text');
           $upper_text.style.left = date.upper_x + 'px';
           $upper_text.style.top = date.upper_y + 'px';
           $upper_text.innerText = date.upper_text;
-          this.$header.appendChild($upper_text);
+          this.$upper_header.appendChild($upper_text);
 
           // remove out-of-bound dates
           if (date.upper_x > this.layers.grid.getBBox().width) {
@@ -1755,9 +1796,8 @@ var Gantt = (function () {
       return dates;
     }
 
-    get_date_info(date, last_date_info, i) {
+    get_date_info(date, last_date_info) {
       let last_date = last_date_info ? last_date_info.date : date_utils.add(date, 1, "day");
-
       const date_text = {
         Hour_lower: date_utils.format(date, "HH", this.options.language),
         "Quarter Day_lower": date_utils.format(date, "HH", this.options.language),
@@ -1787,7 +1827,7 @@ var Gantt = (function () {
               : date_utils.format(date, "D", this.options.language)
             : "",
         Day_upper:
-          date.getMonth() !== last_date.getMonth()
+          date.getMonth() !== last_date.getMonth() || !last_date_info
             ? date_utils.format(date, "MMMM", this.options.language)
             : "",
         Week_upper:
@@ -1809,26 +1849,25 @@ var Gantt = (function () {
           ? last_date_info.base_pos_x + last_date_info.column_width
           : 0,
         lower_y: this.options.header_height - 15,
-        upper_y: this.options.header_height - 35,
+        upper_y: this.options.header_height - 40,
       };
 
       const x_pos = {
-        Hour_lower: this.options.column_width / 2,
-        Hour_upper: this.options.column_width * 12,
-        "Quarter Day_lower": this.options.column_width / 2,
-        "Quarter Day_upper": this.options.column_width * 2,
-        "Half Day_lower": this.options.column_width / 2,
-        "Half Day_upper": this.options.column_width,
-        Day_lower: this.options.column_width / 2,
-        Day_upper: (this.options.column_width * 30) / 2,
+        Hour_lower: column_width / 2,
+        Hour_upper: column_width * 12,
+        "Quarter Day_lower": column_width / 2,
+        "Quarter Day_upper": column_width * 2,
+        "Half Day_lower": column_width / 2,
+        "Half Day_upper": column_width,
+        Day_lower: column_width / 2,
+        Day_upper: column_width / 2,
         Week_lower: 0,
-        Week_upper: (this.options.column_width * 4) / 2,
+        Week_upper: (column_width * 4) / 2,
         Month_lower: column_width / 2,
-        Month_upper: (column_width * 12) / 2,
-        Year_lower: this.options.column_width / 2,
-        Year_upper: (this.options.column_width * 30) / 2,
+        Month_upper: column_width / 2,
+        Year_lower: column_width / 2,
+        Year_upper: (column_width * 30) / 2,
       };
-      console.log(base_pos.x, x_pos[`${this.options.view_mode}_lower`],);
       return {
         date,
         column_width,
@@ -1910,7 +1949,7 @@ var Gantt = (function () {
         (hours_before_first_task / this.options.step) *
         this.options.column_width -
         this.options.column_width;
-      console.log(parent_element.scrollTo({ left: scroll_pos, behavior: 'smooth' }));
+      parent_element.scrollTo({ left: scroll_pos, behavior: 'smooth' });
     }
 
     scroll_today() {
@@ -1988,6 +2027,34 @@ var Gantt = (function () {
         let dx;
         if (x_on_scroll_start) {
           dx = e.currentTarget.scrollLeft - x_on_scroll_start;
+        }
+
+        const daysSinceStart = e.currentTarget.scrollLeft / this.options.column_width * this.options.step / 24;
+        let format_str = "D MMM";
+        if (["Year", "Month"].includes(this.options.view_mode)) format_str = 'YYYY';
+        else if (["Day", "Week"].includes(this.options.view_mode)) format_str = 'MMMM';
+        else if (this.view_is('Half Day')) format_str = 'D';
+        else if (this.view_is('Hour')) format_str = "D MMMM";
+
+
+        let currentUpper = date_utils.format(
+          date_utils.add(this.gantt_start, daysSinceStart, 'day'),
+          format_str
+        );
+        const upperTexts = Array.from(document.querySelectorAll('.upper-text'));
+        const $el = upperTexts.find(el => el.textContent === currentUpper);
+        if ($el && !$el.classList.contains('current-upper')) {
+          const $current = document.querySelector('.current-upper');
+          if ($current) {
+            $current.classList.remove('current-upper');
+            $current.style.left = this.upper_texts_x[$current.textContent] + 'px';
+            $current.style.top = this.options.header_height - 40 + 'px';
+          }
+
+          $el.classList.add('current-upper');
+          let dimensions = this.$svg.getBoundingClientRect();
+          $el.style.left = dimensions.x + this.$container.scrollLeft + 10 + 'px';
+          $el.style.top = dimensions.y + this.options.header_height - 40 + 'px';
         }
 
         Array.prototype.forEach.call(elements, function (el, i) {
