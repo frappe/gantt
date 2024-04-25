@@ -66,6 +66,15 @@ $light-blue: #c4c4e9 !default;
     padding: 3px 5px;
     margin-right: 4px;
   }
+
+  .date-highlight {
+    border: 2px dotted black;
+    border-radius: 12px;
+    z-index: 1;
+    position: absolute;
+    opacity: 0.4;
+    display: none;
+  }
 }
 
 .gantt {
@@ -145,10 +154,7 @@ $light-blue: #c4c4e9 !default;
     fill: $progress;
   }
 
-  .date-highlight {
-    fill: darken(#f5f5f5, 5);
-    display: none;
-  }
+
 
   .bar-expected-progress {
     fill: $light-blue;
@@ -233,8 +239,6 @@ $light-blue: #c4c4e9 !default;
         display: block;
       }
     }
-
-
   }
 
 

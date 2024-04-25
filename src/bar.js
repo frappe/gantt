@@ -144,15 +144,16 @@ export default class Bar {
       this.gantt.options.step) *
       this.gantt.options.column_width;
 
-    this.$date_highlight = createSVG("rect", {
-      x,
-      y: this.gantt.options.header_height - 17,
-      width: this.width,
-      height: this.height * 0.8,
-      rx: 12,
-      class: "date-highlight",
-      append_to: this.bar_group,
-    });
+    let $date_highlight = document.createElement("div");
+    $date_highlight.id = `${this.task.id}-highlight`
+    $date_highlight.classList.add('date-highlight')
+    $date_highlight.style.height = this.height * 0.8 + 'px'
+    $date_highlight.style.width = this.width + 'px'
+    $date_highlight.style.top = this.gantt.options.header_height - 21 + 'px'
+    $date_highlight.style.left = x + 'px'
+    this.$date_highlight = $date_highlight
+    this.gantt.$lower_header.appendChild($date_highlight)
+
 
 
     animateSVG(this.$bar_progress, "width", 0, this.progress_width);
@@ -270,9 +271,13 @@ export default class Bar {
 
   setup_click_event() {
     let in_action = false;
-    $.on(this.group, "mouseover", (e) => this.gantt.trigger_event("hover", [this.task, e.screenX, e.screenY, e]))
+    let task_id = this.task.id;
+    $.on(this.group, "mouseover", (e) => {
+      this.gantt.trigger_event("hover", [this.task, e.screenX, e.screenY, e])
+      document.querySelector(`#${task_id}-highlight`).style.display = 'block'
+    })
     $.on(this.group, "mouseenter", (e) => this.show_popup(e.offsetX))
-    $.on(this.group, "mouseleave", () => this.gantt.hide_popup())
+    $.on(this.group, "mouseleave", () => document.querySelector(`#${task_id}-highlight`).style.display = 'none')
 
 
     $.on(this.group, "focus " + this.gantt.options.popup_trigger, (e) => {

@@ -621,13 +621,13 @@ export default class Gantt {
 
   make_dates() {
     this.upper_texts_x = {}
-    for (let date of this.get_dates_to_draw()) {
+    this.get_dates_to_draw().forEach((date, i) => {
       let $lower_text = document.createElement('div');
       $lower_text.classList.add('lower-text')
-      $lower_text.style.left = date.lower_x + 'px'
-      $lower_text.style.top = date.lower_y + 'px'
       $lower_text.innerText = date.lower_text
       this.$lower_header.appendChild($lower_text)
+      $lower_text.style.left = date.lower_x - (true ? $lower_text.clientWidth / 2 : 0) + 'px'
+      $lower_text.style.top = date.lower_y + 'px'
 
       if (date.upper_text) {
         this.upper_texts_x[date.upper_text] = date.upper_x
@@ -643,7 +643,7 @@ export default class Gantt {
           $upper_text.remove();
         }
       }
-    }
+    })
   }
 
   get_dates_to_draw() {
@@ -711,7 +711,6 @@ export default class Gantt {
       lower_y: this.options.header_height - 15,
       upper_y: this.options.header_height - 40,
     };
-
     const x_pos = {
       Hour_lower: column_width / 2,
       Hour_upper: column_width * 12,
@@ -721,7 +720,7 @@ export default class Gantt {
       "Half Day_upper": column_width,
       Day_lower: column_width / 2,
       Day_upper: column_width / 2,
-      Week_lower: 0,
+      Week_lower: column_width / 2,
       Week_upper: (column_width * 4) / 2,
       Month_lower: column_width / 2,
       Month_upper: column_width / 2,

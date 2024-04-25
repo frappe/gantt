@@ -107,6 +107,14 @@
   padding: 3px 5px;
   margin-right: 4px;
 }
+.gantt-container .date-highlight {
+  border: 2px dotted black;
+  border-radius: 12px;
+  z-index: 1;
+  position: absolute;
+  opacity: 0.4;
+  display: none;
+}
 
 .gantt {
   user-select: none;
@@ -163,10 +171,6 @@
 }
 .gantt .bar-progress {
   fill: #dedfe0;
-}
-.gantt .date-highlight {
-  fill: #e8e8e8;
-  display: none;
 }
 .gantt .bar-expected-progress {
   fill: #c4c4e9;

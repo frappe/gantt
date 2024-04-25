@@ -547,15 +547,16 @@ var Gantt = (function () {
         this.gantt.options.step) *
         this.gantt.options.column_width;
 
-      this.$date_highlight = createSVG("rect", {
-        x,
-        y: this.gantt.options.header_height - 17,
-        width: this.width,
-        height: this.height * 0.8,
-        rx: 12,
-        class: "date-highlight",
-        append_to: this.bar_group,
-      });
+      let $date_highlight = document.createElement("div");
+      $date_highlight.id = `${this.task.id}-highlight`;
+      $date_highlight.classList.add('date-highlight');
+      $date_highlight.style.height = this.height * 0.8 + 'px';
+      $date_highlight.style.width = this.width + 'px';
+      $date_highlight.style.top = this.gantt.options.header_height - 21 + 'px';
+      $date_highlight.style.left = x + 'px';
+      this.$date_highlight = $date_highlight;
+      this.gantt.$lower_header.appendChild($date_highlight);
+
 
 
       animateSVG(this.$bar_progress, "width", 0, this.progress_width);
@@ -672,9 +673,13 @@ var Gantt = (function () {
     }
 
     setup_click_event() {
-      $.on(this.group, "mouseover", (e) => this.gantt.trigger_event("hover", [this.task, e.screenX, e.screenY, e]));
+      let task_id = this.task.id;
+      $.on(this.group, "mouseover", (e) => {
+        this.gantt.trigger_event("hover", [this.task, e.screenX, e.screenY, e]);
+        document.querySelector(`#${task_id}-highlight`).style.display = 'block';
+      });
       $.on(this.group, "mouseenter", (e) => this.show_popup(e.offsetX));
-      $.on(this.group, "mouseleave", () => this.gantt.hide_popup());
+      $.on(this.group, "mouseleave", () => document.querySelector(`#${task_id}-highlight`).style.display = 'none');
 
 
       $.on(this.group, "focus " + this.gantt.options.popup_trigger, (e) => {
@@ -1761,13 +1766,13 @@ var Gantt = (function () {
 
     make_dates() {
       this.upper_texts_x = {};
-      for (let date of this.get_dates_to_draw()) {
+      this.get_dates_to_draw().forEach((date, i) => {
         let $lower_text = document.createElement('div');
         $lower_text.classList.add('lower-text');
-        $lower_text.style.left = date.lower_x + 'px';
-        $lower_text.style.top = date.lower_y + 'px';
         $lower_text.innerText = date.lower_text;
         this.$lower_header.appendChild($lower_text);
+        $lower_text.style.left = date.lower_x - ($lower_text.clientWidth / 2 ) + 'px';
+        $lower_text.style.top = date.lower_y + 'px';
 
         if (date.upper_text) {
           this.upper_texts_x[date.upper_text] = date.upper_x;
@@ -1783,7 +1788,7 @@ var Gantt = (function () {
             $upper_text.remove();
           }
         }
-      }
+      });
     }
 
     get_dates_to_draw() {
@@ -1851,7 +1856,6 @@ var Gantt = (function () {
         lower_y: this.options.header_height - 15,
         upper_y: this.options.header_height - 40,
       };
-
       const x_pos = {
         Hour_lower: column_width / 2,
         Hour_upper: column_width * 12,
@@ -1861,7 +1865,7 @@ var Gantt = (function () {
         "Half Day_upper": column_width,
         Day_lower: column_width / 2,
         Day_upper: column_width / 2,
-        Week_lower: 0,
+        Week_lower: column_width / 2,
         Week_upper: (column_width * 4) / 2,
         Month_lower: column_width / 2,
         Month_upper: column_width / 2,
