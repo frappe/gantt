@@ -682,7 +682,7 @@ var Gantt = (function () {
       $.on(this.group, "mouseleave", () => document.querySelector(`#${task_id}-highlight`).style.display = 'none');
 
 
-      $.on(this.group, "focus " + this.gantt.options.popup_trigger, (e) => {
+      $.on(this.group, "focus " + this.gantt.options.popup_trigger, () => {
         this.gantt.trigger_event("click", [this.task]);
       });
 
