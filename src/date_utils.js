@@ -6,6 +6,21 @@ const MINUTE = "minute";
 const SECOND = "second";
 const MILLISECOND = "millisecond";
 
+const SHORTENED = {
+  January: "Jan",
+  February: "Feb",
+  March: "Mar",
+  April: "Apr",
+  May: "May",
+  June: "Jun",
+  July: "Jul",
+  August: "Aug",
+  September: "Sep",
+  October: "Oct",
+  November: "Nov",
+  December: "Dec"
+};
+
 export default {
   parse_duration(duration) {
     const regex = /([0-9])+(y|m|d|h|min|s|ms)/gm;
@@ -98,7 +113,7 @@ export default {
       SSS: values[6],
       D: values[2],
       MMMM: month_name_capitalized,
-      MMM: month_name_capitalized,
+      MMM: SHORTENED[month_name_capitalized],
     };
 
     let str = format_string;

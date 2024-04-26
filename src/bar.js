@@ -34,7 +34,7 @@ export default class Bar {
       this.duration *
       (this.task.progress / 100) || 0;
     this.group = createSVG("g", {
-      class: "bar-wrapper " + (this.task.custom_class || ""),
+      class: "bar-wrapper" + (this.task.custom_class ? " " + this.task.custom_class : "") + (this.task.important ? ' important' : ''),
       "data-id": this.task.id,
     });
     this.bar_group = createSVG("g", {
@@ -75,11 +75,11 @@ export default class Bar {
 
   draw() {
     this.draw_bar();
+    this.draw_progress_bar();
     if (this.gantt.options.show_expected_progress) {
       this.prepare_expected_progress_values();
       this.draw_expected_progress_bar();
     }
-    this.draw_progress_bar();
     this.draw_label();
     this.draw_resize_handles();
 
@@ -140,12 +140,27 @@ export default class Bar {
       class: "bar-progress",
       append_to: this.bar_group,
     });
+    const x = (date_utils.diff(this.task._start, this.gantt.gantt_start, 'hour') /
+      this.gantt.options.step) *
+      this.gantt.options.column_width;
+
+    let $date_highlight = document.createElement("div");
+    $date_highlight.id = `${this.task.id}-highlight`
+    $date_highlight.classList.add('date-highlight')
+    $date_highlight.style.height = this.height * 0.8 + 'px'
+    $date_highlight.style.width = this.width + 'px'
+    $date_highlight.style.top = this.gantt.options.header_height - 21 + 'px'
+    $date_highlight.style.left = x + 'px'
+    this.$date_highlight = $date_highlight
+    this.gantt.$lower_header.appendChild($date_highlight)
+
+
 
     animateSVG(this.$bar_progress, "width", 0, this.progress_width);
   }
 
   draw_label() {
-    let x_coord = this.x + 5;
+    let x_coord = this.x + this.$bar.getWidth() / 2;
 
     if (this.task.thumbnail) {
       x_coord = this.x + this.image_size + 5;
@@ -209,7 +224,7 @@ export default class Bar {
     const handle_width = 8;
 
     createSVG("rect", {
-      x: bar.getX() + bar.getWidth() - 9,
+      x: bar.getX() + bar.getWidth() + handle_width - 4,
       y: bar.getY() + 1,
       width: handle_width,
       height: this.height - 2,
@@ -220,7 +235,7 @@ export default class Bar {
     });
 
     createSVG("rect", {
-      x: bar.getX() + 1,
+      x: bar.getX() - handle_width - 4,
       y: bar.getY() + 1,
       width: handle_width,
       height: this.height - 2,
@@ -240,12 +255,12 @@ export default class Bar {
   get_progress_polygon_points() {
     const bar_progress = this.$bar_progress;
     return [
-      bar_progress.getEndX() - 5,
-      bar_progress.getY() + bar_progress.getHeight(),
-      bar_progress.getEndX() + 5,
-      bar_progress.getY() + bar_progress.getHeight(),
+      bar_progress.getEndX() - 6,
+      bar_progress.getY() + bar_progress.getHeight() + 8,
+      bar_progress.getEndX() + 6,
+      bar_progress.getY() + bar_progress.getHeight() + 8,
       bar_progress.getEndX(),
-      bar_progress.getY() + bar_progress.getHeight() - 8.66,
+      bar_progress.getY() + bar_progress.getHeight() + 0.5,
     ];
   }
 
@@ -256,24 +271,17 @@ export default class Bar {
 
   setup_click_event() {
     let in_action = false;
-    $.on(this.group, "mouseover", (e) => this.gantt.trigger_event("hover", [this.task, e.screenX, e.screenY, e]))
+    let task_id = this.task.id;
+    $.on(this.group, "mouseover", (e) => {
+      this.gantt.trigger_event("hover", [this.task, e.screenX, e.screenY, e])
+      document.querySelector(`#${task_id}-highlight`).style.display = 'block'
+    })
+    $.on(this.group, "mouseenter", (e) => this.show_popup(e.offsetX))
+    $.on(this.group, "mouseleave", () => document.querySelector(`#${task_id}-highlight`).style.display = 'none')
 
-    $.on(this.group, "focus " + this.gantt.options.popup_trigger, (e) => {
-      if (this.action_completed) {
-        // just finished a move action, wait for a few seconds
-        return;
-      }
-      if (!in_action) this.gantt.trigger_event("click", [this.task]);
-      if (in_action) {
-        this.gantt.hide_popup();
-        this.group.classList.remove("active");
-      } else {
-        this.show_popup();
-        this.gantt.unselect_all();
-        this.group.classList.add("active");
-      }
 
-      in_action = !in_action
+    $.on(this.group, "focus " + this.gantt.options.popup_trigger, () => {
+      this.gantt.trigger_event("click", [this.task]);
     });
 
     $.on(this.group, "dblclick", (e) => {
@@ -286,7 +294,7 @@ export default class Bar {
     });
   }
 
-  show_popup() {
+  show_popup(x) {
     if (this.gantt.bar_being_dragged) return;
 
     const start_date = date_utils.format(
@@ -299,9 +307,10 @@ export default class Bar {
       "MMM D",
       this.gantt.options.language,
     );
-    const subtitle = start_date + " - " + end_date;
+    const subtitle = `${start_date} -  ${end_date}<br/>Progress: ${this.task.progress}`;
 
     this.gantt.show_popup({
+      x,
       target_element: this.$bar,
       title: this.task.name,
       subtitle: subtitle,
@@ -325,9 +334,11 @@ export default class Bar {
         return;
       }
       this.update_attr(bar, "x", x);
+      this.update_attr(this.$date_highlight, "x", x);
     }
     if (width) {
       this.update_attr(bar, "width", width);
+      this.update_attr(this.$date_highlight, "width", width);
     }
     this.update_label_position();
     this.update_handle_position();
@@ -537,10 +548,12 @@ export default class Bar {
       label = this.group.querySelector(".bar-label"),
       img = this.group.querySelector('.bar-img');
 
+
     let padding = 5;
     let x_offset_label_img = this.image_size + 10;
-
-    if (label.getBBox().width > bar.getWidth()) {
+    const labelWidth = label.getBBox().width
+    const barWidth = bar.getWidth()
+    if (labelWidth > barWidth) {
       label.classList.add("big");
       if (img) {
         img.setAttribute('x', bar.getX() + bar.getWidth() + padding);
@@ -554,9 +567,9 @@ export default class Bar {
       if (img) {
         img.setAttribute('x', bar.getX() + padding);
         img_mask.setAttribute('x', bar.getX() + padding);
-        label.setAttribute('x', bar.getX() + x_offset_label_img);
+        label.setAttribute('x', bar.getX() + barWidth / 2 + x_offset_label_img);
       } else {
-        label.setAttribute('x', bar.getX() + padding);
+        label.setAttribute('x', bar.getX() + barWidth / 2 - labelWidth / 2);
       }
     }
   }
@@ -566,10 +579,10 @@ export default class Bar {
     const bar = this.$bar;
     this.handle_group
       .querySelector(".handle.left")
-      .setAttribute("x", bar.getX() + 1);
+      .setAttribute("x", bar.getX() - 12);
     this.handle_group
       .querySelector(".handle.right")
-      .setAttribute("x", bar.getEndX() - 9);
+      .setAttribute("x", bar.getEndX() + 4);
     const handle = this.group.querySelector(".handle.progress");
     handle && handle.setAttribute("points", this.get_progress_polygon_points());
   }
