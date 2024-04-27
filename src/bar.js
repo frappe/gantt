@@ -149,10 +149,10 @@ export default class Bar {
     $date_highlight.classList.add('date-highlight')
     $date_highlight.style.height = this.height * 0.8 + 'px'
     $date_highlight.style.width = this.width + 'px'
-    $date_highlight.style.top = this.gantt.options.header_height - 21 + 'px'
+    $date_highlight.style.top = this.gantt.options.header_height - 19 + 'px'
     $date_highlight.style.left = x + 'px'
     this.$date_highlight = $date_highlight
-    this.gantt.$lower_header.appendChild($date_highlight)
+    this.gantt.$lower_header.prepend($date_highlight)
 
 
 
@@ -334,11 +334,11 @@ export default class Bar {
         return;
       }
       this.update_attr(bar, "x", x);
-      this.update_attr(this.$date_highlight, "x", x);
+      this.$date_highlight.style.left = x + 'px'
     }
     if (width) {
       this.update_attr(bar, "width", width);
-      this.update_attr(this.$date_highlight, "width", width);
+      this.$date_highlight.style.width = width + 'px'
     }
     this.update_label_position();
     this.update_handle_position();

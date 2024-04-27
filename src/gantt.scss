@@ -68,7 +68,7 @@ $light-blue: #c4c4e9 !default;
   }
 
   .date-highlight {
-    border: 2px dotted black;
+    background-color: $text-muted;
     border-radius: 12px;
     z-index: 1;
     position: absolute;
