@@ -149,7 +149,7 @@ export default class Bar {
     $date_highlight.classList.add('date-highlight')
     $date_highlight.style.height = this.height * 0.8 + 'px'
     $date_highlight.style.width = this.width + 'px'
-    $date_highlight.style.top = this.gantt.options.header_height - 19 + 'px'
+    $date_highlight.style.top = this.gantt.options.header_height - 24 + 'px'
     $date_highlight.style.left = x + 'px'
     this.$date_highlight = $date_highlight
     this.gantt.$lower_header.prepend($date_highlight)

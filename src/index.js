@@ -85,7 +85,7 @@ export default class Gantt {
 
   setup_options(options) {
     const default_options = {
-      header_height: 50,
+      header_height: 65,
       column_width: 30,
       step: 24,
       view_modes: [...Object.values(VIEW_MODE)],
@@ -340,6 +340,7 @@ export default class Gantt {
     this.make_grid();
     this.make_dates();
     this.make_bars();
+    this.make_grid_extras();
     this.make_arrows();
     this.map_arrows_on_bars();
     this.set_width();
@@ -363,8 +364,11 @@ export default class Gantt {
     this.make_grid_background();
     this.make_grid_rows();
     this.make_grid_header();
-    this.make_grid_ticks();
+  }
+
+  make_grid_extras() {
     this.make_grid_highlights();
+    this.make_grid_ticks();
   }
 
   make_grid_background() {
@@ -391,14 +395,13 @@ export default class Gantt {
 
   make_grid_rows() {
     const rows_layer = createSVG("g", { append_to: this.layers.grid });
-    const lines_layer = createSVG("g", { append_to: this.layers.grid });
 
     const row_width = this.dates.length * this.options.column_width;
     const row_height = this.options.bar_height + this.options.padding;
 
     let row_y = this.options.header_height + this.options.padding / 2;
 
-    for (let task of this.tasks) {
+    for (let _ of this.tasks) {
       createSVG("rect", {
         x: 0,
         y: row_y,
@@ -408,14 +411,7 @@ export default class Gantt {
         append_to: rows_layer,
       });
       if (this.options.lines === 'both' || this.options.lines === 'horizontal') {
-        createSVG("line", {
-          x1: 0,
-          y1: row_y + row_height,
-          x2: row_width,
-          y2: row_y + row_height,
-          class: "row-line",
-          append_to: lines_layer,
-        });
+
       }
 
       row_y += this.options.bar_height + this.options.padding;
@@ -445,9 +441,12 @@ export default class Gantt {
     this.$lower_header = $lower_header
     this.$header.appendChild($lower_header)
 
+    this.make_side_header()
+  }
+
+  make_side_header() {
     let $side_header = document.createElement('div')
     $side_header.classList.add('side-header')
-
 
     // Create view mode change select
     const $select = document.createElement("select");
@@ -473,19 +472,40 @@ export default class Gantt {
     $side_header.appendChild($today_button)
 
     this.$header.appendChild($side_header)
-    const { left, y } = $header.getBoundingClientRect();
+    const { left, y } = this.$header.getBoundingClientRect();
     const width = Math.min(this.$header.clientWidth, this.$container.clientWidth)
     $side_header.style.left = left + this.$container.scrollLeft + width - $side_header.clientWidth + 'px';
-    $side_header.style.top = y + 5 + 'px';
+    $side_header.style.top = y + 20 + 'px';
   }
 
   make_grid_ticks() {
-    if (this.options.lines !== 'both' && this.options.lines !== 'vertical') return
+    if (!['both', 'vertical', 'horizontal'].includes(this.options.lines)) return
     let tick_x = 0;
     let tick_y = this.options.header_height + this.options.padding / 2;
     let tick_height =
       (this.options.bar_height + this.options.padding) * this.tasks.length;
 
+    let $lines_layer = createSVG("g", { class: 'lines_layer', append_to: this.layers.grid });
+
+
+    let row_y = this.options.header_height + this.options.padding / 2;
+
+    const row_width = this.dates.length * this.options.column_width;
+    const row_height = this.options.bar_height + this.options.padding;
+    if (this.options.lines !== 'vertical') {
+      for (let _ of this.tasks) {
+        createSVG("line", {
+          x1: 0,
+          y1: row_y + row_height,
+          x2: row_width,
+          y2: row_y + row_height,
+          class: "row-line",
+          append_to: $lines_layer,
+        });
+        row_y += row_height;
+      }
+    }
+    if (this.options.lines === 'horizontal') return;
     for (let date of this.dates) {
       let tick_class = "tick";
       // thick tick for monday
@@ -542,14 +562,16 @@ export default class Gantt {
 
   //compute the horizontal x distance
   computeGridHighlightDimensions(view_mode) {
-    let xDist = 0;
+    let x = this.options.column_width / 2;
 
     if (this.view_is(VIEW_MODE.DAY)) {
-      return (
-        (date_utils.diff(date_utils.today(), this.gantt_start, "hour") /
-          this.options.step) *
-        this.options.column_width
-      );
+      let today = date_utils.today()
+      return {
+        x: x +
+          (date_utils.diff(today, this.gantt_start, "hour") / this.options.step) *
+          this.options.column_width,
+        date: today
+      }
     }
 
     for (let date of this.dates) {
@@ -568,12 +590,11 @@ export default class Gantt {
           break;
       }
       if (todayDate >= startDate && todayDate <= endDate) {
-        break;
+        return { x, date: startDate }
       } else {
-        xDist += this.options.column_width;
+        x += this.options.column_width;
       }
     }
-    return xDist;
   }
 
   make_grid_highlights() {
@@ -585,49 +606,43 @@ export default class Gantt {
       this.view_is(VIEW_MODE.MONTH) ||
       this.view_is(VIEW_MODE.YEAR)
     ) {
-      const x = this.computeGridHighlightDimensions(this.options.view_mode);
-      const y = 0;
-      const width = this.options.column_width;
-      const height =
-        (this.options.bar_height + this.options.padding) * this.tasks.length +
-        this.options.header_height +
-        this.options.padding / 2;
+      // Used as we must find the _end_ of session if view is not Day
+      const { x: left, date } = this.computeGridHighlightDimensions(this.options.view_mode)
+      const top = this.options.header_height + this.options.padding / 2;
+      const height = (this.options.bar_height + this.options.padding) * this.tasks.length;
+      this.create_el({ top, left, height, classes: 'current-highlight', append_to: this.$container })
+      let $today = document.getElementById(date_utils.format(date).replaceAll(' ', '_'))
 
-      let className = "";
-      switch (this.options.view_mode) {
-        case VIEW_MODE.DAY:
-          className = "today-highlight";
-          break;
-        case VIEW_MODE.WEEK:
-          className = "week-highlight";
-          break;
-        case VIEW_MODE.MONTH:
-          className = "month-highlight";
-          break;
-        case VIEW_MODE.YEAR:
-          className = "year-highlight";
-          break;
-      }
-      createSVG("rect", {
-        x,
-        y,
-        width,
-        height,
-        class: className,
-        append_to: this.layers.grid,
-      });
+      $today.classList.add('current-date-highlight')
+      $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px'
+      $today.style.left = +$today.style.left.slice(0, -2) - 4 + 'px'
     }
+  }
+
+  create_el({ left, top, width, height, id, classes, append_to }) {
+    let $el = document.createElement("div");
+    $el.classList.add(classes)
+    $el.style.top = top + 'px'
+    $el.style.left = left + 'px'
+    if (id) $el.id = id
+    if (width) $el.style.width = height + 'px'
+    if (height) $el.style.height = height + 'px'
+    append_to.appendChild($el)
+    return $el
   }
 
   make_dates() {
     this.upper_texts_x = {}
     this.get_dates_to_draw().forEach((date, i) => {
-      let $lower_text = document.createElement('div');
-      $lower_text.classList.add('lower-text')
+      let $lower_text = this.create_el({
+        left: date.lower_x,
+        top: date.lower_y,
+        id: date.formatted_date,
+        classes: 'lower-text',
+        append_to: this.$lower_header
+      })
       $lower_text.innerText = date.lower_text
-      this.$lower_header.appendChild($lower_text)
-      $lower_text.style.left = date.lower_x - (true ? $lower_text.clientWidth / 2 : 0) + 'px'
-      $lower_text.style.top = date.lower_y + 'px'
+      $lower_text.style.left = +$lower_text.style.left.slice(0, -2) - $lower_text.clientWidth / 2 + 'px'
 
       if (date.upper_text) {
         this.upper_texts_x[date.upper_text] = date.upper_x
@@ -708,8 +723,8 @@ export default class Gantt {
       x: last_date_info
         ? last_date_info.base_pos_x + last_date_info.column_width
         : 0,
-      lower_y: this.options.header_height - 15,
-      upper_y: this.options.header_height - 40,
+      lower_y: this.options.header_height - 20,
+      upper_y: this.options.header_height - 50,
     };
     const x_pos = {
       Hour_lower: column_width / 2,
@@ -729,6 +744,7 @@ export default class Gantt {
     };
     return {
       date,
+      formatted_date: date_utils.format(date).replaceAll(' ', '_'),
       column_width,
       base_pos_x: base_pos.x,
       upper_text: date_text[`${this.options.view_mode}_upper`],
@@ -907,13 +923,13 @@ export default class Gantt {
         if ($current) {
           $current.classList.remove('current-upper')
           $current.style.left = this.upper_texts_x[$current.textContent] + 'px';
-          $current.style.top = this.options.header_height - 40 + 'px';
+          $current.style.top = this.options.header_height - 50 + 'px';
         }
 
         $el.classList.add('current-upper')
         let dimensions = this.$svg.getBoundingClientRect()
         $el.style.left = dimensions.x + this.$container.scrollLeft + 10 + 'px';
-        $el.style.top = dimensions.y + this.options.header_height - 40 + 'px';
+        $el.style.top = dimensions.y + this.options.header_height - 50 + 'px';
       }
 
       Array.prototype.forEach.call(elements, function (el, i) {
