@@ -149,7 +149,7 @@ export default class Bar {
     $date_highlight.classList.add('date-highlight')
     $date_highlight.style.height = this.height * 0.8 + 'px'
     $date_highlight.style.width = this.width + 'px'
-    $date_highlight.style.top = this.gantt.options.header_height - 24 + 'px'
+    $date_highlight.style.top = this.gantt.options.header_height - 25 + 'px'
     $date_highlight.style.left = x + 'px'
     this.$date_highlight = $date_highlight
     this.gantt.$lower_header.prepend($date_highlight)
@@ -254,13 +254,24 @@ export default class Bar {
 
   get_progress_polygon_points() {
     const bar_progress = this.$bar_progress;
+    let icon_width = 10;
+    let icon_height = 15;
+
     return [
-      bar_progress.getEndX() - 6,
-      bar_progress.getY() + bar_progress.getHeight() + 8,
-      bar_progress.getEndX() + 6,
-      bar_progress.getY() + bar_progress.getHeight() + 8,
+      bar_progress.getEndX() - icon_width / 2,
+      bar_progress.getY() + bar_progress.getHeight() / 2,
+
       bar_progress.getEndX(),
-      bar_progress.getY() + bar_progress.getHeight() + 0.5,
+      bar_progress.getY() + bar_progress.getHeight() / 2 - icon_height / 2,
+
+      bar_progress.getEndX() + icon_width / 2,
+      bar_progress.getY() + bar_progress.getHeight() / 2,
+
+      bar_progress.getEndX(),
+      bar_progress.getY() + bar_progress.getHeight() / 2 + icon_height / 2,
+
+      bar_progress.getEndX() - icon_width / 2,
+      bar_progress.getY() + bar_progress.getHeight() / 2,
     ];
   }
 

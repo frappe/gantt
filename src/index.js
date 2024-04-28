@@ -1182,7 +1182,7 @@ export default class Gantt {
     this.$svg.innerHTML = "";
     this.$header?.remove?.()
     this.$current_highlight?.remove?.()
-    this.$popup_wrapper?.remove?.()
+    this.$popup_wrapper.innerHTML = ''
   }
 }
 

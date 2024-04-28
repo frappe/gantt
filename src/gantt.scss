@@ -38,11 +38,11 @@ $dark-blue: #2c94ec !default;
   }
 
   .upper-header {
-    height: 50px;
+    height: 40px;
   }
 
   .lower-header {
-    height: 56px;
+    height: 30px;
   }
 
   .lower-text {
@@ -218,6 +218,10 @@ $dark-blue: #2c94ec !default;
     .handle {
       fill: $handle-color-important;
     }
+
+    .handle.progress {
+      fill: $text-light;
+    }
   }
 
 
@@ -227,6 +231,10 @@ $dark-blue: #2c94ec !default;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease;
+  }
+
+  .handle.progress {
+    fill: $text-muted;
   }
 
   .bar-wrapper {
