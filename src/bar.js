@@ -281,17 +281,25 @@ export default class Bar {
   }
 
   setup_click_event() {
-    let in_action = false;
     let task_id = this.task.id;
     $.on(this.group, "mouseover", (e) => {
       this.gantt.trigger_event("hover", [this.task, e.screenX, e.screenY, e])
-      document.querySelector(`#${task_id}-highlight`).style.display = 'block'
     })
-    $.on(this.group, "mouseenter", (e) => this.show_popup(e.offsetX))
-    $.on(this.group, "mouseleave", () => document.querySelector(`#${task_id}-highlight`).style.display = 'none')
+
+    let timeout;
+    $.on(this.group, "mouseenter", (e) => timeout = setTimeout(() => {
+      this.show_popup(e.offsetX)
+      document.querySelector(`#${task_id}-highlight`).style.display = 'block'
+    }, 200))
+
+    $.on(this.group, "mouseleave", () => {
+      clearTimeout(timeout)
+      this.gantt.popup?.hide?.()
+      document.querySelector(`#${task_id}-highlight`).style.display = 'none'
+    })
 
 
-    $.on(this.group, "focus " + this.gantt.options.popup_trigger, () => {
+    $.on(this.group, this.gantt.options.popup_trigger, () => {
       this.gantt.trigger_event("click", [this.task]);
     });
 
@@ -337,7 +345,7 @@ export default class Bar {
         return this.gantt.get_bar(dep).$bar.getX();
       });
       // child task must not go before parent
-      const valid_x = xs.reduce((prev, curr) => {
+      const valid_x = xs.reduce((_, curr) => {
         return x >= curr;
       }, x);
       if (!valid_x) {

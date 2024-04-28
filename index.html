@@ -92,12 +92,12 @@
       ];
 
       // Uncomment to test fixed header
-      // tasks = [...tasks, ...Array.from({length: tasks.length * 3}, (_, i) => ({...tasks[i % 3], id: i}))]
+      tasks = [...tasks, ...Array.from({length: tasks.length * 3}, (_, i) => ({...tasks[i % 3], id: i}))]
       
       let gantt_chart = new Gantt(".gantt-target", tasks, {
-        // on_click: (task) => {
-        //   console.log("Double Click", task);
-        // },
+        on_click: (task) => {
+          console.log("Click", task);
+        },
         // on_double_click: (task) => {
         //   console.log("Double Click", task);
         // },

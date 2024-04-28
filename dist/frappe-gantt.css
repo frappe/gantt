@@ -66,25 +66,37 @@
   border-top-color: #333;
 }
 
+.gantt-container {
+  line-height: 14.5px;
+}
 .gantt-container .grid-header {
   background-color: #ffffff;
   position: sticky;
   top: 0;
   left: 0;
+  z-index: 10;
 }
 .gantt-container .lower-text,
 .gantt-container .upper-text {
-  font-size: 14px;
   text-anchor: middle;
-  color: #666;
+  color: #111;
+}
+.gantt-container .upper-header {
+  height: 40px;
+}
+.gantt-container .lower-header {
+  height: 30px;
 }
 .gantt-container .lower-text {
+  font-size: 14px;
   position: absolute;
   width: fit-content;
 }
 .gantt-container .upper-text {
   position: absolute;
   width: fit-content;
+  font-weight: 500;
+  font-size: 16px;
 }
 .gantt-container .current-upper {
   position: fixed;
@@ -92,28 +104,49 @@
 .gantt-container .side-header {
   position: fixed;
   padding: 0 10px;
+  margin-right: 10px;
   background: white;
+  line-height: 20px;
+  font-weight: 400;
 }
 .gantt-container .today-button,
 .gantt-container .viewmode-select {
-  background-color: #fff;
-  border: 1px solid black;
+  background: #F4F5F6;
+  text-align: -webkit-center;
+  text-align: center;
+  height: 25px;
+  border-radius: 8px;
+  border: none;
   color: #111;
   padding: 4px 10px;
-  font-size: 14px;
-  border-radius: 5px;
+  border-radius: 8px;
+  height: 25px;
 }
 .gantt-container .viewmode-select {
-  padding: 3px 5px;
+  outline: none !important;
+  padding: 4px 8px;
   margin-right: 4px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  text-indent: 1px;
+  text-overflow: "";
 }
 .gantt-container .date-highlight {
-  border: 2px dotted black;
+  background-color: #EBEEF0;
   border-radius: 12px;
-  z-index: 1;
   position: absolute;
-  opacity: 0.4;
   display: none;
+}
+.gantt-container .current-highlight {
+  position: absolute;
+  background: #2c94ec;
+  width: 1px;
+}
+.gantt-container .current-date-highlight {
+  background: #2c94ec;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 200px;
 }
 
 .gantt {
@@ -131,37 +164,20 @@
   stroke: #ebeff2;
 }
 .gantt .tick {
-  stroke: #e0e0e0;
-  stroke-width: 0.2;
+  stroke: #EBEEF0;
+  stroke-width: 0.4;
 }
 .gantt .tick.thick {
-  stroke: #000;
-  stroke-width: 0.5;
-}
-.gantt .today-highlight {
-  fill: #f6e796;
-  opacity: 0.5;
-}
-.gantt .week-highlight {
-  fill: #f6e796;
-  opacity: 0.5;
+  stroke: #e0e0e0;
+  stroke-width: 0.7;
 }
 .gantt .holiday-highlight {
-  fill: #f3f4f7;
-  opacity: 0.5;
-}
-.gantt .month-highlight {
-  fill: #f6e796;
-  opacity: 0.5;
-}
-.gantt .year-highlight {
-  fill: #f6e796;
-  opacity: 0.5;
+  fill: #F9FAFA;
 }
 .gantt .arrow {
   fill: none;
-  stroke: #666;
-  stroke-width: 1.4;
+  stroke: #9FA9B1;
+  stroke-width: 1;
 }
 .gantt .bar-wrapper .bar {
   fill: #fff;
@@ -170,7 +186,7 @@
   transition: stroke-width 0.3s ease;
 }
 .gantt .bar-progress {
-  fill: #dedfe0;
+  fill: #EBEEF0;
 }
 .gantt .bar-expected-progress {
   fill: #c4c4e9;
@@ -188,7 +204,7 @@
   fill: #111;
   dominant-baseline: central;
   font-family: Helvetica;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
 }
 .gantt .bar-label.big {
@@ -207,12 +223,18 @@
 .gantt .bar-wrapper.important .handle {
   fill: #94c4f4;
 }
+.gantt .bar-wrapper.important .handle.progress {
+  fill: #fff;
+}
 .gantt .handle {
   fill: #dcdce4;
   cursor: ew-resize;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease;
+}
+.gantt .handle.progress {
+  fill: #666;
 }
 .gantt .bar-wrapper {
   cursor: pointer;
@@ -247,25 +269,22 @@
   position: absolute;
   top: 0;
   left: 0;
-  background: rgb(0, 0, 0);
-  padding: 0;
-  color: #959da5;
-  border-radius: 3px;
-  border: 1px solid rgb(0, 0, 0);
+  background: #171B1F;
+  padding: 10px;
+  border-radius: 5px;
   width: max-content;
 }
 .gantt-container .popup-wrapper.hidden {
   opacity: 0 !important;
 }
 .gantt-container .popup-wrapper .title {
-  border-bottom: 1px solid #dedfe0;
-  padding: 10px;
+  margin-bottom: 5px;
+  text-align: -webkit-center;
   text-align: center;
   color: #fff;
 }
 .gantt-container .popup-wrapper .subtitle {
-  padding: 10px;
-  color: #dfe2e5;
+  color: #98A1A9;
 }
 .gantt-container .popup-wrapper .pointer {
   position: absolute;

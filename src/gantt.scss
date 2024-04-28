@@ -29,6 +29,7 @@ $dark-blue: #2c94ec !default;
     position: sticky;
     top: 0;
     left: 0;
+    z-index: 10;
   }
 
   .lower-text,
@@ -74,6 +75,7 @@ $dark-blue: #2c94ec !default;
   .today-button,
   .viewmode-select {
     background: #F4F5F6;
+    text-align: -webkit-center;
     text-align: center;
     height: 25px;
     border-radius: 8px;
@@ -158,8 +160,8 @@ $dark-blue: #2c94ec !default;
 
   .arrow {
     fill: none;
-    stroke: $text-muted;
-    stroke-width: 1.4;
+    stroke: #9FA9B1;
+    stroke-width: 1;
   }
 
   .bar-wrapper .bar {
@@ -294,6 +296,7 @@ $dark-blue: #2c94ec !default;
 
     .title {
       margin-bottom: 5px;
+      text-align: -webkit-center;
       text-align: center;
       color: $text-light;
     }
