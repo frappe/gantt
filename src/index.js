@@ -751,7 +751,7 @@ export default class Gantt {
       column_width,
       base_pos_x: base_pos.x,
       upper_text: date_text[`${this.options.view_mode}_upper`],
-      lower_text: date_text[`${this.options.view_mode}_lower`],
+      lower_text: this.options.lower_text ? this.options.lower_text(date, this.options.view_mode) : date_text[`${this.options.view_mode}_lower`],
       upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
       upper_y: base_pos.upper_y,
       lower_x: base_pos.x + x_pos[`${this.options.view_mode}_lower`],
