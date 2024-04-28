@@ -78,9 +78,9 @@ export default class Gantt {
     this.$container.appendChild(this.$svg);
 
     // popup wrapper
-    this.popup_wrapper = document.createElement("div");
-    this.popup_wrapper.classList.add("popup-wrapper");
-    this.$container.appendChild(this.popup_wrapper);
+    this.$popup_wrapper = document.createElement("div");
+    this.$popup_wrapper.classList.add("popup-wrapper");
+    this.$container.appendChild(this.$popup_wrapper);
   }
 
   setup_options(options) {
@@ -420,9 +420,6 @@ export default class Gantt {
 
   make_grid_header() {
     const curHeader = document.querySelector('.grid-header')
-    if (curHeader) {
-      curHeader.remove()
-    };
 
     let $header = document.createElement("div");
     $header.style.height = this.options.header_height + 10 + "px";
@@ -452,13 +449,19 @@ export default class Gantt {
     const $select = document.createElement("select");
     $select.classList.add('viewmode-select')
 
+    const $el = document.createElement("option");
+    $el.selected = true
+    $el.disabled = true
+    $el.textContent = 'Mode'
+    $select.appendChild($el)
+
     for (const key in VIEW_MODE) {
       const $option = document.createElement("option");
       $option.value = VIEW_MODE[key];
       $option.textContent = VIEW_MODE[key];
       $select.appendChild($option);
     }
-    $select.value = this.options.view_mode
+    // $select.value = this.options.view_mode
     $select.addEventListener("change", (function () {
       this.change_view_mode($select.value)
     }).bind(this));
@@ -475,7 +478,7 @@ export default class Gantt {
     const { left, y } = this.$header.getBoundingClientRect();
     const width = Math.min(this.$header.clientWidth, this.$container.clientWidth)
     $side_header.style.left = left + this.$container.scrollLeft + width - $side_header.clientWidth + 'px';
-    $side_header.style.top = y + 20 + 'px';
+    $side_header.style.top = y + 10 + 'px';
   }
 
   make_grid_ticks() {
@@ -610,12 +613,12 @@ export default class Gantt {
       const { x: left, date } = this.computeGridHighlightDimensions(this.options.view_mode)
       const top = this.options.header_height + this.options.padding / 2;
       const height = (this.options.bar_height + this.options.padding) * this.tasks.length;
-      this.create_el({ top, left, height, classes: 'current-highlight', append_to: this.$container })
+      this.$current_highlight = this.create_el({ top, left, height, classes: 'current-highlight', append_to: this.$container })
       let $today = document.getElementById(date_utils.format(date).replaceAll(' ', '_'))
 
       $today.classList.add('current-date-highlight')
       $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px'
-      $today.style.left = +$today.style.left.slice(0, -2) - 4 + 'px'
+      $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px'
     }
   }
 
@@ -1138,7 +1141,7 @@ export default class Gantt {
   show_popup(options) {
     if (!this.popup) {
       this.popup = new Popup(
-        this.popup_wrapper,
+        this.$popup_wrapper,
         this.options.custom_popup_html,
       );
     }
@@ -1177,6 +1180,9 @@ export default class Gantt {
    */
   clear() {
     this.$svg.innerHTML = "";
+    this.$header?.remove?.()
+    this.$current_highlight?.remove?.()
+    this.$popup_wrapper?.remove?.()
   }
 }
 

@@ -69,26 +69,31 @@ $dark-blue: #2c94ec !default;
     background: white;
     line-height: 20px;
     font-weight: 400;
-    font-size: 13px;
   }
 
-  .today-button {
+  .today-button,
+  .viewmode-select {
     background: #F4F5F6;
+    text-align: center;
+    height: 25px;
+    border-radius: 8px;
     border: none;
     color: $text-dark;
     padding: 4px 10px;
     border-radius: 8px;
-    float: right;
+    height: 25px;
   }
 
   .viewmode-select {
-    background: #F4F5F6;
-    text-align: center;
     outline: none !important;
     padding: 4px 8px;
-    border-radius: 6px;
-    // display: block;
-    margin-bottom: 4px;
+    margin-right: 4px;
+
+    // Hide select icon
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    text-indent: 1px;
+    text-overflow: '';
   }
 
   .date-highlight {
@@ -107,7 +112,7 @@ $dark-blue: #2c94ec !default;
   .current-date-highlight {
     background: $dark-blue;
     color: $text-light;
-    padding: 4px;
+    padding: 4px 8px;
     border-radius: 200px;
   }
 }
@@ -137,7 +142,7 @@ $dark-blue: #2c94ec !default;
 
   .tick {
     stroke: $stroke-color;
-    stroke-width: 0.2;
+    stroke-width: 0.4;
 
     &.thick {
       stroke: $dark-stroke-color;
