@@ -1192,6 +1192,30 @@ var Gantt = (function () {
     YEAR: ["2y", "2y"],
   };
 
+  const DEFAULT_OPTIONS = {
+    header_height: 65,
+    column_width: 30,
+    step: 24,
+    view_modes: [...Object.values(VIEW_MODE)],
+    bar_height: 30,
+    bar_corner_radius: 3,
+    arrow_curve: 5,
+    padding: 18,
+    view_mode: "Day",
+    date_format: "YYYY-MM-DD",
+    popup_trigger: "click",
+    show_expected_progress: false,
+    popup: null,
+    language: "en",
+    readonly: false,
+    highlight_weekend: true,
+    scroll_to: 'start',
+    lines: 'both',
+    auto_move_label: true,
+    today_button: true,
+    view_mode_select: false,
+  };
+
   class Gantt {
     constructor(wrapper, tasks, options) {
       this.setup_wrapper(wrapper);
@@ -1250,27 +1274,7 @@ var Gantt = (function () {
     }
 
     setup_options(options) {
-      const default_options = {
-        header_height: 65,
-        column_width: 30,
-        step: 24,
-        view_modes: [...Object.values(VIEW_MODE)],
-        bar_height: 30,
-        bar_corner_radius: 3,
-        arrow_curve: 5,
-        padding: 18,
-        view_mode: "Day",
-        date_format: "YYYY-MM-DD",
-        popup_trigger: "click",
-        custom_popup_html: null,
-        language: "en",
-        readonly: false,
-        highlight_weekend: true,
-        scroll_today: true,
-        lines: 'both',
-        auto_move_label: true,
-      };
-      this.options = Object.assign({}, default_options, options);
+      this.options = { ...DEFAULT_OPTIONS, ...options };
       if (!options.view_mode_padding) options.view_mode_padding = {};
       for (let [key, value] of Object.entries(options.view_mode_padding)) {
         if (typeof value === "string") {
@@ -1510,8 +1514,7 @@ var Gantt = (function () {
       this.make_arrows();
       this.map_arrows_on_bars();
       this.set_width();
-      this.set_scroll_position();
-      if (this.options.scroll_today) this.scroll_today();
+      this.set_scroll_position(this.options.scroll_to);
     }
 
     setup_layers() {
@@ -1610,33 +1613,38 @@ var Gantt = (function () {
       $side_header.classList.add('side-header');
 
       // Create view mode change select
-      const $select = document.createElement("select");
-      $select.classList.add('viewmode-select');
+      if (this.options.view_mode_select) {
 
-      const $el = document.createElement("option");
-      $el.selected = true;
-      $el.disabled = true;
-      $el.textContent = 'Mode';
-      $select.appendChild($el);
+        const $select = document.createElement("select");
+        $select.classList.add('viewmode-select');
 
-      for (const key in VIEW_MODE) {
-        const $option = document.createElement("option");
-        $option.value = VIEW_MODE[key];
-        $option.textContent = VIEW_MODE[key];
-        $select.appendChild($option);
+        const $el = document.createElement("option");
+        $el.selected = true;
+        $el.disabled = true;
+        $el.textContent = 'Mode';
+        $select.appendChild($el);
+
+        for (const key in VIEW_MODE) {
+          const $option = document.createElement("option");
+          $option.value = VIEW_MODE[key];
+          $option.textContent = VIEW_MODE[key];
+          $select.appendChild($option);
+        }
+        // $select.value = this.options.view_mode
+        $select.addEventListener("change", (function () {
+          this.change_view_mode($select.value);
+        }).bind(this));
+        $side_header.appendChild($select);
       }
-      // $select.value = this.options.view_mode
-      $select.addEventListener("change", (function () {
-        this.change_view_mode($select.value);
-      }).bind(this));
-      $side_header.appendChild($select);
 
       // Create today button
-      let $today_button = document.createElement('button');
-      $today_button.classList.add('today-button');
-      $today_button.textContent = 'Today';
-      $today_button.onclick = this.scroll_today.bind(this);
-      $side_header.appendChild($today_button);
+      if (this.options.today_button) {
+        let $today_button = document.createElement('button');
+        $today_button.classList.add('today-button');
+        $today_button.textContent = 'Today';
+        $today_button.onclick = this.scroll_today.bind(this);
+        $side_header.appendChild($today_button);
+      }
 
       this.$header.appendChild($side_header);
       const { left, y } = this.$header.getBoundingClientRect();
@@ -1914,8 +1922,8 @@ var Gantt = (function () {
         formatted_date: date_utils.format(date).replaceAll(' ', '_'),
         column_width,
         base_pos_x: base_pos.x,
-        upper_text: date_text[`${this.options.view_mode}_upper`],
-        lower_text: this.options.lower_text ? this.options.lower_text(date, this.options.view_mode) : date_text[`${this.options.view_mode}_lower`],
+        upper_text: this.options.lower_text ? this.options.upper_text(date, this.options.view_mode, date_text[`${this.options.view_mode}_upper`]) : date_text[`${this.options.view_mode}_upper`],
+        lower_text: this.options.lower_text ? this.options.lower_text(date, this.options.view_mode, date_text[`${this.options.view_mode}_lower`]) : date_text[`${this.options.view_mode}_lower`],
         upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
         upper_y: base_pos.upper_y,
         lower_x: base_pos.x + x_pos[`${this.options.view_mode}_lower`],
@@ -1974,18 +1982,22 @@ var Gantt = (function () {
     }
 
     set_scroll_position(date) {
-      if (!date) {
+      if (!date || date === 'start') {
         date = this.gantt_start;
+      } else if (date === 'today') {
+        return this.scroll_today()
+      } else if (typeof date === 'string') {
+        date = date_utils.parse(date);
       }
 
       const parent_element = this.$svg.parentElement;
       if (!parent_element) return;
 
       const hours_before_first_task = date_utils.diff(
-        this.get_oldest_starting_date(),
         date,
+        this.gantt_start,
         "hour",
-      );
+      ) + 24;
 
       const scroll_pos =
         (hours_before_first_task / this.options.step) *
@@ -1995,9 +2007,7 @@ var Gantt = (function () {
     }
 
     scroll_today() {
-      const oldest = this.get_oldest_starting_date().getTime();
-      const t = new Date() - oldest;
-      this.set_scroll_position(new Date(this.gantt_start.getTime() - t));
+      this.set_scroll_position(new Date());
     }
 
     bind_grid_click() {
@@ -2303,10 +2313,11 @@ var Gantt = (function () {
     }
 
     show_popup(options) {
+      if (this.options.popup === false) return
       if (!this.popup) {
         this.popup = new Popup(
           this.$popup_wrapper,
-          this.options.custom_popup_html,
+          this.options.popup,
         );
       }
       this.popup.show(options);

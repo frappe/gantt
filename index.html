@@ -35,7 +35,7 @@
       let tasks = [
         {
         	start: '2024-04-01',
-        	end: '2024-04-08',
+        	end: '2024-04-01',
         	name: 'Redesign website',
         	id: "Task 0",
         	progress: 30
@@ -114,10 +114,15 @@
         //   console.log("Hover", x, y);
         // },
         view_mode: "Day",
-        view_mode_padding: { DAY: "7d" },
-        language: "en",
-        scroll_today: false,
-        // readonly: true
+        view_mode_padding: { DAY: "3d" },
+        popup: false,
+        // scroll_to: 'today',
+        // view_mode_select: true,
+        // today_button: false,
+        // readonly: true,
+        // lines: 'vertical',
+        // lower_text: (date) => date.getDay(),
+        // upper_text: (date, view_mode, def) => def,
       });
       console.log(gantt_chart);
     </script>
