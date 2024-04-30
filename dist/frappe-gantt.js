@@ -363,7 +363,7 @@ class O {
     if (this.invalid || this.gantt.options.readonly)
       return;
     const t = this.$bar, e = 8;
-    this.gantt.options.dates_readonly || (c("rect", {
+    if (this.gantt.options.dates_readonly || (c("rect", {
       x: t.getX() + t.getWidth() + e - 4,
       y: t.getY() + 1,
       width: e,
@@ -381,27 +381,16 @@ class O {
       ry: this.corner_radius,
       class: "handle left",
       append_to: this.handle_group
-    })), this.gantt.options.progress_readonly || (this.$handle_progress = c("polygon", {
-      points: this.get_progress_polygon_points().join(","),
-      class: "handle progress",
-      append_to: this.handle_group
-    }));
-  }
-  get_progress_polygon_points() {
-    const t = this.$bar_progress;
-    let e = 10, s = 15;
-    return [
-      t.getEndX() - e / 2,
-      t.getY() + t.getHeight() / 2,
-      t.getEndX(),
-      t.getY() + t.getHeight() / 2 - s / 2,
-      t.getEndX() + e / 2,
-      t.getY() + t.getHeight() / 2,
-      t.getEndX(),
-      t.getY() + t.getHeight() / 2 + s / 2,
-      t.getEndX() - e / 2,
-      t.getY() + t.getHeight() / 2
-    ];
+    })), !this.gantt.options.progress_readonly) {
+      const s = this.$bar_progress;
+      this.$handle_progress = c("circle", {
+        cx: s.getEndX(),
+        cy: s.getY() + s.getHeight() / 2,
+        r: 5,
+        class: "handle progress",
+        append_to: this.handle_group
+      });
+    }
   }
   bind() {
     this.invalid || this.setup_click_event();
@@ -1203,7 +1192,7 @@ class F {
       let a = (o.offsetX || o.layerX) - t;
       a > i.max_dx && (a = i.max_dx), a < i.min_dx && (a = i.min_dx);
       const p = s.$handle_progress;
-      _.attr(i, "width", i.owidth + a), _.attr(p, "points", s.get_progress_polygon_points()), i.finaldx = a;
+      _.attr(i, "width", i.owidth + a), _.attr(p, "cx", i.getEndX()), i.finaldx = a;
     }), _.on(this.$svg, "mouseup", () => {
       e = !1, i && i.finaldx && (i.finaldx = 0, s.progress_changed(), s.set_action_completed(), s = null, i = null, r = null);
     });

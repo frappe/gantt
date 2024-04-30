@@ -1152,7 +1152,7 @@ export default class Gantt {
 
             const $handle = bar.$handle_progress;
             $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
-            $.attr($handle, 'points', bar.get_progress_polygon_points());
+            $.attr($handle, 'cx', $bar_progress.getEndX());
             $bar_progress.finaldx = dx;
         });
 

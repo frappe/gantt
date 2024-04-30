@@ -252,39 +252,16 @@ export default class Bar {
 
         }
         if (!this.gantt.options.progress_readonly) {
-            this.$handle_progress = createSVG('polygon', {
-                points: this.get_progress_polygon_points().join(','),
+            const bar_progress = this.$bar_progress;
+            this.$handle_progress = createSVG('circle', {
+                cx: bar_progress.getEndX(),
+                cy: bar_progress.getY() +
+                    bar_progress.getHeight() / 2,
+                r: 5,
                 class: 'handle progress',
                 append_to: this.handle_group,
             });
         }
-    }
-
-    get_progress_polygon_points() {
-        const bar_progress = this.$bar_progress;
-        let icon_width = 10;
-        let icon_height = 15;
-
-        return [
-            bar_progress.getEndX() - icon_width / 2,
-            bar_progress.getY() + bar_progress.getHeight() / 2,
-
-            bar_progress.getEndX(),
-            bar_progress.getY() +
-            bar_progress.getHeight() / 2 -
-            icon_height / 2,
-
-            bar_progress.getEndX() + icon_width / 2,
-            bar_progress.getY() + bar_progress.getHeight() / 2,
-
-            bar_progress.getEndX(),
-            bar_progress.getY() +
-            bar_progress.getHeight() / 2 +
-            icon_height / 2,
-
-            bar_progress.getEndX() - icon_width / 2,
-            bar_progress.getY() + bar_progress.getHeight() / 2,
-        ];
     }
 
     bind() {
