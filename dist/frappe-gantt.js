@@ -491,12 +491,18 @@ class O {
       this.gantt.gantt_start,
       e * this.gantt.options.step,
       "hour"
-    ), i = t.getWidth() / this.gantt.options.column_width, r = h.add(
+    ), i = this.gantt.gantt_start.getTimezoneOffset() - s.getTimezoneOffset();
+    i && (s = h.add(
       s,
-      i * this.gantt.options.step,
+      i,
+      "minute"
+    ));
+    const r = t.getWidth() / this.gantt.options.column_width, o = h.add(
+      s,
+      r * this.gantt.options.step,
       "hour"
     );
-    return { new_start_date: s, new_end_date: r };
+    return { new_start_date: s, new_end_date: o };
   }
   compute_progress() {
     const t = this.$bar_progress.getWidth() / this.$bar.getWidth() * 100;
@@ -723,7 +729,7 @@ class F {
         let o = [];
         e.dependencies && (o = e.dependencies.split(",").map((a) => a.trim().replaceAll(" ", "_")).filter((a) => a)), e.dependencies = o;
       }
-      return e.id ? typeof e.id == "string" ? e.id = e.id.replaceAll(" ", "_") : e.id = `${e.id}` : e.id = B(e), e;
+      return e.id ? typeof e.id == "string" ? e.id = e.id.replaceAll(" ", "_") : e.id = `${e.id}` : e.id = z(e), e;
     }), this.setup_dependencies();
   }
   setup_dependencies() {
@@ -1259,7 +1265,7 @@ class F {
   }
 }
 F.VIEW_MODE = l;
-function B(n) {
+function z(n) {
   return n.name + "_" + Math.random().toString(36).slice(2, 12);
 }
 export {
