@@ -6,6 +6,21 @@ const MINUTE = "minute";
 const SECOND = "second";
 const MILLISECOND = "millisecond";
 
+const SHORTENED = {
+  January: "Jan",
+  February: "Feb",
+  March: "Mar",
+  April: "Apr",
+  May: "May",
+  June: "Jun",
+  July: "Jul",
+  August: "Aug",
+  September: "Sep",
+  October: "Oct",
+  November: "Nov",
+  December: "Dec"
+};
+
 export default {
   parse_duration(duration) {
     const regex = /([0-9])+(y|m|d|h|min|s|ms)/gm;
@@ -36,25 +51,23 @@ export default {
     if (typeof date === "string") {
       let date_parts, time_parts;
       const parts = date.split(" ");
-
       date_parts = parts[0]
         .split(date_separator)
         .map((val) => parseInt(val, 10));
       time_parts = parts[1] && parts[1].split(time_separator);
 
       // month is 0 indexed
-      date_parts[1] = date_parts[1] - 1;
+      date_parts[1] = date_parts[1] ? date_parts[1] - 1 : 0;
 
       let vals = date_parts;
 
       if (time_parts && time_parts.length) {
-        if (time_parts.length == 4) {
+        if (time_parts.length === 4) {
           time_parts[3] = "0." + time_parts[3];
           time_parts[3] = parseFloat(time_parts[3]) * 1000;
         }
         vals = vals.concat(time_parts);
       }
-
       return new Date(...vals);
     }
   },
@@ -100,7 +113,7 @@ export default {
       SSS: values[6],
       D: values[2],
       MMMM: month_name_capitalized,
-      MMM: month_name_capitalized,
+      MMM: SHORTENED[month_name_capitalized],
     };
 
     let str = format_string;
@@ -110,13 +123,13 @@ export default {
       .sort((a, b) => b.length - a.length) // big string first
       .forEach((key) => {
         if (str.includes(key)) {
-          str = str.replace(key, `$${formatted_values.length}`);
+          str = str.replaceAll(key, `$${formatted_values.length}`);
           formatted_values.push(format_map[key]);
         }
       });
 
     formatted_values.forEach((value, i) => {
-      str = str.replace(`$${i}`, value);
+      str = str.replaceAll(`$${i}`, value);
     });
 
     return str;
@@ -229,7 +242,7 @@ export default {
 
     // Feb
     const year = date.getFullYear();
-    if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
+    if ((year % 4 === 0 && year % 100 != 0) || year % 400 === 0) {
       return 29;
     }
     return 28;
