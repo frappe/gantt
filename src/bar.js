@@ -309,7 +309,7 @@ export default class Bar {
             'mouseenter',
             (e) =>
             (timeout = setTimeout(() => {
-                this.show_popup(e.offsetX);
+                this.show_popup(e.offsetX || e.layerX);
                 document.getElementById(
                     `${task_id}-highlight`,
                 ).style.display = 'block';
