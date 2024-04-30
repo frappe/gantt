@@ -23,5 +23,6 @@ export default defineConfig({
             // preserveEntrySignatures: "allow-extension"
         },
     },
-    output: { interop: 'auto' }
+    output: { interop: 'auto' },
+    server: { watch: { include: ['dist/*', 'src/*'] } }
 });

@@ -281,7 +281,7 @@ class C {
       height: this.height,
       rx: this.corner_radius,
       ry: this.corner_radius,
-      class: "bar",
+      class: "bar" + (/^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !this.task.important ? " safari" : ""),
       append_to: this.bar_group
     }), S(this.$bar, "width", 0, this.width), this.invalid && this.$bar.classList.add("bar-invalid");
   }

@@ -74,7 +74,7 @@
     & .lower-text,
     & .upper-text {
         text-anchor: middle;
-        color: var(--text-light);
+        color: var(--text-dark);
     }
 
     & .upper-header {
@@ -270,7 +270,7 @@
 
     & .bar-wrapper {
         cursor: pointer;
-        outline: none;
+
 
         &.active {
             & .handle {
@@ -283,6 +283,10 @@
             -webkit-filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.7));
             filter: drop-shadow(0 0 2px rgba(17, 43, 66, 0.16));
             border-radius: 3px;
+        }
+
+        & .bar.safari {
+            outline: 1px solid black;
         }
 
         &:hover {

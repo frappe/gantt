@@ -31,8 +31,8 @@ export default class Bar {
         this.width = this.gantt.options.column_width * this.duration;
         this.progress_width =
             this.gantt.options.column_width *
-                this.duration *
-                (this.task.progress / 100) || 0;
+            this.duration *
+            (this.task.progress / 100) || 0;
         this.group = createSVG('g', {
             class:
                 'bar-wrapper' +
@@ -72,8 +72,8 @@ export default class Bar {
         this.compute_expected_progress();
         this.expected_progress_width =
             this.gantt.options.column_width *
-                this.duration *
-                (this.expected_progress / 100) || 0;
+            this.duration *
+            (this.expected_progress / 100) || 0;
     }
 
     draw() {
@@ -92,6 +92,7 @@ export default class Bar {
     }
 
     draw_bar() {
+
         this.$bar = createSVG('rect', {
             x: this.x,
             y: this.y,
@@ -99,7 +100,7 @@ export default class Bar {
             height: this.height,
             rx: this.corner_radius,
             ry: this.corner_radius,
-            class: 'bar',
+            class: 'bar' + (/^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !this.task.important ? ' safari' : ''),
             append_to: this.bar_group,
         });
 
@@ -267,16 +268,16 @@ export default class Bar {
 
             bar_progress.getEndX(),
             bar_progress.getY() +
-                bar_progress.getHeight() / 2 -
-                icon_height / 2,
+            bar_progress.getHeight() / 2 -
+            icon_height / 2,
 
             bar_progress.getEndX() + icon_width / 2,
             bar_progress.getY() + bar_progress.getHeight() / 2,
 
             bar_progress.getEndX(),
             bar_progress.getY() +
-                bar_progress.getHeight() / 2 +
-                icon_height / 2,
+            bar_progress.getHeight() / 2 +
+            icon_height / 2,
 
             bar_progress.getEndX() - icon_width / 2,
             bar_progress.getY() + bar_progress.getHeight() / 2,
@@ -304,12 +305,12 @@ export default class Bar {
             this.group,
             'mouseenter',
             (e) =>
-                (timeout = setTimeout(() => {
-                    this.show_popup(e.offsetX);
-                    document.querySelector(
-                        `#${task_id}-highlight`,
-                    ).style.display = 'block';
-                }, 200)),
+            (timeout = setTimeout(() => {
+                this.show_popup(e.offsetX);
+                document.querySelector(
+                    `#${task_id}-highlight`,
+                ).style.display = 'block';
+            }, 200)),
         );
 
         $.on(this.group, 'mouseleave', () => {
@@ -570,8 +571,8 @@ export default class Bar {
         this.$expected_bar_progress.setAttribute(
             'width',
             this.gantt.options.column_width *
-                this.duration *
-                (this.expected_progress / 100) || 0,
+            this.duration *
+            (this.expected_progress / 100) || 0,
         );
     }
 
