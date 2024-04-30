@@ -78,7 +78,7 @@ export default class Gantt {
         } else {
             throw new TypeError(
                 'Frappé Gantt only supports usage of a string CSS selector,' +
-                " HTML DOM element or SVG DOM element for the 'element' parameter",
+                    " HTML DOM element or SVG DOM element for the 'element' parameter",
             );
         }
 
@@ -144,7 +144,7 @@ export default class Gantt {
             if (diff < 0) {
                 throw Error(
                     "start of task can't be after end of task: in task #, " +
-                    (i + 1),
+                        (i + 1),
                 );
             }
             // make task invalid if duration too large
@@ -390,7 +390,7 @@ export default class Gantt {
             this.options.header_height +
             this.options.padding +
             (this.options.bar_height + this.options.padding) *
-            this.tasks.length;
+                this.tasks.length;
 
         createSVG('rect', {
             x: 0,
@@ -621,7 +621,7 @@ export default class Gantt {
                     x +
                     (date_utils.diff(today, this.gantt_start, 'hour') /
                         this.options.step) *
-                    this.options.column_width,
+                        this.options.column_width,
                 date: today,
             };
         }
@@ -776,10 +776,10 @@ export default class Gantt {
                 date.getDate() !== last_date.getDate()
                     ? date.getMonth() !== last_date.getMonth()
                         ? date_utils.format(
-                            date,
-                            'D MMM',
-                            this.options.language,
-                        )
+                              date,
+                              'D MMM',
+                              this.options.language,
+                          )
                         : date_utils.format(date, 'D', this.options.language)
                     : '',
             Day_upper:
@@ -801,7 +801,7 @@ export default class Gantt {
         };
         let column_width = this.view_is(VIEW_MODE.MONTH)
             ? (date_utils.get_days_in_month(date) * this.options.column_width) /
-            30
+              30
             : this.options.column_width;
         const base_pos = {
             x: last_date_info
@@ -833,17 +833,17 @@ export default class Gantt {
             base_pos_x: base_pos.x,
             upper_text: this.options.lower_text
                 ? this.options.upper_text(
-                    date,
-                    this.options.view_mode,
-                    date_text[`${this.options.view_mode}_upper`],
-                )
+                      date,
+                      this.options.view_mode,
+                      date_text[`${this.options.view_mode}_upper`],
+                  )
                 : date_text[`${this.options.view_mode}_upper`],
             lower_text: this.options.lower_text
                 ? this.options.lower_text(
-                    date,
-                    this.options.view_mode,
-                    date_text[`${this.options.view_mode}_lower`],
-                )
+                      date,
+                      this.options.view_mode,
+                      date_text[`${this.options.view_mode}_lower`],
+                  )
                 : date_text[`${this.options.view_mode}_lower`],
             upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
             upper_y: base_pos.upper_y,
@@ -919,7 +919,7 @@ export default class Gantt {
 
         const scroll_pos =
             (hours_before_first_task / this.options.step) *
-            this.options.column_width -
+                this.options.column_width -
             this.options.column_width;
         parent_element.scrollTo({ left: scroll_pos, behavior: 'smooth' });
     }
@@ -955,9 +955,9 @@ export default class Gantt {
             return is_dragging || is_resizing_left || is_resizing_right;
         }
 
-        this.$svg.onclick = e => {
-            if (e.target.classList.contains('grid-row')) this.unselect_all()
-        }
+        this.$svg.onclick = (e) => {
+            if (e.target.classList.contains('grid-row')) this.unselect_all();
+        };
 
         $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
             const bar_wrapper = $.closest('.bar-wrapper', element);
@@ -1064,7 +1064,7 @@ export default class Gantt {
 
         $.on(this.$svg, 'mousemove', (e) => {
             if (!action_in_progress()) return;
-            console.log(e)
+            console.log(e);
             const dx = (e.offsetX || e.layerX) - x_on_start;
 
             bars.forEach((bar) => {
@@ -1088,7 +1088,11 @@ export default class Gantt {
                             width: $bar.owidth + $bar.finaldx,
                         });
                     }
-                } else if (is_dragging && !this.options.readonly && !this.options.dates_readonly) {
+                } else if (
+                    is_dragging &&
+                    !this.options.readonly &&
+                    !this.options.dates_readonly
+                ) {
                     bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
                 }
             });

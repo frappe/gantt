@@ -31,8 +31,8 @@ export default class Bar {
         this.width = this.gantt.options.column_width * this.duration;
         this.progress_width =
             this.gantt.options.column_width *
-            this.duration *
-            (this.task.progress / 100) || 0;
+                this.duration *
+                (this.task.progress / 100) || 0;
         this.group = createSVG('g', {
             class:
                 'bar-wrapper' +
@@ -72,8 +72,8 @@ export default class Bar {
         this.compute_expected_progress();
         this.expected_progress_width =
             this.gantt.options.column_width *
-            this.duration *
-            (this.expected_progress / 100) || 0;
+                this.duration *
+                (this.expected_progress / 100) || 0;
     }
 
     draw() {
@@ -92,7 +92,6 @@ export default class Bar {
     }
 
     draw_bar() {
-
         this.$bar = createSVG('rect', {
             x: this.x,
             y: this.y,
@@ -100,7 +99,12 @@ export default class Bar {
             height: this.height,
             rx: this.corner_radius,
             ry: this.corner_radius,
-            class: 'bar' + (/^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !this.task.important ? ' safari' : ''),
+            class:
+                'bar' +
+                (/^((?!chrome|android).)*safari/i.test(navigator.userAgent) &&
+                !this.task.important
+                    ? ' safari'
+                    : ''),
             append_to: this.bar_group,
         });
 
@@ -249,14 +253,12 @@ export default class Bar {
                 class: 'handle left',
                 append_to: this.handle_group,
             });
-
         }
         if (!this.gantt.options.progress_readonly) {
             const bar_progress = this.$bar_progress;
             this.$handle_progress = createSVG('circle', {
                 cx: bar_progress.getEndX(),
-                cy: bar_progress.getY() +
-                    bar_progress.getHeight() / 2,
+                cy: bar_progress.getY() + bar_progress.getHeight() / 2,
                 r: 5,
                 class: 'handle progress',
                 append_to: this.handle_group,
@@ -285,12 +287,12 @@ export default class Bar {
             this.group,
             'mouseenter',
             (e) =>
-            (timeout = setTimeout(() => {
-                this.show_popup(e.offsetX || e.layerX);
-                document.getElementById(
-                    `${task_id}-highlight`,
-                ).style.display = 'block';
-            }, 200)),
+                (timeout = setTimeout(() => {
+                    this.show_popup(e.offsetX || e.layerX);
+                    document.getElementById(
+                        `${task_id}-highlight`,
+                    ).style.display = 'block';
+                }, 200)),
         );
 
         $.on(this.group, 'mouseleave', () => {
@@ -300,7 +302,7 @@ export default class Bar {
                 'none';
         });
 
-        $.on(this.group, "click", () => {
+        $.on(this.group, 'click', () => {
             this.gantt.trigger_event('click', [this.task]);
         });
 
@@ -309,8 +311,9 @@ export default class Bar {
                 // just finished a move action, wait for a few seconds
                 return;
             }
-            this.group.classList.remove('active')
-            if (this.gantt.popup) this.gantt.popup.parent.classList.remove('hidden');
+            this.group.classList.remove('active');
+            if (this.gantt.popup)
+                this.gantt.popup.parent.classList.remove('hidden');
 
             this.gantt.trigger_event('double_click', [this.task]);
         });
@@ -449,12 +452,14 @@ export default class Bar {
             x_in_units * this.gantt.options.step,
             'hour',
         );
-        const start_offset = this.gantt.gantt_start.getTimezoneOffset() - new_start_date.getTimezoneOffset();
+        const start_offset =
+            this.gantt.gantt_start.getTimezoneOffset() -
+            new_start_date.getTimezoneOffset();
         if (start_offset) {
             new_start_date = date_utils.add(
                 new_start_date,
                 start_offset,
-                'minute'
+                'minute',
             );
         }
 
@@ -562,8 +567,8 @@ export default class Bar {
         this.$expected_bar_progress.setAttribute(
             'width',
             this.gantt.options.column_width *
-            this.duration *
-            (this.expected_progress / 100) || 0,
+                this.duration *
+                (this.expected_progress / 100) || 0,
         );
     }
 
