@@ -227,34 +227,37 @@ export default class Bar {
 
         const bar = this.$bar;
         const handle_width = 8;
+        if (!this.gantt.options.dates_readonly) {
+            createSVG('rect', {
+                x: bar.getX() + bar.getWidth() + handle_width - 4,
+                y: bar.getY() + 1,
+                width: handle_width,
+                height: this.height - 2,
+                rx: this.corner_radius,
+                ry: this.corner_radius,
+                class: 'handle right',
+                append_to: this.handle_group,
+            });
 
-        createSVG('rect', {
-            x: bar.getX() + bar.getWidth() + handle_width - 4,
-            y: bar.getY() + 1,
-            width: handle_width,
-            height: this.height - 2,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
-            class: 'handle right',
-            append_to: this.handle_group,
-        });
+            createSVG('rect', {
+                x: bar.getX() - handle_width - 4,
+                y: bar.getY() + 1,
+                width: handle_width,
+                height: this.height - 2,
+                rx: this.corner_radius,
+                ry: this.corner_radius,
+                class: 'handle left',
+                append_to: this.handle_group,
+            });
 
-        createSVG('rect', {
-            x: bar.getX() - handle_width - 4,
-            y: bar.getY() + 1,
-            width: handle_width,
-            height: this.height - 2,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
-            class: 'handle left',
-            append_to: this.handle_group,
-        });
-
-        this.$handle_progress = createSVG('polygon', {
-            points: this.get_progress_polygon_points().join(','),
-            class: 'handle progress',
-            append_to: this.handle_group,
-        });
+        }
+        if (!this.gantt.options.progress_readonly) {
+            this.$handle_progress = createSVG('polygon', {
+                points: this.get_progress_polygon_points().join(','),
+                class: 'handle progress',
+                append_to: this.handle_group,
+            });
+        }
     }
 
     get_progress_polygon_points() {
@@ -307,8 +310,8 @@ export default class Bar {
             (e) =>
             (timeout = setTimeout(() => {
                 this.show_popup(e.offsetX);
-                document.querySelector(
-                    `#${task_id}-highlight`,
+                document.getElementById(
+                    `${task_id}-highlight`,
                 ).style.display = 'block';
             }, 200)),
         );
@@ -316,11 +319,11 @@ export default class Bar {
         $.on(this.group, 'mouseleave', () => {
             clearTimeout(timeout);
             this.gantt.popup?.hide?.();
-            document.querySelector(`#${task_id}-highlight`).style.display =
+            document.getElementById(`${task_id}-highlight`).style.display =
                 'none';
         });
 
-        $.on(this.group, this.gantt.options.popup_trigger, () => {
+        $.on(this.group, "click", () => {
             this.gantt.trigger_event('click', [this.task]);
         });
 
@@ -329,6 +332,8 @@ export default class Bar {
                 // just finished a move action, wait for a few seconds
                 return;
             }
+            this.group.classList.remove('active')
+            if (this.gantt.popup) this.gantt.popup.parent.classList.remove('hidden');
 
             this.gantt.trigger_event('double_click', [this.task]);
         });

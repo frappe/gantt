@@ -37,11 +37,12 @@ const DEFAULT_OPTIONS = {
     padding: 18,
     view_mode: 'Day',
     date_format: 'YYYY-MM-DD',
-    popup_trigger: 'click',
     show_expected_progress: false,
     popup: null,
     language: 'en',
     readonly: false,
+    progress_readonly: false,
+    dates_readonly: false,
     highlight_weekend: true,
     scroll_to: 'start',
     lines: 'both',
@@ -954,6 +955,10 @@ export default class Gantt {
             return is_dragging || is_resizing_left || is_resizing_right;
         }
 
+        this.$svg.onclick = e => {
+            if (e.target.classList.contains('grid-row')) this.unselect_all()
+        }
+
         $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
             const bar_wrapper = $.closest('.bar-wrapper', element);
             bars.forEach((bar) => bar.group.classList.remove('active'));
@@ -967,6 +972,7 @@ export default class Gantt {
             }
 
             bar_wrapper.classList.add('active');
+
             if (this.popup) this.popup.parent.classList.add('hidden');
 
             x_on_start = e.offsetX;
@@ -1082,7 +1088,7 @@ export default class Gantt {
                             width: $bar.owidth + $bar.finaldx,
                         });
                     }
-                } else if (is_dragging && !this.options.readonly) {
+                } else if (is_dragging && !this.options.readonly && !this.options.dates_readonly) {
                     bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
                 }
             });
