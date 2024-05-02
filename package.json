@@ -7,6 +7,7 @@
     "scripts": {
         "start": "yarn run dev",
         "dev": "vite",
+        "build-dev": "vite build --watch",
         "build": "vite build",
         "test": "jest",
         "lint": "eslint src/**/*.js",

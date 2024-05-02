@@ -1,4 +1,4 @@
-const k = "year", D = "month", v = "day", E = "hour", Y = "minute", A = "second", L = "millisecond", T = {
+const M = "year", D = "month", v = "day", E = "hour", Y = "minute", A = "second", L = "millisecond", T = {
   January: "Jan",
   February: "Feb",
   March: "Mar",
@@ -95,7 +95,7 @@ const k = "year", D = "month", v = "day", E = "hour", Y = "minute", A = "second"
   add(n, t, e) {
     t = parseInt(t, 10);
     const s = [
-      n.getFullYear() + (e === k ? t : 0),
+      n.getFullYear() + (e === M ? t : 0),
       n.getMonth() + (e === D ? t : 0),
       n.getDate() + (e === v ? t : 0),
       n.getHours() + (e === E ? t : 0),
@@ -107,7 +107,7 @@ const k = "year", D = "month", v = "day", E = "hour", Y = "minute", A = "second"
   },
   start_of(n, t) {
     const e = {
-      [k]: 6,
+      [M]: 6,
       [D]: 5,
       [v]: 4,
       [E]: 3,
@@ -121,7 +121,7 @@ const k = "year", D = "month", v = "day", E = "hour", Y = "minute", A = "second"
     }
     const i = [
       n.getFullYear(),
-      s(k) ? 0 : n.getMonth(),
+      s(M) ? 0 : n.getMonth(),
       s(D) ? 1 : n.getDate(),
       s(v) ? 0 : n.getHours(),
       s(E) ? 0 : n.getMinutes(),
@@ -554,7 +554,7 @@ class O {
     const t = this.$bar;
     this.handle_group.querySelector(".handle.left").setAttribute("x", t.getX() - 12), this.handle_group.querySelector(".handle.right").setAttribute("x", t.getEndX() + 4);
     const e = this.group.querySelector(".handle.progress");
-    e && e.setAttribute("points", this.get_progress_polygon_points());
+    console.log(e, this.$bar_progress.getEndX()), e && e.setAttribute("cx", this.$bar_progress.getEndX());
   }
   update_arrow_position() {
     this.arrows = this.arrows || [];
@@ -685,7 +685,7 @@ class F {
       e = t;
     else
       throw new TypeError(
-        "Frappé Gantt only supports usage of a string CSS selector, HTML DOM element or SVG DOM element for the 'element' parameter"
+        "Frappe Gantt only supports usage of a string CSS selector, HTML DOM element or SVG DOM element for the 'element' parameter"
       );
     e ? (this.$svg = e, this.$svg.classList.add("gantt")) : this.$svg = c("svg", {
       append_to: s,
@@ -1101,7 +1101,7 @@ class F {
   bind_grid_click() {
     _.on(
       this.$svg,
-      this.options.popup_trigger,
+      "click",
       ".grid-row, .grid-header",
       () => {
         this.unselect_all(), this.hide_popup();
@@ -1145,10 +1145,10 @@ class F {
       if (x && !x.classList.contains("current-upper")) {
         const m = document.querySelector(".current-upper");
         m && (m.classList.remove("current-upper"), m.style.left = this.upper_texts_x[m.textContent] + "px", m.style.top = this.options.header_height - 50 + "px"), x.classList.add("current-upper");
-        let M = this.$svg.getBoundingClientRect();
-        x.style.left = M.x + this.$container.scrollLeft + 10 + "px", x.style.top = M.y + this.options.header_height - 50 + "px";
+        let k = this.$svg.getBoundingClientRect();
+        x.style.left = k.x + this.$container.scrollLeft + 10 + "px", x.style.top = k.y + this.options.header_height - 50 + "px";
       }
-      Array.prototype.forEach.call(g, function(m, M) {
+      Array.prototype.forEach.call(g, function(m, k) {
         f.push(m.getAttribute("data-id"));
       }), w && (u = f.map((m) => this.get_bar(m)), this.options.auto_move_label && u.forEach((m) => {
         m.update_label_position_on_horizontal_scroll({
