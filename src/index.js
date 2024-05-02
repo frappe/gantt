@@ -29,7 +29,6 @@ const VIEW_MODE_PADDING = {
 const DEFAULT_OPTIONS = {
     header_height: 65,
     column_width: 30,
-    step: 24,
     view_modes: [...Object.values(VIEW_MODE)],
     bar_height: 30,
     bar_corner_radius: 3,
@@ -676,10 +675,11 @@ export default class Gantt {
             let $today = document.getElementById(
                 date_utils.format(date).replaceAll(' ', '_'),
             );
-
-            $today.classList.add('current-date-highlight');
-            $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
-            $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px';
+            if ($today) {
+                $today.classList.add('current-date-highlight');
+                $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
+                $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px';
+            }
         }
     }
 
@@ -1064,7 +1064,6 @@ export default class Gantt {
 
         $.on(this.$svg, 'mousemove', (e) => {
             if (!action_in_progress()) return;
-            console.log(e);
             const dx = (e.offsetX || e.layerX) - x_on_start;
 
             bars.forEach((bar) => {

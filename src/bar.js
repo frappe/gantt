@@ -634,7 +634,6 @@ export default class Bar {
             .querySelector('.handle.right')
             .setAttribute('x', bar.getEndX() + 4);
         const handle = this.group.querySelector('.handle.progress');
-        console.log(handle, this.$bar_progress.getEndX())
         handle &&
             handle.setAttribute('cx', this.$bar_progress.getEndX());
     }
