@@ -51,19 +51,19 @@ var gantt = new Gantt("#gantt", tasks);
 You can also pass various options to the Gantt constructor:
 
 ```js
-var gantt = new Gantt("#gantt", tasks, {
-  header_height: 50,
-  column_width: 30,
-  step: 24,
-  view_modes: ["Quarter Day", "Half Day", "Day", "Week", "Month"],
-  bar_height: 20,
-  bar_corner_radius: 3,
-  arrow_curve: 5,
-  padding: 18,
-  view_mode: "Day",
-  date_format: "YYYY-MM-DD",
-  language: "en", // or 'es', 'it', 'ru', 'ptBr', 'fr', 'tr', 'zh', 'de', 'hu'
-  custom_popup_html: null,
+var gantt = new Gantt('#gantt', tasks, {
+    header_height: 50,
+    column_width: 30,
+    step: 24,
+    view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
+    bar_height: 20,
+    bar_corner_radius: 3,
+    arrow_curve: 5,
+    padding: 18,
+    view_mode: 'Day',
+    date_format: 'YYYY-MM-DD',
+    language: 'en', // or 'es', 'it', 'ru', 'ptBr', 'fr', 'tr', 'zh', 'de', 'hu'
+    custom_popup_html: null,
 });
 ```
 
@@ -91,25 +91,25 @@ Assuming the last commit (or a couple of commits) were enhancements or fixes,
 
 1. Run `yarn build`
 
-   This will generate files in the `dist/` folder. These files need to be committed.
+    This will generate files in the `dist/` folder. These files need to be committed.
 
 1. Run `yarn publish`
 1. Type the new version at the prompt
 
-   Depending on the type of change, you can either bump the patch version or the minor version.
-   For e.g.,
+    Depending on the type of change, you can either bump the patch version or the minor version.
+    For e.g.,
 
-   ```
-   0.5.0 -> 0.6.0 (minor version bump)
-   0.5.0 -> 0.5.1 (patch version bump)
-   ```
+    ```
+    0.5.0 -> 0.6.0 (minor version bump)
+    0.5.0 -> 0.5.1 (patch version bump)
+    ```
 
 1. Now, there will be a commit named after the version you just entered. Include the generated files in `dist/` folder as part of this commit by running the command:
-   ```
-   git add dist
-   git commit --amend
-   git push origin master
-   ```
+    ```
+    git add dist
+    git commit --amend
+    git push origin master
+    ```
 
 License: MIT
 
