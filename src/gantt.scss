@@ -1,316 +1,307 @@
-@import "./dark.scss";
+@import './dark.scss';
 
 $bar-color: #fff !default;
 $bar-color-important: #94c4f4 !default;
 $bar-stroke: #fff !default;
 $dark-stroke-color: #e0e0e0 !default;
-$stroke-color: #EBEEF0 !default;
+$stroke-color: #ebeef0 !default;
 $light-bg: #f5f5f5 !default;
 $light-border-color: #ebeff2 !default;
 $light-yellow: #f6e796 !default;
-$holiday-color: #F9FAFA !default;
+$holiday-color: #f9fafa !default;
 $text-muted: #666 !default;
-$text-grey: #98A1A9;
+$text-grey: #98a1a9;
 $text-light: #fff !default;
 $text-dark: #111 !default;
-$progress: #EBEEF0 !default;
+$progress: #ebeef0 !default;
 $handle-color: #dcdce4 !default;
 $handle-color-important: #94c4f4 !default;
 $light-blue: #c4c4e9 !default;
-$middle-blue: #62B2F9 !default;
+$middle-blue: #62b2f9 !default;
 $dark-blue: #2c94ec !default;
 
-
 .gantt-container {
-  line-height: 14.5px;
+    line-height: 14.5px;
 
-  .grid-header {
-    background-color: #ffffff;
-    position: sticky;
-    top: 0;
-    left: 0;
-    z-index: 10;
-  }
+    .grid-header {
+        background-color: #ffffff;
+        position: sticky;
+        top: 0;
+        left: 0;
+        z-index: 10;
+    }
 
-  .lower-text,
-  .upper-text {
-    text-anchor: middle;
-    color: $text-dark;
-  }
+    .lower-text,
+    .upper-text {
+        text-anchor: middle;
+        color: $text-dark;
+    }
 
-  .upper-header {
-    height: 40px;
-  }
+    .upper-header {
+        height: 40px;
+    }
 
-  .lower-header {
-    height: 30px;
-  }
+    .lower-header {
+        height: 30px;
+    }
 
-  .lower-text {
-    font-size: 14px;
-    position: absolute;
-    width: fit-content;
-  }
+    .lower-text {
+        font-size: 14px;
+        position: absolute;
+        width: fit-content;
+    }
 
-  .upper-text {
-    position: absolute;
-    width: fit-content;
-    font-weight: 500;
-    font-size: 16px;
-  }
+    .upper-text {
+        position: absolute;
+        width: fit-content;
+        font-weight: 500;
+        font-size: 16px;
+    }
 
-  .current-upper {
-    position: fixed;
-  }
+    .current-upper {
+        position: fixed;
+    }
 
-  .side-header {
-    position: fixed;
-    padding: 0 10px;
-    margin-right: 10px;
-    background: white;
-    line-height: 20px;
-    font-weight: 400;
-  }
+    .side-header {
+        position: fixed;
+        padding: 0 10px;
+        margin-right: 10px;
+        background: white;
+        line-height: 20px;
+        font-weight: 400;
+    }
 
-  .today-button,
-  .viewmode-select {
-    background: #F4F5F6;
-    text-align: -webkit-center;
-    text-align: center;
-    height: 25px;
-    border-radius: 8px;
-    border: none;
-    color: $text-dark;
-    padding: 4px 10px;
-    border-radius: 8px;
-    height: 25px;
-  }
+    .today-button,
+    .viewmode-select {
+        background: #f4f5f6;
+        text-align: -webkit-center;
+        text-align: center;
+        height: 25px;
+        border-radius: 8px;
+        border: none;
+        color: $text-dark;
+        padding: 4px 10px;
+        border-radius: 8px;
+        height: 25px;
+    }
 
-  .viewmode-select {
-    outline: none !important;
-    padding: 4px 8px;
-    margin-right: 4px;
+    .viewmode-select {
+        outline: none !important;
+        padding: 4px 8px;
+        margin-right: 4px;
 
-    // Hide select icon
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    text-indent: 1px;
-    text-overflow: '';
-  }
+        // Hide select icon
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-indent: 1px;
+        text-overflow: '';
+    }
 
-  .date-highlight {
-    background-color: $progress;
-    border-radius: 12px;
-    position: absolute;
-    display: none;
-  }
+    .date-highlight {
+        background-color: $progress;
+        border-radius: 12px;
+        position: absolute;
+        display: none;
+    }
 
-  .current-highlight {
-    position: absolute;
-    background: $dark-blue;
-    width: 1px;
-  }
+    .current-highlight {
+        position: absolute;
+        background: $dark-blue;
+        width: 1px;
+    }
 
-  .current-date-highlight {
-    background: $dark-blue;
-    color: $text-light;
-    padding: 4px 8px;
-    border-radius: 200px;
-  }
+    .current-date-highlight {
+        background: $dark-blue;
+        color: $text-light;
+        padding: 4px 8px;
+        border-radius: 200px;
+    }
 }
 
 .gantt {
-  user-select: none;
-  -webkit-user-select: none;
-  position: absolute;
+    user-select: none;
+    -webkit-user-select: none;
+    position: absolute;
 
-  .grid-background {
-    fill: none;
-  }
-
-
-
-  .grid-row {
-    fill: #ffffff;
-  }
-
-  // .grid-row:nth-child(even) {
-  //   fill: $light-bg;
-  // }
-
-  .row-line {
-    stroke: $light-border-color;
-  }
-
-  .tick {
-    stroke: $stroke-color;
-    stroke-width: 0.4;
-
-    &.thick {
-      stroke: $dark-stroke-color;
-      stroke-width: 0.7;
+    .grid-background {
+        fill: none;
     }
-  }
 
-
-
-  .holiday-highlight {
-    fill: $holiday-color;
-  }
-
-  .arrow {
-    fill: none;
-    stroke: #9FA9B1;
-    stroke-width: 1;
-  }
-
-  .bar-wrapper .bar {
-    fill: $bar-color;
-    stroke: $bar-stroke;
-    stroke-width: 0;
-    transition: stroke-width 0.3s ease;
-  }
-
-  .bar-progress {
-    fill: $progress;
-  }
-
-  .bar-expected-progress {
-    fill: $light-blue;
-  }
-
-  .bar-invalid {
-    fill: transparent;
-    stroke: $bar-stroke;
-    stroke-width: 1;
-    stroke-dasharray: 5;
-
-    &~.bar-label {
-      fill: $text-light;
+    .grid-row {
+        fill: #ffffff;
     }
-  }
 
-  .bar-label {
-    fill: $text-dark;
-    dominant-baseline: central;
-    // text-anchor: middle;
-    font-family: Helvetica;
-    font-size: 13px;
-    font-weight: 400;
+    // .grid-row:nth-child(even) {
+    //   fill: $light-bg;
+    // }
 
-    &.big {
-      fill: $text-dark;
-      text-anchor: start;
+    .row-line {
+        stroke: $light-border-color;
     }
-  }
 
-  .bar-wrapper.important {
-    .bar {
-      fill: $bar-color-important;
+    .tick {
+        stroke: $stroke-color;
+        stroke-width: 0.4;
+
+        &.thick {
+            stroke: $dark-stroke-color;
+            stroke-width: 0.7;
+        }
+    }
+
+    .holiday-highlight {
+        fill: $holiday-color;
+    }
+
+    .arrow {
+        fill: none;
+        stroke: #9fa9b1;
+        stroke-width: 1;
+    }
+
+    .bar-wrapper .bar {
+        fill: $bar-color;
+        stroke: $bar-stroke;
+        stroke-width: 0;
+        transition: stroke-width 0.3s ease;
     }
 
     .bar-progress {
-      fill: $dark-blue;
+        fill: $progress;
+    }
+
+    .bar-expected-progress {
+        fill: $light-blue;
+    }
+
+    .bar-invalid {
+        fill: transparent;
+        stroke: $bar-stroke;
+        stroke-width: 1;
+        stroke-dasharray: 5;
+
+        & ~ .bar-label {
+            fill: $text-light;
+        }
     }
 
     .bar-label {
-      fill: $text-light;
+        fill: $text-dark;
+        dominant-baseline: central;
+        // text-anchor: middle;
+        font-family: Helvetica;
+        font-size: 13px;
+        font-weight: 400;
+
+        &.big {
+            fill: $text-dark;
+            text-anchor: start;
+        }
+    }
+
+    .bar-wrapper.important {
+        .bar {
+            fill: $bar-color-important;
+        }
+
+        .bar-progress {
+            fill: $dark-blue;
+        }
+
+        .bar-label {
+            fill: $text-light;
+        }
+
+        .handle {
+            fill: $handle-color-important;
+        }
+
+        .handle.progress {
+            fill: $text-light;
+        }
     }
 
     .handle {
-      fill: $handle-color-important;
+        fill: $handle-color;
+        cursor: ew-resize;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
     }
 
     .handle.progress {
-      fill: $text-light;
-    }
-  }
-
-
-  .handle {
-    fill: $handle-color;
-    cursor: ew-resize;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease;
-  }
-
-  .handle.progress {
-    fill: $text-muted;
-  }
-
-  .bar-wrapper {
-    cursor: pointer;
-    outline: none;
-
-    &.active {
-      & .handle {
-        visibility: visible;
-        opacity: 1;
-      }
+        fill: $text-muted;
     }
 
-    .bar {
-      -webkit-filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, .7));
-      filter: drop-shadow(0 0 2px rgba(17, 43, 66, .16));
-      border-radius: 3px;
+    .bar-wrapper {
+        cursor: pointer;
+        outline: none;
+
+        &.active {
+            & .handle {
+                visibility: visible;
+                opacity: 1;
+            }
+        }
+
+        .bar {
+            -webkit-filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.7));
+            filter: drop-shadow(0 0 2px rgba(17, 43, 66, 0.16));
+            border-radius: 3px;
+        }
+
+        &:hover {
+            .bar {
+                transition: transform 0.3s ease;
+            }
+
+            .date-highlight {
+                display: block;
+            }
+        }
     }
 
-
-    &:hover {
-      .bar {
-        transition: transform 0.3s ease;
-      }
-
-      .date-highlight {
-        display: block;
-      }
+    .hide {
+        display: none;
     }
-  }
-
-
-  .hide {
-    display: none;
-  }
 }
 
 .gantt-container {
-  position: relative;
-  overflow: auto;
-  font-size: 12px;
-  height: 500px;
+    position: relative;
+    overflow: auto;
+    font-size: 12px;
+    height: 500px;
 
-  .popup-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: #171B1F;
-    padding: 10px;
-    border-radius: 5px;
-    width: max-content;
+    .popup-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: #171b1f;
+        padding: 10px;
+        border-radius: 5px;
+        width: max-content;
 
-    &.hidden {
-      opacity: 0 !important;
+        &.hidden {
+            opacity: 0 !important;
+        }
+
+        .title {
+            margin-bottom: 5px;
+            text-align: -webkit-center;
+            text-align: center;
+            color: $text-light;
+        }
+
+        .subtitle {
+            color: $text-grey;
+        }
+
+        .pointer {
+            position: absolute;
+            height: 5px;
+            margin: 0 0 0 -5px;
+            border: 5px solid transparent;
+            border-bottom-color: rgba(0, 0, 0, 0.8);
+        }
     }
-
-
-    .title {
-      margin-bottom: 5px;
-      text-align: -webkit-center;
-      text-align: center;
-      color: $text-light;
-    }
-
-    .subtitle {
-      color: $text-grey;
-    }
-
-    .pointer {
-      position: absolute;
-      height: 5px;
-      margin: 0 0 0 -5px;
-      border: 5px solid transparent;
-      border-bottom-color: rgba(0, 0, 0, 0.8);
-    }
-  }
 }

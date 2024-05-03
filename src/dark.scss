@@ -9,89 +9,89 @@ $text-color-dark: #f7f7f7;
 $blue-dark: #8a8aff;
 
 .dark > .gantt-container .gantt {
-  .grid-header {
-    fill: #252525;
-    stroke: $border-color-dark;
-  }
-  .grid-row {
-    fill: #252525;
-  }
-  .grid-row:nth-child(even) {
-    fill: $light-bg-dark;
-  }
-  .row-line {
-    stroke: $light-border-color-dark;
-  }
-  .tick {
-    stroke: $border-color-dark;
-  }
-  .today-highlight {
-    opacity: 0.2;
-  }
-
-  .arrow {
-    stroke: $text-muted-dark;
-  }
-
-  .bar {
-    fill: $bar-color-dark;
-    stroke: none;
-  }
-  .bar-progress {
-    fill: $blue-dark;
-  }
-  .bar-invalid {
-    fill: transparent;
-    stroke: $bar-stroke-dark;
-
-    & ~ .bar-label {
-      fill: $text-light-dark;
+    .grid-header {
+        fill: #252525;
+        stroke: $border-color-dark;
     }
-  }
-
-  .bar-label.big {
-    fill: $text-light-dark;
-  }
-
-  .bar-wrapper {
-    &:hover {
-      .bar {
-        fill: lighten($bar-color-dark, 5);
-      }
-
-      .bar-progress {
-        fill: lighten($blue-dark, 5);
-      }
+    .grid-row {
+        fill: #252525;
+    }
+    .grid-row:nth-child(even) {
+        fill: $light-bg-dark;
+    }
+    .row-line {
+        stroke: $light-border-color-dark;
+    }
+    .tick {
+        stroke: $border-color-dark;
+    }
+    .today-highlight {
+        opacity: 0.2;
     }
 
-    &.active {
-      .bar {
-        fill: lighten($bar-color-dark, 5);
-      }
-
-      .bar-progress {
-        fill: lighten($blue-dark, 5);
-      }
+    .arrow {
+        stroke: $text-muted-dark;
     }
-  }
 
-  .upper-text {
-    fill: #a2a2a2;
-  }
-  .lower-text {
-    fill: $text-color-dark;
-  }
+    .bar {
+        fill: $bar-color-dark;
+        stroke: none;
+    }
+    .bar-progress {
+        fill: $blue-dark;
+    }
+    .bar-invalid {
+        fill: transparent;
+        stroke: $bar-stroke-dark;
+
+        & ~ .bar-label {
+            fill: $text-light-dark;
+        }
+    }
+
+    .bar-label.big {
+        fill: $text-light-dark;
+    }
+
+    .bar-wrapper {
+        &:hover {
+            .bar {
+                fill: lighten($bar-color-dark, 5);
+            }
+
+            .bar-progress {
+                fill: lighten($blue-dark, 5);
+            }
+        }
+
+        &.active {
+            .bar {
+                fill: lighten($bar-color-dark, 5);
+            }
+
+            .bar-progress {
+                fill: lighten($blue-dark, 5);
+            }
+        }
+    }
+
+    .upper-text {
+        fill: #a2a2a2;
+    }
+    .lower-text {
+        fill: $text-color-dark;
+    }
 }
 
 .dark > .gantt-container {
-  .popup-wrapper {
-    background-color: #333;
+    .popup-wrapper {
+        background-color: #333;
 
-    .title {
-      border-color: lighten($blue-dark, 5);
+        .title {
+            border-color: lighten($blue-dark, 5);
+        }
+        .pointer {
+            border-top-color: #333;
+        }
     }
-    .pointer {
-      border-top-color: #333;
-    }
-  }
 }
