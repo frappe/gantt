@@ -1,5 +1,5 @@
 {
-  "name": "frappe-gantt",
+  "name": "frappe-gantt-vermillion",
   "version": "0.6.1",
   "description": "A simple, modern, interactive gantt library for the web",
   "main": "src/index.js",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/frappe/gantt.git"
+    "url": "git+https://github.com/apar-adhikari/gantt"
   },
   "files": [
     "src",
@@ -48,5 +48,8 @@
   },
   "eslintIgnore": [
     "dist"
-  ]
+  ],
+  "directories": {
+    "test": "tests"
+  }
 }
