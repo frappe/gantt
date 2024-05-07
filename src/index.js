@@ -151,6 +151,11 @@ export default class Gantt {
       // cache index
       task._index = i;
 
+      // To support tasks for same row
+      if (typeof task.custom_index === 'number') {
+        task._index = task.custom_index;
+      }
+
       // invalid dates
       if (!task.start && !task.end) {
         const today = date_utils.today();
