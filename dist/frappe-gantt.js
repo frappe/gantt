@@ -548,7 +548,7 @@ var Gantt = (function () {
         this.gantt.options.column_width;
 
       let $date_highlight = document.createElement("div");
-      $date_highlight.id = `${this.task.id}-highlight`;
+      $date_highlight.id = `highlight-${this.task.id}`;
       $date_highlight.classList.add('date-highlight');
       $date_highlight.style.height = this.height * 0.8 + 'px';
       $date_highlight.style.width = this.width + 'px';
@@ -692,13 +692,13 @@ var Gantt = (function () {
       let timeout;
       $.on(this.group, "mouseenter", (e) => timeout = setTimeout(() => {
         this.show_popup(e.offsetX);
-        document.querySelector(`#${task_id}-highlight`).style.display = 'block';
+        document.querySelector(`#highlight-${task_id}`).style.display = 'block';
       }, 200));
 
       $.on(this.group, "mouseleave", () => {
         clearTimeout(timeout);
         this.gantt.popup?.hide?.();
-        document.querySelector(`#${task_id}-highlight`).style.display = 'none';
+        document.querySelector(`#highlight-${task_id}`).style.display = 'none';
       });
 
 
