@@ -1057,8 +1057,6 @@ export default class Scheduler {
 
         $.on(this.$column_container, 'scroll', e => {
             this.$container.scrollTop = e.currentTarget.scrollTop;
-            this.dates.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
-            this.header.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
         });
     }
 
