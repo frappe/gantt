@@ -474,7 +474,7 @@ export default class Bar {
         const bar = this.$bar,
             label = this.group.querySelector('.bar-label');
 
-        const handle_width = this.handle_group.querySelector('.handle.left').getWidth();
+        const handle_width = this.handle_width;
 
         const max_width = bar.getWidth() - (handle_width * 2);
         const text = label.textContent;

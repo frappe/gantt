@@ -59,10 +59,17 @@ export default {
         return date_string + (with_time ? ' ' + time_string : '');
     },
 
-    format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
+    format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'it') {
         const dateTimeFormat = new Intl.DateTimeFormat(lang, {
             month: 'long'
         });
+        const dayFormat = new Intl.DateTimeFormat(lang, {
+            weekday: 'long'
+        });
+
+        const day_name = dayFormat.format(date);
+        const day_name_capitalized =
+            day_name.charAt(0).toUpperCase() + day_name.slice(1);
         const month_name = dateTimeFormat.format(date);
         const month_name_capitalized =
             month_name.charAt(0).toUpperCase() + month_name.slice(1);
@@ -79,6 +86,7 @@ export default {
             D: values[2],
             MMMM: month_name_capitalized,
             MMM: month_name_capitalized,
+            ddd: day_name_capitalized,
         };
 
         let str = format_string;

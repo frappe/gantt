@@ -11,6 +11,7 @@ $blue: #a3a3ff !default;
 $handle-color: #ddd !default;
 
 .scheduler {
+    font-family: "Segoe UI","Segoe WP", Segoe, device-segoe, Tahoma, Helvetica, Arial, sans-serif;
     .grid-background {
         fill: none;
     }
@@ -23,10 +24,16 @@ $handle-color: #ddd !default;
 
     .grid-row {
         fill: #ffffff;
+        &.selected-row {
+            fill: #0987f5;
+        }
     }
 
     .grid-row:nth-child(even) {
         fill: $light-bg;
+        &.selected-row {
+            fill: #0987f5;
+        }
     }
 
     .row-line {
@@ -45,6 +52,12 @@ $handle-color: #ddd !default;
     .today-highlight {
         fill: $light-yellow;
         opacity: 0.5;
+    }
+    .weekend-highlight {
+        position: inherit;
+        z-index: -1;
+        fill: rgba(241, 196, 15, 0.3);;
+        opacity: 0.7;
     }
 
     .arrow {
@@ -158,23 +171,30 @@ $handle-color: #ddd !default;
     .cell-wrapper {
         fill: transparent;
         user-select: none;
+
+        &.selected-row {
+            fill: #0987f5;
+        }
     }
 }
 
 .scheduler-container {
+    font-family: "Segoe UI","Segoe WP", Segoe, device-segoe, Tahoma, Helvetica, Arial, sans-serif;
     display: flex;
     font-size: 12px;
 
     .scheduler-columns-container {
         flex: 0 0 auto;
-        overflow: hidden;
+        // overflow: hidden;
+        scrollbar-width: none;
+        overflow: auto;
         padding-bottom: 20px;
     }
 
     .scheduler-grid-container {
         flex: 1;
         overflow: auto;
-        position: relative;    
+        position: relative;
     }
 
     .popup-wrapper {

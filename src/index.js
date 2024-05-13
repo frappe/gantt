@@ -114,7 +114,7 @@ export default class Scheduler {
             view_mode: 'Day',
             date_format: 'YYYY-MM-DD',
             custom_popup_html: null,
-            language: 'en',
+            language: 'it',
             resize_left: false,
             resize_right: false,
             drag_drop_x: false,
@@ -131,6 +131,8 @@ export default class Scheduler {
             this.options.date_start = date_utils.parse(this.options.date_start);
         if (this.options.date_end)
             this.options.date_end = date_utils.parse(this.options.date_end);
+        else
+            this.options.date_end = date_utils.add(this.options.date_start, 2, 'year');
     }
 
     setup_cells(cells) {
@@ -142,22 +144,28 @@ export default class Scheduler {
         this.tasks = tasks.filter(t => t.row).map((task, i) => {
             return this.setup_task(task);
         }).filter(t => (
-            (!this.options.date_start || t._start >= this.options.date_start) &&
-            (!this.options.date_end || t._end <= this.options.date_end))
+            (!this.options.date_start || t._start >= this.options.date_start))
+            // &&
+            // (!this.options.date_end || t._end <= this.options.date_end))
         );
 
         this.setup_dependencies();
     }
 
     setup_task(task) {
+        let need_to_be_lock = false;
         // convert to Date objects
         task._start = date_utils.parse(task.start);
+        if (date_utils.parse(task.end) > this.options.date_end) {
+            task.end = this.options.date_end;
+            need_to_be_lock = true;
+        }
         task._end = date_utils.parse(task.end);
 
         // make task invalid if duration too large
-        if (date_utils.diff(task._end, task._start, 'year') > 10) {
-            task.end = null;
-        }
+        // if (date_utils.diff(task._end, task._start, 'year') > 10) {
+        //     task.end = null;
+        // }
 
         // cache index
         task._index = this.options.rows.indexOf(task.row);
@@ -188,11 +196,17 @@ export default class Scheduler {
             task._end = date_utils.add(task._end, 59, 'second');
         }
 
-        task.resize_left = (task.resize_left != null) ? task.resize_left : this.options.resize_left;
-        task.resize_right = (task.resize_right != null) ? task.resize_right : this.options.resize_right;
-        task.drag_drop_x = (task.drag_drop_x != null) ? task.drag_drop_x : this.options.drag_drop_x;
-        task.drag_drop_y = (task.drag_drop_y != null) ? task.drag_drop_y : this.options.drag_drop_y;
-
+        if (!need_to_be_lock) {
+            task.resize_left = (task.resize_left != null) ? task.resize_left : this.options.resize_left;
+            task.resize_right = (task.resize_right != null) ? task.resize_right : this.options.resize_right;
+            task.drag_drop_x = (task.drag_drop_x != null) ? task.drag_drop_x : this.options.drag_drop_x;
+            task.drag_drop_y = (task.drag_drop_y != null) ? task.drag_drop_y : this.options.drag_drop_y;
+        } else {
+            task.resize_left = false;
+            task.resize_right = false;
+            task.drag_drop_x = false;
+            task.drag_drop_y = false;
+        }
         // invalid flag
         if (!task.start || !task.end) {
             task.invalid = true;
@@ -743,6 +757,40 @@ export default class Scheduler {
                 class: 'lower-text',
                 append_to: this.layers.date,
             });
+            if (this.view_is(VIEW_MODE.DAY) && (date.lower_text.includes('Sa') || date.lower_text.includes('Do'))) {
+                createSVG('rect', {
+                    x: date.lower_x - (this.options.column_width / 2),
+                    y: date.lower_y + (this.options.padding / 2),
+                    width: this.options.column_width,
+                    height: this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height -
+                        (this.options.header_height +
+                            this.options.padding / 2),
+                    class: 'weekend-highlight',
+                    append_to: this.layers.grid,
+                });
+            } else if (this.view_is(VIEW_MODE.HALF_DAY) && (date.upper_text.includes('Sa') || date.upper_text.includes('Do'))) {
+                createSVG('rect', {
+                    x: date.lower_x,
+                    y: date.lower_y,
+                    width: this.options.column_width * 2,
+                    height: this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height -
+                        (this.options.header_height +
+                            this.options.padding / 2),
+                    class: 'weekend-highlight',
+                    append_to: this.layers.grid,
+                });
+            } else if (this.view_is(VIEW_MODE.QUARTER_DAY) && (date.upper_text.includes('Sa') || date.upper_text.includes('Do'))) {
+                createSVG('rect', {
+                    x: date.lower_x,
+                    y: date.lower_y,
+                    width: this.options.column_width * 4,
+                    height: this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height -
+                        (this.options.header_height +
+                            this.options.padding / 2),
+                    class: 'weekend-highlight',
+                    append_to: this.layers.grid,
+                });
+            }
 
             if (date.upper_text) {
                 const $upper_text = createSVG('text', {
@@ -800,7 +848,7 @@ export default class Scheduler {
             ),
             Day_lower:
                 date.getDate() !== last_date.getDate()
-                    ? date_utils.format(date, 'D', this.options.language)
+                    ? date_utils.format(date, 'D ddd', this.options.language).substring(0, 5)
                     : '',
             Week_lower:
                 date.getMonth() !== last_date.getMonth()
@@ -810,21 +858,21 @@ export default class Scheduler {
             Year_lower: date_utils.format(date, 'YYYY', this.options.language),
             Hour_upper:
                 date.getDate() !== last_date.getDate()
-                    ? date_utils.format(date, 'D MMM', this.options.language)
+                    ? date_utils.format(date, 'D (ddd) MMM', this.options.language)
                     : '',
             'Quarter Day_upper':
                 date.getDate() !== last_date.getDate()
-                    ? date_utils.format(date, 'D MMM', this.options.language)
+                    ? date_utils.format(date, 'D (ddd) MMM', this.options.language)
                     : '',
             'Half Day_upper':
                 date.getDate() !== last_date.getDate()
                     ? date.getMonth() !== last_date.getMonth()
                         ? date_utils.format(
                             date,
-                            'D MMM',
+                            'D (' + date_utils.format(date, 'ddd').substring(0, 2) + ') ' + date_utils.format(date, 'MMM').substring(0, 3),
                             this.options.language
                         )
-                        : date_utils.format(date, 'D', this.options.language)
+                        : date_utils.format(date, 'D (ddd)', this.options.language)
                     : '',
             Day_upper:
                 date.getMonth() !== last_date.getMonth()
@@ -957,13 +1005,40 @@ export default class Scheduler {
     }
 
     bind_grid_events() {
-        $.on(this.$svg, 'click', '.grid-row, .grid-header', () => {
+        $.on(this.$svg, 'click', '.grid-row, .grid-header', (e) => {
             this.unselect_all();
             this.hide_popup();
+            if (e.target.classList.contains('grid-row')) {
+                const row = $.closest('.grid-row', e.target);
+                const data_id = row.getAttribute('data-id');
+                const cells = this.$column_svg.querySelectorAll('g.cell > g.cell-wrapper[data-row-id=' + data_id + ']');
+
+                if (!row.classList.contains('selected-row')) {
+                    row.classList.add('selected-row');
+                    cells.forEach(cell => {
+                        cell.classList.add('selected-row');
+                    });
+                } else {
+                    row.classList.remove('selected-row');
+                    cells.forEach(cell => {
+                        cell.classList.remove('selected-row');
+                    });
+                }
+            }
         });
 
-        $.on(this.$svg, 'dblclick', '.grid-row', (e) => {
-            const data_id = e.target.getAttribute('data-id');
+        $.on(this.$svg, 'dblclick', '.grid-row, .weekend-highlight', (e) => {
+            let data_id;
+            if (e.target.classList.contains('weekend-highlight')) {
+                let prev_y = 0;
+                this.rows.forEach(row => {
+                    if (e.offsetY >= prev_y && e.offsetY < row.y)
+                        return;
+                    data_id = row.id;
+                    prev_y = row.y;
+                })
+            } else
+                data_id = e.target.getAttribute('data-id');
 
             const x_in_units = e.offsetX / this.options.column_width;
             const datetime = date_utils.add(
@@ -979,13 +1054,22 @@ export default class Scheduler {
             this.layers.date.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
             this.fixed_col_layers.header.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
         });
+
+        $.on(this.$column_container, 'scroll', e => {
+            this.$container.scrollTop = e.currentTarget.scrollTop;
+            this.dates.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
+            this.header.setAttribute('transform', 'translate(0,' + e.currentTarget.scrollTop + ')');
+        });
     }
 
     bind_cell_events() {
         $.on(this.$column_svg, 'mouseover', '.cell-wrapper > text', (e) => {
             const cell = $.closest('.cell-wrapper > text', e.target);
-            if (cell.getAttribute('value') !== cell.innerHTML || cell.getAttribute('tooltip'))
-                this.show_cell_popup(cell, e);
+            const cell_tooltip = cell.getAttribute('tooltip');
+            const cell_value = cell.getAttribute('value');
+            if (cell_value !== cell.innerHTML || (
+                cell_tooltip && cell_tooltip !== cell_value))
+                this.show_cell_popup(cell, cell_value, cell_tooltip, e);
         });
 
         $.on(this.$column_svg, 'dblclick', '.cell-wrapper', (e) => {
@@ -993,6 +1077,25 @@ export default class Scheduler {
             const data_row_id = cell_wrapper.getAttribute('data-row-id');
             const data_col_id = cell_wrapper.getAttribute('data-col-id');
             this.trigger_event('cell_dblclick', [data_row_id, data_col_id]);
+        });
+
+        $.on(this.$column_svg, 'click', '.cell-wrapper', (e) => {
+            const cell_wrapper = $.closest('.cell-wrapper', e.target);
+            const data_row_id = cell_wrapper.getAttribute('data-row-id');
+            const cells = this.$column_svg.querySelectorAll('g.cell > g.cell-wrapper[data-row-id=' + data_row_id + ']');
+            const row = this.$container.querySelector('g > g > rect[data-id=' + data_row_id + ']');
+
+            if (!row.classList.contains('selected-row')) {
+                row.classList.add('selected-row');
+                cells.forEach(cell => {
+                    cell.classList.add('selected-row');
+                });
+            } else {
+                row.classList.remove('selected-row');
+                cells.forEach(cell => {
+                    cell.classList.remove('selected-row');
+                });
+            }
         });
     }
 
@@ -1360,8 +1463,12 @@ export default class Scheduler {
         });
         //highlight
         if (this.view_is(VIEW_MODE.DAY)) {
-            const highlight = this.$svg.getElementsByClassName('today-highlight');
-            $.attr(highlight[0], 'height', max_height);
+            const today_highlight = this.$svg.getElementsByClassName('today-highlight');
+            $.attr(today_highlight[0], 'height', max_height);
+            const weekend_highlight = Array.from(this.$svg.getElementsByClassName('weekend-highlight'))
+            weekend_highlight.forEach(weekend => {
+                $.attr(weekend, 'height', max_height);
+            });
         }
         //bars
         const bars_to_move = this.bars.filter(bar =>
@@ -1473,13 +1580,15 @@ export default class Scheduler {
         return out.filter(Boolean);
     }
 
-    show_cell_popup(cell, e) {
+    show_cell_popup(cell, cell_value, cell_tooltip, e) {
         if (this.bar_being_dragged) return;
+        if (cell_value === cell_tooltip)
+            cell_tooltip = '';
         this.show_popup({
             target_element: cell,
-            title: cell.getAttribute('value'),
+            title: cell_value,
             description: '',
-            subtitle: cell.getAttribute('tooltip'),
+            subtitle: cell_tooltip,
             task: '',
             e: e,
         });
