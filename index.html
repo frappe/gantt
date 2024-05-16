@@ -1,130 +1,130 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Simple Gantt</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        background: #ccc;
-      }
-      .container {
-        width: 80%;
-        margin: 0 auto;
-      }
-      /* custom class */
-      .gantt .bar-milestone .bar {
-        fill: tomato;
-      }
-      .heading {
-        text-align: center;
-      }
-      .gantt-target.dark {
-        background-color: #252525;
-      }
-    </style>
-    <link rel="stylesheet" href="dist/frappe-gantt.css" />
-    <script src="dist/frappe-gantt.js"></script>
-  </head>
-  <body>
-    <div class="container">
-      <h2 class="heading">Interactive Gantt Chart entirely made in SVG!</h2>
-      <div class="gantt-target"></div>
-    </div>
-    <script>
-      let tasks = [
-        {
-        	start: '2024-04-01',
-        	end: '2024-04-01',
-        	name: 'Redesign website',
-        	id: "Task 0",
-        	progress: 30
-        },
-        {
-        	start: '2024-03-26',
-          // Utilizes duration
-        	duration: '6d',
-        	name: 'Write new content',
-        	id: "Task 1",
-        	progress: 5,
-          important: true
-        },
-        {
-        	start: '2024-04-04',
-        	end: '2024-04-08',
-        	name: 'Apply new styles',
-        	id: "Task 2",
-        	progress: 80,
-        	dependencies: 'Task 1'
-        },
-        {
-        	start: '2024-04-08',
-        	end: '2024-04-09',
-        	name: 'Review',
-        	id: "Task 3",
-        	progress: 5,
-        	dependencies: 'Task 2'
-        },
-        {
-        	start: '2024-04-08',
-        	end: '2024-04-10',
-        	name: 'Deploy',
-        	id: "Task 4",
-        	progress: 0,
-        	// dependencies: 'Task 2'
-        },
-        {
-        	start: '2024-04-21',
-        	end: '2024-04-29',
-        	name: 'Go Live!',
-        	id: "Task 5",
-        	progress: 0,
-        	dependencies: 'Task 2',
-        	custom_class: 'bar-milestone'
-        },
-        // {
-        // 	start: '2014-01-05',
-        // 	end: '2019-10-12',
-        // 	name: 'Long term task',
-        // 	id: "Task 6",
-        // 	progress: 0
-        // }
-      ];
+    <head>
+        <meta charset="UTF-8" />
+        <title>Simple Gantt</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                background: #ccc;
+            }
+            .container {
+                width: 80%;
+                margin: 0 auto;
+            }
+            /* custom class */
+            .gantt .bar-milestone .bar {
+                fill: tomato;
+            }
+            .heading {
+                text-align: center;
+            }
+            .gantt-target.dark {
+                background-color: #252525;
+            }
+        </style>
+        <link rel="stylesheet" href="dist/frappe-gantt.css" />
+        <script src="dist/frappe-gantt.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h2 class="heading">Interactive Gantt Chart entirely made in SVG!</h2>
+            <div class="gantt-target"></div>
+        </div>
+        <script>
+            let tasks = [
+                {
+                    start: '2024-04-01',
+                    end: '2024-04-01',
+                    name: 'Redesign website',
+                    id: 'Task 0',
+                    progress: 30,
+                },
+                {
+                    start: '2024-03-26',
+                    // Utilizes duration
+                    duration: '6d',
+                    name: 'Write new content',
+                    id: 'Task 1',
+                    progress: 5,
+                    important: true,
+                },
+                {
+                    start: '2024-04-04',
+                    end: '2024-04-08',
+                    name: 'Apply new styles',
+                    id: 'Task 2',
+                    progress: 80,
+                    dependencies: 'Task 1',
+                },
+                {
+                    start: '2024-04-08',
+                    end: '2024-04-09',
+                    name: 'Review',
+                    id: 'Task 3',
+                    progress: 5,
+                    dependencies: 'Task 2',
+                },
+                {
+                    start: '2024-04-08',
+                    end: '2024-04-10',
+                    name: 'Deploy',
+                    id: 'Task 4',
+                    progress: 0,
+                    // dependencies: 'Task 2'
+                },
+                {
+                    start: '2024-04-21',
+                    end: '2024-04-29',
+                    name: 'Go Live!',
+                    id: 'Task 5',
+                    progress: 0,
+                    dependencies: 'Task 2',
+                    custom_class: 'bar-milestone',
+                },
+                // {
+                // 	start: '2014-01-05',
+                // 	end: '2019-10-12',
+                // 	name: 'Long term task',
+                // 	id: "Task 6",
+                // 	progress: 0
+                // }
+            ];
 
-      // Uncomment to test fixed header
-      tasks = [...tasks, ...Array.from({length: tasks.length * 3}, (_, i) => ({...tasks[i % 3], id: i}))]
-      
-      let gantt_chart = new Gantt(".gantt-target", tasks, {
-        on_click: (task) => {
-          console.log("Click", task);
-        },
-        // on_double_click: (task) => {
-        //   console.log("Double Click", task);
-        // },
-        // on_date_change: (task, start, end) => {
-        //   console.log("Date change", task, start, end);
-        // },
-        // on_progress_change: (task, progress) => {
-        //   console.log("Progress Change", task, progress);
-        // },
-        // on_view_change: (mode) => {
-        //   console.log("View Change", mode);
-        // },
-        // on_hover: (task, x, y) => {
-        //   console.log("Hover", x, y);
-        // },
-        view_mode: "Day",
-        view_mode_padding: { DAY: "3d" },
-        popup: false,
-        // scroll_to: 'today',
-        // view_mode_select: true,
-        // today_button: false,
-        // readonly: true,
-        // lines: 'vertical',
-        // lower_text: (date) => date.getDay(),
-        // upper_text: (date, view_mode, def) => def,
-      });
-      console.log(gantt_chart);
-    </script>
-  </body>
+            // Uncomment to test fixed header
+            tasks = [...tasks, ...Array.from({ length: tasks.length * 3 }, (_, i) => ({ ...tasks[i % 3], id: i }))];
+
+            let gantt_chart = new Gantt('.gantt-target', tasks, {
+                on_click: (task) => {
+                    console.log('Click', task);
+                },
+                // on_double_click: (task) => {
+                //   console.log("Double Click", task);
+                // },
+                // on_date_change: (task, start, end) => {
+                //   console.log("Date change", task, start, end);
+                // },
+                // on_progress_change: (task, progress) => {
+                //   console.log("Progress Change", task, progress);
+                // },
+                // on_view_change: (mode) => {
+                //   console.log("View Change", mode);
+                // },
+                // on_hover: (task, x, y) => {
+                //   console.log("Hover", x, y);
+                // },
+                view_mode: 'Day',
+                view_mode_padding: { DAY: '3d' },
+                popup: false,
+                // scroll_to: 'today',
+                // view_mode_select: true,
+                // today_button: false,
+                // readonly: true,
+                // lines: 'vertical',
+                // lower_text: (date) => date.getDay(),
+                // upper_text: (date, view_mode, def) => def,
+            });
+            console.log(gantt_chart);
+        </script>
+    </body>
 </html>

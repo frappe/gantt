@@ -1,19 +1,29 @@
-name: Publish on NPM
+name: Publish to npm registry
 on:
   push:
-    branches: [master]
+    branches:
+      - master
 
 jobs:
-  publish:
+  release:
+    name: publish
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
         with:
-          node-version: 14
-      - run: yarn install
+          node-version: 20
+          cache: 'yarn'
+          registry-url: 'https://registry.npmjs.org/'
+      - run: yarn install --frozen-lockfile
       - run: yarn prettier-check
       - run: yarn test
-      - uses: JS-DevTools/npm-publish@v1
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
+      - name: Check for vulnerabilities
+        run: yarn audit
+      - run: yarn build
+      - name: Publish package
+        if: success()
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: yarn semantic-release

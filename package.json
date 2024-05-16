@@ -1,52 +1,83 @@
 {
-  "name": "frappe-gantt",
-  "version": "0.6.1",
-  "description": "A simple, modern, interactive gantt library for the web",
-  "main": "src/index.js",
-  "scripts": {
-    "start": "yarn run dev",
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "prettier": "prettier --write \"{src/*,tests/*,rollup.config}.js\"",
-    "prettier-check": "prettier --check \"{src/*,tests/*,rollup.config}.js\""
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/frappe/gantt.git"
-  },
-  "files": [
-    "src",
-    "dist",
-    "README.md"
-  ],
-  "keywords": [
-    "gantt",
-    "svg",
-    "simple gantt",
-    "project timeline",
-    "interactive gantt",
-    "project management"
-  ],
-  "author": "Faris Ansari",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/frappe/gantt/issues"
-  },
-  "homepage": "https://github.com/frappe/gantt",
-  "devDependencies": {
-    "babel-preset-env": "^1.6.1",
-    "eslint": "^4.17.0",
-    "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-prettier": "^2.6.0",
-    "jest": "^22.2.1",
-    "prettier": "3.2.5",
-    "rollup": "^2.70.2",
-    "rollup-plugin-sass": "^1.2.12",
-    "rollup-plugin-terser": "^7.0.2"
-  },
-  "eslintIgnore": [
-    "dist"
-  ]
+    "name": "@energiency/gantt",
+    "version": "1.0.0",
+    "description": "A simple, modern, interactive gantt library for the web",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/energiency/gantt.git"
+    },
+    "author": {
+        "name": "Energiency",
+        "email": "dev@energiency.com"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/energiency/gantt/issues"
+    },
+    "homepage": "https://github.com/energiency/gantt",
+    "keywords": [
+        "gantt",
+        "svg",
+        "simple gantt",
+        "project timeline",
+        "interactive gantt",
+        "project management"
+    ],
+    "main": "src/index.js",
+    "scripts": {
+        "start": "yarn run dev",
+        "build": "rollup -c",
+        "dev": "rollup -c -w",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "prettier": "prettier --write \"{src/*,tests/*,rollup.config}.js\"",
+        "prettier-check": "prettier --check \"{src/*,tests/*,rollup.config}.js\"",
+        "release": "semantic-release"
+    },
+    "files": [
+        "src",
+        "dist",
+        "README.md"
+    ],
+    "devDependencies": {
+        "@semantic-release/git": "^10.0.1",
+        "babel-preset-env": "^1.6.1",
+        "eslint": "^4.17.0",
+        "eslint-config-prettier": "^2.9.0",
+        "eslint-plugin-prettier": "^2.6.0",
+        "jest": "^22.2.1",
+        "prettier": "3.2.5",
+        "rollup": "^2.70.2",
+        "rollup-plugin-sass": "^1.2.12",
+        "rollup-plugin-terser": "^7.0.2",
+        "semantic-release": "^23.1.1"
+    },
+    "eslintIgnore": [
+        "dist"
+    ],
+    "release": {
+        "branches": [
+            "+([0-9])?(.{+([0-9]),x}).x",
+            "main",
+            "next",
+            "next-major",
+            {
+                "name": "beta",
+                "prerelease": true
+            },
+            {
+                "name": "alpha",
+                "prerelease": true
+            }
+        ],
+        "plugins": [
+            "@semantic-release/commit-analyzer",
+            "@semantic-release/npm",
+            "@semantic-release/git",
+            "@semantic-release/github"
+        ]
+    },
+    "publishConfig": {
+        "access": "public"
+    }
 }
