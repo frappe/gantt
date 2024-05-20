@@ -1092,11 +1092,6 @@ export default class Scheduler {
         $.on(this.$column_container, 'scroll', e => {
             this.$container.scrollTop = e.currentTarget.scrollTop;
         });
-
-        $.on(this.$column_svg, 'mousedown', '.header-tick', (e) => {
-            is_resizing = true;
-            x = e.clientX;
-        });
     }
 
     bind_cell_events() {
