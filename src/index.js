@@ -156,10 +156,8 @@ export default class Scheduler {
         let need_to_be_lock = false;
         // convert to Date objects
         task._start = date_utils.parse(task.start);
-        if (date_utils.parse(task.end) > this.options.date_end) {
-            task.end = this.options.date_end;
+        if (date_utils.parse(task.end) > this.options.date_end)
             need_to_be_lock = true;
-        }
         task._end = date_utils.parse(task.end);
 
         // make task invalid if duration too large
@@ -517,10 +515,16 @@ export default class Scheduler {
                 x: pos_x,
                 y: pos_y,
                 innerHTML: text_content,
-                class: 'lower-text',
+                class: 'lower-text bold',
                 append_to: this.fixed_col_layers.header
             });
             pos_x += column.width / 2;
+
+            createSVG('path', {
+                d: `M ${pos_x - 2} ${0} v ${this.options.header_height + (this.options.padding / 2)}`,
+                class: 'header-tick',
+                append_to: this.fixed_col_layers.header,
+            });
 
             // make_grid_ticks
             let tick_y = 0;
@@ -609,9 +613,13 @@ export default class Scheduler {
     }
 
     make_grid_background() {
-        const grid_width = this.dates.length * this.options.column_width;
+        let grid_width;
+        if (this.view_is(VIEW_MODE.WEEK) || this.view_is(VIEW_MODE.MONTH) || this.view_is(VIEW_MODE.YEAR)) {
+            grid_width = (this.dates.length - 1) * this.options.column_width;
+        } else
+            grid_width = this.dates.length * this.options.column_width;
         const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
-        const grid_height = sum_rows_height; //+ this.options.header_height + (this.options.padding / 2);
+        const grid_height = sum_rows_height;
 
         createSVG('rect', {
             x: 0,
@@ -632,7 +640,12 @@ export default class Scheduler {
         const rows_layer = createSVG('g', { append_to: this.layers.grid });
         const lines_layer = createSVG('g', { append_to: this.layers.grid });
 
-        const row_width = this.dates.length * this.options.column_width;
+
+        let row_width;
+        if (this.view_is(VIEW_MODE.WEEK) || this.view_is(VIEW_MODE.MONTH) || this.view_is(VIEW_MODE.YEAR)) {
+            row_width = (this.dates.length - 1) * this.options.column_width;
+        } else
+            row_width = this.dates.length * this.options.column_width;
 
         let i = 0;
 
@@ -668,7 +681,11 @@ export default class Scheduler {
     }
 
     make_grid_header() {
-        const header_width = this.dates.length * this.options.column_width;
+        let header_width;
+        if (this.view_is(VIEW_MODE.WEEK) || this.view_is(VIEW_MODE.MONTH) || this.view_is(VIEW_MODE.YEAR)) {
+            header_width = (this.dates.length - 1) * this.options.column_width;
+        } else
+            header_width = this.dates.length * this.options.column_width;
         const header_height = this.options.header_height + 10;
         createSVG('rect', {
             x: 0,
@@ -727,8 +744,7 @@ export default class Scheduler {
         if (this.view_is(VIEW_MODE.DAY)) {
             const x =
                 (date_utils.diff(date_utils.today(), this.scheduler_start, 'hour') /
-                    this.options.step) +
-                this.options.column_width;
+                    this.options.step);
             const y = (this.options.header_height +
                 this.options.padding / 2);
 
@@ -754,39 +770,35 @@ export default class Scheduler {
                 x: date.lower_x,
                 y: date.lower_y,
                 innerHTML: date.lower_text,
-                class: 'lower-text',
+                class: 'lower-text bold',
                 append_to: this.layers.date,
             });
-            if (this.view_is(VIEW_MODE.DAY) && (date.lower_text.includes('Sa') || date.lower_text.includes('Do'))) {
+
+            if ((date.lower_text.includes('Sa') || date.lower_text.includes('Do')) ||
+                (date.upper_text.includes('Sa') || date.upper_text.includes('Do'))) {
+
+                let highlight_x = date.lower_x;
+                const highlight_y = date.lower_y + (this.options.padding / 2);
+                let highlight_width = this.options.column_width;
+                const highlight_height = this.rows[this.rows.length - 1].y +
+                    this.rows[this.rows.length - 1].height -
+                    this.options.header_height -
+                    (this.options.padding / 2);
+
+                if (this.view_is(VIEW_MODE.DAY))
+                    highlight_x = date.lower_x - (this.options.column_width / 2);
+                else if (this.view_is(VIEW_MODE.HALF_DAY))
+                    highlight_width *= 2;
+                else if (this.view_is(VIEW_MODE.QUARTER_DAY))
+                    highlight_width *= 4;
+                else if (this.view_is(VIEW_MODE.HOUR))
+                    highlight_width *= 24;
+
                 createSVG('rect', {
-                    x: date.lower_x - (this.options.column_width / 2),
-                    y: date.lower_y + (this.options.padding / 2),
-                    width: this.options.column_width,
-                    height: this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height -
-                        (this.options.header_height +
-                            this.options.padding / 2),
-                    class: 'weekend-highlight',
-                    append_to: this.layers.grid,
-                });
-            } else if (this.view_is(VIEW_MODE.HALF_DAY) && (date.upper_text.includes('Sa') || date.upper_text.includes('Do'))) {
-                createSVG('rect', {
-                    x: date.lower_x,
-                    y: date.lower_y,
-                    width: this.options.column_width * 2,
-                    height: this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height -
-                        (this.options.header_height +
-                            this.options.padding / 2),
-                    class: 'weekend-highlight',
-                    append_to: this.layers.grid,
-                });
-            } else if (this.view_is(VIEW_MODE.QUARTER_DAY) && (date.upper_text.includes('Sa') || date.upper_text.includes('Do'))) {
-                createSVG('rect', {
-                    x: date.lower_x,
-                    y: date.lower_y,
-                    width: this.options.column_width * 4,
-                    height: this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height -
-                        (this.options.header_height +
-                            this.options.padding / 2),
+                    x: highlight_x,
+                    y: highlight_y,
+                    width: highlight_width,
+                    height: highlight_height,
                     class: 'weekend-highlight',
                     append_to: this.layers.grid,
                 });
@@ -797,13 +809,13 @@ export default class Scheduler {
                     x: date.upper_x,
                     y: date.upper_y,
                     innerHTML: date.upper_text,
-                    class: 'upper-text',
+                    class: 'upper-text bold',
                     append_to: this.layers.date,
                 });
 
                 // remove out-of-bound dates
                 if (
-                    $upper_text.getBBox().x2 > this.layers.grid.getBBox().width
+                    $upper_text.getBBox().x + $upper_text.getBBox().width > this.layers.grid.getBBox().width
                 ) {
                     $upper_text.remove();
                 }
@@ -854,33 +866,33 @@ export default class Scheduler {
                 date.getMonth() !== last_date.getMonth()
                     ? date_utils.format(date, 'D MMM', this.options.language)
                     : date_utils.format(date, 'D', this.options.language),
-            Month_lower: date_utils.format(date, 'MMMM', this.options.language),
+            Month_lower: date_utils.format(date, 'MMMM YYYY', this.options.language),
             Year_lower: date_utils.format(date, 'YYYY', this.options.language),
             Hour_upper:
                 date.getDate() !== last_date.getDate()
-                    ? date_utils.format(date, 'D (ddd) MMM', this.options.language)
+                    ? date_utils.format(date, 'ddd D MMM YYYY', this.options.language)
                     : '',
             'Quarter Day_upper':
                 date.getDate() !== last_date.getDate()
-                    ? date_utils.format(date, 'D (ddd) MMM', this.options.language)
+                    ? date_utils.format(date, 'ddd D ' + date_utils.format(date, 'MMM').substring(0, 3) + ' YYYY', this.options.language)
                     : '',
             'Half Day_upper':
                 date.getDate() !== last_date.getDate()
                     ? date.getMonth() !== last_date.getMonth()
                         ? date_utils.format(
                             date,
-                            'D (' + date_utils.format(date, 'ddd').substring(0, 2) + ') ' + date_utils.format(date, 'MMM').substring(0, 3),
+                            date_utils.format(date, 'D ') + date_utils.format(date, 'ddd').substring(0, 2) + ' ' + date_utils.format(date, 'MMM').substring(0, 3),
                             this.options.language
                         )
-                        : date_utils.format(date, 'D (ddd)', this.options.language)
+                        : date_utils.format(date, 'D ' + date_utils.format(date, 'ddd').substring(0, 2) + ' ' + date_utils.format(date, 'YYYY'), this.options.language)
                     : '',
             Day_upper:
                 date.getMonth() !== last_date.getMonth()
-                    ? date_utils.format(date, 'MMMM', this.options.language)
+                    ? date_utils.format(date, 'MMMM YYYY', this.options.language)
                     : '',
             Week_upper:
                 date.getMonth() !== last_date.getMonth()
-                    ? date_utils.format(date, 'MMMM', this.options.language)
+                    ? date_utils.format(date, 'MMMM YYYY', this.options.language)
                     : '',
             Month_upper:
                 date.getFullYear() !== last_date.getFullYear()
@@ -1005,25 +1017,47 @@ export default class Scheduler {
     }
 
     bind_grid_events() {
-        $.on(this.$svg, 'click', '.grid-row, .grid-header', (e) => {
-            this.unselect_all();
+        const grid_header = this.$container.querySelector('g.date > rect.grid-header');
+        const scroll = this.$svg.parentElement;
+        let scroll_left = scroll.scrollLeft;
+        let x = 0;
+        let is_resizing = false;
+
+        $.on(this.$svg, 'mousedown', '.grid-header, .lower-text, .upper-text', (e) => {
             this.hide_popup();
+            grid_header.classList.add('active');
+            x = e.offsetX;
+        });
+
+        $.on(this.$svg, 'mousemove', '.grid-row, .grid-header, .lower-text, .upper-text, .weekend-highlight', (e) => {
+            if (grid_header.classList.contains('active')) {
+                scroll.scrollLeft = scroll_left + x - e.offsetX;
+                scroll_left = scroll.scrollLeft;
+            }
+        });
+
+        $.on(this.$svg, 'mouseup', '.grid-row, .grid-header, .lower-text, .upper-text, .weekend-highlight', (e) => {
+            if (grid_header.classList.contains('active'))
+                grid_header.classList.remove('active');
+        });
+
+        $.on(this.$svg, 'click', '.grid-row', (e) => {
             if (e.target.classList.contains('grid-row')) {
                 const row = $.closest('.grid-row', e.target);
                 const data_id = row.getAttribute('data-id');
-                const cells = this.$column_svg.querySelectorAll('g.cell > g.cell-wrapper[data-row-id=' + data_id + ']');
+                const cells = this.$column_svg.querySelectorAll('g.cell > g.cell-wrapper[data-row-id="' + data_id + '"]');
+                const is_currently_selected = row.classList.contains('selected-row');
 
-                if (!row.classList.contains('selected-row')) {
+                this.unselect_all();
+                this.hide_popup();
+                if (!is_currently_selected) {
                     row.classList.add('selected-row');
                     cells.forEach(cell => {
                         cell.classList.add('selected-row');
                     });
-                } else {
-                    row.classList.remove('selected-row');
-                    cells.forEach(cell => {
-                        cell.classList.remove('selected-row');
-                    });
                 }
+
+                this.trigger_event('row_select', [data_id]);
             }
         });
 
@@ -1058,6 +1092,11 @@ export default class Scheduler {
         $.on(this.$column_container, 'scroll', e => {
             this.$container.scrollTop = e.currentTarget.scrollTop;
         });
+
+        $.on(this.$column_svg, 'mousedown', '.header-tick', (e) => {
+            is_resizing = true;
+            x = e.clientX;
+        });
     }
 
     bind_cell_events() {
@@ -1080,20 +1119,21 @@ export default class Scheduler {
         $.on(this.$column_svg, 'click', '.cell-wrapper', (e) => {
             const cell_wrapper = $.closest('.cell-wrapper', e.target);
             const data_row_id = cell_wrapper.getAttribute('data-row-id');
-            const cells = this.$column_svg.querySelectorAll('g.cell > g.cell-wrapper[data-row-id=' + data_row_id + ']');
-            const row = this.$container.querySelector('g > g > rect[data-id=' + data_row_id + ']');
+            const cells = this.$column_svg.querySelectorAll('g.cell > g.cell-wrapper[data-row-id="' + data_row_id + '"]');
+            const row = this.$container.querySelector('g.grid > g > rect[data-id="' + data_row_id + '"]');
+            const is_currently_selected = row.classList.contains('selected-row');
 
-            if (!row.classList.contains('selected-row')) {
+            this.unselect_all();
+            this.hide_popup();
+
+            if (!is_currently_selected) {
                 row.classList.add('selected-row');
                 cells.forEach(cell => {
                     cell.classList.add('selected-row');
                 });
-            } else {
-                row.classList.remove('selected-row');
-                cells.forEach(cell => {
-                    cell.classList.remove('selected-row');
-                });
             }
+
+            this.trigger_event('row_select', [data_row_id]);
         });
     }
 
@@ -1640,6 +1680,12 @@ export default class Scheduler {
     }
 
     unselect_all() {
+        [...this.$column_svg.querySelectorAll('.cell-wrapper.selected-row')].forEach((el) => {
+            el.classList.remove('selected-row');
+        });
+        [...this.$svg.querySelectorAll('.grid-row.selected-row')].forEach((el) => {
+            el.classList.remove('selected-row');
+        });
         [...this.$svg.querySelectorAll('.bar-wrapper')].forEach((el) => {
             el.classList.remove('active');
         });
@@ -1677,9 +1723,7 @@ export default class Scheduler {
             );
         }
         const scroll = this.$container.scrollTop;
-        const off_set_top = this.$container.offsetTop;
-        const off_set_height = this.$container.offsetHeight;
-        this.popup.show(options, off_set_height, off_set_top, scroll);
+        this.popup.show(options, this.$container_parent, scroll);
     }
 
     hide_popup() {

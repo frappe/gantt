@@ -31,8 +31,8 @@ export default class Bar {
             task_start_timezone_offset !== starting_timezone_offset)
             if (task_end_timezone_offset === -60)
                 task_end = date_utils.add(task_end, -1, 'hour');
-            else
-                task_end = date_utils.add(task_end, 1, 'hour');
+            // else
+            //     task_end = date_utils.add(task_end, 1, 'hour');
 
         this.invalid = this.task.invalid;
         this.height = this.scheduler.options.bar_height;
@@ -218,19 +218,19 @@ export default class Bar {
                 return;
             }
 
-            this.scheduler.trigger_event('task_dblclick', [this.task]);
+            this.scheduler.trigger_event('task_dblclick', [this.task.id]);
         });
     }
 
     show_popup(e) {
         const start_date = date_utils.format(
             this.task._start,
-            'MMM D',
+            'D MMM YYYY',
             this.scheduler.options.language
         );
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),
-            'MMM D',
+            'D MMM YYYY',
             this.scheduler.options.language
         );
         const subtitle = start_date + ' - ' + end_date;
@@ -399,8 +399,8 @@ export default class Bar {
         if (task_start_timezone_offset !== starting_timezone_offset) {
             if (task_start_timezone_offset === -60)
                 task_start = date_utils.add(task_start, -1, 'hour');
-            else
-                task_start = date_utils.add(task_start, 2, 'hour');
+            else if (starting_timezone_offset === -120)
+                task_start = date_utils.add(task_start, -2, 'hour');
             const diff = date_utils.diff(task_start, scheduler_start, 'hour');
             x = Math.floor((diff / step) * column_width * 1000) / 1000;
         }

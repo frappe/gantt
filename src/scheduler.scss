@@ -17,9 +17,15 @@ $handle-color: #ddd !default;
     }
 
     .grid-header {
-        fill: #ffffff;
+        fill: #cfcbcb;
         stroke: $border-color;
         stroke-width: 1.4;
+
+        &.active {
+            .grid-header {
+                stroke-width: 1.5;
+            }
+        }
     }
 
     .grid-row {
@@ -28,6 +34,10 @@ $handle-color: #ddd !default;
             fill: #0987f5;
         }
     }
+
+    // .grid-header:hover {
+    //     cursor: move;
+    // }
 
     .grid-row:nth-child(even) {
         fill: $light-bg;
@@ -39,6 +49,15 @@ $handle-color: #ddd !default;
     .row-line {
         stroke: $light-border-color;
     }
+
+    .header-tick{
+        stroke: $border-color;
+        stroke-width: 5;
+        stroke-dasharray: 5,2;
+    }
+    .header-tick:hover {
+        cursor: ew-resize;
+      }
 
     .tick {
         stroke: $border-color;
@@ -55,7 +74,6 @@ $handle-color: #ddd !default;
     }
     .weekend-highlight {
         position: inherit;
-        z-index: -1;
         fill: rgba(241, 196, 15, 0.3);;
         opacity: 0.7;
     }
@@ -154,10 +172,13 @@ $handle-color: #ddd !default;
         font-size: 12px;
         text-anchor: middle;
         user-select: none;
+        &.bold {
+            font-weight: 600;
+        }
     }
 
     .upper-text {
-        fill: $text-light;
+        fill: $text-color;
     }
 
     .lower-text {
@@ -185,7 +206,6 @@ $handle-color: #ddd !default;
 
     .scheduler-columns-container {
         flex: 0 0 auto;
-        // overflow: hidden;
         scrollbar-width: none;
         overflow: auto;
         padding-bottom: 17px;
