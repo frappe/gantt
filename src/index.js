@@ -503,7 +503,7 @@ export default class Scheduler {
         for (let column of this.options.fixed_columns) {
             const max_width = column.width;
             let text_content = column.header;
-            const text_width = text_content.length * 6;
+            const text_width = text_content.length * 7;
 
             if (text_width > max_width) {
                 const reduction_percentage = (text_width - max_width) / text_width;
@@ -569,7 +569,7 @@ export default class Scheduler {
 
                     const max_width = column.width;
                     let text_content = cell.value;
-                    const text_width = text_content.length * 6;
+                    const text_width = text_content.length * 7;
                     let tooltip = '';
                     if (cell.tooltip)
                         tooltip = cell.tooltip;
@@ -743,8 +743,9 @@ export default class Scheduler {
         // highlight today's date
         if (this.view_is(VIEW_MODE.DAY)) {
             const x =
-                (date_utils.diff(date_utils.today(), this.scheduler_start, 'hour') /
-                    this.options.step);
+                date_utils.diff(date_utils.today(), this.scheduler_start, 'hour') /
+                this.options.step *
+                this.options.column_width;
             const y = (this.options.header_height +
                 this.options.padding / 2);
 
@@ -1002,14 +1003,14 @@ export default class Scheduler {
         const parent_element = this.$svg.parentElement;
         if (!parent_element) return;
 
-        const hours_before_first_task = date_utils.diff(
-            this.get_oldest_starting_date(),
+        const hours_before_today = date_utils.diff(
+            date_utils.today(),
             this.scheduler_start,
             'hour'
         );
 
         const scroll_pos =
-            (hours_before_first_task / this.options.step) *
+            (hours_before_today / this.options.step) *
             this.options.column_width -
             this.options.column_width;
 
@@ -1017,28 +1018,46 @@ export default class Scheduler {
     }
 
     bind_grid_events() {
-        const grid_header = this.$container.querySelector('g.date > rect.grid-header');
         const scroll = this.$svg.parentElement;
-        let scroll_left = scroll.scrollLeft;
+        let is_dragging = false;
+        let start_x;
+        let scroll_left;
         let x = 0;
         let is_resizing = false;
+        let header_tick = null;
 
         $.on(this.$svg, 'mousedown', '.grid-header, .lower-text, .upper-text', (e) => {
-            this.hide_popup();
-            grid_header.classList.add('active');
-            x = e.offsetX;
+            is_dragging = true;
+            start_x = e.pageX;
+            scroll_left = scroll.scrollLeft;
         });
 
-        $.on(this.$svg, 'mousemove', '.grid-row, .grid-header, .lower-text, .upper-text, .weekend-highlight', (e) => {
-            if (grid_header.classList.contains('active')) {
-                scroll.scrollLeft = scroll_left + x - e.offsetX;
-                scroll_left = scroll.scrollLeft;
+        $.on(this.$container_parent, 'mousemove', '.grid-row, .grid-header, .lower-text, .upper-text, .weekend-highlight', (e) => {
+            if (is_dragging) {
+                const x = e.pageX;
+                const walk = x - start_x;
+                scroll.scrollLeft = scroll_left - walk;
             }
         });
 
-        $.on(this.$svg, 'mouseup', '.grid-row, .grid-header, .lower-text, .upper-text, .weekend-highlight', (e) => {
-            if (grid_header.classList.contains('active'))
-                grid_header.classList.remove('active');
+        $.on(document, 'mouseup', () => {
+            if (is_dragging)
+                is_dragging = false;
+
+            if (is_resizing) {
+                is_resizing = false;
+                header_tick = null;
+            }
+        });
+
+        $.on(this.$container_parent, 'mouseleave', () => {
+            if (is_dragging)
+                is_dragging = false;
+
+            if (is_resizing) {
+                is_resizing = false;
+                header_tick = null;
+            }
         });
 
         $.on(this.$svg, 'click', '.grid-row', (e) => {
@@ -1091,6 +1110,110 @@ export default class Scheduler {
 
         $.on(this.$column_container, 'scroll', e => {
             this.$container.scrollTop = e.currentTarget.scrollTop;
+        });
+
+        $.on(this.$column_svg, 'mousedown', '.header-tick', (e) => {
+            is_resizing = true;
+            x = e.clientX;
+            header_tick = e.target;
+        });
+
+        $.on(this.$container_parent, 'mousemove', '.header-tick, .grid-header', (e) => {
+            if (is_resizing) {
+                const delta_x = e.clientX - x;
+                x = e.clientX;
+                let cell_x;
+                let cell_width;
+                let max_width;
+                let text_pos_x;
+                let need_to_resize = true;
+                let d_attr = header_tick.getAttribute('d');
+                const tick_x = parseInt(d_attr.split(' ')[1]);
+                //cell-wrapper
+                const cells = this.$column_svg.querySelectorAll('g.cell-wrapper > *');
+                for (let i = 0; i < cells.length; i++) {
+                    const cell = cells[i];
+                    cell_x = parseInt(cell.getAttribute('x'));
+                    // cell_width = parseInt(cell.getAttribute('width'));
+                    cell_width = cell.getBBox().width;
+
+                    if (cell_x < tick_x && (cell_width + cell_x) > tick_x && cell.tagName === 'rect') {
+                        max_width = cell_width + delta_x;
+                        if (max_width < 50) { //impostata larghezza minima
+                            need_to_resize = false;
+                            break;
+                        }
+                        $.attr(cell, 'width', max_width);
+                        // text_pos_x = max_width + cell_x;
+                    } else if (cell_x > tick_x) {
+                        $.attr(cell, 'x', cell_x + delta_x);
+                    } //ridurre il testo
+                    // else if (cell_x < tick_x && (cell_width + cell_x) > tick_x && cell.tagName === 'text') {
+                    //     let text_content = cell.getAttribute('value');
+                    //     const text_width = text_content.length * 7;
+                    //     if (text_width > max_width) {
+                    //         const reduction_percentage = (text_width - max_width) / text_width;
+                    //         const visible_characters = Math.max(0, Math.round(text_content.length * (1 - reduction_percentage))) - 1;
+                    //         cell.textContent = text_content.substring(0, visible_characters);
+                    //     } else {
+                    //         const expansion_percentage = (max_width - text_width) / text_content.length;
+                    //         const visible_characters = Math.min(text_content.length, Math.round(text_content.length * (1 + expansion_percentage)));
+                    //         cell.textContent = text_content.substring(0, visible_characters);
+                    //     }
+                    //     $.attr(cell, 'x', text_pos_x / 2);
+                    // }
+                }
+
+                if (need_to_resize) {
+                    //tick
+                    let new_d_attr = d_attr.replace(/M\s*\d+/, `M ${tick_x + delta_x}`);
+                    $.attr(header_tick, 'd', new_d_attr);
+
+                    //other tick
+                    const header_ticks = this.$column_svg.querySelectorAll('g.header > path');
+                    header_ticks.forEach(tick => {
+                        if (tick !== header_tick) {
+                            const d_attr = tick.getAttribute('d');
+                            const M_value = parseInt(d_attr.split(' ')[1]);
+                            if (tick_x < M_value) {
+                                let new_d_attr = d_attr.replace(/M\s*\d+/, `M ${M_value + delta_x}`);
+                                $.attr(tick, 'd', new_d_attr);
+                            }
+                        }
+                    });
+
+                    //background
+                    const current_width = parseInt(this.$column_svg.getAttribute('width'));
+                    const new_width = current_width + delta_x;
+                    $.attr(this.$column_svg, 'width', new_width);
+
+                    //header
+                    $.attr(this.$column_svg.querySelector('g.header > rect.grid-header'), 'width', new_width);
+
+                    //row
+                    const fixed_grid_rows = this.$column_svg.querySelectorAll('g.grid > g > rect.grid-row');
+                    fixed_grid_rows.forEach(row => {
+                        $.attr(row, 'width', new_width);
+                    });
+                    //ticks under the header
+                    const ticks = this.$column_svg.querySelectorAll('g.grid > path');
+                    ticks.forEach(tick => {
+                        const d_attr = tick.getAttribute('d');
+                        const M_value = parseInt(d_attr.split(' ')[1]);
+                        if (tick_x < M_value) {
+                            let new_d_attr = d_attr.replace(/M\s*\d+/, `M ${M_value + delta_x}`);
+                            $.attr(tick, 'd', new_d_attr);
+                        }
+                    });
+
+                    const header_text = this.$column_svg.querySelectorAll('g.header > text.lower-text.bold');
+                    header_text.forEach(text => {
+                        const text_x = parseInt(text.getAttribute('x'))
+                        if (text_x > tick_x)
+                            $.attr(text, 'x', text_x + delta_x);
+                    });
+                }
+            }
         });
     }
 

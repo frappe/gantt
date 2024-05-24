@@ -11,36 +11,29 @@ $blue: #a3a3ff !default;
 $handle-color: #ddd !default;
 
 .scheduler {
-    font-family: "Segoe UI","Segoe WP", Segoe, device-segoe, Tahoma, Helvetica, Arial, sans-serif;
+    font-family: "Segoe UI", "Segoe WP", Segoe, device-segoe, Tahoma, Helvetica, Arial, sans-serif;
+
     .grid-background {
         fill: none;
     }
 
-    .grid-header {
+    .grid-header{
         fill: #cfcbcb;
         stroke: $border-color;
         stroke-width: 1.4;
-
-        &.active {
-            .grid-header {
-                stroke-width: 1.5;
-            }
-        }
     }
 
     .grid-row {
         fill: #ffffff;
+
         &.selected-row {
             fill: #0987f5;
         }
     }
 
-    // .grid-header:hover {
-    //     cursor: move;
-    // }
-
     .grid-row:nth-child(even) {
         fill: $light-bg;
+
         &.selected-row {
             fill: #0987f5;
         }
@@ -50,14 +43,15 @@ $handle-color: #ddd !default;
         stroke: $light-border-color;
     }
 
-    .header-tick{
+    .header-tick {
         stroke: $border-color;
         stroke-width: 5;
-        stroke-dasharray: 5,2;
+        stroke-dasharray: 5, 2;
     }
+
     .header-tick:hover {
         cursor: ew-resize;
-      }
+    }
 
     .tick {
         stroke: $border-color;
@@ -72,9 +66,11 @@ $handle-color: #ddd !default;
         fill: $light-yellow;
         opacity: 0.5;
     }
+
     .weekend-highlight {
         position: inherit;
-        fill: rgba(241, 196, 15, 0.3);;
+        fill: rgba(241, 196, 15, 0.3);
+        ;
         opacity: 0.7;
     }
 
@@ -172,6 +168,7 @@ $handle-color: #ddd !default;
         font-size: 12px;
         text-anchor: middle;
         user-select: none;
+
         &.bold {
             font-weight: 600;
         }
@@ -200,7 +197,7 @@ $handle-color: #ddd !default;
 }
 
 .scheduler-container {
-    font-family: "Segoe UI","Segoe WP", Segoe, device-segoe, Tahoma, Helvetica, Arial, sans-serif;
+    font-family: "Segoe UI", "Segoe WP", Segoe, device-segoe, Tahoma, Helvetica, Arial, sans-serif;
     display: flex;
     font-size: 12px;
 
