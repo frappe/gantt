@@ -1133,35 +1133,39 @@ export default class Scheduler {
                 const cells = this.$column_svg.querySelectorAll('g.cell-wrapper > *');
                 for (let i = 0; i < cells.length; i++) {
                     const cell = cells[i];
-                    cell_x = parseInt(cell.getAttribute('x'));
-                    // cell_width = parseInt(cell.getAttribute('width'));
-                    cell_width = cell.getBBox().width;
-
-                    if (cell_x < tick_x && (cell_width + cell_x) > tick_x && cell.tagName === 'rect') {
-                        max_width = cell_width + delta_x;
-                        if (max_width < 50) { //impostata larghezza minima
-                            need_to_resize = false;
-                            break;
+                    if (cell.tagName === 'rect') {
+                        cell_x = parseInt(cell.getAttribute('x'));
+                        cell_width = cell.getBBox().width;
+                        if (cell_x < tick_x && (cell_width + cell_x) > tick_x) {
+                            max_width = cell_width + delta_x;
+                            if (max_width < 50) { //impostata larghezza minima
+                                need_to_resize = false;
+                                break;
+                            }
+                            $.attr(cell, 'width', max_width);
+                            text_pos_x = tick_x + 2 + cell_x;
+                        } else if (cell_x > tick_x) {
+                            $.attr(cell, 'x', cell_x + delta_x);
                         }
-                        $.attr(cell, 'width', max_width);
-                        // text_pos_x = max_width + cell_x;
-                    } else if (cell_x > tick_x) {
-                        $.attr(cell, 'x', cell_x + delta_x);
-                    } //ridurre il testo
-                    // else if (cell_x < tick_x && (cell_width + cell_x) > tick_x && cell.tagName === 'text') {
-                    //     let text_content = cell.getAttribute('value');
-                    //     const text_width = text_content.length * 7;
-                    //     if (text_width > max_width) {
-                    //         const reduction_percentage = (text_width - max_width) / text_width;
-                    //         const visible_characters = Math.max(0, Math.round(text_content.length * (1 - reduction_percentage))) - 1;
-                    //         cell.textContent = text_content.substring(0, visible_characters);
-                    //     } else {
-                    //         const expansion_percentage = (max_width - text_width) / text_content.length;
-                    //         const visible_characters = Math.min(text_content.length, Math.round(text_content.length * (1 + expansion_percentage)));
-                    //         cell.textContent = text_content.substring(0, visible_characters);
-                    //     }
-                    //     $.attr(cell, 'x', text_pos_x / 2);
-                    // }
+                    } else {
+                        if (cell_x < tick_x && (cell_width + cell_x) > tick_x) {
+                            let text_content = cell.getAttribute('value');
+                            const text_width = text_content.length * 7;
+                            if (text_width > max_width) {
+                                const reduction_percentage = (text_width - max_width) / text_width;
+                                const visible_characters = Math.max(0, Math.round(text_content.length * (1 - reduction_percentage))) - 1;
+                                cell.textContent = text_content.substring(0, visible_characters);
+                            } else {
+                                const expansion_percentage = (max_width - text_width) / text_content.length;
+                                const visible_characters = Math.min(text_content.length, Math.round(text_content.length * (1 + expansion_percentage)));
+                                cell.textContent = text_content.substring(0, visible_characters);
+                            }
+                            $.attr(cell, 'x', text_pos_x / 2);
+                        } else if (cell_x > tick_x) {
+                            const text_x = parseInt(cell.getAttribute('x'));
+                            $.attr(cell, 'x', text_x + delta_x);
+                        }
+                    }
                 }
 
                 if (need_to_resize) {
@@ -1189,11 +1193,12 @@ export default class Scheduler {
 
                     //header
                     $.attr(this.$column_svg.querySelector('g.header > rect.grid-header'), 'width', new_width);
-
-                    //row
-                    const fixed_grid_rows = this.$column_svg.querySelectorAll('g.grid > g > rect.grid-row');
-                    fixed_grid_rows.forEach(row => {
-                        $.attr(row, 'width', new_width);
+                    //header text
+                    const header_text = this.$column_svg.querySelectorAll('g.header > text.lower-text.bold');
+                    header_text.forEach(text => {
+                        const text_x = parseInt(text.getAttribute('x'))
+                        if (text_x > tick_x)
+                            $.attr(text, 'x', text_x + delta_x);
                     });
                     //ticks under the header
                     const ticks = this.$column_svg.querySelectorAll('g.grid > path');
@@ -1206,11 +1211,10 @@ export default class Scheduler {
                         }
                     });
 
-                    const header_text = this.$column_svg.querySelectorAll('g.header > text.lower-text.bold');
-                    header_text.forEach(text => {
-                        const text_x = parseInt(text.getAttribute('x'))
-                        if (text_x > tick_x)
-                            $.attr(text, 'x', text_x + delta_x);
+                    //row
+                    const fixed_grid_rows = this.$column_svg.querySelectorAll('g.grid > g > rect.grid-row');
+                    fixed_grid_rows.forEach(row => {
+                        $.attr(row, 'width', new_width);
                     });
                 }
             }
