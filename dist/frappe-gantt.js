@@ -9,21 +9,6 @@ var Gantt = (function () {
   const SECOND = "second";
   const MILLISECOND = "millisecond";
 
-  const SHORTENED = {
-    January: "Jan",
-    February: "Feb",
-    March: "Mar",
-    April: "Apr",
-    May: "May",
-    June: "Jun",
-    July: "Jul",
-    August: "Aug",
-    September: "Sep",
-    October: "Oct",
-    November: "Nov",
-    December: "Dec"
-  };
-
   var date_utils = {
     parse_duration(duration) {
       const regex = /([0-9])+(y|m|d|h|min|s|ms)/gm;
@@ -101,6 +86,9 @@ var Gantt = (function () {
       const dateTimeFormat = new Intl.DateTimeFormat(lang, {
         month: "long",
       });
+      const dateTimeFormatShort = new Intl.DateTimeFormat(lang, {
+        month: "short",
+      });
       const month_name = dateTimeFormat.format(date);
       const month_name_capitalized =
         month_name.charAt(0).toUpperCase() + month_name.slice(1);
@@ -116,7 +104,7 @@ var Gantt = (function () {
         SSS: values[6],
         D: values[2],
         MMMM: month_name_capitalized,
-        MMM: SHORTENED[month_name_capitalized],
+        MMM: dateTimeFormatShort.format(date),
       };
 
       let str = format_string;
@@ -1923,7 +1911,7 @@ var Gantt = (function () {
         formatted_date: date_utils.format(date).replaceAll(' ', '_'),
         column_width,
         base_pos_x: base_pos.x,
-        upper_text: this.options.lower_text ? this.options.upper_text(date, this.options.view_mode, date_text[`${this.options.view_mode}_upper`]) : date_text[`${this.options.view_mode}_upper`],
+        upper_text: this.options.upper_text ? this.options.upper_text(date, this.options.view_mode, date_text[`${this.options.view_mode}_upper`]) : date_text[`${this.options.view_mode}_upper`],
         lower_text: this.options.lower_text ? this.options.lower_text(date, this.options.view_mode, date_text[`${this.options.view_mode}_lower`]) : date_text[`${this.options.view_mode}_lower`],
         upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
         upper_y: base_pos.upper_y,

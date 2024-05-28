@@ -30,6 +30,12 @@
     <div class="container">
       <h2 class="heading">Interactive Gantt Chart entirely made in SVG!</h2>
       <div class="gantt-target"></div>
+
+      <button type="button" class="change-view" data-view="Quarter Day">Quarter Day</button>
+      <button type="button" class="change-view" data-view="Half Day">Half Day</button>
+      <button type="button" class="change-view" data-view="Day">Day</button>
+      <button type="button" class="change-view" data-view="Week">Week</button>
+      <button type="button" class="change-view" data-view="Month">Month</button>
     </div>
     <script>
       let tasks = [
@@ -82,13 +88,13 @@
         	dependencies: 'Task 2',
         	custom_class: 'bar-milestone'
         },
-        // {
-        // 	start: '2014-01-05',
-        // 	end: '2019-10-12',
-        // 	name: 'Long term task',
-        // 	id: "Task 6",
-        // 	progress: 0
-        // }
+        {
+        	start: '2024-05-22',
+        	end: '2024-06-01',
+        	name: 'Long term task',
+        	id: "Task 6",
+        	progress: 0
+        }
       ];
 
       // Uncomment to test fixed header
@@ -118,15 +124,44 @@
         popup: (task) => {
           return `<p>${task.name}</p>`;
         },
-        // scroll_to: 'today',
+        scroll_to: 'today',
+        language: 'fr',
         // view_mode_select: true,
         // today_button: false,
         // readonly: true,
         // lines: 'vertical',
-        // lower_text: (date) => date.getDay(),
+        lower_text: (date, view_mode, default_label) => {
+          if (view_mode == 'Waeek') {
+            const d = new Date();
+            let yearStart = new Date(d.getFullYear(), 0, 1);
+            let dayOfYear = ((date - yearStart + 1) / 86400000);
+            let week = Math.ceil(dayOfYear / 7);
+
+            console.log(date, week);
+
+            return default_label + ' ⋅ S' + week;
+          }
+
+          return default_label;
+        },
         // upper_text: (date, view_mode, def) => def,
       });
       console.log(gantt_chart);
+
+      // Change view buttons
+      function changeView(btn) {
+        const views = ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'];
+
+        if (btn.dataset.view && views.includes(btn.dataset.view)) {
+          gantt_chart.change_view_mode(btn.dataset.view);
+        }
+      }     
+
+      document.querySelectorAll('.change-view').forEach(
+        btn => btn.addEventListener('click', function() { changeView(btn); })
+      );
+
+
     </script>
   </body>
 </html>
