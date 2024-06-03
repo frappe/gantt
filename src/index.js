@@ -514,6 +514,7 @@ export default class Scheduler {
             createSVG('text', {
                 x: pos_x,
                 y: pos_y,
+                value: column.header,
                 innerHTML: text_content,
                 class: 'lower-text bold',
                 append_to: this.fixed_col_layers.header
@@ -1195,8 +1196,28 @@ export default class Scheduler {
                     $.attr(this.$column_svg.querySelector('g.header > rect.grid-header'), 'width', new_width);
                     //header text
                     const header_text = this.$column_svg.querySelectorAll('g.header > text.lower-text.bold');
+                    const text_to_resize = header_tick.previousSibling;
                     header_text.forEach(text => {
-                        const text_x = parseInt(text.getAttribute('x'))
+                        const text_x = parseFloat(text.getAttribute('x'));
+
+                        if (text === text_to_resize) {
+                            const left_tick = (text_x * 2) - tick_x - 2;
+                            const max_width = tick_x - Math.abs(left_tick) + delta_x;
+                            const text_content = text.textContent;
+                            const original_text = text.getAttribute('value');
+                            const text_width = text_content.length * 7;
+                            if (text_width > max_width) {
+                                const reduction_percentage = (text_width - max_width) / text_width;
+                                const visible_characters = Math.max(0, Math.round(text_content.length * (1 - reduction_percentage))) - 1;
+                                text.textContent = text_content.substring(0, visible_characters);
+                            } else {
+                                const expansion_percentage = (max_width - text_width) / (original_text.length * 7);
+                                const visible_characters = Math.min(original_text.length, Math.round(text_content.length * (1 + expansion_percentage)));
+                                text.textContent = original_text.substring(0, visible_characters);
+                            }
+                            $.attr(text, 'x', text_pos_x / 2);
+                        }
+
                         if (text_x > tick_x)
                             $.attr(text, 'x', text_x + delta_x);
                     });
