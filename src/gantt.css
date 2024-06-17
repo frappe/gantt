@@ -1,0 +1,306 @@
+@import './dark.css';
+
+:root {
+    --bar-color: #fff;
+    --bar-color-important: #94c4f4;
+    --bar-stroke: #fff;
+    --dark-stroke-color: #e0e0e0;
+    --stroke-color: #ebeef0;
+    --light-bg: #f5f5f5;
+    --light-border-color: #ebeff2;
+    --light-yellow: #f6e796;
+    --holiday-color: #f9fafa;
+    --text-muted: #666;
+    --text-grey: #98a1a9;
+    --text-light: #fff;
+    --text-dark: #111;
+    --progress: #ebeef0;
+    --handle-color: #dcdce4;
+    --handle-color-important: #94c4f4;
+    --light-blue: #c4c4e9;
+    --middle-blue: #62b2f9;
+    --dark-blue: #2c94ec;
+}
+
+
+.gantt-container {
+    line-height: 14.5px;
+    position: relative;
+    overflow: auto;
+    font-size: 12px;
+    height: 500px;
+
+    & .popup-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: #171b1f;
+        padding: 10px;
+        border-radius: 5px;
+        width: max-content;
+
+        &.hidden {
+            opacity: 0 !important;
+        }
+
+        & .title {
+            margin-bottom: 5px;
+            text-align: -webkit-center;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        & .subtitle {
+            color: var(--text-grey);
+        }
+
+        & .pointer {
+            position: absolute;
+            height: 5px;
+            margin: 0 0 0 -5px;
+            border: 5px solid transparent;
+            border-bottom-color: rgba(0, 0, 0, 0.8);
+        }
+    }
+
+    & .grid-header {
+        background-color: #ffffff;
+        position: sticky;
+        top: 0;
+        left: 0;
+        z-index: 10;
+    }
+
+    & .lower-text,
+    & .upper-text {
+        text-anchor: middle;
+        color: var(--text-dark);
+    }
+
+    & .upper-header {
+        height: 40px;
+    }
+
+    & .lower-header {
+        height: 30px;
+    }
+
+    & .lower-text {
+        font-size: 14px;
+        position: absolute;
+        width: fit-content;
+    }
+
+    & .upper-text {
+        position: absolute;
+        width: fit-content;
+        font-weight: 500;
+        font-size: 16px;
+    }
+
+    & .current-upper {
+        position: fixed;
+    }
+
+    & .side-header {
+        position: fixed;
+        padding: 0 10px;
+        margin-right: 10px;
+        background: white;
+        line-height: 20px;
+        font-weight: 400;
+    }
+
+    & .today-button,
+    & .viewmode-select {
+        background: #f4f5f6;
+        text-align: -webkit-center;
+        text-align: center;
+        height: 25px;
+        border-radius: 8px;
+        border: none;
+        color: var(--text-dark);
+        padding: 4px 10px;
+        border-radius: 8px;
+        height: 25px;
+    }
+
+    & .viewmode-select {
+        outline: none !important;
+        padding: 4px 8px;
+        margin-right: 4px;
+
+        /* -webkit-appearance: none; */
+        /* -moz-appearance: none; */
+        text-indent: 1px;
+        text-overflow: '';
+    }
+
+    & .date-highlight {
+        background-color: var(--progress);
+        border-radius: 12px;
+        position: absolute;
+        display: none;
+    }
+
+    & .current-highlight {
+        position: absolute;
+        background: var(--dark-blue);
+        width: 1px;
+    }
+
+    & .current-date-highlight {
+        background: var(--dark-blue);
+        color: var(--text-light);
+        padding: 4px 8px;
+        border-radius: 200px;
+    }
+}
+
+
+.gantt {
+    user-select: none;
+    -webkit-user-select: none;
+    position: absolute;
+
+    & .grid-background {
+        fill: none;
+    }
+
+    & .grid-row {
+        fill: #ffffff;
+    }
+
+    & .row-line {
+        stroke: var(--light-border-color);
+    }
+
+    & .tick {
+        stroke: var(--stroke-color);
+        stroke-width: 0.4;
+
+        &.thick {
+            stroke: var(--dark-stroke-color);
+            stroke-width: 0.7;
+        }
+    }
+
+    & .holiday-highlight {
+        fill: var(--holiday-color);
+    }
+
+    & .arrow {
+        fill: none;
+        stroke: #9fa9b1;
+        stroke-width: 1;
+    }
+
+    & .bar-wrapper .bar {
+        fill: var(--bar-color);
+        stroke: var(--bar-stroke);
+        stroke-width: 0;
+        transition: stroke-width 0.3s ease;
+    }
+
+    & .bar-progress {
+        fill: var(--progress);
+    }
+
+    & .bar-expected-progress {
+        fill: var(--light-blue);
+    }
+
+    & .bar-invalid {
+        fill: transparent;
+        stroke: var(--bar-stroke);
+        stroke-width: 1;
+        stroke-dasharray: 5;
+
+        &~.bar-label {
+            fill: var(--text-light);
+        }
+    }
+
+    & .bar-label {
+        fill: var(--text-dark);
+        dominant-baseline: central;
+        font-family: Helvetica;
+        font-size: 13px;
+        font-weight: 400;
+
+        &.big {
+            fill: var(--text-dark);
+            text-anchor: start;
+        }
+    }
+
+    & .bar-wrapper.important {
+        & .bar {
+            fill: var(--bar-color-important);
+        }
+
+        & .bar-progress {
+            fill: var(--dark-blue);
+        }
+
+        & .bar-label {
+            fill: var(--text-light);
+        }
+
+        & .handle {
+            fill: var(--handle-color-important);
+        }
+
+        & .handle.progress {
+            fill: var(--text-light);
+        }
+    }
+
+    & .handle {
+        fill: var(--handle-color);
+        cursor: ew-resize;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+    }
+
+    & .handle.progress {
+        fill: var(--text-muted);
+    }
+
+    & .bar-wrapper {
+        cursor: pointer;
+
+
+        &.active {
+            & .handle {
+                visibility: visible;
+                opacity: 1;
+            }
+        }
+
+        & .bar {
+            -webkit-filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.7));
+            filter: drop-shadow(0 0 2px rgba(17, 43, 66, 0.16));
+            border-radius: 3px;
+        }
+
+        & .bar.safari {
+            outline: 1px solid black;
+        }
+
+        &:hover {
+            .bar {
+                transition: transform 0.3s ease;
+            }
+
+            .date-highlight {
+                display: block;
+            }
+        }
+    }
+
+    & .hide {
+        display: none;
+    }
+}

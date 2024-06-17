@@ -1,0 +1,99 @@
+:root {
+    --bar-color-dark: #616161;
+    --bar-stroke-dark: #c6ccd2;
+    --border-color-dark: #616161;
+    --light-bg-dark: #3e3e3e;
+    --light-border-color-dark: #3e3e3e;
+    --text-muted-dark: #eee;
+    --text-light-dark: #ececec;
+    --text-color-dark: #f7f7f7;
+    --blue-dark: #8a8aff;
+}
+
+.dark>.gantt-container .gantt {
+    & .grid-row {
+        fill: #252525;
+    }
+
+    /* & .grid-row:nth-child(even) {
+        fill: var(--light-bg-dark);
+    } */
+
+    & .row-line {
+        stroke: var(--light-border-color-dark);
+    }
+
+    & .tick {
+        stroke: var(--border-color-dark);
+    }
+
+    & .holiday-highlight {
+        fill: var(--light-bg-dark);
+    }
+
+    & .arrow {
+        stroke: var(--text-muted-dark);
+    }
+
+    & .bar {
+        fill: var(--bar-color-dark);
+        stroke: none;
+    }
+
+    & .bar-progress {
+        fill: var(--blue-dark);
+    }
+
+    & .bar-invalid {
+        fill: transparent;
+        stroke: var(--bar-stroke-dark);
+
+        &~.bar-label {
+            fill: var(--text-light-dark);
+        }
+    }
+
+    & .bar-label.big {
+        fill: var(--text-light-dark);
+    }
+
+    & .bar-wrapper {
+        &:hover {
+            .bar {
+                fill: lighten(var(--bar-color-dark, 5));
+            }
+
+            & .bar-progress {
+                fill: lighten(var(--blue-dark, 5));
+            }
+        }
+
+        &.active {
+            .bar {
+                fill: lighten(var(--bar-color-dark, 5));
+            }
+
+            & .bar-progress {
+                fill: lighten(var(--blue-dark, 5));
+            }
+        }
+    }
+}
+
+.dark>.gantt-container {
+    & .grid-header {
+        background-color: #252525;
+    }
+
+    & .popup-wrapper {
+        background-color: #333;
+
+        & .title {
+            border-color: lighten(var(--blue-dark, 5));
+        }
+
+        & .pointer {
+            border-top-color: #333;
+        }
+    }
+}
