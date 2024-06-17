@@ -1777,9 +1777,11 @@ var Gantt = (function () {
         this.$current_highlight = this.create_el({ top, left, height, classes: 'current-highlight', append_to: this.$container });
         let $today = document.getElementById(date_utils.format(date).replaceAll(' ', '_'));
 
-        $today.classList.add('current-date-highlight');
-        $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
-        $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px';
+        if ($today) { 
+          $today.classList.add('current-date-highlight');
+          $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
+          $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px';
+        }
       }
     }
 
