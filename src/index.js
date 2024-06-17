@@ -619,14 +619,16 @@ export default class Gantt {
     ) {
       // Used as we must find the _end_ of session if view is not Day
       const { x: left, date } = this.computeGridHighlightDimensions(this.options.view_mode)
+      if (!this.dates.find(d => d.getTime() == date.getTime())) return;
       const top = this.options.header_height + this.options.padding / 2;
       const height = (this.options.bar_height + this.options.padding) * this.tasks.length;
       this.$current_highlight = this.create_el({ top, left, height, classes: 'current-highlight', append_to: this.$container })
       let $today = document.getElementById(date_utils.format(date).replaceAll(' ', '_'))
-
-      $today.classList.add('current-date-highlight')
-      $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px'
-      $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px'
+      if ($today) {
+        $today.classList.add('current-date-highlight')
+        $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px'
+        $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px'
+      }
     }
   }
 
@@ -886,7 +888,7 @@ export default class Gantt {
       }
 
       bar_wrapper.classList.add("active");
-      this.popup.parent.classList.add('hidden')
+      if (this.popup) this.popup.parent.classList.add('hidden')
 
       x_on_start = e.offsetX;
       y_on_start = e.offsetY;
