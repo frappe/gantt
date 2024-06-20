@@ -605,6 +605,8 @@ export default class Gantt {
       } else {
         x += this.options.column_width;
       }
+
+      return { x, date: this.gantt_start };
     }
   }
 
