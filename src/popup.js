@@ -44,7 +44,8 @@ export default class Popup {
       position_meta = options.target_element.getBBox();
     }
 
-    this.parent.style.left = options.x - this.parent.clientWidth / 2 + "px";
+    // Display the popup at the center of the bar
+    this.parent.style.left = position_meta.x - (this.parent.clientWidth / 2) + (position_meta.width / 2) + 'px';
     this.parent.style.top = position_meta.y + position_meta.height + 10 + "px";
 
     this.pointer.style.left = this.parent.clientWidth / 2 + "px";

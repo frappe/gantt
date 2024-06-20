@@ -605,6 +605,8 @@ export default class Gantt {
       } else {
         x += this.options.column_width;
       }
+
+      return { x, date: this.gantt_start };
     }
   }
 
@@ -624,9 +626,11 @@ export default class Gantt {
       this.$current_highlight = this.create_el({ top, left, height, classes: 'current-highlight', append_to: this.$container })
       let $today = document.getElementById(date_utils.format(date).replaceAll(' ', '_'))
 
-      $today.classList.add('current-date-highlight')
-      $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px'
-      $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px'
+      if ($today) { 
+        $today.classList.add('current-date-highlight')
+        $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px'
+        $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px'
+      }
     }
   }
 
@@ -758,7 +762,7 @@ export default class Gantt {
       formatted_date: date_utils.format(date).replaceAll(' ', '_'),
       column_width,
       base_pos_x: base_pos.x,
-      upper_text: this.options.lower_text ? this.options.upper_text(date, this.options.view_mode, date_text[`${this.options.view_mode}_upper`]) : date_text[`${this.options.view_mode}_upper`],
+      upper_text: this.options.upper_text ? this.options.upper_text(date, this.options.view_mode, date_text[`${this.options.view_mode}_upper`]) : date_text[`${this.options.view_mode}_upper`],
       lower_text: this.options.lower_text ? this.options.lower_text(date, this.options.view_mode, date_text[`${this.options.view_mode}_lower`]) : date_text[`${this.options.view_mode}_lower`],
       upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
       upper_y: base_pos.upper_y,

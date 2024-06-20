@@ -9,21 +9,6 @@ var Gantt = (function () {
   const SECOND = "second";
   const MILLISECOND = "millisecond";
 
-  const SHORTENED = {
-    January: "Jan",
-    February: "Feb",
-    March: "Mar",
-    April: "Apr",
-    May: "May",
-    June: "Jun",
-    July: "Jul",
-    August: "Aug",
-    September: "Sep",
-    October: "Oct",
-    November: "Nov",
-    December: "Dec"
-  };
-
   var date_utils = {
     parse_duration(duration) {
       const regex = /([0-9])+(y|m|d|h|min|s|ms)/gm;
@@ -101,6 +86,9 @@ var Gantt = (function () {
       const dateTimeFormat = new Intl.DateTimeFormat(lang, {
         month: "long",
       });
+      const dateTimeFormatShort = new Intl.DateTimeFormat(lang, {
+        month: "short",
+      });
       const month_name = dateTimeFormat.format(date);
       const month_name_capitalized =
         month_name.charAt(0).toUpperCase() + month_name.slice(1);
@@ -116,7 +104,7 @@ var Gantt = (function () {
         SSS: values[6],
         D: values[2],
         MMMM: month_name_capitalized,
-        MMM: SHORTENED[month_name_capitalized],
+        MMM: dateTimeFormatShort.format(date),
       };
 
       let str = format_string;
@@ -548,7 +536,7 @@ var Gantt = (function () {
         this.gantt.options.column_width;
 
       let $date_highlight = document.createElement("div");
-      $date_highlight.id = `${this.task.id}-highlight`;
+      $date_highlight.id = `highlight-${this.task.id}`;
       $date_highlight.classList.add('date-highlight');
       $date_highlight.style.height = this.height * 0.8 + 'px';
       $date_highlight.style.width = this.width + 'px';
@@ -692,13 +680,13 @@ var Gantt = (function () {
       let timeout;
       $.on(this.group, "mouseenter", (e) => timeout = setTimeout(() => {
         this.show_popup(e.offsetX);
-        document.querySelector(`#${task_id}-highlight`).style.display = 'block';
+        document.querySelector(`#highlight-${task_id}`).style.display = 'block';
       }, 200));
 
       $.on(this.group, "mouseleave", () => {
         clearTimeout(timeout);
         this.gantt.popup?.hide?.();
-        document.querySelector(`#${task_id}-highlight`).style.display = 'none';
+        document.querySelector(`#highlight-${task_id}`).style.display = 'none';
       });
 
 
@@ -1156,7 +1144,8 @@ var Gantt = (function () {
         position_meta = options.target_element.getBBox();
       }
 
-      this.parent.style.left = options.x - this.parent.clientWidth / 2 + "px";
+      // Display the popup at the center of the bar
+      this.parent.style.left = position_meta.x - (this.parent.clientWidth / 2) + (position_meta.width / 2) + 'px';
       this.parent.style.top = position_meta.y + position_meta.height + 10 + "px";
 
       this.pointer.style.left = this.parent.clientWidth / 2 + "px";
@@ -1769,6 +1758,8 @@ var Gantt = (function () {
         } else {
           x += this.options.column_width;
         }
+
+        return { x, date: this.gantt_start };
       }
     }
 
@@ -1788,9 +1779,11 @@ var Gantt = (function () {
         this.$current_highlight = this.create_el({ top, left, height, classes: 'current-highlight', append_to: this.$container });
         let $today = document.getElementById(date_utils.format(date).replaceAll(' ', '_'));
 
-        $today.classList.add('current-date-highlight');
-        $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
-        $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px';
+        if ($today) { 
+          $today.classList.add('current-date-highlight');
+          $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
+          $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px';
+        }
       }
     }
 
@@ -1922,7 +1915,7 @@ var Gantt = (function () {
         formatted_date: date_utils.format(date).replaceAll(' ', '_'),
         column_width,
         base_pos_x: base_pos.x,
-        upper_text: this.options.lower_text ? this.options.upper_text(date, this.options.view_mode, date_text[`${this.options.view_mode}_upper`]) : date_text[`${this.options.view_mode}_upper`],
+        upper_text: this.options.upper_text ? this.options.upper_text(date, this.options.view_mode, date_text[`${this.options.view_mode}_upper`]) : date_text[`${this.options.view_mode}_upper`],
         lower_text: this.options.lower_text ? this.options.lower_text(date, this.options.view_mode, date_text[`${this.options.view_mode}_lower`]) : date_text[`${this.options.view_mode}_lower`],
         upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
         upper_y: base_pos.upper_y,
