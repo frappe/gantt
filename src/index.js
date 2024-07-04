@@ -77,7 +77,7 @@ export default class Gantt {
     } else {
       throw new TypeError(
         "Frappé Gantt only supports usage of a string CSS selector," +
-        " HTML DOM element or SVG DOM element for the 'element' parameter",
+        " HTML DOM element or SVG DOM element for the 'element' parameter"
       );
     }
 
@@ -146,7 +146,6 @@ export default class Gantt {
       if (date_utils.diff(task._end, task._start, "year") > 10) {
         task.end = null;
       }
-
 
       // cache index
       task._index = i;
@@ -372,6 +371,7 @@ export default class Gantt {
   make_grid_extras() {
     this.make_grid_highlights();
     this.make_grid_ticks();
+    this.make_grid_current_time(this.options.view_mode);
   }
 
   make_grid_background() {
@@ -398,7 +398,6 @@ export default class Gantt {
 
   make_grid_rows() {
     const rows_layer = createSVG("g", { append_to: this.layers.grid });
-
     const row_width = this.dates.length * this.options.column_width;
     const row_height = this.options.bar_height + this.options.padding;
 
@@ -493,12 +492,8 @@ export default class Gantt {
     if (!['both', 'vertical', 'horizontal'].includes(this.options.lines)) return
     let tick_x = 0;
     let tick_y = this.options.header_height + this.options.padding / 2;
-    let tick_height =
-      (this.options.bar_height + this.options.padding) * this.tasks.length;
-
+    let tick_height = (this.options.bar_height + this.options.padding) * this.tasks.length;
     let $lines_layer = createSVG("g", { class: 'lines_layer', append_to: this.layers.grid });
-
-
     let row_y = this.options.header_height + this.options.padding / 2;
 
     const row_width = this.dates.length * this.options.column_width;
@@ -551,6 +546,43 @@ export default class Gantt {
     }
   }
 
+  make_grid_current_time(view_mode) {
+    let tick_x = 0;
+    let tick_y = this.options.header_height + this.options.padding / 2;
+    let tick_height = (this.options.bar_height + this.options.padding) * this.tasks.length;
+    let $current_time = createSVG("g", { class: 'current_time', append_to: this.layers.grid });
+
+    let today = date_utils.today();
+    for (let date of this.dates) {
+      if (date.toString() === today.toString()) {
+        let current_time_class = "current-time";
+        let day_columns = 1;
+        if (view_mode === VIEW_MODE.HOUR) {
+          day_columns = 24;
+        }
+        if (view_mode === VIEW_MODE.QUARTER_DAY) {
+          day_columns = 4;
+        }
+        if (view_mode === VIEW_MODE.HALF_DAY) {
+          day_columns = 2;
+        }
+        let tick_secs = (this.options.column_width * day_columns) / 86400;
+        let timestamp = Math.floor(new Date().getTime()) / 1000;
+        let today_timestamp = Math.floor(new Date(today).getTime()) / 1000;
+        let today_secs = timestamp - today_timestamp;
+        tick_x += today_secs * tick_secs;
+
+        createSVG("path", {
+          d: `M ${tick_x} ${tick_y} v ${tick_height}`,
+          class: current_time_class,
+          append_to: this.layers.grid,
+        });
+        return;
+      }
+      tick_x += this.options.column_width;
+    }
+  }
+
   highlightWeekends() {
     if (!this.view_is('Day') && !this.view_is('Half Day')) return
     for (let d = new Date(this.gantt_start); d <= this.gantt_end; d.setDate(d.getDate() + 1)) {
@@ -576,7 +608,7 @@ export default class Gantt {
     let x = this.options.column_width / 2;
 
     if (this.view_is(VIEW_MODE.DAY)) {
-      let today = date_utils.today()
+      let today = date_utils.today();
       return {
         x: x +
           (date_utils.diff(today, this.gantt_start, "hour") / this.options.step) *

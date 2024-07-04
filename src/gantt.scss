@@ -128,8 +128,6 @@ $dark-blue: #2c94ec !default;
     fill: none;
   }
 
-
-
   .grid-row {
     fill: #ffffff;
   }
@@ -152,7 +150,10 @@ $dark-blue: #2c94ec !default;
     }
   }
 
-
+  .current-time {
+    stroke: red;
+    stroke-width: 1px;
+  }
 
   .holiday-highlight {
     fill: $holiday-color;

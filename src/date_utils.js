@@ -113,7 +113,7 @@ export default {
       SSS: values[6],
       D: values[2],
       MMMM: month_name_capitalized,
-      MMM: SHORTENED[month_name_capitalized],
+      MMM: month_name_capitalized.slice(0, 3),
     };
 
     let str = format_string;
@@ -159,7 +159,7 @@ export default {
         days,
         months,
         years,
-      }[scale],
+      }[scale]
     );
   },
 
@@ -242,7 +242,7 @@ export default {
 
     // Feb
     const year = date.getFullYear();
-    if ((year % 4 === 0 && year % 100 != 0) || year % 400 === 0) {
+    if ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) {
       return 29;
     }
     return 28;

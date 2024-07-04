@@ -9,21 +9,6 @@ var Gantt = (function () {
   const SECOND = "second";
   const MILLISECOND = "millisecond";
 
-  const SHORTENED = {
-    January: "Jan",
-    February: "Feb",
-    March: "Mar",
-    April: "Apr",
-    May: "May",
-    June: "Jun",
-    July: "Jul",
-    August: "Aug",
-    September: "Sep",
-    October: "Oct",
-    November: "Nov",
-    December: "Dec"
-  };
-
   var date_utils = {
     parse_duration(duration) {
       const regex = /([0-9])+(y|m|d|h|min|s|ms)/gm;
@@ -116,7 +101,7 @@ var Gantt = (function () {
         SSS: values[6],
         D: values[2],
         MMMM: month_name_capitalized,
-        MMM: SHORTENED[month_name_capitalized],
+        MMM: month_name_capitalized.slice(0, 3),
       };
 
       let str = format_string;
@@ -162,7 +147,7 @@ var Gantt = (function () {
           days,
           months,
           years,
-        }[scale],
+        }[scale]
       );
     },
 
@@ -245,7 +230,7 @@ var Gantt = (function () {
 
       // Feb
       const year = date.getFullYear();
-      if ((year % 4 === 0 && year % 100 != 0) || year % 400 === 0) {
+      if ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) {
         return 29;
       }
       return 28;
@@ -1243,7 +1228,7 @@ var Gantt = (function () {
       } else {
         throw new TypeError(
           "Frappé Gantt only supports usage of a string CSS selector," +
-          " HTML DOM element or SVG DOM element for the 'element' parameter",
+          " HTML DOM element or SVG DOM element for the 'element' parameter"
         );
       }
 
@@ -1312,7 +1297,6 @@ var Gantt = (function () {
         if (date_utils.diff(task._end, task._start, "year") > 10) {
           task.end = null;
         }
-
 
         // cache index
         task._index = i;
@@ -1538,6 +1522,7 @@ var Gantt = (function () {
     make_grid_extras() {
       this.make_grid_highlights();
       this.make_grid_ticks();
+      this.make_grid_current_time(this.options.view_mode);
     }
 
     make_grid_background() {
@@ -1564,7 +1549,6 @@ var Gantt = (function () {
 
     make_grid_rows() {
       const rows_layer = createSVG("g", { append_to: this.layers.grid });
-
       const row_width = this.dates.length * this.options.column_width;
       const row_height = this.options.bar_height + this.options.padding;
 
@@ -1657,12 +1641,8 @@ var Gantt = (function () {
       if (!['both', 'vertical', 'horizontal'].includes(this.options.lines)) return
       let tick_x = 0;
       let tick_y = this.options.header_height + this.options.padding / 2;
-      let tick_height =
-        (this.options.bar_height + this.options.padding) * this.tasks.length;
-
+      let tick_height = (this.options.bar_height + this.options.padding) * this.tasks.length;
       let $lines_layer = createSVG("g", { class: 'lines_layer', append_to: this.layers.grid });
-
-
       let row_y = this.options.header_height + this.options.padding / 2;
 
       const row_width = this.dates.length * this.options.column_width;
@@ -1712,6 +1692,43 @@ var Gantt = (function () {
         } else {
           tick_x += this.options.column_width;
         }
+      }
+    }
+
+    make_grid_current_time(view_mode) {
+      let tick_x = 0;
+      let tick_y = this.options.header_height + this.options.padding / 2;
+      let tick_height = (this.options.bar_height + this.options.padding) * this.tasks.length;
+      createSVG("g", { class: 'current_time', append_to: this.layers.grid });
+
+      let today = date_utils.today();
+      for (let date of this.dates) {
+        if (date.toString() === today.toString()) {
+          let current_time_class = "current-time";
+          let day_columns = 1;
+          if (view_mode === VIEW_MODE.HOUR) {
+            day_columns = 24;
+          }
+          if (view_mode === VIEW_MODE.QUARTER_DAY) {
+            day_columns = 4;
+          }
+          if (view_mode === VIEW_MODE.HALF_DAY) {
+            day_columns = 2;
+          }
+          let tick_secs = (this.options.column_width * day_columns) / 86400;
+          let timestamp = Math.floor(new Date().getTime()) / 1000;
+          let today_timestamp = Math.floor(new Date(today).getTime()) / 1000;
+          let today_secs = timestamp - today_timestamp;
+          tick_x += today_secs * tick_secs;
+
+          createSVG("path", {
+            d: `M ${tick_x} ${tick_y} v ${tick_height}`,
+            class: current_time_class,
+            append_to: this.layers.grid,
+          });
+          return;
+        }
+        tick_x += this.options.column_width;
       }
     }
 

@@ -171,6 +171,10 @@
   stroke: #e0e0e0;
   stroke-width: 0.7;
 }
+.gantt .current-time {
+  stroke: red;
+  stroke-width: 1px;
+}
 .gantt .holiday-highlight {
   fill: #F9FAFA;
 }
