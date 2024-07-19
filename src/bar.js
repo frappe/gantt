@@ -31,8 +31,8 @@ export default class Bar {
             task_start_timezone_offset !== starting_timezone_offset)
             if (task_end_timezone_offset === -60)
                 task_end = date_utils.add(task_end, -1, 'hour');
-            // else
-            //     task_end = date_utils.add(task_end, 1, 'hour');
+        // else
+        //     task_end = date_utils.add(task_end, 1, 'hour');
 
         this.invalid = this.task.invalid;
         this.height = this.scheduler.options.bar_height;
@@ -43,7 +43,15 @@ export default class Bar {
         this.duration =
             date_utils.diff(task_end, this.task._start, 'hour') /
             this.scheduler.options.step;
-        this.width = this.scheduler.options.column_width * this.duration;
+        if (date_utils.diff(task_end, this.task._start, 'day') < 1 &
+            !['Hour', 'Quarter Day', 'Half Day'].includes(this.scheduler.options.view_mode)) {
+            this.duration = 0.05;
+            this.task.progress = 0;
+            this.task.resize_left = false;
+            this.task.resize_right = false;
+            this.width = 38 * this.duration;
+        } else
+            this.width = this.scheduler.options.column_width * this.duration;
         this.progress_width =
             this.scheduler.options.column_width *
             this.duration *
@@ -286,13 +294,14 @@ export default class Bar {
                 this.scheduler.view_is('Quarter Day') ||
                 this.scheduler.view_is('Half Day'))) {
                 const start_hours = this.task._start.getHours();
-                const start_minutes = this.task._start.getMinutes();
-                const start_seconds = this.task._start.getSeconds();
 
                 new_start_date.setHours(start_hours);
-                new_start_date.setMinutes(start_minutes);
-                new_start_date.setSeconds(start_seconds);
             }
+            const start_minutes = this.task._start.getMinutes();
+            const start_seconds = this.task._start.getSeconds();
+            new_start_date.setMinutes(start_minutes);
+            new_start_date.setSeconds(start_seconds);
+
             this.task._start = new_start_date;
             this.task.start = new_start_date;
         }
@@ -306,13 +315,13 @@ export default class Bar {
                 this.scheduler.view_is('Half Day'))) {
 
                 const end_hours = this.task._end.getHours();
-                const end_minutes = this.task._end.getMinutes();
-                const end_seconds = this.task._end.getSeconds();
 
                 new_end_date.setHours(end_hours);
-                new_end_date.setMinutes(end_minutes);
-                new_end_date.setSeconds(end_seconds);
             }
+            const end_minutes = this.task._end.getMinutes();
+            const end_seconds = this.task._end.getSeconds();
+            new_end_date.setMinutes(end_minutes);
+            new_end_date.setSeconds(end_seconds);
 
             this.task._end = new_end_date;
             this.task.end = new_end_date;

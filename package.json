@@ -1,6 +1,6 @@
 {
     "name": "horsa-scheduler",
-    "version": "0.7.1",
+    "version": "0.7.2",
     "description": "A lightweight and interactive svg scheduler library for web applications",
     "main": "src/index.js",
     "scripts": {
