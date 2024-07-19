@@ -428,12 +428,12 @@ export default class Scheduler {
 
     // TODO refactor with single functions?
     make_fixed_columns() {
-        if (this.options.hide_fixed_columns) {
+        const column_grid_width = this.options.fixed_columns.reduce((acc, curr) => acc + curr.width, 0);
+        if (this.options.hide_fixed_columns || column_grid_width === 0) {
             this.$column_svg.setAttribute('width', 0);
             return;
         }
         // make_grid_background
-        const column_grid_width = this.options.fixed_columns.reduce((acc, curr) => acc + curr.width, 0);
         const sum_rows_height = this.rows[this.rows.length - 1].y + this.rows[this.rows.length - 1].height;
         const grid_height = sum_rows_height;
 
