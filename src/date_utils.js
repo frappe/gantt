@@ -61,29 +61,32 @@ export default {
 
     format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'it') {
         const dateTimeFormat = new Intl.DateTimeFormat(lang, {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            fractionalSecondDigits: 3,
+            weekday: 'long',
             month: 'long'
         });
-        const dayFormat = new Intl.DateTimeFormat(lang, {
-            weekday: 'long'
+        const parts = dateTimeFormat.formatToParts(date);
+        const dateParts = {};
+        parts.forEach(({ type, value }) => {
+            dateParts[type] = value;
         });
-
-        const day_name = dayFormat.format(date);
-        const day_name_capitalized =
-            day_name.charAt(0).toUpperCase() + day_name.slice(1);
-        const month_name = dateTimeFormat.format(date);
-        const month_name_capitalized =
-            month_name.charAt(0).toUpperCase() + month_name.slice(1);
-
-        const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
+        const day_name_capitalized = dateParts.weekday.charAt(0).toUpperCase() + dateParts.weekday.slice(1);
+        const month_name_capitalized = dateParts.month.charAt(0).toUpperCase() + dateParts.month.slice(1);
         const format_map = {
-            YYYY: values[0],
-            MM: padStart(+values[1] + 1, 2, 0),
-            DD: values[2],
-            HH: values[3],
-            mm: values[4],
-            ss: values[5],
-            SSS: values[6],
-            D: values[2],
+            YYYY: dateParts.year,
+            MM: dateParts.month.padStart(2, '0'),
+            DD: dateParts.day.padStart(2, '0'),
+            HH: dateParts.hour.padStart(2, '0'),
+            mm: dateParts.minute.padStart(2, '0'),
+            ss: dateParts.second.padStart(2, '0'),
+            SSS: dateParts.fractionalSecond.padStart(3, '0'),
+            D: dateParts.day.padStart(2, '0'),
             MMMM: month_name_capitalized,
             MMM: month_name_capitalized,
             ddd: day_name_capitalized,

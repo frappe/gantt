@@ -43,8 +43,7 @@ export default class Bar {
         this.duration =
             date_utils.diff(task_end, this.task._start, 'hour') /
             this.scheduler.options.step;
-        if (date_utils.diff(task_end, this.task._start, 'day') < 1 &
-            !['Hour', 'Quarter Day', 'Half Day'].includes(this.scheduler.options.view_mode)) {
+        if (date_utils.diff(task_end, this.task._start, 'hour') < 1) {
             this.duration = 0.05;
             this.task.progress = 0;
             this.task.resize_left = false;
