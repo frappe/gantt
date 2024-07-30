@@ -733,8 +733,6 @@ export default class Scheduler {
     }
 
     make_grid_highlights() {
-        if (this.view_is(VIEW_MODE.YEAR) || this.view_is(VIEW_MODE.HOUR))
-            return;
         let x;
         let width;
         const today = date_utils.today();
@@ -766,6 +764,16 @@ export default class Scheduler {
             x = date_utils.diff(today, this.scheduler_start, 'hour') /
                 this.options.step * this.options.column_width;
             width = this.options.column_width * 4;
+        } else if (this.view_is(VIEW_MODE.HOUR)) {
+            x = date_utils.diff(today, this.scheduler_start, 'hour') /
+                this.options.step * this.options.column_width;
+            width = this.options.column_width * 24;
+        } else if (this.view_is(VIEW_MODE.YEAR)) {
+            const start_of_year = date_utils.start_of(today, 'year');
+            const starting_year = date_utils.start_of(this.scheduler_start, 'year');
+            x = date_utils.diff(start_of_year, starting_year, 'hour') /
+                this.options.step * this.options.column_width;
+            width = this.options.column_width;
         }
 
         const y = this.options.header_height + this.options.padding / 2;
