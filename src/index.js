@@ -764,6 +764,8 @@ export default class Scheduler {
             const starting_month = date_utils.start_of(this.scheduler_start, 'month');
             x = date_utils.diff(start_of_month, starting_month, 'hour') /
                 this.options.step * this.options.column_width;
+            if (this.scheduler_start.getDate() >= 30)
+                x -= this.options.column_width - (31 - this.scheduler_start.getDate()) * 4; 
             width = (date_utils.get_days_in_month(today) *
                 this.options.column_width) /
                 30;
@@ -1314,7 +1316,7 @@ export default class Scheduler {
                 }
             }
         });
-        
+
         $.on(this.$container, 'wheel', '.grid, .bar', (e) => {
             this.hide_popup();
             e.preventDefault();
