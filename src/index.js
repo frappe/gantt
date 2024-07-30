@@ -379,6 +379,17 @@ export default class Scheduler {
                     this.dates.push(cur_date);
                 }
                 cur_date = date_utils.add(cur_date, 1, 'day');
+            } else if (this.view_is(VIEW_MODE.HOUR)) {
+                let next_date = date_utils.add(cur_date, this.options.step, 'hour');
+                // Controllo per l'ora legale
+                if (next_date.getHours() === 3 && cur_date.getHours() === 1) {
+                    this.dates.push(cur_date);
+                    let curDateString = date_utils.to_string(cur_date, true);
+                    let missing_hour_string = curDateString.replace(/ \d{2}:/, ' 02:');
+                    this.dates.push(missing_hour_string);
+                } else
+                    this.dates.push(cur_date);
+                cur_date = next_date;
             } else {
                 this.dates.push(cur_date);
                 cur_date = date_utils.add(cur_date, this.options.step, 'hour');
@@ -886,17 +897,27 @@ export default class Scheduler {
                 Day_upper: (column_width * 30) / 2
             };
         } else if (this.view_is(VIEW_MODE.HOUR)) {
-            date_text = {
-                Hour_lower: date_utils.format(
-                    date,
-                    'HH',
-                    this.options.language
-                ),
-                Hour_upper:
-                    date.getDate() !== last_date.getDate()
-                        ? date_utils.format(date, 'ddd D MMM YYYY', this.options.language)
-                        : '',
-            };
+            if (typeof last_date === 'string')
+                last_date = new Date(last_date);
+            if (typeof date === 'string') {
+                date_text = {
+                    Hour_lower:
+                        '02',
+                    Hour_upper:
+                        ''
+                };
+            } else
+                date_text = {
+                    Hour_lower: date_utils.format(
+                        date,
+                        'HH',
+                        this.options.language
+                    ),
+                    Hour_upper:
+                        date.getDate() !== last_date.getDate()
+                            ? date_utils.format(date, 'ddd D MMM YYYY', this.options.language)
+                            : '',
+                };
             x_pos = {
                 Hour_lower: 0,
                 Hour_upper: column_width * 24 / 2
@@ -1292,6 +1313,33 @@ export default class Scheduler {
                     });
                 }
             }
+        });
+        
+        $.on(this.$container, 'wheel', '.grid, .bar', (e) => {
+            this.hide_popup();
+            e.preventDefault();
+
+            const VIEW_MODES_ORDER = [
+                VIEW_MODE.HOUR,
+                VIEW_MODE.QUARTER_DAY,
+                VIEW_MODE.HALF_DAY,
+                VIEW_MODE.DAY,
+                VIEW_MODE.WEEK,
+                VIEW_MODE.MONTH,
+                VIEW_MODE.YEAR,
+            ];
+
+            let curr_index = VIEW_MODES_ORDER.indexOf(this.options.view_mode);
+            const scroll_pos = this.$svg.parentElement.scrollLeft;
+            const scroll_width = this.$svg.parentElement.scrollWidth;
+
+            if (e.deltaY > 0 && curr_index !== VIEW_MODES_ORDER.length - 1) {
+                this.change_view_mode(VIEW_MODES_ORDER[curr_index + 1]);
+            } else if (e.deltaY < 0 && curr_index > 0) {
+                this.change_view_mode(VIEW_MODES_ORDER[curr_index - 1]);
+            }
+
+            this.$svg.parentElement.scrollLeft = scroll_pos * (this.$svg.parentElement.scrollWidth / scroll_width);
         });
     }
 
