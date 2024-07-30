@@ -155,10 +155,12 @@ export default class Scheduler {
     setup_task(task) {
         let need_to_be_lock = false;
         // convert to Date objects
-        task._start = date_utils.parse(task.start);
+        task._start = new Date(task.start);
+        // task._start = date_utils.parse(task.start);
         if (date_utils.parse(task.end) > this.options.date_end)
             need_to_be_lock = true;
-        task._end = date_utils.parse(task.end);
+        task._end = new Date(task.end);
+        // task._end = date_utils.parse(task.end);
 
         // make task invalid if duration too large
         // if (date_utils.diff(task._end, task._start, 'year') > 10) {
