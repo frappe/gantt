@@ -144,10 +144,12 @@ export default class Scheduler {
         this.tasks = tasks.filter(t => t.row).map((task, i) => {
             return this.setup_task(task);
         }).filter(t => (
-            (!this.options.date_start || t._start >= this.options.date_start))
-            // &&
-            // (!this.options.date_end || t._end <= this.options.date_end))
-        );
+            (this.options.date_start && this.options.date_end &&
+                ((t._start >= this.options.date_start && t._end <= this.options.date_end) ||  // Task within the range
+                    (t._start < this.options.date_start && t._end >= this.options.date_start) ||  // Task starts before but ends during or after date_start
+                    (t._start >= this.options.date_start && t._start <= this.options.date_end && t._end > this.options.date_end))   // Task starts within the range but ends after date_end
+            )
+        ));
 
         this.setup_dependencies();
     }
@@ -156,16 +158,9 @@ export default class Scheduler {
         let need_to_be_lock = false;
         // convert to Date objects
         task._start = new Date(task.start);
-        // task._start = date_utils.parse(task.start);
-        if (date_utils.parse(task.end) > this.options.date_end)
-            need_to_be_lock = true;
         task._end = new Date(task.end);
-        // task._end = date_utils.parse(task.end);
-
-        // make task invalid if duration too large
-        // if (date_utils.diff(task._end, task._start, 'year') > 10) {
-        //     task.end = null;
-        // }
+        if (task._end > this.options.date_end || task._start < this.options.date_start)
+            need_to_be_lock = true;
 
         // cache index
         task._index = this.options.rows.indexOf(task.row);
@@ -371,20 +366,33 @@ export default class Scheduler {
             this.dates.push(cur_date);
             switch (this.options.view_mode) {
                 case VIEW_MODE.YEAR:
-                    cur_date = date_utils.add(cur_date, 1, 'year');       
+                    cur_date = date_utils.add(cur_date, 1, 'year');
                     break;
                 case VIEW_MODE.MONTH:
+                    if (cur_date.getDate() !== 1) {
+                        cur_date = cur_date.setDate(1);
+                        cur_date = new Date(cur_date);
+                        this.dates[0] = cur_date;
+                    }
                     cur_date = date_utils.add(cur_date, 1, 'month');
+                    break;
+                case VIEW_MODE.WEEK:
+                    if (cur_date.getDay() !== 1) {
+                        const days_back_to_monday = (cur_date.getDay() + 6) % 7;
+                        cur_date = date_utils.add(cur_date, -days_back_to_monday, 'day');
+                        this.dates[0] = cur_date;
+                    }
+                    cur_date = date_utils.add(cur_date, 7, 'day');
                     break;
                 case VIEW_MODE.HOUR:
                     let next_date = date_utils.add(cur_date, 1, 'hour');
                     // Controllo per l'ora legale
-                    if (next_date.getHours() === 3 && cur_date.getHours() === 1) {  
+                    if (next_date.getHours() === 3 && cur_date.getHours() === 1) {
                         let curDateString = date_utils.to_string(cur_date, true);
                         let missing_hour_string = curDateString.replace(/ \d{2}:/, ' 02:');
                         this.dates.push(missing_hour_string);
-                    } 
-                    cur_date = next_date;    
+                    }
+                    cur_date = next_date;
                     break;
                 default:
                     cur_date = date_utils.add(cur_date, this.options.step, 'hour');
@@ -740,49 +748,44 @@ export default class Scheduler {
     }
 
     make_grid_highlights() {
-        let x;
-        let width;
         const today = date_utils.today();
-        // TODO Cambia con switch
-        if (this.view_is(VIEW_MODE.DAY)) {
-            x = date_utils.diff(today, this.scheduler_start, 'hour') /
-                this.options.step * this.options.column_width;
-            width = this.options.column_width;
-        } else if (this.view_is(VIEW_MODE.WEEK)) {
-            const day_of_week = today.getDay(); // 0 = Domenica, 1 = Lunedì, ..., 6 = Sabato
-            const start_of_week = new Date(today);
-            start_of_week.setDate(today.getDate() - (day_of_week === 0 ? 6 : day_of_week - 1)); // Sposta indietro al lunedì
-            x = date_utils.diff(start_of_week, this.dates[0], 'hour') /
-                this.options.step * this.options.column_width;
-            width = this.options.column_width;
-        } else if (this.view_is(VIEW_MODE.MONTH)) {
-            const start_of_month = date_utils.start_of(today, 'month');
-            const starting_month = date_utils.start_of(this.scheduler_start, 'month');
-            x = date_utils.diff(start_of_month, starting_month, 'hour') /
-                this.options.step * this.options.column_width;
-            if (this.scheduler_start.getDate() >= 30)
-                x -= this.options.column_width - (31 - this.scheduler_start.getDate()) * 4; 
-            width = (date_utils.get_days_in_month(today) *
-                this.options.column_width) /
-                30;
-        } else if (this.view_is(VIEW_MODE.HALF_DAY)) {
-            x = date_utils.diff(today, this.scheduler_start, 'hour') /
-                this.options.step * this.options.column_width;
-            width = this.options.column_width * 2;
-        } else if (this.view_is(VIEW_MODE.QUARTER_DAY)) {
-            x = date_utils.diff(today, this.scheduler_start, 'hour') /
-                this.options.step * this.options.column_width;
-            width = this.options.column_width * 4;
-        } else if (this.view_is(VIEW_MODE.HOUR)) {
-            x = date_utils.diff(today, this.scheduler_start, 'hour') /
-                this.options.step * this.options.column_width;
-            width = this.options.column_width * 24;
-        } else if (this.view_is(VIEW_MODE.YEAR)) {
-            const start_of_year = date_utils.start_of(today, 'year');
-            const starting_year = date_utils.start_of(this.scheduler_start, 'year');
-            x = date_utils.diff(start_of_year, starting_year, 'hour') /
-                this.options.step * this.options.column_width;
-            width = this.options.column_width;
+        let x = date_utils.diff(today, this.dates[0], 'hour') /
+            this.options.step * this.options.column_width;
+        let width = this.options.column_width;
+
+        switch (this.options.view_mode) {
+            case VIEW_MODE.HOUR:
+                width = this.options.column_width * 24;
+                break;
+            case VIEW_MODE.HALF_DAY:
+                width *= 2;
+                break;
+            case VIEW_MODE.QUARTER_DAY:
+                width *= 4;
+                break;
+            case VIEW_MODE.WEEK:
+                const day_of_week = today.getDay(); // 0 = Domenica, 1 = Lunedì, ..., 6 = Sabato
+                const start_of_week = new Date(today);
+                start_of_week.setDate(today.getDate() - (day_of_week === 0 ? 6 : day_of_week - 1)); // Sposta indietro al lunedì
+                x = date_utils.diff(start_of_week, this.dates[0], 'hour') /
+                    this.options.step * this.options.column_width;
+                break;
+            case VIEW_MODE.MONTH:
+                const start_of_month = date_utils.start_of(today, 'month');
+                x = date_utils.diff(start_of_month, this.dates[0], 'hour') /
+                    this.options.step * this.options.column_width;
+                width = (date_utils.get_days_in_month(today) *
+                    this.options.column_width) /
+                    30;
+                break;
+            case VIEW_MODE.YEAR:
+                const start_of_year = date_utils.start_of(today, 'year');
+                const starting_year = date_utils.start_of(this.scheduler_start, 'year');
+                x = date_utils.diff(start_of_year, starting_year, 'hour') /
+                    this.options.step * this.options.column_width;
+                break;
+            default:
+                break;
         }
 
         const y = this.options.header_height + this.options.padding / 2;
@@ -811,47 +814,43 @@ export default class Scheduler {
                 class: 'lower-text bold',
                 append_to: this.layers.date,
             });
-            
-            // cambia con check del giorno tramite data, controllalo se 6 o 7
-            // deve essere HOUR, QUARTER, HALF, DAY
-            if ((d.lower_text.includes('Sa') || d.lower_text.includes('Do')) ||
-                (d.upper_text.includes('Sa') || d.upper_text.includes('Do'))) {
 
-                let highlight_x = d.lower_x;
-                const highlight_y = d.lower_y + (this.options.padding / 2);
-                let highlight_width = this.options.column_width;
-                const highlight_height = this.rows[this.rows.length - 1].y +
-                    this.rows[this.rows.length - 1].height -
-                    this.options.header_height -
-                    (this.options.padding / 2);
-                
-                // cambia con switch
-                if (this.view_is(VIEW_MODE.DAY))
-                    highlight_x = d.lower_x - (this.options.column_width / 2);
-                else if (this.view_is(VIEW_MODE.HALF_DAY))
-                    highlight_width *= 2;
-                else if (this.view_is(VIEW_MODE.QUARTER_DAY))
-                    highlight_width *= 4;
-                else if (this.view_is(VIEW_MODE.HOUR))
-                    highlight_width *= 24;
+            if (typeof d.date !== 'string') {
+                if ((d.date.getDay() === 6 || d.date.getDay() === 0) &&
+                    (this.options.view_mode === VIEW_MODE.DAY ||
+                        this.options.view_mode === VIEW_MODE.HALF_DAY ||
+                        this.options.view_mode === VIEW_MODE.QUARTER_DAY ||
+                        this.options.view_mode === VIEW_MODE.HOUR)) {
 
-                createSVG('rect', {
-                    x: highlight_x,
-                    y: highlight_y,
-                    width: highlight_width,
-                    height: highlight_height,
-                    class: 'weekend-highlight',
-                    append_to: this.layers.grid,
-                });
-            }
-            if (d.upper_text) {
-                createSVG('text', {
-                    x: d.upper_x,
-                    y: d.upper_y,
-                    innerHTML: d.upper_text,
-                    class: 'upper-text bold',
-                    append_to: this.layers.date,
-                });
+                    let highlight_x = d.lower_x;
+                    const highlight_y = d.lower_y + (this.options.padding / 2);
+                    let highlight_width = this.options.column_width;
+                    const highlight_height = this.rows[this.rows.length - 1].y +
+                        this.rows[this.rows.length - 1].height -
+                        this.options.header_height -
+                        (this.options.padding / 2);
+
+                    if (this.view_is(VIEW_MODE.DAY))
+                        highlight_x = d.lower_x - (this.options.column_width / 2);
+
+                    createSVG('rect', {
+                        x: highlight_x,
+                        y: highlight_y,
+                        width: highlight_width,
+                        height: highlight_height,
+                        class: 'weekend-highlight',
+                        append_to: this.layers.grid,
+                    });
+                }
+                if (d.upper_text) {
+                    createSVG('text', {
+                        x: d.upper_x,
+                        y: d.upper_y,
+                        innerHTML: d.upper_text,
+                        class: 'upper-text bold',
+                        append_to: this.layers.date,
+                    });
+                }
             }
             return d;
         });
