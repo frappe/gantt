@@ -368,31 +368,27 @@ export default class Scheduler {
         let cur_date = date_utils.clone(this.scheduler_start);
 
         while (cur_date <= this.scheduler_end) {
-            if (this.view_is(VIEW_MODE.YEAR)) {
-                this.dates.push(cur_date);
-                cur_date = date_utils.add(cur_date, 1, 'year');
-            } else if (this.view_is(VIEW_MODE.MONTH)) {
-                this.dates.push(cur_date);
-                cur_date = date_utils.add(cur_date, 1, 'month');
-            } else if (this.view_is(VIEW_MODE.WEEK)) {
-                if (cur_date.getDay() === 1) {
-                    this.dates.push(cur_date);
-                }
-                cur_date = date_utils.add(cur_date, 1, 'day');
-            } else if (this.view_is(VIEW_MODE.HOUR)) {
-                let next_date = date_utils.add(cur_date, this.options.step, 'hour');
-                // Controllo per l'ora legale
-                if (next_date.getHours() === 3 && cur_date.getHours() === 1) {
-                    this.dates.push(cur_date);
-                    let curDateString = date_utils.to_string(cur_date, true);
-                    let missing_hour_string = curDateString.replace(/ \d{2}:/, ' 02:');
-                    this.dates.push(missing_hour_string);
-                } else
-                    this.dates.push(cur_date);
-                cur_date = next_date;
-            } else {
-                this.dates.push(cur_date);
-                cur_date = date_utils.add(cur_date, this.options.step, 'hour');
+            this.dates.push(cur_date);
+            switch (this.options.view_mode) {
+                case VIEW_MODE.YEAR:
+                    cur_date = date_utils.add(cur_date, 1, 'year');       
+                    break;
+                case VIEW_MODE.MONTH:
+                    cur_date = date_utils.add(cur_date, 1, 'month');
+                    break;
+                case VIEW_MODE.HOUR:
+                    let next_date = date_utils.add(cur_date, 1, 'hour');
+                    // Controllo per l'ora legale
+                    if (next_date.getHours() === 3 && cur_date.getHours() === 1) {  
+                        let curDateString = date_utils.to_string(cur_date, true);
+                        let missing_hour_string = curDateString.replace(/ \d{2}:/, ' 02:');
+                        this.dates.push(missing_hour_string);
+                    } 
+                    cur_date = next_date;    
+                    break;
+                default:
+                    cur_date = date_utils.add(cur_date, this.options.step, 'hour');
+                    break;
             }
         }
     }
@@ -747,7 +743,7 @@ export default class Scheduler {
         let x;
         let width;
         const today = date_utils.today();
-
+        // TODO Cambia con switch
         if (this.view_is(VIEW_MODE.DAY)) {
             x = date_utils.diff(today, this.scheduler_start, 'hour') /
                 this.options.step * this.options.column_width;
@@ -803,12 +799,8 @@ export default class Scheduler {
     }
 
     make_dates() {
-        this.get_dates_to_draw();
-    }
-
-    get_dates_to_draw() {
         let last_date_info = null;
-        // const dates = 
+
         this.dates.map((date) => {
             const d = this.get_date_info(date, last_date_info);
             last_date_info = d;
@@ -819,7 +811,9 @@ export default class Scheduler {
                 class: 'lower-text bold',
                 append_to: this.layers.date,
             });
-
+            
+            // cambia con check del giorno tramite data, controllalo se 6 o 7
+            // deve essere HOUR, QUARTER, HALF, DAY
             if ((d.lower_text.includes('Sa') || d.lower_text.includes('Do')) ||
                 (d.upper_text.includes('Sa') || d.upper_text.includes('Do'))) {
 
@@ -830,7 +824,8 @@ export default class Scheduler {
                     this.rows[this.rows.length - 1].height -
                     this.options.header_height -
                     (this.options.padding / 2);
-
+                
+                // cambia con switch
                 if (this.view_is(VIEW_MODE.DAY))
                     highlight_x = d.lower_x - (this.options.column_width / 2);
                 else if (this.view_is(VIEW_MODE.HALF_DAY))
@@ -850,7 +845,6 @@ export default class Scheduler {
                 });
             }
             if (d.upper_text) {
-                // const $upper_text = 
                 createSVG('text', {
                     x: d.upper_x,
                     y: d.upper_y,
@@ -858,17 +852,9 @@ export default class Scheduler {
                     class: 'upper-text bold',
                     append_to: this.layers.date,
                 });
-
-                // remove out-of-bound dates
-                // if (
-                //     $upper_text.getBBox().x2 > this.layers.grid.getBBox().width
-                // ) {
-                //     $upper_text.remove();
-                // }
             }
             return d;
         });
-        // return dates;
     }
 
     get_date_info(date, last_date_info) {
