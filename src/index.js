@@ -653,7 +653,7 @@ export default class Gantt {
         append_to: this.$lower_header
       })
       $lower_text.innerText = date.lower_text
-      $lower_text.style.left = +$lower_text.style.left.slice(0, -2) - $lower_text.clientWidth / 2 + 'px'
+      $lower_text.style.left = +$lower_text.style.left.slice(0, -2) + 'px'
 
       if (date.upper_text) {
         this.upper_texts_x[date.upper_text] = date.upper_x
