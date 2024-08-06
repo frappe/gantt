@@ -571,8 +571,16 @@ export default class Gantt {
     }
   }
 
-  //compute the horizontal x distance
+  /**
+   * Compute the horizontal x-axis distance and associated date for the current date and view.
+   * 
+   * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
+   */
   computeGridHighlightDimensions(view_mode) {
+    // Return null if today is out of the gantt range
+    const todayDate = new Date();
+    if (todayDate < this.gantt_start || todayDate > this.gantt_end) return null;
+
     let x = this.options.column_width / 2;
 
     if (this.view_is(VIEW_MODE.DAY)) {
@@ -586,7 +594,7 @@ export default class Gantt {
     }
 
     for (let date of this.dates) {
-      const todayDate = new Date();
+      
       const startDate = new Date(date);
       const endDate = new Date(date);
       switch (view_mode) {
@@ -606,6 +614,8 @@ export default class Gantt {
         x += this.options.column_width;
       }
     }
+
+    return null;
   }
 
   make_grid_highlights() {
@@ -618,7 +628,9 @@ export default class Gantt {
       this.view_is(VIEW_MODE.YEAR)
     ) {
       // Used as we must find the _end_ of session if view is not Day
-      const { x: left, date } = this.computeGridHighlightDimensions(this.options.view_mode)
+      const highlightDimensions = this.computeGridHighlightDimensions(this.options.view_mode);
+      if (!highlightDimensions) return;
+      const { x: left, date } = highlightDimensions;
       const top = this.options.header_height + this.options.padding / 2;
       const height = (this.options.bar_height + this.options.padding) * this.tasks.length;
       this.$current_highlight = this.create_el({ top, left, height, classes: 'current-highlight', append_to: this.$container })
