@@ -131,8 +131,8 @@ export default class Scheduler {
             this.options.date_start = date_utils.parse(this.options.date_start);
         if (this.options.date_end)
             this.options.date_end = date_utils.parse(this.options.date_end);
-        else
-            this.options.date_end = date_utils.add(this.options.date_start, 2, 'year');
+        // else
+        //     this.options.date_end = date_utils.add(this.options.date_start, 2, 'year');
     }
 
     setup_cells(cells) {
@@ -144,11 +144,13 @@ export default class Scheduler {
         this.tasks = tasks.filter(t => t.row).map((task, i) => {
             return this.setup_task(task);
         }).filter(t => (
-            (this.options.date_start && this.options.date_end &&
-                ((t._start >= this.options.date_start && t._end <= this.options.date_end) ||  // Task within the range
+            ((!this.options.date_start || t._end >= this.options.date_start) &&
+                (!this.options.date_end || t._start <= this.options.date_end) &&
+                (
+                    (t._start >= this.options.date_start && t._end <= this.options.date_end) ||  // Task within the range
                     (t._start < this.options.date_start && t._end >= this.options.date_start) ||  // Task starts before but ends during or after date_start
-                    (t._start >= this.options.date_start && t._start <= this.options.date_end && t._end > this.options.date_end))   // Task starts within the range but ends after date_end
-            )
+                    (t._start >= this.options.date_start && t._end > this.options.date_end)   // Task starts within the range but ends after date_end
+                ))
         ));
 
         this.setup_dependencies();
@@ -159,8 +161,12 @@ export default class Scheduler {
         // convert to Date objects
         task._start = new Date(task.start);
         task._end = new Date(task.end);
-        if (task._end > this.options.date_end || task._start < this.options.date_start)
-            need_to_be_lock = true;
+        if (this.options.date_end)
+            if (task._end > this.options.date_end)
+                need_to_be_lock = true;
+        if (this.options.date_start)
+            if (task._start < this.options.date_start)
+                need_to_be_lock = true;
 
         // cache index
         task._index = this.options.rows.indexOf(task.row);
