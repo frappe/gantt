@@ -1058,13 +1058,10 @@ export default class Scheduler {
     }
 
     set_width() {
-        // const cur_width = this.$svg.getBoundingClientRect().width;
         const actual_width = this.$svg
             .querySelector('.grid .grid-row')
             .getAttribute('width');
-        // if (cur_width < actual_width) {
         this.$svg.setAttribute('width', actual_width);
-        // }
     }
 
     set_scroll_position() {
