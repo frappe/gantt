@@ -102,8 +102,6 @@ export default class Scheduler {
         const default_options = {
             container_height: 300,
             header_height: 50,
-            column_width: 30,
-            step: 24,
             date_start: null,
             date_end: null,
             view_modes: [...Object.values(VIEW_MODE)],
@@ -128,9 +126,9 @@ export default class Scheduler {
         this.options = Object.assign({}, default_options, options);
 
         if (this.options.date_start)
-            this.options.date_start = date_utils.parse(this.options.date_start);
+            this.options.date_start = new Date(this.options.date_start);
         if (this.options.date_end)
-            this.options.date_end = date_utils.parse(this.options.date_end);
+            this.options.date_end = new Date(this.options.date_end);
         // else
         //     this.options.date_end = date_utils.add(this.options.date_start, 2, 'year');
     }
@@ -291,27 +289,35 @@ export default class Scheduler {
 
     update_view_scale(view_mode) {
         this.options.view_mode = view_mode;
-        if (view_mode === VIEW_MODE.HOUR) {
-            this.options.step = 24 / 24;
-            this.options.column_width = 38;
-        } else if (view_mode === VIEW_MODE.DAY) {
-            this.options.step = 24;
-            this.options.column_width = 38;
-        } else if (view_mode === VIEW_MODE.HALF_DAY) {
-            this.options.step = 24 / 2;
-            this.options.column_width = 38;
-        } else if (view_mode === VIEW_MODE.QUARTER_DAY) {
-            this.options.step = 24 / 4;
-            this.options.column_width = 38;
-        } else if (view_mode === VIEW_MODE.WEEK) {
-            this.options.step = 24 * 7;
-            this.options.column_width = 140;
-        } else if (view_mode === VIEW_MODE.MONTH) {
-            this.options.step = 24 * 30;
-            this.options.column_width = 120;
-        } else if (view_mode === VIEW_MODE.YEAR) {
-            this.options.step = 24 * 365;
-            this.options.column_width = 120;
+        switch (this.options.view_mode) {
+            case VIEW_MODE.HOUR:
+                this.options.step = 60;
+                this.options.column_width = 60;    
+                break;
+            case VIEW_MODE.QUARTER_DAY:
+                this.options.step = 24 / 4;
+                this.options.column_width = 24 * 2;
+                break;
+            case VIEW_MODE.HALF_DAY:
+                this.options.step = 24 / 2;
+                this.options.column_width = 24 * 2;
+                break;
+            case VIEW_MODE.DAY:
+                this.options.step = 24;
+                this.options.column_width = 24 * 2;   
+                break;
+            case VIEW_MODE.WEEK:
+                this.options.step = 24 * 7;
+                this.options.column_width = this.options.step;
+                break;
+            case VIEW_MODE.MONTH:
+                this.options.step = 24 * 30;
+                this.options.column_width = 150;
+                break;
+            case VIEW_MODE.YEAR:
+                this.options.step = 24 * 365;
+                this.options.column_width = 120;
+                break;
         }
     }
 
@@ -335,8 +341,8 @@ export default class Scheduler {
                 }
             }
 
-        this.scheduler_start = date_utils.start_of(this.scheduler_start, 'day');
-        this.scheduler_end = date_utils.start_of(this.scheduler_end, 'day');
+        this.scheduler_start.setUTCHours(0,0,0,0);
+        this.scheduler_end.setUTCHours(0,0,0,0);
 
         // add date padding on both sides
         if (!this.options.date_start) {
@@ -348,6 +354,14 @@ export default class Scheduler {
                 this.scheduler_start = date_utils.add(this.scheduler_start, -2, 'year');
             } else {
                 this.scheduler_start = date_utils.add(this.scheduler_start, -1, 'month');
+            }
+        } else {
+            if (this.view_is(VIEW_MODE.WEEK)) {
+                this.scheduler_start = date_utils.start_of(this.scheduler_start, 'week');
+            } else if (this.view_is(VIEW_MODE.MONTH)) {
+                this.scheduler_start = date_utils.start_of(this.scheduler_start, 'month');
+            } else if (this.view_is(VIEW_MODE.YEAR)) {
+                this.scheduler_start = date_utils.start_of(this.scheduler_start, 'year');
             }
         }
 
@@ -375,29 +389,19 @@ export default class Scheduler {
                     cur_date = date_utils.add(cur_date, 1, 'year');
                     break;
                 case VIEW_MODE.MONTH:
-                    if (cur_date.getDate() !== 1) {
-                        cur_date = cur_date.setDate(1);
-                        cur_date = new Date(cur_date);
-                        this.dates[0] = cur_date;
-                    }
                     cur_date = date_utils.add(cur_date, 1, 'month');
                     break;
                 case VIEW_MODE.WEEK:
-                    if (cur_date.getDay() !== 1) {
-                        const days_back_to_monday = (cur_date.getDay() + 6) % 7;
-                        cur_date = date_utils.add(cur_date, -days_back_to_monday, 'day');
-                        this.dates[0] = cur_date;
-                    }
                     cur_date = date_utils.add(cur_date, 7, 'day');
                     break;
                 case VIEW_MODE.HOUR:
                     let next_date = date_utils.add(cur_date, 1, 'hour');
                     // Controllo per l'ora legale
-                    if (next_date.getHours() === 3 && cur_date.getHours() === 1) {
-                        let curDateString = date_utils.to_string(cur_date, true);
-                        let missing_hour_string = curDateString.replace(/ \d{2}:/, ' 02:');
-                        this.dates.push(missing_hour_string);
-                    }
+                    // if (next_date.getHours() === 3 && cur_date.getHours() === 1) {
+                    //     let curDateString = date_utils.to_string(cur_date, true);
+                    //     let missing_hour_string = curDateString.replace(/ \d{2}:/, ' 02:');
+                    //     this.dates.push(missing_hour_string);
+                    // }
                     cur_date = next_date;
                     break;
                 default:
@@ -1869,33 +1873,39 @@ export default class Scheduler {
     get_snap_x_position(dx) {
         let odx = dx,
             rem,
-            position;
+            position,
+            divider;
 
-        if (this.view_is(VIEW_MODE.WEEK)) {
-            rem = dx % (this.options.column_width / 7);
-            position =
-                odx -
-                rem +
-                (rem < this.options.column_width / 14
-                    ? 0
-                    : this.options.column_width / 7);
-        } else if (this.view_is(VIEW_MODE.MONTH)) {
-            rem = dx % (this.options.column_width / 30);
-            position =
-                odx -
-                rem +
-                (rem < this.options.column_width / 60
-                    ? 0
-                    : this.options.column_width / 30);
-        } else {
-            rem = dx % this.options.column_width;
-            position =
-                odx -
-                rem +
-                (rem < this.options.column_width / 2
-                    ? 0
-                    : this.options.column_width);
+        switch (this.options.view_mode) {
+            case VIEW_MODE.MONTH:
+                divider = 30;
+                break;
+            case VIEW_MODE.WEEK:
+                divider = 7;
+                break;
+            case VIEW_MODE.DAY:
+                divider = 24;
+                break;
+            case VIEW_MODE.HALF_DAY:
+                divider = 12;
+                break;
+            case VIEW_MODE.QUARTER_DAY:
+                divider = 6;
+                break;
+            case VIEW_MODE.HOUR:
+                divider = 60;
+                break;    
+            default:
+                divider = 1
+                break;
         }
+        rem = dx % (this.options.column_width / divider);
+        position =
+            odx -
+            rem +
+            (rem < this.options.column_width / (2 * divider)
+                ? 0
+                : this.options.column_width / divider);
         return position;
     }
 

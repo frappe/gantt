@@ -69,7 +69,8 @@ export default {
             second: '2-digit',
             fractionalSecondDigits: 3,
             weekday: 'long',
-            month: 'long'
+            month: 'long',
+            timeZone: "UTC",
         });
         const parts = dateTimeFormat.formatToParts(date);
         const dateParts = {};
@@ -151,18 +152,26 @@ export default {
     add(date, qty, scale) {
         qty = parseInt(qty, 10);
         const vals = [
-            date.getFullYear() + (scale === YEAR ? qty : 0),
-            date.getMonth() + (scale === MONTH ? qty : 0),
-            date.getDate() + (scale === DAY ? qty : 0),
-            date.getHours() + (scale === HOUR ? qty : 0),
-            date.getMinutes() + (scale === MINUTE ? qty : 0),
-            date.getSeconds() + (scale === SECOND ? qty : 0),
-            date.getMilliseconds() + (scale === MILLISECOND ? qty : 0),
+            date.getUTCFullYear() + (scale === YEAR ? qty : 0),
+            date.getUTCMonth() + (scale === MONTH ? qty : 0),
+            date.getUTCDate() + (scale === DAY ? qty : 0),
+            date.getUTCHours() + (scale === HOUR ? qty : 0),
+            date.getUTCMinutes() + (scale === MINUTE ? qty : 0),
+            date.getUTCSeconds() + (scale === SECOND ? qty : 0),
+            date.getUTCMilliseconds() + (scale === MILLISECOND ? qty : 0),
         ];
-        return new Date(...vals);
+        return new Date(Date.UTC(...vals));
     },
 
     start_of(date, scale) {
+        if (scale == 'week')
+        {
+            var d = this.clone(date);
+            var day = d.getUTCDay(), diff = d.getUTCDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
+            d.setUTCDate(diff);
+            return d;
+        }
+
         const scores = {
             [YEAR]: 6,
             [MONTH]: 5,
@@ -180,30 +189,30 @@ export default {
 
         const vals = [
             date.getFullYear(),
-            should_reset(YEAR) ? 0 : date.getMonth(),
-            should_reset(MONTH) ? 1 : date.getDate(),
-            should_reset(DAY) ? 0 : date.getHours(),
-            should_reset(HOUR) ? 0 : date.getMinutes(),
-            should_reset(MINUTE) ? 0 : date.getSeconds(),
-            should_reset(SECOND) ? 0 : date.getMilliseconds(),
+            should_reset(YEAR) ? 0 : date.getUTCMonth(),
+            should_reset(MONTH) ? 1 : date.getUTCDate(),
+            should_reset(DAY) ? 0 : date.getUTCHours(),
+            should_reset(HOUR) ? 0 : date.getUTCMinutes(),
+            should_reset(MINUTE) ? 0 : date.getUTCSeconds(),
+            should_reset(SECOND) ? 0 : date.getUTCMilliseconds(),
         ];
 
-        return new Date(...vals);
+        return new Date(Date.UTC(...vals));
     },
 
     clone(date) {
-        return new Date(...this.get_date_values(date));
+        return new Date(Date.UTC(...this.get_date_values(date)));
     },
 
     get_date_values(date) {
         return [
-            date.getFullYear(),
-            date.getMonth(),
-            date.getDate(),
-            date.getHours(),
-            date.getMinutes(),
-            date.getSeconds(),
-            date.getMilliseconds(),
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate(),
+            date.getUTCHours(),
+            date.getUTCMinutes(),
+            date.getUTCSeconds(),
+            date.getUTCMilliseconds(),
         ];
     },
 

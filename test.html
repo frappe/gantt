@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Simple Scheduler</title>
+    <style>
+        body {
+            /* font-family: "Segoe UI","Segoe WP", Segoe, device-segoe, Tahoma, Helvetica, Arial, sans-serif; */
+            background: #ccc;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        /* custom class */
+        .scheduler .bar-milestone .bar {
+            fill: tomato;
+        }
+
+        .heading {
+            text-align: center;
+        }
+
+        /* Toggle */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 47px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #f32121;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: rgb(160, 123, 234);
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 20px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+    </style>
+    <link rel="stylesheet" href="dist/horsa-scheduler.css" />
+    <script src="dist/horsa-scheduler.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="heading">Interactive Scheduler Chart entirely made in SVG!</h2>
+
+        <div style="margin-bottom: 15px">
+            <label>Nascondi colonne fisse</label>
+            <label class="switch">
+                <input id="toggle_column" type="checkbox" onclick="hide_column_event()">
+                <span class="slider round"></span>
+            </label>
+
+            <label>Attiva sovrapposizione</label>
+            <label class="switch">
+                <input id="toggle_overlap" type="checkbox" onclick="overlap_event()">
+                <span class="slider round"></span>
+            </label>
+
+            <label>Cambia visualizzazione</label>
+            <select name="view" id="view-select" onchange="view_change_event()">
+                <option value="Day">Giorno</option>
+                <option value="Quarter Day">Quarter</option>
+                <option value="Half Day">Half</option>
+                <option value="Hour">Ore</option>
+                <option value="Week">Settimana</option>
+                <option value="Month">Mese</option>
+                <option value="Year">Anno</option>
+            </select>
+        </div>
+
+        <div class="scheduler-target"></div>
+    </div>
+    <script>
+        var tasks = [
+            {
+                start: "2024-07-31T22:15:10.000Z",
+                end: "2024-08-01T21:50:00.000Z",
+                name: "Task 0",
+                id: "Task 0",
+                description: 'PROVAsajdjk sajkdjksdjlajdnjcs jasnòvòajsdjnvjan',
+                progress: 0,
+                row: "machine_1"
+            },
+            {
+                start: "2024-03-30T00:00:00.000Z",
+                end: "2024-07-31T22:15:11.000Z",
+                name: "Task 1",
+                id: "Task 1",
+                progress: 0,
+                row: "machine_1"
+            },
+            {
+                start: "2024-04-25T20:00:00.000Z",
+                end: "2025-04-28T22:00:00.000Z",
+                name: "Task 2",
+                id: "Task 2",
+                progress: 0,
+                row: "machine_3"
+            },
+            {
+                start: "2024-07-25T22:00:00.000Z",
+                end: "2024-07-27T22:15:00.000Z",
+                name: "Task 3",
+                id: "Task 3",
+                progress: 0,
+                row: "machine_4"
+            },
+            {
+                start: "2018-10-05",
+                end: "2018-10-12",
+                // end: "2023-10-16",
+                name: "Task 4",
+                id: "Task 4",
+                progress: 0,
+                row: "machine_5"
+            },
+            {
+                start: "2018-10-06",
+                end: "2018-10-13",
+                name: "Task 5",
+                id: "Task 5",
+                progress: 0,
+                row: "machine_6"
+            },
+            {
+                start: "2018-10-07",
+                end: "2018-10-14",
+                name: "Task 6",
+                id: "Task 6",
+                progress: 0,
+                row: "machine_7"
+            },
+            {
+                start: "2018-10-08",
+                end: "2018-10-15",
+                name: "Task 7",
+                id: "Task 7",
+                progress: 90,
+                row: "machine_8"
+            },
+            {
+                start: "2018-10-09",
+                end: "2018-10-16",
+                name: "Task 8",
+                id: "Task 8",
+                progress: 100,
+                row: "machine_9"
+            },
+            {
+                start: "2018-10-10",
+                end: "2018-10-17",
+                name: "Task 9",
+                id: "Task 9",
+                progress: 10,
+                row: "machine_10"
+            },
+            {
+                start: "2018-10-11",
+                end: "2018-10-18",
+                name: "Task 10",
+                id: "Task 10",
+                progress: 20,
+                row: "machine_11"
+            },
+            {
+                start: "2018-10-12",
+                end: "2018-10-19",
+                name: "Task 11",
+                id: "Task 11",
+                progress: 30,
+                row: "machine_12"
+            },
+            {
+                start: "2018-10-13",
+                end: "2018-10-20",
+                name: "Task 12",
+                id: "Task 12",
+                progress: 40,
+                row: "machine_13"
+            },
+            {
+                start: "2018-10-14",
+                end: "2018-10-21",
+                name: "Task 13",
+                id: "Task 13",
+                progress: 50,
+                row: "machine_14"
+            },
+            {
+                start: "2018-10-15",
+                end: "2018-10-22",
+                name: "Task 14",
+                id: "Task 14",
+                progress: 60,
+                row: "machine_15"
+            },
+            {
+                start: "2018-10-16",
+                end: "2018-10-23",
+                name: "Task 15",
+                id: "Task 15",
+                progress: 70,
+                row: "machine_16"
+            },
+            {
+                start: "2018-10-17",
+                end: "2018-10-24",
+                name: "Task 16",
+                id: "Task 16",
+                progress: 80,
+                row: "machine_17"
+            },
+            {
+                start: "2018-10-18",
+                end: "2018-10-25",
+                name: "Task 17",
+                id: "Task 17",
+                progress: 90,
+                row: "machine_18"
+            },
+            {
+                start: "2018-10-19",
+                end: "2018-10-26",
+                name: "Task 18",
+                id: "Task 18",
+                progress: 100,
+                row: "machine_19"
+            },
+            {
+                start: "2018-10-20",
+                end: "2018-10-27",
+                name: "Task 19",
+                id: "Task 19",
+                progress: 10,
+                row: "machine_20"
+            },
+            {
+                start: "2018-10-21",
+                end: "2018-10-28",
+                name: "Task 20",
+                id: "Task 20",
+                progress: 20,
+                row: "machine_21"
+            },
+            {
+                start: "2018-10-22",
+                end: "2018-10-29",
+                name: "Task 21",
+                id: "Task 21",
+                progress: 30,
+                row: "machine_22"
+            },
+            {
+                start: "2018-10-23",
+                end: "2018-10-30",
+                name: "Task 22",
+                id: "Task 22",
+                progress: 40,
+                row: "machine_23"
+            },
+            {
+                start: "2018-10-24",
+                end: "2018-10-31",
+                name: "Task 23",
+                id: "Task 23",
+                progress: 50,
+                row: "machine_24"
+            },
+            {
+                start: "2018-10-25",
+                end: "2018-11-01",
+                name: "Task 24",
+                id: "Task 24",
+                progress: 60,
+                row: "machine_25"
+            },
+            {
+                start: "2018-10-26",
+                end: "2018-11-02",
+                name: "Task 25",
+                id: "Task 25",
+                progress: 70,
+                row: "machine_26"
+            },
+            {
+                start: "2018-10-27",
+                end: "2018-11-03",
+                name: "Task 26",
+                id: "Task 26",
+                progress: 80,
+                row: "machine_27"
+            },
+            {
+                start: "2018-10-28",
+                end: "2018-11-04",
+                name: "Task 27",
+                id: "Task 27",
+                progress: 90,
+                row: "machine_28"
+            },
+            {
+                start: "2018-10-29",
+                end: "2018-11-05",
+                name: "Task 28",
+                id: "Task 28",
+                progress: 100,
+                row: "machine_29"
+            },
+            {
+                start: "2018-10-30",
+                end: "2018-11-06",
+                name: "Task 29",
+                id: "Task 29",
+                progress: 10,
+                row: "machine_30"
+            },
+            {
+                start: "2018-10-31",
+                end: "2018-11-07",
+                name: "Task 30",
+                id: "Task 30",
+                progress: 20,
+                row: "machine_31"
+            },
+            {
+                start: "2018-11-01",
+                end: "2018-11-08",
+                name: "Task 31",
+                id: "Task 31",
+                progress: 30,
+                row: "machine_32"
+            },
+            {
+                start: "2018-11-02",
+                end: "2018-11-09",
+                name: "Task 32",
+                id: "Task 32",
+                progress: 40,
+                row: "machine_33"
+            },
+            {
+                start: "2018-11-03",
+                end: "2018-11-10",
+                name: "Task 33",
+                id: "Task 33",
+                progress: 50,
+                row: "machine_34"
+            },
+            {
+                start: "2018-11-04",
+                end: "2018-11-11",
+                name: "Task 34",
+                id: "Task 34",
+                progress: 60,
+                row: "machine_35"
+            },
+            {
+                start: "2018-11-05",
+                end: "2018-11-12",
+                name: "Task 35",
+                id: "Task 35",
+                progress: 70,
+                row: "machine_36"
+            },
+            {
+                start: "2018-11-06",
+                end: "2018-11-13",
+                name: "Task 36",
+                id: "Task 36",
+                progress: 80,
+                row: "machine_37"
+            },
+            {
+                start: "2018-11-07",
+                end: "2018-11-14",
+                name: "Task 37",
+                id: "Task 37",
+                progress: 90,
+                row: "machine_38"
+            },
+            {
+                start: "2018-11-08",
+                end: "2018-11-15",
+                name: "Task 38",
+                id: "Task 38",
+                progress: 100,
+                row: "machine_39"
+            },
+            {
+                start: "2018-11-09",
+                end: "2018-11-16",
+                name: "Task 39",
+                id: "Task 39",
+                progress: 10,
+                row: "machine_40"
+            },
+            {
+                start: "2018-11-10",
+                end: "2018-11-17",
+                name: "Task 40",
+                id: "Task 40",
+                progress: 20,
+                row: "machine_41"
+            },
+            {
+                start: "2018-11-11",
+                end: "2018-11-18",
+                name: "Task 41",
+                id: "Task 41",
+                progress: 30,
+                row: "machine_42"
+            },
+            {
+                start: "2018-11-12",
+                end: "2018-11-19",
+                name: "Task 42",
+                id: "Task 42",
+                progress: 40,
+                row: "machine_43"
+            },
+            {
+                start: "2018-11-13",
+                end: "2018-11-20",
+                name: "Task 43",
+                id: "Task 43",
+                progress: 50,
+                row: "machine_44"
+            },
+            {
+                start: "2018-11-14",
+                end: "2018-11-21",
+                name: "Task 44",
+                id: "Task 44",
+                progress: 60,
+                row: "machine_45"
+            },
+            {
+                start: "2018-11-15",
+                end: "2018-11-22",
+                name: "Task 45",
+                id: "Task 45",
+                progress: 70,
+                row: "machine_46"
+            },
+            {
+                start: "2018-11-16",
+                end: "2018-11-23",
+                name: "Task 46",
+                id: "Task 46",
+                progress: 80,
+                row: "machine_47"
+            },
+            {
+                start: "2018-11-17",
+                end: "2018-11-24",
+                name: "Task 47",
+                id: "Task 47",
+                progress: 90,
+                row: "machine_48"
+            },
+            {
+                start: "2018-11-18",
+                end: "2018-11-25",
+                name: "Task 48",
+                id: "Task 48",
+                progress: 100,
+                row: "machine_49"
+            },
+            {
+                start: "2018-11-19",
+                end: "2018-11-26",
+                name: "Task 49",
+                id: "Task 49",
+                progress: 10,
+                row: "machine_50"
+            },
+            {
+                start: "2018-11-20",
+                end: "2018-11-27",
+                name: "Task 50",
+                id: "Task 50",
+                progress: 20,
+                row: "machine_1"
+            },
+            {
+                start: "2018-11-21",
+                end: "2018-11-28",
+                name: "Task 51",
+                id: "Task 51",
+                progress: 30,
+                row: "machine_2"
+            },
+            {
+                start: "2018-11-22",
+                end: "2018-11-29",
+                name: "Task 52",
+                id: "Task 52",
+                progress: 40,
+                row: "machine_3"
+            },
+            {
+                start: "2018-11-23",
+                end: "2018-11-30",
+                name: "Task 53",
+                id: "Task 53",
+                progress: 50,
+                row: "machine_4"
+            },
+            {
+                start: "2018-11-24",
+                end: "2018-12-01",
+                name: "Task 54",
+                id: "Task 54",
+                progress: 60,
+                row: "machine_5"
+            },
+            {
+                start: "2018-11-25",
+                end: "2018-12-02",
+                name: "Task 55",
+                id: "Task 55",
+                progress: 70,
+                row: "machine_6"
+            },
+            {
+                start: "2018-11-26",
+                end: "2018-12-03",
+                name: "Task 56",
+                id: "Task 56",
+                progress: 80,
+                row: "machine_7"
+            },
+            {
+                start: "2018-11-27",
+                end: "2018-12-04",
+                name: "Task 57",
+                id: "Task 57",
+                progress: 90,
+                row: "machine_8"
+            },
+            {
+                start: "2018-11-28",
+                end: "2018-12-05",
+                name: "Task 58",
+                id: "Task 58",
+                progress: 100,
+                row: "machine_9"
+            },
+            {
+                start: "2018-11-29",
+                end: "2018-12-06",
+                name: "Task 59",
+                id: "Task 59",
+                progress: 10,
+                row: "machine_10"
+            },
+            {
+                start: "2018-10-04",
+                end: "2018-10-11",
+                name: "Task 60",
+                id: "Task 60",
+                progress: 20,
+                row: "machine_11"
+            },
+            {
+                start: "2018-10-05",
+                end: "2018-10-12",
+                name: "Task 61",
+                id: "Task 61",
+                progress: 30,
+                row: "machine_12"
+            },
+            {
+                start: "2018-10-06",
+                end: "2018-10-13",
+                name: "Task 62",
+                id: "Task 62",
+                progress: 40,
+                row: "machine_13"
+            },
+            {
+                start: "2018-10-07",
+                end: "2018-10-14",
+                name: "Task 63",
+                id: "Task 63",
+                progress: 50,
+                row: "machine_14"
+            },
+            {
+                start: "2018-10-08",
+                end: "2018-10-15",
+                name: "Task 64",
+                id: "Task 64",
+                progress: 60,
+                row: "machine_15"
+            },
+            {
+                start: "2018-10-09",
+                end: "2018-10-16",
+                name: "Task 65",
+                id: "Task 65",
+                progress: 70,
+                row: "machine_16"
+            },
+            {
+                start: "2018-10-10",
+                end: "2018-10-17",
+                name: "Task 66",
+                id: "Task 66",
+                progress: 80,
+                row: "machine_17"
+            },
+            {
+                start: "2018-10-11",
+                end: "2018-10-18",
+                name: "Task 67",
+                id: "Task 67",
+                progress: 90,
+                row: "machine_18"
+            },
+            {
+                start: "2018-10-12",
+                end: "2018-10-19",
+                name: "Task 68",
+                id: "Task 68",
+                progress: 100,
+                row: "machine_19"
+            },
+            {
+                start: "2018-10-13",
+                end: "2018-10-20",
+                name: "Task 69",
+                id: "Task 69",
+                progress: 10,
+                row: "machine_20"
+            },
+            {
+                start: "2018-10-14",
+                end: "2018-10-21",
+                name: "Task 70",
+                id: "Task 70",
+                progress: 20,
+                row: "machine_21"
+            },
+            {
+                start: "2018-10-15",
+                end: "2018-10-22",
+                name: "Task 71",
+                id: "Task 71",
+                progress: 30,
+                row: "machine_22"
+            },
+            {
+                start: "2018-10-16",
+                end: "2018-10-23",
+                name: "Task 72",
+                id: "Task 72",
+                progress: 40,
+                row: "machine_23"
+            },
+            {
+                start: "2018-10-17",
+                end: "2018-10-24",
+                name: "Task 73",
+                id: "Task 73",
+                progress: 50,
+                row: "machine_24"
+            },
+            {
+                start: "2018-10-18",
+                end: "2018-10-25",
+                name: "Task 74",
+                id: "Task 74",
+                progress: 60,
+                row: "machine_25"
+            },
+            {
+                start: "2018-10-19",
+                end: "2018-10-26",
+                name: "Task 75",
+                id: "Task 75",
+                progress: 70,
+                row: "machine_26"
+            },
+            {
+                start: "2018-10-20",
+                end: "2018-10-27",
+                name: "Task 76",
+                id: "Task 76",
+                progress: 80,
+                row: "machine_27"
+            },
+            {
+                start: "2018-10-21",
+                end: "2018-10-28",
+                name: "Task 77",
+                id: "Task 77",
+                progress: 90,
+                row: "machine_28"
+            },
+            {
+                start: "2018-10-22",
+                end: "2018-10-29",
+                name: "Task 78",
+                id: "Task 78",
+                progress: 100,
+                row: "machine_29"
+            },
+            {
+                start: "2018-10-23",
+                end: "2018-10-30",
+                name: "Task 79",
+                id: "Task 79",
+                progress: 10,
+                row: "machine_30"
+            },
+            {
+                start: "2018-09-24",
+                end: "2018-10-01",
+                name: "Task 80",
+                id: "Task 80",
+                progress: 20,
+                row: "machine_31"
+            },
+            {
+                start: "2018-09-25",
+                end: "2018-10-02",
+                name: "Task 81",
+                id: "Task 81",
+                progress: 30,
+                row: "machine_32"
+            },
+            {
+                start: "2018-09-26",
+                end: "2018-10-03",
+                name: "Task 82",
+                id: "Task 82",
+                progress: 40,
+                row: "machine_33"
+            },
+            {
+                start: "2018-09-27",
+                end: "2018-10-04",
+                name: "Task 83",
+                id: "Task 83",
+                progress: 50,
+                row: "machine_34"
+            },
+            {
+                start: "2018-09-28",
+                end: "2018-10-05",
+                name: "Task 84",
+                id: "Task 84",
+                progress: 60,
+                row: "machine_35"
+            },
+            {
+                start: "2018-09-29",
+                end: "2018-10-06",
+                name: "Task 85",
+                id: "Task 85",
+                progress: 70,
+                row: "machine_36"
+            },
+            {
+                start: "2018-09-30",
+                end: "2018-10-07",
+                name: "Task 86",
+                id: "Task 86",
+                progress: 80,
+                row: "machine_37"
+            },
+            {
+                start: "2018-10-01",
+                end: "2018-10-08",
+                name: "Task 87",
+                id: "Task 87",
+                progress: 90,
+                row: "machine_38"
+            },
+            {
+                start: "2018-10-02",
+                end: "2018-10-09",
+                name: "Task 88",
+                id: "Task 88",
+                progress: 100,
+                row: "machine_39"
+            },
+            {
+                start: "2018-10-03",
+                end: "2018-10-10",
+                name: "Task 89",
+                id: "Task 89",
+                progress: 10,
+                row: "machine_40"
+            },
+            {
+                start: "2018-10-04",
+                end: "2018-10-11",
+                name: "Task 90",
+                id: "Task 90",
+                progress: 20,
+                row: "machine_41"
+            },
+            {
+                start: "2018-10-05",
+                end: "2018-10-12",
+                name: "Task 91",
+                id: "Task 91",
+                progress: 30,
+                row: "machine_42"
+            },
+            {
+                start: "2018-10-06",
+                end: "2018-10-13",
+                name: "Task 92",
+                id: "Task 92",
+                progress: 40,
+                row: "machine_43"
+            },
+            {
+                start: "2018-10-07",
+                end: "2018-10-14",
+                name: "Task 93",
+                id: "Task 93",
+                progress: 50,
+                row: "machine_44"
+            },
+            {
+                start: "2018-10-08",
+                end: "2018-10-15",
+                name: "Task 94",
+                id: "Task 94",
+                progress: 60,
+                row: "machine_45"
+            },
+            {
+                start: "2018-10-09",
+                end: "2018-10-16",
+                name: "Task 95",
+                id: "Task 95",
+                progress: 70,
+                row: "machine_46"
+            },
+            {
+                start: "2018-10-10",
+                end: "2018-10-17",
+                name: "Task 96",
+                id: "Task 96",
+                progress: 80,
+                row: "machine_47"
+            },
+            {
+                start: "2018-10-11",
+                end: "2018-10-18",
+                name: "Task 97",
+                id: "Task 97",
+                progress: 90,
+                row: "machine_48"
+            },
+            {
+                start: "2018-10-12",
+                end: "2018-10-19",
+                name: "Task 98",
+                id: "Task 98",
+                progress: 100,
+                row: "machine_49"
+            },
+            {
+                start: "2018-10-13",
+                end: "2018-10-20",
+                name: "Task 99",
+                id: "Task 99",
+                progress: 10,
+                row: "machine_50"
+            },
+            {
+                start: "2019-04-01",
+                end: "2019-04-08",
+                name: "Task 100",
+                id: "Task 100",
+                progress: 0,
+                row: "machine_1"
+            },
+            {
+                start: "2019-03-27",
+                end: "2019-04-02",
+                name: "Task 101",
+                id: "Task 101",
+                progress: 0,
+                row: "machine_2"
+            }
+        ]
+        var cells = [
+            { row: 'machine_1', column: 'C3', value: 'prova', tooltip: 'test' },
+            { row: 'machine_1', column: 'C1', value: 'Carrello Elettrico 3 Ruote 15 QLI 48Vx', tooltip: 'Prova' },
+            { row: 'machine_1', column: 'C2', value: 'Description 1', tooltip: 'Description 1' },
+            { row: 'machine_2', column: 'C1', value: 'Machine 2', tooltip: 'Machine 2' },
+            { row: 'machine_2', column: 'C2', value: 'Description 2' },
+            { row: 'machine_3', column: 'C1', value: 'Machine 3' },
+            { row: 'machine_3', column: 'C2', value: 'Description 3' },
+            { row: 'machine_4', column: 'C1', value: 'Machine 4' },
+            { row: 'machine_4', column: 'C2', value: 'Description 4' },
+            { row: 'machine_5', column: 'C1', value: 'Machine 5' },
+            { row: 'machine_5', column: 'C2', value: 'Description 5' },
+            { row: 'machine_6', column: 'C1', value: 'Machine 6' },
+            { row: 'machine_6', column: 'C2', value: 'Description 6' },
+            { row: 'machine_7', column: 'C1', value: 'Machine 7' },
+            { row: 'machine_7', column: 'C2', value: 'Description 7' },
+            { row: 'machine_8', column: 'C1', value: 'Machine 8' },
+            { row: 'machine_8', column: 'C2', value: 'Description 8' },
+            { row: 'machine_9', column: 'C1', value: 'Machine 9' },
+            { row: 'machine_9', column: 'C2', value: 'Description 9' },
+            { row: 'machine_10', column: 'C1', value: 'Machine 10' },
+            { row: 'machine_10', column: 'C2', value: 'Description 10' },
+            { row: 'machine_11', column: 'C1', value: 'Machine 11' },
+            { row: 'machine_11', column: 'C2', value: 'Description 11' },
+            { row: 'machine_12', column: 'C1', value: 'Machine 12' },
+            { row: 'machine_12', column: 'C2', value: 'Description 12' },
+            { row: 'machine_13', column: 'C1', value: 'Machine 13' },
+            { row: 'machine_13', column: 'C2', value: 'Description 13' },
+            { row: 'machine_14', column: 'C1', value: 'Machine 14' },
+            { row: 'machine_14', column: 'C2', value: 'Description 14' },
+            { row: 'machine_15', column: 'C1', value: 'Machine 15' },
+            { row: 'machine_15', column: 'C2', value: 'Description 15' },
+            { row: 'machine_16', column: 'C1', value: 'Machine 16' },
+            { row: 'machine_16', column: 'C2', value: 'Description 16' },
+            { row: 'machine_17', column: 'C1', value: 'Machine 17' },
+            { row: 'machine_17', column: 'C2', value: 'Description 17' },
+            { row: 'machine_18', column: 'C1', value: 'Machine 18' },
+            { row: 'machine_18', column: 'C2', value: 'Description 18' },
+            { row: 'machine_19', column: 'C1', value: 'Machine 19' },
+            { row: 'machine_19', column: 'C2', value: 'Description 19' },
+            { row: 'machine_20', column: 'C1', value: 'Machine 20' },
+            { row: 'machine_20', column: 'C2', value: 'Description 20' },
+            { row: 'machine_21', column: 'C1', value: 'Machine 21' },
+            { row: 'machine_21', column: 'C2', value: 'Description 21' },
+            { row: 'machine_22', column: 'C1', value: 'Machine 22' },
+            { row: 'machine_22', column: 'C2', value: 'Description 22' },
+            { row: 'machine_23', column: 'C1', value: 'Machine 23' },
+            { row: 'machine_23', column: 'C2', value: 'Description 23' },
+            { row: 'machine_24', column: 'C1', value: 'Machine 24' },
+            { row: 'machine_24', column: 'C2', value: 'Description 24' },
+            { row: 'machine_25', column: 'C1', value: 'Machine 25' },
+            { row: 'machine_25', column: 'C2', value: 'Description 25' },
+            { row: 'machine_26', column: 'C1', value: 'Machine 26' },
+            { row: 'machine_26', column: 'C2', value: 'Description 26' },
+            { row: 'machine_27', column: 'C1', value: 'Machine 27' },
+            { row: 'machine_27', column: 'C2', value: 'Description 27' },
+            { row: 'machine_28', column: 'C1', value: 'Machine 28' },
+            { row: 'machine_28', column: 'C2', value: 'Description 28' },
+            { row: 'machine_29', column: 'C1', value: 'Machine 29' },
+            { row: 'machine_29', column: 'C2', value: 'Description 29' },
+            { row: 'machine_30', column: 'C1', value: 'Machine 30' },
+            { row: 'machine_30', column: 'C2', value: 'Description 30' },
+            { row: 'machine_31', column: 'C1', value: 'Machine 31' },
+            { row: 'machine_31', column: 'C2', value: 'Description 31' },
+            { row: 'machine_32', column: 'C1', value: 'Machine 32' },
+            { row: 'machine_32', column: 'C2', value: 'Description 32' },
+            { row: 'machine_33', column: 'C1', value: 'Machine 33' },
+            { row: 'machine_33', column: 'C2', value: 'Description 33' },
+            { row: 'machine_34', column: 'C1', value: 'Machine 34' },
+            { row: 'machine_34', column: 'C2', value: 'Description 34' },
+            { row: 'machine_35', column: 'C1', value: 'Machine 35' },
+            { row: 'machine_35', column: 'C2', value: 'Description 35' },
+            { row: 'machine_36', column: 'C1', value: 'Machine 36' },
+            { row: 'machine_36', column: 'C2', value: 'Description 36' },
+            { row: 'machine_37', column: 'C1', value: 'Machine 37' },
+            { row: 'machine_37', column: 'C2', value: 'Description 37' },
+            { row: 'machine_38', column: 'C1', value: 'Machine 38' },
+            { row: 'machine_38', column: 'C2', value: 'Description 38' },
+            { row: 'machine_39', column: 'C1', value: 'Machine 39' },
+            { row: 'machine_39', column: 'C2', value: 'Description 39' },
+            { row: 'machine_40', column: 'C1', value: 'Machine 40' },
+            { row: 'machine_40', column: 'C2', value: 'Description 40' },
+            { row: 'machine_41', column: 'C1', value: 'Machine 41' },
+            { row: 'machine_41', column: 'C2', value: 'Description 41' },
+            { row: 'machine_42', column: 'C1', value: 'Machine 42' },
+            { row: 'machine_42', column: 'C2', value: 'Description 42' },
+            { row: 'machine_43', column: 'C1', value: 'Machine 43' },
+            { row: 'machine_43', column: 'C2', value: 'Description 43' },
+            { row: 'machine_44', column: 'C1', value: 'Machine 44' },
+            { row: 'machine_44', column: 'C2', value: 'Description 44' },
+            { row: 'machine_45', column: 'C1', value: 'Machine 45' },
+            { row: 'machine_45', column: 'C2', value: 'Description 45' },
+            { row: 'machine_46', column: 'C1', value: 'Machine 46' },
+            { row: 'machine_46', column: 'C2', value: 'Description 46' },
+            { row: 'machine_47', column: 'C1', value: 'Machine 47' },
+            { row: 'machine_47', column: 'C2', value: 'Description 47' },
+            { row: 'machine_48', column: 'C1', value: 'Machine 48' },
+            { row: 'machine_48', column: 'C2', value: 'Description 48' },
+            { row: 'machine_49', column: 'C1', value: 'Machine 49' },
+            { row: 'machine_49', column: 'C2', value: 'Description 49' },
+            { row: 'machine_50', column: 'C1', value: 'Machine 50' },
+            { row: 'machine_50', column: 'C2', value: 'Description 50' }
+        ]
+        var rows = [
+            "machine_1",
+            "machine_2",
+            "machine_3",
+            "machine_4",
+            "machine_5",
+            "machine_6",
+            "machine_7",
+            "machine_8",
+            "machine_9",
+            "machine_10",
+            "machine_11",
+            "machine_12",
+            "machine_13",
+            "machine_14",
+            "machine_15",
+            "machine_16",
+            "machine_17",
+            "machine_18",
+            "machine_19",
+            "machine_20",
+            "machine_21",
+            "machine_22",
+            "machine_23",
+            "machine_24",
+            "machine_25",
+            "machine_26",
+            "machine_27",
+            "machine_28",
+            "machine_29",
+            "machine_30",
+            "machine_31",
+            "machine_32",
+            "machine_33",
+            "machine_34",
+            "machine_35",
+            "machine_36",
+            "machine_37",
+            "machine_38",
+            "machine_39",
+            "machine_40",
+            "machine_41",
+            "machine_42",
+            "machine_43",
+            "machine_44",
+            "machine_45",
+            "machine_46",
+            "machine_47",
+            "machine_48",
+            "machine_49",
+            "machine_50"
+        ]
+        var scheduler_chart = new Scheduler(".scheduler-target", tasks, cells, {
+            on_task_dblclick: task_id => {
+                console.log('on_task_dblclick', task_id);
+            },
+            on_grid_dblclick: (row_id, datetime) => {
+                console.log('on_grid_dblclick', row_id, datetime);
+            },
+            on_cell_dblclick: (row_id, col_id) => {
+                console.log('on_cell_dblclick', row_id, col_id);
+            },
+            on_position_change: (task, row, start, end) => {
+                console.log('on_position_change', task);
+                console.log(start.toUTCString());
+            },
+            on_progress_change: (task, progress) => {
+                console.log('on_progress_change', task, progress);
+            },
+            on_view_change: (mode) => {
+                console.log('on_view_change', mode);
+                document.getElementById('view-select').value = mode;
+            },
+            on_row_select: (row_id) => {
+                console.log('on_row_select', row_id);
+            },
+            view_mode: 'Day',
+            language: 'it',
+            resize_left: true,
+            resize_right: true,
+            drag_drop_x: true,
+            drag_drop_y: true,
+            overlap: false,
+            moving_scroll_bar: false,
+            date_start: '2024-04-05T00:00:00.000Z',
+            date_end: null,
+            rows,
+            fixed_columns: [{ id: 'C1', header: 'name', width: 0 }, { id: 'C2', header: 'description', width: 0 }
+            , { id: 'C3', header: 'prova', width: 100 }]
+        });
+        console.log(scheduler_chart);
+
+        function hide_column_event() {
+            const toggle = document.getElementById('toggle_column');
+
+            if (toggle.checked) {
+                this.scheduler_chart.options.hide_fixed_columns = true;
+            } else {
+                this.scheduler_chart.options.hide_fixed_columns = false;
+            }
+            this.scheduler_chart.refresh();
+        }
+
+        function overlap_event() {
+            const toggle = document.getElementById('toggle_overlap');
+
+            if (toggle.checked) {
+                this.scheduler_chart.options.overlap = true;
+            } else {
+                this.scheduler_chart.options.overlap = false;
+            }
+            this.scheduler_chart.refresh();
+        }
+
+        function view_change_event() {
+            const select = document.getElementById('view-select');
+            this.scheduler_chart.options.view_mode = select.value;
+            this.scheduler_chart.refresh();
+        }
+    </script>
+</body>
+
+</html>
