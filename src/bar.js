@@ -28,9 +28,14 @@ export default class Bar {
         this.x = this.compute_x();
         this.y = this.compute_y();
         this.corner_radius = this.scheduler.options.bar_corner_radius;
-        this.duration =
-            date_utils.diff(task_end, this.task._start, 'hour') /
-            this.scheduler.options.step;
+        if (this.scheduler.view_is('Hour')) {
+            this.duration =
+                date_utils.diff(task_end, this.task._start, 'minute') /
+                this.scheduler.options.step;
+        } else
+            this.duration =
+                date_utils.diff(task_end, this.task._start, 'hour') /
+                this.scheduler.options.step;
         if (date_utils.diff(task_end, this.task._start, 'hour') < 1) {
             this.duration = 0.05;
             this.task.progress = 0;
@@ -224,7 +229,7 @@ export default class Bar {
             this.scheduler.options.language
         );
         const end_date = date_utils.format(
-            date_utils.add(this.task._end, -1, 'second'),
+            this.task._end,
             'D MMM YYYY HH:mm',
             this.scheduler.options.language
         );
@@ -272,16 +277,16 @@ export default class Bar {
         this.update_arrow_position();
     }
 
-    position_changed() {
+    position_changed(calc_start, calc_end) {
         let changed = false;
         let { new_start_date, new_end_date } = this.compute_start_end_date();
-        if (Number(this.task._start) !== Number(new_start_date)) {
+        if (calc_start) {
             changed = true;
             this.task._start = new_start_date;
             this.task.start = new_start_date;
         }
 
-        if (Number(this.task._end) !== Number(new_end_date)) {
+        if (calc_end) {
             changed = true;
             this.task._end = new_end_date;
             this.task.end = new_end_date;
@@ -319,17 +324,33 @@ export default class Bar {
     compute_start_end_date() {
         const bar = this.$bar;
         const x_in_units = bar.getX() / this.scheduler.options.column_width;
-        const new_start_date = date_utils.add(
-            this.scheduler.scheduler_start,
-            x_in_units * this.scheduler.options.step,
-            'hour'
-        );
+        let new_start_date;
+        if (this.scheduler.view_is('Hour'))
+            new_start_date = date_utils.add(
+                this.scheduler.scheduler_start,
+                x_in_units * this.scheduler.options.step,
+                'minute'
+            );
+        else
+            new_start_date = date_utils.add(
+                this.scheduler.scheduler_start,
+                x_in_units * this.scheduler.options.step,
+                'hour'
+            );
         const width_in_units = bar.getWidth() / this.scheduler.options.column_width;
-        const new_end_date = date_utils.add(
-            new_start_date,
-            width_in_units * this.scheduler.options.step,
-            'hour'
-        );
+        let new_end_date;
+        if (this.scheduler.view_is('Hour'))
+            new_end_date = date_utils.add(
+                new_start_date,
+                width_in_units * this.scheduler.options.step,
+                'minute'
+            );
+        else
+            new_end_date = date_utils.add(
+                new_start_date,
+                width_in_units * this.scheduler.options.step,
+                'hour'
+            );
 
         return { new_start_date, new_end_date };
     }
@@ -357,10 +378,15 @@ export default class Bar {
 
     compute_x() {
         const { step, column_width } = this.scheduler.options;
-        let task_start = this.task._start;
+        const task_start = this.task._start;
         const scheduler_start = this.scheduler.scheduler_start;
 
-        const diff = date_utils.diff(task_start, scheduler_start, 'hour');
+        let diff;
+        if (this.scheduler.view_is('Hour'))
+            diff = date_utils.diff(task_start, scheduler_start, 'minute');
+        else
+            diff = date_utils.diff(task_start, scheduler_start, 'hour');
+
         let x = Math.floor((diff / step) * column_width * 1000) / 1000;
 
         return x;

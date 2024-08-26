@@ -292,7 +292,7 @@ export default class Scheduler {
         switch (this.options.view_mode) {
             case VIEW_MODE.HOUR:
                 this.options.step = 60;
-                this.options.column_width = 60;    
+                this.options.column_width = 60;
                 break;
             case VIEW_MODE.QUARTER_DAY:
                 this.options.step = 24 / 4;
@@ -304,7 +304,7 @@ export default class Scheduler {
                 break;
             case VIEW_MODE.DAY:
                 this.options.step = 24;
-                this.options.column_width = 24 * 2;   
+                this.options.column_width = 24 * 2;
                 break;
             case VIEW_MODE.WEEK:
                 this.options.step = 24 * 7;
@@ -341,8 +341,8 @@ export default class Scheduler {
                 }
             }
 
-        this.scheduler_start.setUTCHours(0,0,0,0);
-        this.scheduler_end.setUTCHours(0,0,0,0);
+        this.scheduler_start.setUTCHours(0, 0, 0, 0);
+        this.scheduler_end.setUTCHours(0, 0, 0, 0);
 
         // add date padding on both sides
         if (!this.options.date_start) {
@@ -395,14 +395,7 @@ export default class Scheduler {
                     cur_date = date_utils.add(cur_date, 7, 'day');
                     break;
                 case VIEW_MODE.HOUR:
-                    let next_date = date_utils.add(cur_date, 1, 'hour');
-                    // Controllo per l'ora legale
-                    // if (next_date.getHours() === 3 && cur_date.getHours() === 1) {
-                    //     let curDateString = date_utils.to_string(cur_date, true);
-                    //     let missing_hour_string = curDateString.replace(/ \d{2}:/, ' 02:');
-                    //     this.dates.push(missing_hour_string);
-                    // }
-                    cur_date = next_date;
+                    cur_date = date_utils.add(cur_date, 1, 'hour');
                     break;
                 default:
                     cur_date = date_utils.add(cur_date, this.options.step, 'hour');
@@ -759,13 +752,19 @@ export default class Scheduler {
 
     make_grid_highlights() {
         const today = date_utils.today();
-        let x = date_utils.diff(today, this.dates[0], 'hour') /
-            this.options.step * this.options.column_width;
+        let x = Math.round(date_utils.diff(today, this.dates[0], 'hour') /
+            this.options.step) * this.options.column_width;
         let width = this.options.column_width;
 
         switch (this.options.view_mode) {
             case VIEW_MODE.HOUR:
-                width = this.options.column_width * 24;
+                x = date_utils.diff(today, this.dates[0], 'minute') /
+                    this.options.step * this.options.column_width;
+                if (today.getTimezoneOffset() === -60)
+                    x += this.options.column_width;
+                else
+                    x += (this.options.column_width * 2);
+                width *= 24;
                 break;
             case VIEW_MODE.HALF_DAY:
                 width *= 2;
@@ -777,8 +776,8 @@ export default class Scheduler {
                 const day_of_week = today.getDay(); // 0 = Domenica, 1 = Lunedì, ..., 6 = Sabato
                 const start_of_week = new Date(today);
                 start_of_week.setDate(today.getDate() - (day_of_week === 0 ? 6 : day_of_week - 1)); // Sposta indietro al lunedì
-                x = date_utils.diff(start_of_week, this.dates[0], 'hour') /
-                    this.options.step * this.options.column_width;
+                x = Math.round(date_utils.diff(start_of_week, this.dates[0], 'hour') /
+                    this.options.step) * this.options.column_width;
                 break;
             case VIEW_MODE.MONTH:
                 const start_of_month = date_utils.start_of(today, 'month');
@@ -825,42 +824,47 @@ export default class Scheduler {
                 append_to: this.layers.date,
             });
 
-            if (typeof d.date !== 'string') {
-                if ((d.date.getDay() === 6 || d.date.getDay() === 0) &&
-                    (this.options.view_mode === VIEW_MODE.DAY ||
-                        this.options.view_mode === VIEW_MODE.HALF_DAY ||
-                        this.options.view_mode === VIEW_MODE.QUARTER_DAY ||
-                        this.options.view_mode === VIEW_MODE.HOUR)) {
+            if ((d.date.getDay() === 6 || d.date.getDay() === 0) &&
+                (this.options.view_mode === VIEW_MODE.DAY ||
+                    this.options.view_mode === VIEW_MODE.HALF_DAY ||
+                    this.options.view_mode === VIEW_MODE.QUARTER_DAY ||
+                    this.options.view_mode === VIEW_MODE.HOUR)) {
 
-                    let highlight_x = d.lower_x;
-                    const highlight_y = d.lower_y + (this.options.padding / 2);
-                    let highlight_width = this.options.column_width;
-                    const highlight_height = this.rows[this.rows.length - 1].y +
-                        this.rows[this.rows.length - 1].height -
-                        this.options.header_height -
-                        (this.options.padding / 2);
+                let highlight_x;
+                const highlight_y = d.lower_y + (this.options.padding / 2);
+                let highlight_width = this.options.column_width;
+                const highlight_height = this.rows[this.rows.length - 1].y +
+                    this.rows[this.rows.length - 1].height -
+                    this.options.header_height -
+                    (this.options.padding / 2);
 
-                    if (this.view_is(VIEW_MODE.DAY))
-                        highlight_x = d.lower_x - (this.options.column_width / 2);
+                if (this.view_is(VIEW_MODE.DAY))
+                    highlight_x = d.lower_x - (this.options.column_width / 2);
+                else if (this.view_is(VIEW_MODE.HOUR))
+                    if (d.date.getTimezoneOffset() === -60)
+                        highlight_x = d.lower_x + this.options.column_width;
+                    else
+                        highlight_x = d.lower_x + (this.options.column_width * 2);
+                else
+                    highlight_x = d.lower_x;
 
-                    createSVG('rect', {
-                        x: highlight_x,
-                        y: highlight_y,
-                        width: highlight_width,
-                        height: highlight_height,
-                        class: 'weekend-highlight',
-                        append_to: this.layers.grid,
-                    });
-                }
-                if (d.upper_text) {
-                    createSVG('text', {
-                        x: d.upper_x,
-                        y: d.upper_y,
-                        innerHTML: d.upper_text,
-                        class: 'upper-text bold',
-                        append_to: this.layers.date,
-                    });
-                }
+                createSVG('rect', {
+                    x: highlight_x,
+                    y: highlight_y,
+                    width: highlight_width,
+                    height: highlight_height,
+                    class: 'weekend-highlight',
+                    append_to: this.layers.grid,
+                });
+            }
+            if (d.upper_text) {
+                createSVG('text', {
+                    x: d.upper_x,
+                    y: d.upper_y,
+                    innerHTML: d.upper_text,
+                    class: 'upper-text bold',
+                    append_to: this.layers.date,
+                });
             }
             return d;
         });
@@ -894,30 +898,20 @@ export default class Scheduler {
                 Day_upper: (column_width * 30) / 2
             };
         } else if (this.view_is(VIEW_MODE.HOUR)) {
-            if (typeof last_date === 'string')
-                last_date = new Date(last_date);
-            if (typeof date === 'string') {
-                date_text = {
-                    Hour_lower:
-                        '02',
-                    Hour_upper:
-                        ''
-                };
-            } else
-                date_text = {
-                    Hour_lower: date_utils.format(
-                        date,
-                        'HH',
-                        this.options.language
-                    ),
-                    Hour_upper:
-                        date.getDate() !== last_date.getDate()
-                            ? date_utils.format(date, 'ddd D MMM YYYY', this.options.language)
-                            : '',
-                };
+            date_text = {
+                Hour_lower: date_utils.format(
+                    date,
+                    'HH',
+                    this.options.language
+                ),
+                Hour_upper:
+                    date.getDate() !== last_date.getDate()
+                        ? date_utils.format(date, 'ddd D MMM YYYY', this.options.language)
+                        : '',
+            };
             x_pos = {
                 Hour_lower: 0,
-                Hour_upper: column_width * 24 / 2
+                Hour_upper: column_width * 24 / 2 - 1440
             };
         } else if (this.view_is(VIEW_MODE.WEEK)) {
             date_text = {
@@ -1163,10 +1157,17 @@ export default class Scheduler {
                 data_id = e.target.getAttribute('data-id');
 
             const x_in_units = e.offsetX / this.options.column_width;
-            const datetime = date_utils.add(
-                this.scheduler_start,
-                x_in_units * this.options.step,
-                'hour');
+            let datetime;
+            if (this.view_is('Hour'))
+                datetime = date_utils.add(
+                    this.scheduler_start,
+                    x_in_units * this.options.step,
+                    'minute');
+            else
+                datetime = date_utils.add(
+                    this.scheduler_start,
+                    x_in_units * this.options.step,
+                    'hour');
 
             this.trigger_event('grid_dblclick', [data_id, datetime]);
         });
@@ -1517,7 +1518,7 @@ export default class Scheduler {
                     const start_row_index = bar.task._index;
 
                     if ($bar.finaldx || $bar.finaldy) {
-                        bar.position_changed();
+                        bar.position_changed((is_dragging || is_resizing_left), (is_dragging || is_resizing_right));
                         bar.set_action_completed();
                         if (this.options.overlap)
                             this.overlap(start_row_index, bar.task._index);
@@ -1894,7 +1895,7 @@ export default class Scheduler {
                 break;
             case VIEW_MODE.HOUR:
                 divider = 60;
-                break;    
+                break;
             default:
                 divider = 1
                 break;
