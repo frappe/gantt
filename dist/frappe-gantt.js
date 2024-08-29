@@ -2014,7 +2014,7 @@ var Gantt = (function () {
         date,
         this.gantt_start,
         "hour",
-      ) + 24;
+      );
 
       const scroll_pos =
         (hours_before_first_task / this.options.step) *

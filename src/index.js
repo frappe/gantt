@@ -865,13 +865,13 @@ export default class Gantt {
       date,
       this.gantt_start,
       "hour",
-    ) + 24;
+    );
 
     const scroll_pos =
       (hours_before_first_task / this.options.step) *
       this.options.column_width -
       this.options.column_width;
-    parent_element.scrollTo({ left: scroll_pos, behavior: 'smooth' })
+    parent_element.scrollTo({ left: scroll_pos, behavior: 'smooth' });
   }
 
   scroll_today() {
