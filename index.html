@@ -66,51 +66,73 @@
     <div id="gantt"></div>
 </div>
 <script>
+    function getDate(number, scale) {
+        let today = new Date();
+        switch (scale) {
+            case 'minute':
+                today.setMinutes(today.getMinutes() + number);
+                break;
+            case 'hour':
+                today.setHours(today.getHours() + number);
+                break;
+            case 'day':
+                today.setDate(today.getDate() + number);
+                break;
+            case 'month':
+                today.setMonth(today.getMonth() + number);
+                break;
+            case 'year':
+                today.setFullYear(today.getFullYear() + number);
+                break;
+        }
+        return today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate() + ' ' + today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+    }
+
     let tasks = [
         {
             id: "Task 0",
-            start: '2024-07-01 05:00:00',
-            end: '2024-07-01 10:00:00',
+            start: getDate(),
+            end: getDate(1, 'hour'),
             name: 'Redesign website',
             progress: 30
         },
         {
             id: "Task 1",
-            start: '2024-07-06',
+            start: getDate(),
             // Utilizes duration
-            duration: '6d',
+            duration: '4d',
             name: 'Write new content',
             progress: 50,
             important: true
         },
         {
             id: "Task 2",
-            start: '2024-07-04 00:00:00',
-            end: '2024-07-08 05:00:00',
+            start: getDate(1, 'day'),
+            end: getDate(2, 'day'),
             name: 'Apply new styles',
             progress: 80,
             dependencies: 'Task 1'
         },
         {
             id: "Task 3",
-            start: '2024-07-08 12:00:00',
-            end: '2024-07-09 18:00:00',
+            start: getDate(2, 'day'),
+            end: getDate(3, 'day'),
             name: 'Review',
             progress: 20,
             dependencies: 'Task 2'
         },
         {
             id: "Task 4",
-            start: '2024-07-08',
-            end: '2024-07-10',
+            start: getDate(3, 'day'),
+            end: getDate(4, 'day'),
             name: 'Deploy',
             progress: 10,
             dependencies: 'Task 2'
         },
         {
             id: "Task 5",
-            start: '2024-07-12',
-            end: '2024-07-13',
+            start: getDate(4, 'day'),
+            end: getDate(5, 'day'),
             name: 'Go Live!',
             progress: 0,
             dependencies: 'Task 2',

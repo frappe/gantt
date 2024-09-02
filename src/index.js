@@ -875,7 +875,10 @@ export default class Gantt {
   }
 
   scroll_today() {
-    this.set_scroll_position(new Date())
+    let today = new Date();
+    today.setHours(today.getHours() - 40);
+    console.log(today.toISOString());
+    this.set_scroll_position(today)
   }
 
   bind_grid_click() {
