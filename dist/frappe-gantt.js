@@ -2019,15 +2019,12 @@ var Gantt = (function () {
       const scroll_pos =
         (hours_before_first_task / this.options.step) *
         this.options.column_width -
-        this.options.column_width;
+        this.options.column_width * 4;
       parent_element.scrollTo({ left: scroll_pos, behavior: 'smooth' });
     }
 
     scroll_today() {
-      let today = new Date();
-      today.setHours(today.getHours() - 40);
-      console.log(today.toISOString());
-      this.set_scroll_position(today);
+      this.set_scroll_position(new Date());
     }
 
     bind_grid_click() {
