@@ -512,7 +512,7 @@ var Gantt = (function () {
         this.$expected_bar_progress,
         "width",
         0,
-        this.expected_progress_width,
+        this.expected_progress_width
       );
     }
 
@@ -864,14 +864,14 @@ var Gantt = (function () {
       const task_start = this.task._start;
       const gantt_start = this.gantt.gantt_start;
 
-      const diff = date_utils.diff(task_start, gantt_start, "hour");
-      let x = (diff / step) * column_width;
+      const diff = date_utils.diff(task_start, gantt_start, "minutes");
+      let x = (diff / 60 / step) * column_width;
 
       if (this.gantt.view_is("Month")) {
         const diff = date_utils.diff(task_start, gantt_start, "day");
         x = (diff * column_width) / 30;
       }
-      this.x = x;
+      this.x = Math.floor(x);
     }
 
     compute_y() {
