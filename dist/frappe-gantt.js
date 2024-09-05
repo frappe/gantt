@@ -864,7 +864,7 @@ var Gantt = (function () {
       const task_start = this.task._start;
       const gantt_start = this.gantt.gantt_start;
 
-      const diff = date_utils.diff(task_start, gantt_start, "minutes");
+      const diff = date_utils.diff(task_start, gantt_start, "minute");
       let x = (diff / 60 / step) * column_width;
 
       if (this.gantt.view_is("Month")) {
@@ -883,7 +883,7 @@ var Gantt = (function () {
 
     compute_duration() {
       this.duration =
-        date_utils.diff(this.task._end, this.task._start, "hour") /
+        date_utils.diff(this.task._end, this.task._start, "minute") / 60 /
         this.gantt.options.step;
     }
 
