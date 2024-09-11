@@ -434,8 +434,6 @@ export default class Gantt {
     }
 
     make_grid_header() {
-        const curHeader = document.querySelector('.grid-header');
-
         let $header = document.createElement('div');
         $header.style.height = this.options.header_height + 10 + 'px';
         $header.style.width =
@@ -497,19 +495,41 @@ export default class Gantt {
             $side_header.appendChild($today_button);
         }
 
+
         this.$header.appendChild($side_header);
-        const { left, y } = this.$header.getBoundingClientRect();
-        const width = Math.min(
-            this.$header.clientWidth,
-            this.$container.clientWidth,
-        );
-        $side_header.style.left =
-            left +
-            this.$container.scrollLeft +
-            width -
-            $side_header.clientWidth +
-            'px';
-        $side_header.style.top = y + 10 + 'px';
+
+
+        function updateButtonPosition() {
+            const containerRect = this.$container.getBoundingClientRect();
+            const buttonRect = $side_header.getBoundingClientRect();
+            const { left, y } = this.$header.getBoundingClientRect();
+
+            // Check if the button is scrolled out of the container vertically
+            if (buttonRect.top < containerRect.top || buttonRect.bottom > containerRect.bottom) {
+                $side_header.style.position = 'absolute';
+                $side_header.style.top = `${container.scrollTop + buttonRect.top}px`;
+            } else {
+                $side_header.style.position = 'fixed';
+                $side_header.style.top = y + 10 + 'px';
+            }
+            const width = Math.min(
+                this.$header.clientWidth,
+                this.$container.clientWidth,
+            );
+
+            $side_header.style.left =
+                left +
+                this.$container.scrollLeft +
+                width -
+                $side_header.clientWidth +
+                'px';
+            // Update the left value on page resize
+            button.style.left = `${containerRect.left + 20}px`;
+
+        }
+
+        window.addEventListener('scroll', updateButtonPosition);
+        window.addEventListener('resize', updateButtonPosition);
     }
 
     make_grid_ticks() {

@@ -24,7 +24,7 @@
             }
         </style>
         <link rel="stylesheet" href="dist/style.css" />
-        <!-- <script type="module" src="dist/frappe-gantt.js"></script> -->
+        <script src="dist/frappe-gantt.umd.cjs"></script>
     </head>
     <body>
         <div class="container">
@@ -34,7 +34,8 @@
             <div class="gantt-target"></div>
         </div>
         <script type="module">
-            import Gantt from "/dist/frappe-gantt.js";
+            // import Gantt from "./dist/frappe-gantt.js";
+
             let tasks = [
                 {
                     start: '2024-04-01',
@@ -95,13 +96,13 @@
             ];
 
             // Uncomment to test fixed header
-            tasks = [
-                ...tasks,
-                ...Array.from({ length: tasks.length * 3 }, (_, i) => ({
-                    ...tasks[i % 3],
-                    id: i,
-                })),
-            ];
+            // tasks = [
+            //     ...tasks,
+            //     ...Array.from({ length: tasks.length * 3 }, (_, i) => ({
+            //         ...tasks[i % 3],
+            //         id: i,
+            //     })),
+            // ];
 
             let gantt_chart = new Gantt('.gantt-target', tasks, {
                 on_click: (task) => {
@@ -134,7 +135,6 @@
                 // lower_text: (date) => date.getDay(),
                 // upper_text: (date, view_mode, def) => def,
             });
-            console.log(gantt_chart);
         </script>
     </body>
 </html>
