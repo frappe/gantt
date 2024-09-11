@@ -358,6 +358,7 @@ export default class Gantt {
         this.map_arrows_on_bars();
         this.set_width();
         this.set_scroll_position(this.options.scroll_to);
+        this.update_button_position()
     }
 
     setup_layers() {
@@ -493,43 +494,45 @@ export default class Gantt {
             $today_button.textContent = 'Today';
             $today_button.onclick = this.scroll_today.bind(this);
             $side_header.appendChild($today_button);
+            this.$today_button = $today_button
         }
 
 
         this.$header.appendChild($side_header);
+        this.$side_header = $side_header
 
+        window.addEventListener('scroll', this.update_button_position.bind(this));
+        window.addEventListener('resize', this.update_button_position.bind(this));
+    }
 
-        function updateButtonPosition() {
-            const containerRect = this.$container.getBoundingClientRect();
-            const buttonRect = $side_header.getBoundingClientRect();
-            const { left, y } = this.$header.getBoundingClientRect();
+    update_button_position() {
+        const containerRect = this.$container.getBoundingClientRect();
+        const buttonRect = this.$side_header.getBoundingClientRect();
+        const { left, y } = this.$header.getBoundingClientRect();
 
-            // Check if the button is scrolled out of the container vertically
-            if (buttonRect.top < containerRect.top || buttonRect.bottom > containerRect.bottom) {
-                $side_header.style.position = 'absolute';
-                $side_header.style.top = `${container.scrollTop + buttonRect.top}px`;
-            } else {
-                $side_header.style.position = 'fixed';
-                $side_header.style.top = y + 10 + 'px';
-            }
-            const width = Math.min(
-                this.$header.clientWidth,
-                this.$container.clientWidth,
-            );
-
-            $side_header.style.left =
-                left +
-                this.$container.scrollLeft +
-                width -
-                $side_header.clientWidth +
-                'px';
-            // Update the left value on page resize
-            button.style.left = `${containerRect.left + 20}px`;
-
+        // Check if the button is scrolled out of the container vertically
+        console.log('heyy')
+        if (buttonRect.top < containerRect.top || buttonRect.bottom > containerRect.bottom) {
+            this.$side_header.style.position = 'absolute';
+            this.$side_header.style.top = `${containerRect.scrollTop + buttonRect.top}px`;
+        } else {
+            this.$side_header.style.position = 'fixed';
+            this.$side_header.style.top = y + 10 + 'px';
         }
+        const width = Math.min(
+            this.$header.clientWidth,
+            this.$container.clientWidth,
+        );
 
-        window.addEventListener('scroll', updateButtonPosition);
-        window.addEventListener('resize', updateButtonPosition);
+        this.$side_header.style.left =
+            left +
+            this.$container.scrollLeft +
+            width -
+            this.$side_header.clientWidth +
+            'px';
+            
+        // Update the left value on page resize
+        this.$today_button.style.left = `${containerRect.left + 20}px`;
     }
 
     make_grid_ticks() {
