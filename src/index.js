@@ -867,7 +867,7 @@ export default class Gantt {
             formatted_date: date_utils.format(date).replaceAll(' ', '_'),
             column_width,
             base_pos_x: base_pos.x,
-            upper_text: this.options.lower_text
+            upper_text: this.options.upper_text
                 ? this.options.upper_text(
                       date,
                       this.options.view_mode,

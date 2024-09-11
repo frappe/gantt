@@ -6,20 +6,6 @@ const MINUTE = 'minute';
 const SECOND = 'second';
 const MILLISECOND = 'millisecond';
 
-const SHORTENED = {
-    January: 'Jan',
-    February: 'Feb',
-    March: 'Mar',
-    April: 'Apr',
-    May: 'May',
-    June: 'Jun',
-    July: 'Jul',
-    August: 'Aug',
-    September: 'Sep',
-    October: 'Oct',
-    November: 'Nov',
-    December: 'Dec',
-};
 
 export default {
     parse_duration(duration) {
@@ -97,6 +83,9 @@ export default {
         const dateTimeFormat = new Intl.DateTimeFormat(lang, {
             month: 'long',
         });
+        const dateTimeFormatShort = new Intl.DateTimeFormat(lang, {
+            month: "short",
+        });
         const month_name = dateTimeFormat.format(date);
         const month_name_capitalized =
             month_name.charAt(0).toUpperCase() + month_name.slice(1);
@@ -112,7 +101,7 @@ export default {
             SSS: values[6],
             D: values[2],
             MMMM: month_name_capitalized,
-            MMM: SHORTENED[month_name_capitalized],
+            MMM: dateTimeFormatShort.format(date),
         };
 
         let str = format_string;
