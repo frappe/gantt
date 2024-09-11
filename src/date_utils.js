@@ -25,7 +25,7 @@ export default {
     parse_duration(duration) {
         const regex = /([0-9]+)(y|m|d|h|min|s|ms)/gm;
         const matches = regex.exec(duration);
-        console.log(matches)
+        console.log(matches);
         if (matches !== null) {
             if (matches[2] === 'y') {
                 return { duration: parseInt(matches[1]), scale: `year` };

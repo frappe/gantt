@@ -77,7 +77,7 @@ export default class Gantt {
         } else {
             throw new TypeError(
                 'Frappe Gantt only supports usage of a string CSS selector,' +
-                " HTML DOM element or SVG DOM element for the 'element' parameter",
+                    " HTML DOM element or SVG DOM element for the 'element' parameter",
             );
         }
 
@@ -143,7 +143,7 @@ export default class Gantt {
             if (diff < 0) {
                 throw Error(
                     "start of task can't be after end of task: in task #, " +
-                    (i + 1),
+                        (i + 1),
                 );
             }
             // make task invalid if duration too large
@@ -358,7 +358,7 @@ export default class Gantt {
         this.map_arrows_on_bars();
         this.set_width();
         this.set_scroll_position(this.options.scroll_to);
-        this.update_button_position()
+        this.update_button_position();
     }
 
     setup_layers() {
@@ -390,7 +390,7 @@ export default class Gantt {
             this.options.header_height +
             this.options.padding +
             (this.options.bar_height + this.options.padding) *
-            this.tasks.length;
+                this.tasks.length;
 
         createSVG('rect', {
             x: 0,
@@ -494,15 +494,20 @@ export default class Gantt {
             $today_button.textContent = 'Today';
             $today_button.onclick = this.scroll_today.bind(this);
             $side_header.appendChild($today_button);
-            this.$today_button = $today_button
+            this.$today_button = $today_button;
         }
 
-
         this.$header.appendChild($side_header);
-        this.$side_header = $side_header
+        this.$side_header = $side_header;
 
-        window.addEventListener('scroll', this.update_button_position.bind(this));
-        window.addEventListener('resize', this.update_button_position.bind(this));
+        window.addEventListener(
+            'scroll',
+            this.update_button_position.bind(this),
+        );
+        window.addEventListener(
+            'resize',
+            this.update_button_position.bind(this),
+        );
     }
 
     update_button_position() {
@@ -511,8 +516,11 @@ export default class Gantt {
         const { left, y } = this.$header.getBoundingClientRect();
 
         // Check if the button is scrolled out of the container vertically
-        console.log('heyy')
-        if (buttonRect.top < containerRect.top || buttonRect.bottom > containerRect.bottom) {
+        console.log('heyy');
+        if (
+            buttonRect.top < containerRect.top ||
+            buttonRect.bottom > containerRect.bottom
+        ) {
             this.$side_header.style.position = 'absolute';
             this.$side_header.style.top = `${containerRect.scrollTop + buttonRect.top}px`;
         } else {
@@ -530,7 +538,7 @@ export default class Gantt {
             width -
             this.$side_header.clientWidth +
             'px';
-            
+
         // Update the left value on page resize
         this.$today_button.style.left = `${containerRect.left + 20}px`;
     }
@@ -643,7 +651,7 @@ export default class Gantt {
                     x +
                     (date_utils.diff(today, this.gantt_start, 'hour') /
                         this.options.step) *
-                    this.options.column_width,
+                        this.options.column_width,
                 date: today,
             };
         }
@@ -672,7 +680,7 @@ export default class Gantt {
     }
 
     make_grid_highlights() {
-        if (this.options.highlight_weekend) this.highlightWeekends()
+        if (this.options.highlight_weekend) this.highlightWeekends();
         // highlight today's | week's | month's | year's
         if (
             this.view_is(VIEW_MODE.DAY) ||
@@ -681,16 +689,28 @@ export default class Gantt {
             this.view_is(VIEW_MODE.YEAR)
         ) {
             // Used as we must find the _end_ of session if view is not Day
-            const { x: left, date } = this.computeGridHighlightDimensions(this.options.view_mode)
-            if (!this.dates.find(d => d.getTime() == date.getTime())) return;
+            const { x: left, date } = this.computeGridHighlightDimensions(
+                this.options.view_mode,
+            );
+            if (!this.dates.find((d) => d.getTime() == date.getTime())) return;
             const top = this.options.header_height + this.options.padding / 2;
-            const height = (this.options.bar_height + this.options.padding) * this.tasks.length;
-            this.$current_highlight = this.create_el({ top, left, height, classes: 'current-highlight', append_to: this.$container })
-            let $today = document.getElementById(date_utils.format(date).replaceAll(' ', '_'))
+            const height =
+                (this.options.bar_height + this.options.padding) *
+                this.tasks.length;
+            this.$current_highlight = this.create_el({
+                top,
+                left,
+                height,
+                classes: 'current-highlight',
+                append_to: this.$container,
+            });
+            let $today = document.getElementById(
+                date_utils.format(date).replaceAll(' ', '_'),
+            );
             if ($today) {
-                $today.classList.add('current-date-highlight')
-                $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px'
-                $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px'
+                $today.classList.add('current-date-highlight');
+                $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
+                $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px';
             }
         }
     }
@@ -788,10 +808,10 @@ export default class Gantt {
                 date.getDate() !== last_date.getDate()
                     ? date.getMonth() !== last_date.getMonth()
                         ? date_utils.format(
-                            date,
-                            'D MMM',
-                            this.options.language,
-                        )
+                              date,
+                              'D MMM',
+                              this.options.language,
+                          )
                         : date_utils.format(date, 'D', this.options.language)
                     : '',
             Day_upper:
@@ -813,7 +833,7 @@ export default class Gantt {
         };
         let column_width = this.view_is(VIEW_MODE.MONTH)
             ? (date_utils.get_days_in_month(date) * this.options.column_width) /
-            30
+              30
             : this.options.column_width;
         const base_pos = {
             x: last_date_info
@@ -845,17 +865,17 @@ export default class Gantt {
             base_pos_x: base_pos.x,
             upper_text: this.options.lower_text
                 ? this.options.upper_text(
-                    date,
-                    this.options.view_mode,
-                    date_text[`${this.options.view_mode}_upper`],
-                )
+                      date,
+                      this.options.view_mode,
+                      date_text[`${this.options.view_mode}_upper`],
+                  )
                 : date_text[`${this.options.view_mode}_upper`],
             lower_text: this.options.lower_text
                 ? this.options.lower_text(
-                    date,
-                    this.options.view_mode,
-                    date_text[`${this.options.view_mode}_lower`],
-                )
+                      date,
+                      this.options.view_mode,
+                      date_text[`${this.options.view_mode}_lower`],
+                  )
                 : date_text[`${this.options.view_mode}_lower`],
             upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
             upper_y: base_pos.upper_y,
@@ -931,7 +951,7 @@ export default class Gantt {
 
         const scroll_pos =
             (hours_before_first_task / this.options.step) *
-            this.options.column_width -
+                this.options.column_width -
             this.options.column_width;
         parent_element.scrollTo({ left: scroll_pos, behavior: 'smooth' });
     }
@@ -941,15 +961,10 @@ export default class Gantt {
     }
 
     bind_grid_click() {
-        $.on(
-            this.$svg,
-            'click',
-            '.grid-row, .grid-header',
-            () => {
-                this.unselect_all();
-                this.hide_popup();
-            },
-        );
+        $.on(this.$svg, 'click', '.grid-row, .grid-header', () => {
+            this.unselect_all();
+            this.hide_popup();
+        });
     }
 
     bind_bar_events() {
@@ -983,8 +998,8 @@ export default class Gantt {
                 is_dragging = true;
             }
 
-            bar_wrapper.classList.add("active");
-            if (this.popup) this.popup.parent.classList.add('hidden')
+            bar_wrapper.classList.add('active');
+            if (this.popup) this.popup.parent.classList.add('hidden');
 
             if (this.popup) this.popup.parent.classList.add('hidden');
 
