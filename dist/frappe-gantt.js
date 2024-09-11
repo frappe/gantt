@@ -848,7 +848,13 @@ class B {
       let e = document.createElement("button");
       e.classList.add("today-button"), e.textContent = "Today", e.onclick = this.scroll_today.bind(this), t.appendChild(e), this.$today_button = e;
     }
-    this.$header.appendChild(t), this.$side_header = t, window.addEventListener("scroll", this.update_button_position.bind(this)), window.addEventListener("resize", this.update_button_position.bind(this));
+    this.$header.appendChild(t), this.$side_header = t, window.addEventListener(
+      "scroll",
+      this.update_button_position.bind(this)
+    ), window.addEventListener(
+      "resize",
+      this.update_button_position.bind(this)
+    );
   }
   update_button_position() {
     const t = this.$container.getBoundingClientRect(), e = this.$side_header.getBoundingClientRect(), { left: s, y: i } = this.$header.getBoundingClientRect();
@@ -933,11 +939,21 @@ class B {
   }
   make_grid_highlights() {
     if (this.options.highlight_weekend && this.highlightWeekends(), this.view_is(l.DAY) || this.view_is(l.WEEK) || this.view_is(l.MONTH) || this.view_is(l.YEAR)) {
-      const { x: t, date: e } = this.computeGridHighlightDimensions(this.options.view_mode);
+      const { x: t, date: e } = this.computeGridHighlightDimensions(
+        this.options.view_mode
+      );
       if (!this.dates.find((o) => o.getTime() == e.getTime())) return;
       const s = this.options.header_height + this.options.padding / 2, i = (this.options.bar_height + this.options.padding) * this.tasks.length;
-      this.$current_highlight = this.create_el({ top: s, left: t, height: i, classes: "current-highlight", append_to: this.$container });
-      let r = document.getElementById(h.format(e).replaceAll(" ", "_"));
+      this.$current_highlight = this.create_el({
+        top: s,
+        left: t,
+        height: i,
+        classes: "current-highlight",
+        append_to: this.$container
+      });
+      let r = document.getElementById(
+        h.format(e).replaceAll(" ", "_")
+      );
       r && (r.classList.add("current-date-highlight"), r.style.top = +r.style.top.slice(0, -2) - 4 + "px", r.style.left = +r.style.left.slice(0, -2) - 8 + "px");
     }
   }
@@ -954,7 +970,7 @@ class B {
         classes: "lower-text",
         append_to: this.$lower_header
       });
-      if (s.innerText = t.lower_text, s.style.left = +s.style.left.slice(0, -2) - s.clientWidth / 2 + "px", t.upper_text) {
+      if (s.innerText = t.lower_text, s.style.left = +s.style.left.slice(0, -2) + "px", t.upper_text) {
         this.upper_texts_x[t.upper_text] = t.upper_x;
         let i = document.createElement("div");
         i.classList.add("upper-text"), i.style.left = t.upper_x + "px", i.style.top = t.upper_y + "px", i.innerText = t.upper_text, this.$upper_header.appendChild(i), t.upper_x > this.layers.grid.getBBox().width && i.remove();
@@ -1089,14 +1105,9 @@ class B {
     this.set_scroll_position(/* @__PURE__ */ new Date());
   }
   bind_grid_click() {
-    _.on(
-      this.$svg,
-      "click",
-      ".grid-row, .grid-header",
-      () => {
-        this.unselect_all(), this.hide_popup();
-      }
-    );
+    _.on(this.$svg, "click", ".grid-row, .grid-header", () => {
+      this.unselect_all(), this.hide_popup();
+    });
   }
   bind_bar_events() {
     let t = !1, e = 0, s = 0, i = !1, r = !1, o = null, a = [];

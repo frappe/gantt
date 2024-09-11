@@ -739,8 +739,7 @@ export default class Gantt {
             });
             $lower_text.innerText = date.lower_text;
             $lower_text.style.left =
-                +$lower_text.style.left.slice(0, -2) -
-                $lower_text.clientWidth / 2 +
+                +$lower_text.style.left.slice(0, -2) +
                 'px';
 
             if (date.upper_text) {

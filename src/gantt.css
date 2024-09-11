@@ -89,6 +89,7 @@
         font-size: 14px;
         position: absolute;
         width: fit-content;
+        transform: translateX(-50%);
     }
 
     & .upper-text {
