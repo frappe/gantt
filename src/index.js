@@ -490,7 +490,7 @@ export default class Gantt {
 
   make_grid_ticks() {
     if (!['both', 'vertical', 'horizontal'].includes(this.options.lines)) return
-    let tick_x = 0;
+    let tick_x = this.options.column_width / 2;
     let tick_y = this.options.header_height + this.options.padding / 2;
     let tick_height = (this.options.bar_height + this.options.padding) * this.tasks.length;
     let $lines_layer = createSVG("g", { class: 'lines_layer', append_to: this.layers.grid });
@@ -538,8 +538,7 @@ export default class Gantt {
       });
 
       if (this.view_is(VIEW_MODE.MONTH)) {
-        tick_x +=
-          (date_utils.get_days_in_month(date) * this.options.column_width) / 30;
+        tick_x += (date_utils.get_days_in_month(date) * this.options.column_width) / 30;
       } else {
         tick_x += this.options.column_width;
       }
@@ -547,10 +546,10 @@ export default class Gantt {
   }
 
   make_grid_current_time(view_mode) {
-    let tick_x = 0;
+    let tick_x = this.options.column_width / 2;
     let tick_y = this.options.header_height + this.options.padding / 2;
     let tick_height = (this.options.bar_height + this.options.padding) * this.tasks.length;
-    let $current_time = createSVG("g", { class: 'current_time', append_to: this.layers.grid });
+    createSVG("g", { class: 'current_time', append_to: this.layers.grid });
 
     let today = date_utils.today();
     for (let date of this.dates) {
@@ -635,7 +634,11 @@ export default class Gantt {
       if (todayDate >= startDate && todayDate <= endDate) {
         return { x, date: startDate }
       } else {
-        x += this.options.column_width;
+        if (this.view_is(VIEW_MODE.MONTH)) {
+          x += (date_utils.get_days_in_month(date) * this.options.column_width) / 30;
+        } else {
+          x += this.options.column_width;
+        }
       }
     }
   }

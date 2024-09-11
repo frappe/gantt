@@ -865,11 +865,11 @@ var Gantt = (function () {
       const gantt_start = this.gantt.gantt_start;
 
       const diff = date_utils.diff(task_start, gantt_start, "minute");
-      let x = (diff / 60 / step) * column_width;
+      let x = (diff / 60 / step) * column_width + column_width / 2;
 
       if (this.gantt.view_is("Month")) {
         const diff = date_utils.diff(task_start, gantt_start, "day");
-        x = (diff * column_width) / 30;
+        x = (diff * column_width) / 30 + column_width / 2;
       }
       this.x = Math.floor(x);
     }
@@ -883,8 +883,7 @@ var Gantt = (function () {
 
     compute_duration() {
       this.duration =
-        date_utils.diff(this.task._end, this.task._start, "minute") / 60 /
-        this.gantt.options.step;
+        date_utils.diff(this.task._end, this.task._start, "minute") / 60 / this.gantt.options.step;
     }
 
     get_snap_position(dx) {
@@ -1639,7 +1638,7 @@ var Gantt = (function () {
 
     make_grid_ticks() {
       if (!['both', 'vertical', 'horizontal'].includes(this.options.lines)) return
-      let tick_x = 0;
+      let tick_x = this.options.column_width / 2;
       let tick_y = this.options.header_height + this.options.padding / 2;
       let tick_height = (this.options.bar_height + this.options.padding) * this.tasks.length;
       let $lines_layer = createSVG("g", { class: 'lines_layer', append_to: this.layers.grid });
@@ -1687,8 +1686,7 @@ var Gantt = (function () {
         });
 
         if (this.view_is(VIEW_MODE.MONTH)) {
-          tick_x +=
-            (date_utils.get_days_in_month(date) * this.options.column_width) / 30;
+          tick_x += (date_utils.get_days_in_month(date) * this.options.column_width) / 30;
         } else {
           tick_x += this.options.column_width;
         }
@@ -1696,7 +1694,7 @@ var Gantt = (function () {
     }
 
     make_grid_current_time(view_mode) {
-      let tick_x = 0;
+      let tick_x = this.options.column_width / 2;
       let tick_y = this.options.header_height + this.options.padding / 2;
       let tick_height = (this.options.bar_height + this.options.padding) * this.tasks.length;
       createSVG("g", { class: 'current_time', append_to: this.layers.grid });
@@ -1784,7 +1782,11 @@ var Gantt = (function () {
         if (todayDate >= startDate && todayDate <= endDate) {
           return { x, date: startDate }
         } else {
-          x += this.options.column_width;
+          if (this.view_is(VIEW_MODE.MONTH)) {
+            x += (date_utils.get_days_in_month(date) * this.options.column_width) / 30;
+          } else {
+            x += this.options.column_width;
+          }
         }
       }
     }
