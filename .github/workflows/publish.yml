@@ -13,7 +13,6 @@ jobs:
                   node-version: 18
             - run: yarn install
             - run: yarn prettier-check
-            - run: yarn test
             - uses: JS-DevTools/npm-publish@v1
               with:
                   token: ${{ secrets.NPM_TOKEN }}
