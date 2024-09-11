@@ -516,7 +516,6 @@ export default class Gantt {
         const { left, y } = this.$header.getBoundingClientRect();
 
         // Check if the button is scrolled out of the container vertically
-        console.log('heyy');
         if (
             buttonRect.top < containerRect.top ||
             buttonRect.bottom > containerRect.bottom
@@ -640,12 +639,18 @@ export default class Gantt {
         }
     }
 
-    //compute the horizontal x distance
+    /**
+    * Compute the horizontal x-axis distance and associated date for the current date and view.
+    * 
+    * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
+    */
     computeGridHighlightDimensions(view_mode) {
+        const todayDate = new Date();
+        if (todayDate < this.gantt_start || todayDate > this.gantt_end) return null;
+
         let x = this.options.column_width / 2;
 
         if (this.view_is(VIEW_MODE.DAY)) {
-            let today = date_utils.today();
             return {
                 x:
                     x +
@@ -689,9 +694,9 @@ export default class Gantt {
             this.view_is(VIEW_MODE.YEAR)
         ) {
             // Used as we must find the _end_ of session if view is not Day
-            const { x: left, date } = this.computeGridHighlightDimensions(
-                this.options.view_mode,
-            );
+            const highlightDimensions = this.computeGridHighlightDimensions(this.options.view_mode);
+            if (!highlightDimensions) return;
+            const { x: left, date } = highlightDimensions;
             if (!this.dates.find((d) => d.getTime() == date.getTime())) return;
             const top = this.options.header_height + this.options.padding / 2;
             const height =
