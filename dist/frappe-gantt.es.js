@@ -303,7 +303,8 @@ class O {
     ));
   }
   draw_progress_bar() {
-    if (this.invalid) return;
+    if (this.invalid)
+      return;
     this.$bar_progress = c("rect", {
       x: this.x,
       y: this.y,
@@ -359,7 +360,8 @@ class O {
     });
   }
   draw_resize_handles() {
-    if (this.invalid || this.gantt.options.readonly) return;
+    if (this.invalid || this.gantt.options.readonly)
+      return;
     const t = this.$bar, e = 8;
     if (this.gantt.options.dates_readonly || (c("rect", {
       x: t.getX() + t.getWidth() + e - 4,
@@ -422,7 +424,8 @@ class O {
     });
   }
   show_popup(t) {
-    if (this.gantt.bar_being_dragged) return;
+    if (this.gantt.bar_being_dragged)
+      return;
     const e = h.format(
       this.task._start,
       "MMM D",
@@ -548,7 +551,8 @@ class O {
     ));
   }
   update_handle_position() {
-    if (this.invalid || this.gantt.options.readonly) return;
+    if (this.invalid || this.gantt.options.readonly)
+      return;
     const t = this.$bar;
     this.handle_group.querySelector(".handle.left").setAttribute("x", t.getX() - 12), this.handle_group.querySelector(".handle.right").setAttribute("x", t.getEndX() + 4);
     const e = this.group.querySelector(".handle.progress");
@@ -942,7 +946,8 @@ class B {
       const { x: t, date: e } = this.computeGridHighlightDimensions(
         this.options.view_mode
       );
-      if (!this.dates.find((o) => o.getTime() == e.getTime())) return;
+      if (!this.dates.find((o) => o.getTime() == e.getTime()))
+        return;
       const s = this.options.header_height + this.options.padding / 2, i = (this.options.bar_height + this.options.padding) * this.tasks.length;
       this.$current_highlight = this.create_el({
         top: s,
@@ -1068,7 +1073,8 @@ class B {
       let e = [];
       e = t.dependencies.map((s) => {
         const i = this.get_task(s);
-        if (!i) return;
+        if (!i)
+          return;
         const r = new C(
           this,
           this.bars[i._index],
@@ -1097,7 +1103,8 @@ class B {
       typeof t == "string" && (t = h.parse(t));
     }
     const e = this.$svg.parentElement;
-    if (!e) return;
+    if (!e)
+      return;
     const i = (h.diff(t, this.gantt_start, "hour") + 24) / this.options.step * this.options.column_width - this.options.column_width;
     e.scrollTo({ left: i, behavior: "smooth" });
   }
@@ -1158,7 +1165,8 @@ class B {
         });
       })), s = p.currentTarget.scrollLeft;
     }), _.on(this.$svg, "mousemove", (p) => {
-      if (!d()) return;
+      if (!d())
+        return;
       const g = (p.offsetX || p.layerX) - e;
       a.forEach((u) => {
         const f = u.$bar;
@@ -1186,7 +1194,8 @@ class B {
       const p = _.closest(".bar-wrapper", a).getAttribute("data-id");
       s = this.get_bar(p), i = s.$bar_progress, r = s.$bar, i.finaldx = 0, i.owidth = i.getWidth(), i.min_dx = -i.getWidth(), i.max_dx = r.getWidth() - i.getWidth();
     }), _.on(this.$svg, "mousemove", (o) => {
-      if (!e) return;
+      if (!e)
+        return;
       let a = (o.offsetX || o.layerX) - t;
       a > i.max_dx && (a = i.max_dx), a < i.min_dx && (a = i.min_dx);
       const d = s.$handle_progress;
@@ -1228,7 +1237,7 @@ class B {
     this.popup && this.popup.hide();
   }
   trigger_event(t, e) {
-    this.options["on_" + t] && this.options["on_" + t].apply(null, e);
+    this.options["on_" + t] && this.options["on_" + t].apply(this, e);
   }
   /**
    * Gets the oldest starting date from the list of tasks

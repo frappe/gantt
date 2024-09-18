@@ -9,11 +9,10 @@ export default defineConfig({
             fileName: 'frappe-gantt',
         },
         rollupOptions: {
-            external: ['vue'],
             output: {
-                globals: {
-                    vue: 'Vue'
-                }
+                format: 'cjs',
+                assetFileNames: 'frappe-gantt[extname]',
+                entryFileNames: 'frappe-gantt.[format].js'
             },
         },
     },

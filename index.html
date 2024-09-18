@@ -23,8 +23,8 @@
                 background-color: #252525;
             }
         </style>
-        <link rel="stylesheet" href="dist/style.css" />
-        <script src="dist/frappe-gantt.umd.cjs"></script>
+        <link rel="stylesheet" href="dist/frappe-gantt.css" />
+        <script src="dist/frappe-gantt.umd.js"></script>
     </head>
     <body>
         <div class="container">
@@ -34,8 +34,6 @@
             <div class="gantt-target"></div>
         </div>
         <script type="module">
-            // import Gantt from "./dist/frappe-gantt.js";
-
             let tasks = [
                 {
                     start: '2024-04-01',
@@ -106,7 +104,7 @@
 
             let gantt_chart = new Gantt('.gantt-target', tasks, {
                 on_click: (task) => {
-                    console.log('Click', task);
+                    console.log('Click', task, this);
                 },
                 // on_double_click: (task) => {
                 //   console.log("Double Click", task);

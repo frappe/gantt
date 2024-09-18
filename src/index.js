@@ -1292,7 +1292,7 @@ export default class Gantt {
 
     trigger_event(event, args) {
         if (this.options['on_' + event]) {
-            this.options['on_' + event].apply(null, args);
+            this.options['on_' + event].apply(this, args);
         }
     }
 

@@ -17,7 +17,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/frappe/gantt.git"
+        "url": "git+https://github.com/frappe/gantt.git"
     },
     "files": [
         "src",
@@ -26,7 +26,6 @@
     ],
     "exports": {
         ".": {
-            "import": "./dist/frappe-gantt.es.js",
             "require": "./dist/frappe-gantt.umd.js"
         }
     },
