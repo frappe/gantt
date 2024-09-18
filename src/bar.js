@@ -499,8 +499,15 @@ export default class Bar {
         const diff = date_utils.diff(task_start, gantt_start, 'hour');
         let x = (diff / step) * column_width;
 
+        /* Since the column width is based on 30,
+        we count the month-difference, multiply it by 30 for a "pseudo-month"
+        and then add the days in the month, making sure the number does not exceed 29
+        so it is within the column */
         if (this.gantt.view_is('Month')) {
-            const diff = date_utils.diff(task_start, gantt_start, 'day');
+            const diffDaysBasedOn30DayMonths = date_utils.diff(task_start, gantt_start, 'month') * 30;
+            const dayInMonth = Math.min(29, date_utils.format(task_start, "DD"));
+            const diff = diffDaysBasedOn30DayMonths + dayInMonth;
+            
             x = (diff * column_width) / 30;
         }
         this.x = x;
