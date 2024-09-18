@@ -103,22 +103,10 @@
             // ];
 
             let gantt_chart = new Gantt('.gantt-target', tasks, {
-                on_click: (task) => {
-                    console.log('Click', task, this);
+                on_click (task) {
+                    console.log('Click', task);
                 },
-                // on_double_click: (task) => {
-                //   console.log("Double Click", task);
-                // },
-                // on_date_change: (task, start, end) => {
-                //   console.log("Date change", task, start, end);
-                // },
-                // on_progress_change: (task, progress) => {
-                //   console.log("Progress Change", task, progress);
-                // },
-                // on_view_change: (mode) => {
-                //   console.log("View Change", mode);
-                // },
-                // on_hover: (task, x, y) => {
+                // on_hover (task, x, y) {
                 //   console.log("Hover", x, y);
                 // },
                 view_mode: 'Day',
