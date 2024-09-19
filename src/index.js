@@ -540,7 +540,9 @@ export default class Gantt {
             'px';
 
         // Update the left value on page resize
-        this.$today_button.style.left = `${containerRect.left + 20}px`;
+        if (this.$today_button) {
+            this.$today_button.style.left = `${containerRect.left + 20}px`;
+        }
     }
 
     make_grid_ticks() {
