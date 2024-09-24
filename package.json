@@ -26,7 +26,9 @@
     ],
     "exports": {
         ".": {
-            "require": "./dist/frappe-gantt.umd.js"
+            "require": "./dist/frappe-gantt.umd.js",
+            "import": "./dist/frappe-gantt.es.js",
+            "style": "./dist/frappe-gantt.css"
         }
     },
     "keywords": [
@@ -54,6 +56,9 @@
     },
     "eslintIgnore": [
         "dist"
+    ],
+    "sideEffects": [
+        "*.css"
     ],
     "packageManager": "yarn@1.22.22"
 }
