@@ -9,6 +9,12 @@
 
 ## Frappe Gantt
 Gantt charts are bar charts that visually illustrate a project's tasks, schedule, and dependencies. With Frappe Gantt, you can build beautiful, customizable, Gantt charts with ease.
+## 🆕 Note about update
+I made it to work with grouping so that more than one tasks can go in same row.
+Check `index.html` to see working example.
+
+You need to pass an option `enable_grouping: true` this way behevior can be controlled.
+
 
 You can use it anywhere from hobby projects to tracking the goals of your team at the worksplace.
 
