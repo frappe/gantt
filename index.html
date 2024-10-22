@@ -31,7 +31,7 @@
                 font-size: 0.775em;
             }
         </style>
-        <script src="dist/frappe-gantt.umd.js"></script>
+        <!-- <script  src="./src/index.js"></script> -->
     </head>
     <body>
         <div class="container">
@@ -338,20 +338,22 @@
                 {
                     start: daysSince(-2),
                     end: daysSince(2),
+                    name: 'Write new content',
+                    id: 'Task 1',
+                    progress: 5,
+                    // important: true,
+                    group: 0,
+                },
+                {
                     name: 'Redesign website',
                     id: 'Task 0',
                     progress: random(),
+                    group: 0,
                 },
                 {
                     start: daysSince(3),
-                    duration: '6d',
-                    name: 'Write new content',
-                    id: 'Task 1',
                     progress: random(),
-                    important: true,
                     dependencies: 'Task 0',
-                },
-                {
                     start: daysSince(4),
                     duration: '2d',
                     name: 'Apply new styles',
@@ -461,7 +463,6 @@
                     duration: '7d',
                     name: 'Create prototype',
                     id: 'Task 3',
-                    dependencies: 'Task 2',
                     progress: random(),
                 },
                 {
@@ -473,11 +474,9 @@
                     progress: random(),
                     important: true,
                 },
-                {
                     start: daysSince(5),
                     end: daysSince(10),
                     name: 'Write technical documentation',
-                    id: 'Task 5',
                     progress: random(),
                 },
                 {
@@ -509,7 +508,6 @@
                     id: 'Task 9',
                     progress: random(),
                     important: true,
-                },
             ];
 
             const HOLIDAYS = [
@@ -543,6 +541,7 @@
                     '#bfdbfe': [],
                     '#a3e635': HOLIDAYS,
                 },
+                enable_grouping:  true,
             });
 
             const ignore = new Gantt('#ignore', tasks, {

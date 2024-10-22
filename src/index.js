@@ -165,6 +165,12 @@ export default class Gantt {
                 // cache index
                 task._index = i;
 
+            // ********** Fix for single row grouping
+            if (this.options.enable_grouping && typeof task.group === 'number') {
+                task._index = task.group;
+            }
+            // ********** end of fix
+
                 // if hours is not set, assume the last day is full day
                 // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
                 const task_end_values = date_utils.get_date_values(task._end);
@@ -199,6 +205,8 @@ export default class Gantt {
                 return task;
             })
             .filter((t) => t);
+        this.groups = this.options.enable_grouping ? [...new Set(this.tasks.map(t => t.group))] : this.tasks;
+
         this.setup_dependencies();
     }
 
@@ -399,7 +407,7 @@ export default class Gantt {
             this.config.header_height +
                 this.options.padding +
                 (this.options.bar_height + this.options.padding) *
-                    this.tasks.length -
+                this.groups.length;
                 10,
             this.options.container_height !== 'auto'
                 ? this.options.container_height
@@ -430,12 +438,9 @@ export default class Gantt {
         const row_width = this.dates.length * this.config.column_width;
         const row_height = this.options.bar_height + this.options.padding;
 
-        let y = this.config.header_height;
-        for (
-            let y = this.config.header_height;
-            y < this.grid_height;
-            y += row_height
-        ) {
+        let row_y = this.options.header_height;
+
+        for (let _ of this.groups) {
             createSVG('rect', {
                 x: 0,
                 y,
@@ -444,6 +449,12 @@ export default class Gantt {
                 class: 'grid-row',
                 append_to: rows_layer,
             });
+
+            row_y += row_height;
+            
+            if (row_y >= this.grid_height) {
+              break;
+            }
         }
     }
 
@@ -512,7 +523,8 @@ export default class Gantt {
         if (this.options.lines === 'none') return;
         let tick_x = 0;
         let tick_y = this.config.header_height;
-        let tick_height = this.grid_height - this.config.header_height;
+        let tick_height = (this.grid_height - this.config.header_height)*
+            this.groups.length;
 
         let $lines_layer = createSVG('g', {
             class: 'lines_layer',
@@ -524,11 +536,7 @@ export default class Gantt {
         const row_width = this.dates.length * this.config.column_width;
         const row_height = this.options.bar_height + this.options.padding;
         if (this.options.lines !== 'vertical') {
-            for (
-                let y = this.config.header_height;
-                y < this.grid_height;
-                y += row_height
-            ) {
+            for (let _ of this.groups) {
                 createSVG('line', {
                     x1: 0,
                     y1: row_y + row_height,
@@ -538,6 +546,10 @@ export default class Gantt {
                     append_to: $lines_layer,
                 });
                 row_y += row_height;
+                
+                if (row_y >= this.grid_height) {
+                  break;
+                }
             }
         }
         if (this.options.lines === 'horizontal') return;
