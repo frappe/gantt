@@ -154,6 +154,12 @@ export default class Gantt {
             // cache index
             task._index = i;
 
+            // ********** Fix for single row grouping
+            if (this.options.enable_grouping && typeof task.group === 'number') {
+                task._index = task.group;
+            }
+            // ********** end of fix
+
             // invalid dates
             if (!task.start && !task.end) {
                 const today = date_utils.today();
@@ -204,6 +210,8 @@ export default class Gantt {
 
             return task;
         });
+
+        this.groups = this.options.enable_grouping ? [...new Set(this.tasks.map(t => t.group))] : this.tasks;
 
         this.setup_dependencies();
     }
@@ -390,7 +398,7 @@ export default class Gantt {
             this.options.header_height +
             this.options.padding +
             (this.options.bar_height + this.options.padding) *
-                this.tasks.length;
+                this.groups.length;
 
         createSVG('rect', {
             x: 0,
@@ -415,7 +423,7 @@ export default class Gantt {
 
         let row_y = this.options.header_height + this.options.padding / 2;
 
-        for (let _ of this.tasks) {
+        for (let _ of this.groups) {
             createSVG('rect', {
                 x: 0,
                 y: row_y,
@@ -552,7 +560,7 @@ export default class Gantt {
         let tick_y = this.options.header_height + this.options.padding / 2;
         let tick_height =
             (this.options.bar_height + this.options.padding) *
-            this.tasks.length;
+            this.groups.length;
 
         let $lines_layer = createSVG('g', {
             class: 'lines_layer',
@@ -564,7 +572,7 @@ export default class Gantt {
         const row_width = this.dates.length * this.options.column_width;
         const row_height = this.options.bar_height + this.options.padding;
         if (this.options.lines !== 'vertical') {
-            for (let _ of this.tasks) {
+            for (let _ of this.groups) {
                 createSVG('line', {
                     x1: 0,
                     y1: row_y + row_height,
