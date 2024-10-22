@@ -1,5 +1,5 @@
 {
-    "name": "frappe-gantt",
+    "name": "frappe-gantt-fix-for-grouping",
     "version": "0.8.1",
     "description": "A simple, modern, interactive gantt library for the web",
     "main": "src/index.js",
