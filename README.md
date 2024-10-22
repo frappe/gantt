@@ -15,6 +15,12 @@
     </a>
 </p>
 
+## 🆕 Note about update
+I made it to work with grouping so that more than one tasks can go in same row.
+Check `index.html` to see working example.
+
+You need to pass an option `enable_grouping: true` this way behevior can be controlled.
+
 ### Install
 
 ```
