@@ -4,7 +4,7 @@
 I made it to work with grouping so that more than one tasks can go in same row.
 Check `index.html` to see working example.
 
-You need to pass an option `enable_grouping: true` this way behevior can be controlled.
+You need to pass an option `enable_grouping: true` this way behevior can be controlled. You can also set custom grups indices like `groups: [0,1,2,3,4]`.
 
 ### Install
 
@@ -19,6 +19,14 @@ You need to add following to options
 ```js
 new Gantt('.gantt-target', tasks, {
     enable_grouping:  true,
+    // Other options...
+});
+```
+To set custom index you can do like this is useful if you want to set labels with fixed values
+```js
+new Gantt('.gantt-target', tasks, {
+    enable_grouping:  true,
+    groups: [0,1,2,3,4],
     // Other options...
 });
 ```

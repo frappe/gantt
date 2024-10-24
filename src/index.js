@@ -211,7 +211,15 @@ export default class Gantt {
             return task;
         });
 
-        this.groups = this.options.enable_grouping ? [...new Set(this.tasks.map(t => t.group))] : this.tasks;
+        this.groups = this.tasks;
+        if (this.options?.enable_grouping) {
+            if (this.options?.groups) {
+                this.groups = this.options.groups;
+            } else {
+                this.groups = [...new Set(this.tasks.map((t) => t.group))];
+            }
+        }
+        console.log(this.groups);
 
         this.setup_dependencies();
     }
