@@ -873,7 +873,7 @@ class B {
       this.$header.clientWidth,
       this.$container.clientWidth
     );
-    this.$side_header.style.left = s + this.$container.scrollLeft + r - this.$side_header.clientWidth + "px", this.$today_button.style.left = `${t.left + 20}px`;
+    this.$side_header.style.left = s + this.$container.scrollLeft + r - this.$side_header.clientWidth + "px", this.$today_button && (this.$today_button.style.left = `${t.left + 20}px`);
   }
   make_grid_ticks() {
     if (!["both", "vertical", "horizontal"].includes(this.options.lines))
