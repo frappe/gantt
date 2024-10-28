@@ -28,6 +28,10 @@
         ".": {
             "require": "./dist/frappe-gantt.umd.js",
             "import": "./dist/frappe-gantt.es.js"
+        },
+        "./style": {
+            "import": "./dist/frappe-gantt.css",
+            "default": "./dist/frappe-gantt.css"
         }
     },
     "keywords": [
