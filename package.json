@@ -26,7 +26,8 @@
     ],
     "exports": {
         ".": {
-            "require": "./dist/frappe-gantt.umd.js"
+            "require": "./dist/frappe-gantt.umd.js",
+            "import": "./dist/frappe-gantt.es.js"
         }
     },
     "keywords": [
