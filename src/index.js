@@ -20,7 +20,7 @@ const VIEW_MODE_PADDING = {
     HOUR: ['7d', '7d'],
     QUARTER_DAY: ['7d', '7d'],
     HALF_DAY: ['7d', '7d'],
-    DAY: ['1m', '1m'],
+    DAY: ['2d', '2d'],
     WEEK: ['1m', '1m'],
     MONTH: ['1m', '1m'],
     YEAR: ['2y', '2y'],
@@ -110,12 +110,12 @@ export default class Gantt {
     setup_options(options) {
         this.options = { ...DEFAULT_OPTIONS, ...options };
         const custom_mode = this.options.custom_view_modes.find(m => m.name === this.options.view_mode);
-        if (custom_mode) this.options = {...options, custom_mode}
-        if (!options.view_mode_padding) options.view_mode_padding = {};
-        for (let [key, value] of Object.entries(options.view_mode_padding)) {
+        if (custom_mode) this.options = {...this.options, custom_mode}
+        if (!this.options.view_mode_padding) this.options.view_mode_padding = {};
+        for (let [key, value] of Object.entries(this.options.view_mode_padding)) {
             if (typeof value === 'string') {
                 // Configure for single value given
-                options.view_mode_padding[key] = [value, value];
+                this.options.view_mode_padding[key] = [value, value];
             }
         }
 
@@ -123,6 +123,7 @@ export default class Gantt {
             ...VIEW_MODE_PADDING,
             ...options.view_mode_padding,
         };
+        
     }
 
     setup_tasks(tasks) {
@@ -348,7 +349,14 @@ export default class Gantt {
 
         while (cur_date === null || cur_date < this.gantt_end) {
             if (this.options.custom_mode) {
-                
+                const step = this.options.custom_mode.step || 1; 
+                const unit = this.options.custom_mode.unit || 'day';  
+    
+                if (!cur_date) {
+                    cur_date = date_utils.clone(this.gantt_start);
+                } else {
+                    cur_date = date_utils.add(cur_date, step, unit);
+                }
             }
             else {
                 if (!cur_date) {
@@ -367,7 +375,6 @@ export default class Gantt {
                     }
                 }
             }
-            console.log(cur_date)
             this.dates.push(cur_date);
         }
     }
@@ -766,6 +773,7 @@ export default class Gantt {
     make_dates() {
         this.upper_texts_x = {};
         this.get_dates_to_draw().forEach((date, i) => {
+            console.log(date)
             let $lower_text = this.create_el({
                 left: date.lower_x,
                 top: date.lower_y,
@@ -777,7 +785,7 @@ export default class Gantt {
             $lower_text.innerText = date.lower_text;
             $lower_text.style.left =
                 +$lower_text.style.left.slice(0, -2) + 'px';
-            //console.log($lower_text)
+
             if (date.upper_text) {
                 this.upper_texts_x[date.upper_text] = date.upper_x;
                 let $upper_text = document.createElement('div');
@@ -900,7 +908,7 @@ export default class Gantt {
             };
         }
         
-        let column_width = custom_mode ? custom_mode.lower_text.column_width * (custom_mode.step ?? 1)  : this.view_is(VIEW_MODE.MONTH)
+        let column_width = custom_mode && custom_mode.lower_text && custom_mode.lower_text.column_width ? custom_mode.lower_text.column_width * (custom_mode.step ?? 1)  : this.view_is(VIEW_MODE.MONTH)
             ? (date_utils.get_days_in_month(date) * this.options.column_width) /
               30
             : this.options.column_width;
@@ -912,6 +920,7 @@ export default class Gantt {
             lower_y: this.options.header_height - 20,
             upper_y: this.options.header_height - 50,
         };
+        console.log(this.options)
         const x_pos = {
             Hour_lower: column_width / 2,
             Hour_upper: column_width * 12,
