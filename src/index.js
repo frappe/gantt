@@ -207,7 +207,6 @@ export default class Gantt {
 
             return task;
         });
-
         this.setup_dependencies();
     }
 
@@ -239,14 +238,14 @@ export default class Gantt {
         const custom_mode = this.options.custom_mode
         if (custom_mode) {
             if (custom_mode.unit === "hour") {
-                this.options.step = this.options.step;
+                this.options.step = custom_mode.step;
                 this.options.column_width = 38;
             } else if (custom_mode.unit === "day") {
                 this.options.step =  custom_mode.step * 24;
                 this.options.column_width = 38;
-            } else if (custom_mode === "month") {
-                this.options.step = 24 / 2;
-                this.options.column_width = custom_mode.step * 24 * 30;
+            } else if (custom_mode.unit === "month") {
+                this.options.step = custom_mode.step * 24 * 30;
+                this.options.column_width = 120;
             }
             else {
                 this.options.step = 24;
@@ -429,7 +428,6 @@ export default class Gantt {
             this.options.padding +
             (this.options.bar_height + this.options.padding) *
                 this.tasks.length;
-
         createSVG('rect', {
             x: 0,
             y: 0,
@@ -452,7 +450,6 @@ export default class Gantt {
         const row_height = this.options.bar_height + this.options.padding;
 
         let row_y = this.options.header_height + this.options.padding / 2;
-
         for (let _ of this.tasks) {
             createSVG('rect', {
                 x: 0,
@@ -633,7 +630,6 @@ export default class Gantt {
             if (this.view_is(VIEW_MODE.MONTH) && date.getMonth() % 3 === 0) {
                 tick_class += ' thick';
             }
-
             createSVG('path', {
                 d: `M ${tick_x} ${tick_y} v ${tick_height}`,
                 class: tick_class,
@@ -773,7 +769,6 @@ export default class Gantt {
     make_dates() {
         this.upper_texts_x = {};
         this.get_dates_to_draw().forEach((date, i) => {
-            console.log(date)
             let $lower_text = this.create_el({
                 left: date.lower_x,
                 top: date.lower_y,
@@ -805,7 +800,6 @@ export default class Gantt {
 
     get_dates_to_draw() {
         let last_date = null;
-        console.log(this.dates)
         const dates = this.dates.map((date, i) => {
             const d = this.get_date_info(date, last_date, i);
             last_date = d;
@@ -920,7 +914,6 @@ export default class Gantt {
             lower_y: this.options.header_height - 20,
             upper_y: this.options.header_height - 50,
         };
-        console.log(this.options)
         const x_pos = {
             Hour_lower: column_width / 2,
             Hour_upper: column_width * 12,
@@ -939,7 +932,7 @@ export default class Gantt {
         };
         if (custom_mode){
             x_pos[`${custom_mode.name}_upper`] = column_width / 2
-            x_pos[`${custom_mode.name}_lower`] = column_width / (custom_mode.unit.toLowerCase() === 'hour' ? 2 : 1)
+            x_pos[`${custom_mode.name}_lower`] = column_width / (custom_mode.unit.toLowerCase() === 'day' ? 1 : 2)
         } 
         return {
             date,
