@@ -248,22 +248,25 @@ export default class Gantt {
     }
 
     update_view_scale(view_mode) {
+        let availableSpace = this?.$container?.parentElement?.offsetWidth
+        availableSpace = availableSpace && availableSpace < 912 ? 912 : availableSpace;
+
         this.options.view_mode = view_mode;
         if (view_mode === VIEW_MODE.HOUR) {
             this.options.step = 24 / 24;
-            this.options.column_width = 38;
+            this.options.column_width = availableSpace/24;
         } else if (view_mode === VIEW_MODE.DAY) {
             this.options.step = 24;
-            this.options.column_width = 38;
+            this.options.column_width = availableSpace;
         } else if (view_mode === VIEW_MODE.HALF_DAY) {
             this.options.step = 24 / 2;
-            this.options.column_width = 38;
+            this.options.column_width = availableSpace / 2;
         } else if (view_mode === VIEW_MODE.QUARTER_DAY) {
             this.options.step = 24 / 4;
-            this.options.column_width = 38;
+            this.options.column_width = availableSpace / 4;
         } else if (view_mode === VIEW_MODE.WEEK) {
             this.options.step = 24 * 7;
-            this.options.column_width = 140;
+            this.options.column_width = availableSpace;
         } else if (view_mode === VIEW_MODE.MONTH) {
             this.options.step = 24 * 30;
             this.options.column_width = 120;
