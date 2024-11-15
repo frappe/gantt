@@ -10,7 +10,8 @@
         "build": "vite build",
         "lint": "eslint src/**/*.js",
         "prettier": "prettier --write \"{src/*,tests/*,rollup.config}.js\"",
-        "prettier-check": "prettier --check \"{src/*,tests/*,rollup.config}.js\""
+        "prettier-check": "prettier --check \"{src/*,tests/*,rollup.config}.js\"",
+        "prepublishOnly": "yarn run build"
     },
     "repository": {
         "type": "git",
