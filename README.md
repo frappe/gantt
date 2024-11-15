@@ -1,123 +1,80 @@
-<div align="center">
-    <img src="https://github.com/frappe/design/blob/master/logos/logo-2019/frappe-gantt-logo.png" height="128">
-    <h2>Frappe Gantt</h2>
-    <p align="center">
-        <p>A simple, interactive, modern gantt chart library for the web</p>
-        <a href="https://frappe.github.io/gantt">
-            <b>View the demo »</b>
-        </a>
-    </p>
-</div>
+# A mod of [https://github.com/frappe/gantt](https://github.com/frappe/gantt) for optional grouping feature for v.0.8.1
 
-<p align="center">
-    <a href="https://frappe.github.io/gantt">
-        <img src="https://cloud.githubusercontent.com/assets/9355208/21537921/4a38b194-cdbd-11e6-8110-e0da19678a6d.png">
-    </a>
-</p>
+## 🆕 Note about update
+I made it to work with grouping so that more than one tasks can go in same row.
+Check `index.html` to see working example.
+
+You need to pass an option `enable_grouping: true` this way behevior can be controlled. You can also set custom grups indices like `groups: [0,1,2,3,4]`.
 
 ### Install
 
 ```
-npm install frappe-gantt
+npm i frappe-gantt-fix-for-grouping
 ```
 
 ### Usage
 
-Include it in your HTML:
-
-```
-<script src="frappe-gantt.min.js"></script>
-<link rel="stylesheet" href="frappe-gantt.css">
-```
-
-Or from the CDN:
-```
-<script src="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.umd.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.css">
-```
-And start hacking:
+You need to add following to options
 
 ```js
-var tasks = [
-  {
-    id: 'Task 1',
-    name: 'Redesign website',
-    start: '2016-12-28',
-    end: '2016-12-31',
-    progress: 20,
-    dependencies: 'Task 2, Task 3',
-    custom_class: 'bar-milestone' // optional
-  },
-  ...
-]
-var gantt = new Gantt("#gantt", tasks);
+new Gantt('.gantt-target', tasks, {
+    enable_grouping:  true,
+    // Other options...
+});
 ```
-
-You can also pass various options to the Gantt constructor:
-
+To set custom index you can do like this is useful if you want to set labels with fixed values
 ```js
-var gantt = new Gantt('#gantt', tasks, {
-    header_height: 50,
-    column_width: 30,
-    step: 24,
-    view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
-    bar_height: 20,
-    bar_corner_radius: 3,
-    arrow_curve: 5,
-    padding: 18,
-    view_mode: 'Day',
-    date_format: 'YYYY-MM-DD',
-    language: 'en', // or 'es', 'it', 'ru', 'ptBr', 'fr', 'tr', 'zh', 'de', 'hu'
-    popup: null,
+new Gantt('.gantt-target', tasks, {
+    enable_grouping:  true,
+    groups: [0,1,2,3,4],
+    // Other options...
 });
 ```
 
-You can add `dark` class to the container element to apply dark theme.
-
-```html
-<div class="gantt-target dark"></div>
+and tasks will be like
+```js
+let tasks = [
+    {
+        start: '2024-03-30',
+        duration: '12h',
+        name: 'Write new content',
+        id: 'Task 1',
+        progress: 5,
+        // important: true,
+        group: 0,
+    },
+    {
+        start: '2024-04-01',
+        end: '2024-04-01',
+        name: 'Redesign website',
+        id: 'Task 0',
+        progress: 30,
+        group: 0,
+    },
+    {
+        start: '2024-04-02',
+        end: '2024-04-02',
+        name: 'Apply new styles',
+        id: 'Task 2',
+        progress: 80,
+        group: 0,
+    },
+    {
+        start: '2024-04-04',
+        end: '2024-04-04',
+        name: 'Review',
+        id: 'Task 3',
+        progress: 5,
+        group: 1,
+    },
+    {
+        start: '2024-04-06',
+        end: '2024-04-06',
+        name: 'Deploy',
+        id: 'Task 4',
+        progress: 0,
+        group: 1,
+    },
+];
 ```
-
-### Contributing
-
-If you want to contribute enhancements or fixes:
-
-1. Clone this repo.
-2. `cd` into project directory
-3. `yarn`
-4. `yarn run dev`
-5. Open `index.html` in your browser, make your code changes and test them.
-
-### Publishing
-
-If you have publishing rights (Frappe Team), follow these steps to publish a new version.
-
-Assuming the last commit (or a couple of commits) were enhancements or fixes,
-
-1. Run `yarn build`
-
-    This will generate files in the `dist/` folder. These files need to be committed.
-
-1. Run `yarn publish`
-1. Type the new version at the prompt
-
-    Depending on the type of change, you can either bump the patch version or the minor version.
-    For e.g.,
-
-    ```
-    0.5.0 -> 0.6.0 (minor version bump)
-    0.5.0 -> 0.5.1 (patch version bump)
-    ```
-
-1. Now, there will be a commit named after the version you just entered. Include the generated files in `dist/` folder as part of this commit by running the command:
-    ```
-    git add dist
-    git commit --amend
-    git push origin master
-    ```
-
-License: MIT
-
----
-
-Project maintained by [frappe](https://github.com/frappe)
+### ⚠️ For full docs [check official docs](https://github.com/frappe/gantt) and source of this mod [https://github.com/iaminamcom/gantt-fix](https://github.com/iaminamcom/gantt-fix).

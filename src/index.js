@@ -154,6 +154,12 @@ export default class Gantt {
             // cache index
             task._index = i;
 
+            // ********** Fix for single row grouping
+            if (this.options.enable_grouping && typeof task.group === 'number') {
+                task._index = task.group;
+            }
+            // ********** end of fix
+
             // invalid dates
             if (!task.start && !task.end) {
                 const today = date_utils.today();
@@ -205,6 +211,16 @@ export default class Gantt {
             return task;
         });
 
+        this.groups = this.tasks;
+        if (this.options?.enable_grouping) {
+            if (this.options?.groups) {
+                this.groups = this.options.groups;
+            } else {
+                this.groups = [...new Set(this.tasks.map((t) => t.group))];
+            }
+        }
+        console.log(this.groups);
+
         this.setup_dependencies();
     }
 
@@ -232,22 +248,25 @@ export default class Gantt {
     }
 
     update_view_scale(view_mode) {
+        let availableSpace = this?.$container?.parentElement?.offsetWidth
+        availableSpace = availableSpace && availableSpace < 912 ? 912 : availableSpace;
+
         this.options.view_mode = view_mode;
         if (view_mode === VIEW_MODE.HOUR) {
             this.options.step = 24 / 24;
-            this.options.column_width = 38;
+            this.options.column_width = availableSpace/24;
         } else if (view_mode === VIEW_MODE.DAY) {
             this.options.step = 24;
-            this.options.column_width = 38;
+            this.options.column_width = availableSpace;
         } else if (view_mode === VIEW_MODE.HALF_DAY) {
             this.options.step = 24 / 2;
-            this.options.column_width = 38;
+            this.options.column_width = availableSpace / 2;
         } else if (view_mode === VIEW_MODE.QUARTER_DAY) {
             this.options.step = 24 / 4;
-            this.options.column_width = 38;
+            this.options.column_width = availableSpace / 4;
         } else if (view_mode === VIEW_MODE.WEEK) {
             this.options.step = 24 * 7;
-            this.options.column_width = 140;
+            this.options.column_width = availableSpace;
         } else if (view_mode === VIEW_MODE.MONTH) {
             this.options.step = 24 * 30;
             this.options.column_width = 120;
@@ -390,7 +409,7 @@ export default class Gantt {
             this.options.header_height +
             this.options.padding +
             (this.options.bar_height + this.options.padding) *
-                this.tasks.length;
+                this.groups.length;
 
         createSVG('rect', {
             x: 0,
@@ -415,7 +434,7 @@ export default class Gantt {
 
         let row_y = this.options.header_height + this.options.padding / 2;
 
-        for (let _ of this.tasks) {
+        for (let _ of this.groups) {
             createSVG('rect', {
                 x: 0,
                 y: row_y,
@@ -552,7 +571,7 @@ export default class Gantt {
         let tick_y = this.options.header_height + this.options.padding / 2;
         let tick_height =
             (this.options.bar_height + this.options.padding) *
-            this.tasks.length;
+            this.groups.length;
 
         let $lines_layer = createSVG('g', {
             class: 'lines_layer',
@@ -564,7 +583,7 @@ export default class Gantt {
         const row_width = this.dates.length * this.options.column_width;
         const row_height = this.options.bar_height + this.options.padding;
         if (this.options.lines !== 'vertical') {
-            for (let _ of this.tasks) {
+            for (let _ of this.groups) {
                 createSVG('line', {
                     x1: 0,
                     y1: row_y + row_height,
