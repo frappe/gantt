@@ -742,7 +742,9 @@ class B {
     this.update_view_scale(t), this.setup_dates(), this.render(), this.trigger_event("view_change", [t]);
   }
   update_view_scale(t) {
-    this.options.view_mode = t, t === l.HOUR ? (this.options.step = 24 / 24, this.options.column_width = 38) : t === l.DAY ? (this.options.step = 24, this.options.column_width = 38) : t === l.HALF_DAY ? (this.options.step = 24 / 2, this.options.column_width = 38) : t === l.QUARTER_DAY ? (this.options.step = 24 / 4, this.options.column_width = 38) : t === l.WEEK ? (this.options.step = 24 * 7, this.options.column_width = 140) : t === l.MONTH ? (this.options.step = 24 * 30, this.options.column_width = 120) : t === l.YEAR && (this.options.step = 24 * 365, this.options.column_width = 120);
+    var s, i;
+    let e = (i = (s = this == null ? void 0 : this.$container) == null ? void 0 : s.parentElement) == null ? void 0 : i.offsetWidth;
+    e = e && e < 912 ? 912 : e, this.options.view_mode = t, t === l.HOUR ? (this.options.step = 24 / 24, this.options.column_width = e / 24) : t === l.DAY ? (this.options.step = 24, this.options.column_width = e) : t === l.HALF_DAY ? (this.options.step = 24 / 2, this.options.column_width = e / 2) : t === l.QUARTER_DAY ? (this.options.step = 24 / 4, this.options.column_width = e / 4) : t === l.WEEK ? (this.options.step = 24 * 7, this.options.column_width = e) : t === l.MONTH ? (this.options.step = 24 * 30, this.options.column_width = 120) : t === l.YEAR && (this.options.step = 24 * 365, this.options.column_width = 120);
   }
   setup_dates() {
     this.setup_gantt_dates(), this.setup_date_values();

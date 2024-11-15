@@ -1,6 +1,6 @@
 {
     "name": "frappe-gantt-fix-for-grouping",
-    "version": "0.8.4",
+    "version": "0.8.6",
     "description": "A simple, modern, interactive gantt library for the web",
     "main": "src/index.js",
     "type": "module",
@@ -13,7 +13,8 @@
         "lint": "eslint src/**/*.js",
         "test:watch": "jest --watch",
         "prettier": "prettier --write \"{src/*,tests/*,rollup.config}.js\"",
-        "prettier-check": "prettier --check \"{src/*,tests/*,rollup.config}.js\""
+        "prettier-check": "prettier --check \"{src/*,tests/*,rollup.config}.js\"",
+        "prepublishOnly": "yarn run build"
     },
     "repository": {
         "type": "git",
