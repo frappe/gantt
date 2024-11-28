@@ -38,6 +38,7 @@ const DEFAULT_OPTIONS = {
     date_format: 'YYYY-MM-DD',
     show_expected_progress: false,
     popup: null,
+    popup_on: 'hover',
     language: 'en',
     readonly: false,
     progress_readonly: false,

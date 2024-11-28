@@ -94,16 +94,16 @@
             ];
 
             // Uncomment to test fixed header
-            // tasks = [
-            //     ...tasks,
-            //     ...Array.from({ length: tasks.length * 3 }, (_, i) => ({
-            //         ...tasks[i % 3],
-            //         id: i,
-            //     })),
-            // ];
+            tasks = [
+                ...tasks,
+                ...Array.from({ length: tasks.length * 3 }, (_, i) => ({
+                    ...tasks[i % 3],
+                    id: i,
+                })),
+            ];
 
             let gantt_chart = new Gantt('.gantt-target', tasks, {
-                on_click (task) {
+                on_click(task) {
                     console.log('Click', task);
                 },
                 // on_hover (task, x, y) {
@@ -111,7 +111,7 @@
                 // },
                 view_mode: 'Day',
                 view_mode_padding: { DAY: '3d' },
-                // popup: false,
+                // popup_on: 'click',
                 // scroll_to: 'today',
                 // view_mode_select: true,
                 // dates_readonly: true,

@@ -35,7 +35,7 @@ export default class Popup {
             this.title.innerHTML = options.title;
             this.subtitle.innerHTML = options.subtitle;
         }
-
+        console.log('hey in');
         // set position
         let position_meta;
         if (target_element instanceof HTMLElement) {
@@ -48,6 +48,7 @@ export default class Popup {
         this.parent.style.top =
             position_meta.y + position_meta.height + 10 + 'px';
 
+        this.parent.classList.remove('hidden');
         this.pointer.style.left = this.parent.clientWidth / 2 + 'px';
         this.pointer.style.top = '-15px';
 
