@@ -136,7 +136,7 @@ export default {
 
     diff(date_a, date_b, scale = DAY) {
         let milliseconds, seconds, hours, minutes, days, months, years;
-        
+
         milliseconds = date_a - date_b;
         seconds = milliseconds / 1000;
         minutes = seconds / 60;
@@ -145,17 +145,17 @@ export default {
         // Calculate months across years
         const yearDiff = date_a.getFullYear() - date_b.getFullYear();
         const monthDiff = date_a.getMonth() - date_b.getMonth();
-        
+
         /* If monthDiff is negative, date_b is in an earlier month than
         date_a and thus subtracted from the year difference in months */
         months = yearDiff * 12 + monthDiff;
-        
+
         /* If date_a's (e.g. march 1st) day of the month is smaller than date_b (e.g. february 28th),
         adjust the month difference */
         if (date_a.getDate() < date_b.getDate()) {
             months--;
         }
-        
+
         // Calculate years based on actual months
         years = months / 12;
 

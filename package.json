@@ -9,9 +9,7 @@
         "dev": "vite",
         "build-dev": "vite build --watch",
         "build": "vite build",
-        "test": "jest",
         "lint": "eslint src/**/*.js",
-        "test:watch": "jest --watch",
         "prettier": "prettier --write \"{src/*,tests/*,rollup.config}.js\"",
         "prettier-check": "prettier --check \"{src/*,tests/*,rollup.config}.js\""
     },
@@ -59,6 +57,5 @@
     ],
     "sideEffects": [
         "*.css"
-    ],
-    "packageManager": "yarn@1.22.22"
+    ]
 }

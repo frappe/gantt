@@ -68,7 +68,7 @@ var gantt = new Gantt('#gantt', tasks, {
     view_mode: 'Day',
     date_format: 'YYYY-MM-DD',
     language: 'en', // or 'es', 'it', 'ru', 'ptBr', 'fr', 'tr', 'zh', 'de', 'hu'
-    custom_popup_html: null,
+    popup: null,
 });
 ```
 
