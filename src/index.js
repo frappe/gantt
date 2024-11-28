@@ -36,6 +36,7 @@ const DEFAULT_OPTIONS = {
     padding: 18,
     view_mode: 'Day',
     date_format: 'YYYY-MM-DD',
+    move_dependencies: true,
     show_expected_progress: false,
     popup: null,
     popup_on: 'hover',
@@ -1085,10 +1086,16 @@ export default class Gantt {
             y_on_start = e.offsetY || e.layerY;
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
-            const ids = [
-                parent_bar_id,
-                ...this.get_all_dependent_tasks(parent_bar_id),
-            ];
+            let ids;
+            if (this.options.move_dependencies) {
+                ids = [
+                    parent_bar_id,
+                    ...this.get_all_dependent_tasks(parent_bar_id),
+                ];
+            } else {
+                ids = [parent_bar_id];
+            }
+            console.log('BARS', ids);
             bars = ids.map((id) => this.get_bar(id));
 
             this.bar_being_dragged = parent_bar_id;

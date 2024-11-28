@@ -108,10 +108,9 @@
                 // on_hover (task, x, y) {
                 //   console.log("Hover", x, y);
                 // }
-                view_mode: 'Day',
+                view_mode: 'Custom Day',
                 view_mode_padding: { DAY: '3d' },
-                // popup_on: 'click',
-                custom_view_modes: [//option to add custom views
+                custom_view_modes: [ 
                     {
                         name: 'Custom Day',
                         padding: '1m',
@@ -119,7 +118,8 @@
                         unit: "day",
                     }
                 ]
-                // popup: false,
+                // popup_on: 'click',
+                // move_dependencies: false,
                 // scroll_to: 'today',
                 // view_mode_select: true,
                 // dates_readonly: true,
