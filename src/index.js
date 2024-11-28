@@ -680,7 +680,7 @@ export default class Gantt {
             }
         }
 
-        return { x }
+        return { x };
     }
 
     make_grid_highlights() {
@@ -697,7 +697,8 @@ export default class Gantt {
             const { x: left, date } = this.computeGridHighlightDimensions(
                 this.options.view_mode,
             );
-            if (!date || !this.dates.find((d) => d.getTime() == date.getTime())) return;
+            if (!date || !this.dates.find((d) => d.getTime() == date.getTime()))
+                return;
             const top = this.options.header_height + this.options.padding / 2;
             const height =
                 (this.options.bar_height + this.options.padding) *
@@ -1297,7 +1298,7 @@ export default class Gantt {
 
     trigger_event(event, args) {
         if (this.options['on_' + event]) {
-            this.options['on_' + event].apply(this, args)
+            this.options['on_' + event].apply(this, args);
         }
     }
 
