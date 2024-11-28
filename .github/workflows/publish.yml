@@ -11,8 +11,8 @@ jobs:
             - uses: actions/setup-node@v1
               with:
                   node-version: 18
-            - run: yarn install
-            - run: yarn prettier-check
+            - run: pnpm install
+            - run: pnpm prettier-check
             - uses: JS-DevTools/npm-publish@v1
               with:
                   token: ${{ secrets.NPM_TOKEN }}
