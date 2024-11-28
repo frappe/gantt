@@ -8,9 +8,9 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v1
-            - uses: actions/setup-node@v1
+            - uses: pnpm/action-setup@v4
               with:
-                  node-version: 18
+                  version: 9
             - run: pnpm install
             - run: pnpm prettier-check
             - uses: JS-DevTools/npm-publish@v1
