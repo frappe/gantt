@@ -716,9 +716,13 @@ class F {
   }
   setup_options(t) {
     this.options = { ...B, ...t };
-    const e = this.options.custom_view_modes ? this.options.custom_view_modes.find((s) => s.name === this.options.view_mode) : null;
+    const e = this.options.custom_view_modes ? this.options.custom_view_modes.find(
+      (s) => s.name === this.options.view_mode
+    ) : null;
     e && (this.options = { ...this.options, custom_mode: e }), this.options.view_mode_padding || (this.options.view_mode_padding = {});
-    for (let [s, i] of Object.entries(this.options.view_mode_padding))
+    for (let [s, i] of Object.entries(
+      this.options.view_mode_padding
+    ))
       typeof i == "string" && (this.options.view_mode_padding[s] = [i, i]);
     this.options.view_mode_padding = {
       ...R,
@@ -772,9 +776,15 @@ class F {
     let t, e;
     this.gantt_start ? t = h.start_of(this.gantt_start, "day") : t = /* @__PURE__ */ new Date(), this.gantt_end ? e = h.start_of(this.gantt_end, "day") : e = /* @__PURE__ */ new Date();
     const s = this.options.custom_mode;
-    let [i, o] = [{ duration: 1, scale: "day" }, { duration: 1, scale: "day" }];
+    let [i, o] = [
+      { duration: 1, scale: "day" },
+      { duration: 1, scale: "day" }
+    ];
     if (s)
-      [i, o] = [s.padding, s.padding].map(h.parse_duration);
+      [i, o] = [
+        s.padding,
+        s.padding
+      ].map(h.parse_duration);
     else {
       let a;
       for (let [p, d] of Object.entries(_))
@@ -1033,10 +1043,30 @@ class F {
     if (o) {
       let d, l;
       const g = o ? o.unit.toLowerCase() : "day";
-      g === "hour" ? (d = h.format(t, "HH", this.options.language), l = t.getDate() !== s.getDate() ? h.format(t, "D MMMM", this.options.language) : "") : g === "day" ? (d = t.getDate() !== s.getDate() ? h.format(t, "D", this.options.language) : "", l = t.getMonth() !== s.getMonth() || !e ? h.format(t, "MMMM", this.options.language) : "") : g === "month" ? (d = h.format(t, "MMMM", this.options.language), l = t.getFullYear() !== s.getFullYear() ? h.format(t, "YYYY", this.options.language) : "") : (d = h.format(t, "YYYY", this.options.language), l = ""), i[`${o.name}_upper`] = l, i[`${o.name}_lower`] = d;
+      g === "hour" ? (d = h.format(
+        t,
+        "HH",
+        this.options.language
+      ), l = t.getDate() !== s.getDate() ? h.format(
+        t,
+        "D MMMM",
+        this.options.language
+      ) : "") : g === "day" ? (d = t.getDate() !== s.getDate() ? h.format(t, "D", this.options.language) : "", l = t.getMonth() !== s.getMonth() || !e ? h.format(t, "MMMM", this.options.language) : "") : g === "month" ? (d = h.format(
+        t,
+        "MMMM",
+        this.options.language
+      ), l = t.getFullYear() !== s.getFullYear() ? h.format(t, "YYYY", this.options.language) : "") : (d = h.format(
+        t,
+        "YYYY",
+        this.options.language
+      ), l = ""), i[`${o.name}_upper`] = l, i[`${o.name}_lower`] = d;
     } else
       i = {
-        Hour_lower: h.format(t, "HH", this.options.language),
+        Hour_lower: h.format(
+          t,
+          "HH",
+          this.options.language
+        ),
         "Quarter Day_lower": h.format(
           t,
           "HH",
@@ -1048,16 +1078,40 @@ class F {
           this.options.language
         ),
         Day_lower: t.getDate() !== s.getDate() ? h.format(t, "D", this.options.language) : "",
-        Week_lower: t.getMonth() !== s.getMonth() ? h.format(t, "D MMM", this.options.language) : h.format(t, "D", this.options.language),
-        Month_lower: h.format(t, "MMMM", this.options.language),
-        Year_lower: h.format(t, "YYYY", this.options.language),
-        Hour_upper: t.getDate() !== s.getDate() ? h.format(t, "D MMMM", this.options.language) : "",
-        "Quarter Day_upper": t.getDate() !== s.getDate() ? h.format(t, "D MMM", this.options.language) : "",
+        Week_lower: t.getMonth() !== s.getMonth() ? h.format(
+          t,
+          "D MMM",
+          this.options.language
+        ) : h.format(t, "D", this.options.language),
+        Month_lower: h.format(
+          t,
+          "MMMM",
+          this.options.language
+        ),
+        Year_lower: h.format(
+          t,
+          "YYYY",
+          this.options.language
+        ),
+        Hour_upper: t.getDate() !== s.getDate() ? h.format(
+          t,
+          "D MMMM",
+          this.options.language
+        ) : "",
+        "Quarter Day_upper": t.getDate() !== s.getDate() ? h.format(
+          t,
+          "D MMM",
+          this.options.language
+        ) : "",
         "Half Day_upper": t.getDate() !== s.getDate() ? t.getMonth() !== s.getMonth() ? h.format(
           t,
           "D MMM",
           this.options.language
-        ) : h.format(t, "D", this.options.language) : "",
+        ) : h.format(
+          t,
+          "D",
+          this.options.language
+        ) : "",
         Day_upper: t.getMonth() !== s.getMonth() || !e ? h.format(t, "MMMM", this.options.language) : "",
         Week_upper: t.getMonth() !== s.getMonth() ? h.format(t, "MMMM", this.options.language) : "",
         Month_upper: t.getFullYear() !== s.getFullYear() ? h.format(t, "YYYY", this.options.language) : "",
