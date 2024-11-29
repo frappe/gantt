@@ -512,7 +512,7 @@ export default class Bar {
         const gantt_start = this.gantt.gantt_start;
 
         const diff = date_utils.diff(task_start, gantt_start, 'hour');
-        let x = (diff / step) * column_width;
+        let x = (diff / step) * column_width + column_width;
 
         /* Since the column width is based on 30,
         we count the month-difference, multiply it by 30 for a "pseudo-month"

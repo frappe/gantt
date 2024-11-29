@@ -248,11 +248,11 @@ export default class Gantt {
             //configure step and column width for custom view case
             if (custom_mode.unit === 'hour') {
                 this.options.step = custom_mode.step;
-                this.options.column_width = 38;
-            } else if (custom_mode.unit === 'day') {
-                this.options.step = custom_mode.step * 24;
-                this.options.column_width = 38;
-            } else if (custom_mode.unit === 'month') {
+                this.options.column_width =  (custom_mode.step / 12 + 1) * 38;
+            } else if (custom_mode.unit === "day") {
+                this.options.step =  custom_mode.step * 24;
+                this.options.column_width =  (custom_mode.step / 4 + 1) * 38;
+            } else if (custom_mode.unit === "month") {
                 this.options.step = custom_mode.step * 24 * 30;
                 this.options.column_width = 120;
             } else {
@@ -333,6 +333,7 @@ export default class Gantt {
             -padding_start.duration,
             padding_start.scale,
         );
+        
 
         let format_string;
         if (this.view_is(VIEW_MODE.YEAR)) {
