@@ -35,7 +35,7 @@ export default class Popup {
             this.title.innerHTML = options.title;
             this.subtitle.innerHTML = options.subtitle;
         }
-        console.log('hey in');
+
         // set position
         let position_meta;
         if (target_element instanceof HTMLElement) {

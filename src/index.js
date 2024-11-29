@@ -1159,7 +1159,6 @@ export default class Gantt {
             } else {
                 ids = [parent_bar_id];
             }
-            console.log('BARS', ids);
             bars = ids.map((id) => this.get_bar(id));
 
             this.bar_being_dragged = parent_bar_id;
@@ -1172,6 +1171,7 @@ export default class Gantt {
                 $bar.finaldx = 0;
             });
         });
+
         $.on(this.$container, 'scroll', (e) => {
             let elements = document.querySelectorAll('.bar-wrapper');
             let localBars = [];
@@ -1305,6 +1305,7 @@ export default class Gantt {
             is_resizing = true;
             x_on_start = e.offsetX || e.layerX;
             y_on_start = e.offsetY || e.layerY;
+            console.log(e, handle);
 
             const $bar_wrapper = $.closest('.bar-wrapper', handle);
             const id = $bar_wrapper.getAttribute('data-id');
@@ -1315,14 +1316,19 @@ export default class Gantt {
 
             $bar_progress.finaldx = 0;
             $bar_progress.owidth = $bar_progress.getWidth();
-            $bar_progress.min_dx = -$bar_progress.getWidth();
+            $bar_progress.min_dx = -$bar_progress.owidth;
             $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
         });
 
         $.on(this.$svg, 'mousemove', (e) => {
             if (!is_resizing) return;
             let dx = (e.offsetX || e.layerX) - x_on_start;
-
+            console.log(
+                dx,
+                $bar_progress.getWidth(),
+                $bar_progress.min_dx,
+                $bar_progress.max_dx,
+            );
             if (dx > $bar_progress.max_dx) {
                 dx = $bar_progress.max_dx;
             }
@@ -1330,9 +1336,9 @@ export default class Gantt {
                 dx = $bar_progress.min_dx;
             }
 
-            const $handle = bar.$handle_progress;
-            $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
-            $.attr($handle, 'cx', $bar_progress.getEndX());
+            $bar_progress.setAttribute('width', $bar_progress.owidth + dx);
+            $.attr(bar.$handle_progress, 'cx', $bar_progress.getEndX());
+
             $bar_progress.finaldx = dx;
         });
 

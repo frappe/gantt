@@ -305,8 +305,7 @@ class C {
     ));
   }
   draw_progress_bar() {
-    if (this.invalid)
-      return;
+    if (this.invalid) return;
     this.$bar_progress = c("rect", {
       x: this.x,
       y: this.y,
@@ -362,8 +361,7 @@ class C {
     });
   }
   draw_resize_handles() {
-    if (this.invalid || this.gantt.options.readonly)
-      return;
+    if (this.invalid || this.gantt.options.readonly) return;
     const t = this.$bar, e = 8;
     if (this.gantt.options.dates_readonly || (c("rect", {
       x: t.getX() + t.getWidth() + e - 4,
@@ -435,8 +433,7 @@ class C {
     });
   }
   show_popup(t) {
-    if (this.gantt.bar_being_dragged)
-      return;
+    if (this.gantt.bar_being_dragged) return;
     const e = h.format(
       this.task._start,
       "MMM D",
@@ -569,8 +566,7 @@ class C {
     ));
   }
   update_handle_position() {
-    if (this.invalid || this.gantt.options.readonly)
-      return;
+    if (this.invalid || this.gantt.options.readonly) return;
     const t = this.$bar;
     this.handle_group.querySelector(".handle.left").setAttribute("x", t.getX() - 12), this.handle_group.querySelector(".handle.right").setAttribute("x", t.getEndX() + 4);
     const e = this.group.querySelector(".handle.progress");
@@ -646,7 +642,6 @@ class N {
       i += '<div class="pointer"></div>', this.parent.innerHTML = i, this.pointer = this.parent.querySelector(".pointer");
     } else
       this.title.innerHTML = t.title, this.subtitle.innerHTML = t.subtitle;
-    console.log("hey in");
     let s;
     e instanceof HTMLElement ? s = e.getBoundingClientRect() : e instanceof SVGElement && (s = t.target_element.getBBox()), this.parent.style.left = t.x - this.parent.clientWidth / 2 + "px", this.parent.style.top = s.y + s.height + 10 + "px", this.parent.classList.remove("hidden"), this.pointer.style.left = this.parent.clientWidth / 2 + "px", this.pointer.style.top = "-15px", this.parent.style.opacity = 1;
   }
@@ -670,7 +665,7 @@ const _ = {
   WEEK: ["1m", "1m"],
   MONTH: ["1m", "1m"],
   YEAR: ["2y", "2y"]
-}, B = {
+}, F = {
   header_height: 65,
   column_width: 30,
   view_modes: [...Object.values(_)],
@@ -695,7 +690,7 @@ const _ = {
   today_button: !0,
   view_mode_select: !1
 };
-class F {
+class I {
   constructor(t, e, s) {
     this.setup_wrapper(t), this.setup_options(s), this.setup_tasks(e), this.change_view_mode(), this.bind_events();
   }
@@ -715,7 +710,7 @@ class F {
     }), this.$container = document.createElement("div"), this.$container.classList.add("gantt-container"), this.$svg.parentElement.appendChild(this.$container), this.$container.appendChild(this.$svg), this.$popup_wrapper = document.createElement("div"), this.$popup_wrapper.classList.add("popup-wrapper"), this.$container.appendChild(this.$popup_wrapper);
   }
   setup_options(t) {
-    this.options = { ...B, ...t };
+    this.options = { ...F, ...t };
     const e = this.options.custom_view_modes ? this.options.custom_view_modes.find(
       (s) => s.name === this.options.view_mode
     ) : null;
@@ -746,7 +741,7 @@ class F {
         let n = [];
         e.dependencies && (n = e.dependencies.split(",").map((a) => a.trim().replaceAll(" ", "_")).filter((a) => a)), e.dependencies = n;
       }
-      return e.id ? typeof e.id == "string" ? e.id = e.id.replaceAll(" ", "_") : e.id = `${e.id}` : e.id = I(e), e;
+      return e.id ? typeof e.id == "string" ? e.id = e.id.replaceAll(" ", "_") : e.id = `${e.id}` : e.id = B(e), e;
     }), this.setup_dependencies();
   }
   setup_dependencies() {
@@ -1171,8 +1166,7 @@ class F {
       let e = [];
       e = t.dependencies.map((s) => {
         const i = this.get_task(s);
-        if (!i)
-          return;
+        if (!i) return;
         const o = new O(
           this,
           this.bars[i._index],
@@ -1201,8 +1195,7 @@ class F {
       typeof t == "string" && (t = h.parse(t));
     }
     const e = this.$svg.parentElement;
-    if (!e)
-      return;
+    if (!e) return;
     const i = (h.diff(t, this.gantt_start, "hour") + 24) / this.options.step * this.options.column_width - this.options.column_width;
     e.scrollTo({ left: i, behavior: "smooth" });
   }
@@ -1229,7 +1222,7 @@ class F {
       this.options.move_dependencies ? f = [
         n,
         ...this.get_all_dependent_tasks(n)
-      ] : f = [n], console.log("BARS", f), a = f.map((w) => this.get_bar(w)), this.bar_being_dragged = n, a.forEach((w) => {
+      ] : f = [n], a = f.map((w) => this.get_bar(w)), this.bar_being_dragged = n, a.forEach((w) => {
         const b = w.$bar;
         b.ox = b.getX(), b.oy = b.getY(), b.owidth = b.getWidth(), b.finaldx = 0;
       });
@@ -1265,8 +1258,7 @@ class F {
         });
       })), s = d.currentTarget.scrollLeft;
     }), u.on(this.$svg, "mousemove", (d) => {
-      if (!p())
-        return;
+      if (!p()) return;
       const l = (d.offsetX || d.layerX) - e;
       a.forEach((g) => {
         const f = g.$bar;
@@ -1290,16 +1282,18 @@ class F {
   bind_bar_progress() {
     let t = 0, e = null, s = null, i = null, o = null;
     u.on(this.$svg, "mousedown", ".handle.progress", (n, a) => {
-      e = !0, t = n.offsetX || n.layerX, n.offsetY || n.layerY;
+      e = !0, t = n.offsetX || n.layerX, n.offsetY || n.layerY, console.log(n, a);
       const d = u.closest(".bar-wrapper", a).getAttribute("data-id");
-      s = this.get_bar(d), i = s.$bar_progress, o = s.$bar, i.finaldx = 0, i.owidth = i.getWidth(), i.min_dx = -i.getWidth(), i.max_dx = o.getWidth() - i.getWidth();
+      s = this.get_bar(d), i = s.$bar_progress, o = s.$bar, i.finaldx = 0, i.owidth = i.getWidth(), i.min_dx = -i.owidth, i.max_dx = o.getWidth() - i.getWidth();
     }), u.on(this.$svg, "mousemove", (n) => {
-      if (!e)
-        return;
+      if (!e) return;
       let a = (n.offsetX || n.layerX) - t;
-      a > i.max_dx && (a = i.max_dx), a < i.min_dx && (a = i.min_dx);
-      const p = s.$handle_progress;
-      u.attr(i, "width", i.owidth + a), u.attr(p, "cx", i.getEndX()), i.finaldx = a;
+      console.log(
+        a,
+        i.getWidth(),
+        i.min_dx,
+        i.max_dx
+      ), a > i.max_dx && (a = i.max_dx), a < i.min_dx && (a = i.min_dx), i.setAttribute("width", i.owidth + a), u.attr(s.$handle_progress, "cx", i.getEndX()), i.finaldx = a;
     }), u.on(this.$svg, "mouseup", () => {
       e = !1, i && i.finaldx && (i.finaldx = 0, s.progress_changed(), s.set_action_completed(), s = null, i = null, o = null);
     });
@@ -1360,10 +1354,10 @@ class F {
     this.$svg.innerHTML = "", (e = (t = this.$header) == null ? void 0 : t.remove) == null || e.call(t), (i = (s = this.$current_highlight) == null ? void 0 : s.remove) == null || i.call(s), (n = (o = this.popup) == null ? void 0 : o.hide) == null || n.call(o);
   }
 }
-F.VIEW_MODE = _;
-function I(r) {
+I.VIEW_MODE = _;
+function B(r) {
   return r.name + "_" + Math.random().toString(36).slice(2, 12);
 }
 export {
-  F as default
+  I as default
 };
