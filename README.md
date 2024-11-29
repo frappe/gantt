@@ -30,6 +30,11 @@ Include it in your HTML:
 <link rel="stylesheet" href="frappe-gantt.css">
 ```
 
+Or from the CDN:
+```
+<script src="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.umd.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.css">
+```
 And start hacking:
 
 ```js
@@ -63,7 +68,7 @@ var gantt = new Gantt('#gantt', tasks, {
     view_mode: 'Day',
     date_format: 'YYYY-MM-DD',
     language: 'en', // or 'es', 'it', 'ru', 'ptBr', 'fr', 'tr', 'zh', 'de', 'hu'
-    custom_popup_html: null,
+    popup: null,
 });
 ```
 

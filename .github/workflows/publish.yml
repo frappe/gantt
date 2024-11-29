@@ -7,13 +7,17 @@ jobs:
     publish:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v1
-            - uses: actions/setup-node@v1
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
               with:
-                  node-version: 16
-            - run: yarn install
-            - run: yarn prettier-check
-            - run: yarn test
+                  version: 9
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '18'
+                  cache: 'pnpm'
+            - run: pnpm install
+            - run: pnpm prettier-check
+            - run: pnpm build
             - uses: JS-DevTools/npm-publish@v1
               with:
                   token: ${{ secrets.NPM_TOKEN }}

@@ -282,25 +282,41 @@ export default class Bar {
             ]);
         });
 
-        let timeout;
-        $.on(
-            this.group,
-            'mouseenter',
-            (e) =>
-                (timeout = setTimeout(() => {
+        if (this.gantt.options.popup_on === 'click') {
+            let opened = false;
+            $.on(this.group, 'click', (e) => {
+                console.log(opened);
+                if (!opened) {
                     this.show_popup(e.offsetX || e.layerX);
                     document.getElementById(
                         `highlight-${task_id}`,
                     ).style.display = 'block';
-                }, 200)),
-        );
+                } else {
+                    this.gantt.hide_popup();
+                }
+                opened = !opened;
+            });
+        } else {
+            let timeout;
+            $.on(
+                this.group,
+                'mouseenter',
+                (e) =>
+                    (timeout = setTimeout(() => {
+                        this.show_popup(e.offsetX || e.layerX);
+                        document.getElementById(
+                            `${task_id}-highlight`,
+                        ).style.display = 'block';
+                    }, 200)),
+            );
 
-        $.on(this.group, 'mouseleave', () => {
-            clearTimeout(timeout);
-            this.gantt.popup?.hide?.();
-            document.getElementById(`highlight-${task_id}`).style.display =
-                'none';
-        });
+            $.on(this.group, 'mouseleave', () => {
+                clearTimeout(timeout);
+                this.gantt.popup?.hide?.();
+                document.getElementById(`${task_id}-highlight`).style.display =
+                    'none';
+            });
+        }
 
         $.on(this.group, 'click', () => {
             this.gantt.trigger_event('click', [this.task]);
@@ -333,7 +349,6 @@ export default class Bar {
             this.gantt.options.language,
         );
         const subtitle = `${start_date} -  ${end_date}<br/>Progress: ${this.task.progress}`;
-
         this.gantt.show_popup({
             x,
             target_element: this.$bar,
@@ -499,8 +514,19 @@ export default class Bar {
         const diff = date_utils.diff(task_start, gantt_start, 'hour');
         let x = (diff / step) * column_width;
 
+        /* Since the column width is based on 30,
+        we count the month-difference, multiply it by 30 for a "pseudo-month"
+        and then add the days in the month, making sure the number does not exceed 29
+        so it is within the column */
         if (this.gantt.view_is('Month')) {
-            const diff = date_utils.diff(task_start, gantt_start, 'day');
+            const diffDaysBasedOn30DayMonths =
+                date_utils.diff(task_start, gantt_start, 'month') * 30;
+            const dayInMonth = Math.min(
+                29,
+                date_utils.format(task_start, 'DD'),
+            );
+            const diff = diffDaysBasedOn30DayMonths + dayInMonth;
+
             x = (diff * column_width) / 30;
         }
         this.x = x;
