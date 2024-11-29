@@ -154,7 +154,7 @@ export default class Bar {
             this.gantt.options.column_width;
 
         let $date_highlight = document.createElement('div');
-        $date_highlight.id = `${this.task.id}-highlight`;
+        $date_highlight.id = `highlight-${this.task.id}`;
         $date_highlight.classList.add('date-highlight');
         $date_highlight.style.height = this.height * 0.8 + 'px';
         $date_highlight.style.width = this.width + 'px';
@@ -289,7 +289,7 @@ export default class Bar {
                 if (!opened) {
                     this.show_popup(e.offsetX || e.layerX);
                     document.getElementById(
-                        `${task_id}-highlight`,
+                        `highlight-${task_id}`,
                     ).style.display = 'block';
                 } else {
                     this.gantt.hide_popup();
