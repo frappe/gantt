@@ -7,10 +7,14 @@ jobs:
     publish:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v1
+            - uses: actions/checkout@v4
             - uses: pnpm/action-setup@v4
               with:
                   version: 9
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '14'
+                  cache: 'pnpm'
             - run: pnpm install
             - run: pnpm prettier-check
             - run: pnpm build
