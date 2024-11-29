@@ -13,7 +13,7 @@ jobs:
                   version: 9
             - uses: actions/setup-node@v4
               with:
-                  node-version: '14'
+                  node-version: '18'
                   cache: 'pnpm'
             - run: pnpm install
             - run: pnpm prettier-check
