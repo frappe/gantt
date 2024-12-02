@@ -38,6 +38,7 @@ const DEFAULT_VIEW_MODES = [
     {
         name: 'Day',
         padding: '14d',
+        format_string: 'YYYY-MM-DD',
         step: '1d',
         lower_text: (d, ld, lang) =>
             d.getDate() !== ld.getDate() ? date_utils.format(d, 'D', lang) : '',
@@ -45,6 +46,7 @@ const DEFAULT_VIEW_MODES = [
             d.getMonth() !== ld.getMonth()
                 ? date_utils.format(d, 'MMMM', lang)
                 : '',
+        thick_line: (d) => d.getDay() === 1,
     },
     {
         name: 'Week',
@@ -59,6 +61,7 @@ const DEFAULT_VIEW_MODES = [
             d.getMonth() !== ld.getMonth()
                 ? date_utils.format(d, 'MMMM', lang)
                 : '',
+        thick_line: (d) => d.getDate() >= 1 && d.getDate() <= 7,
     },
     {
         name: 'Month',
@@ -71,6 +74,7 @@ const DEFAULT_VIEW_MODES = [
             d.getMonth() !== ld.getMonth()
                 ? date_utils.format(d, 'YYYY', lang)
                 : '',
+        thick_line: (d) => d.getMonth() % 3 === 0,
     },
     {
         name: 'Year',

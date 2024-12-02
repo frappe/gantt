@@ -9,16 +9,6 @@ import { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES } from './defaults';
 
 import './gantt.css';
 
-const VIEW_MODE = {
-    HOUR: DEFAULT_VIEW_MODES[0],
-    QUARTER_DAY: DEFAULT_VIEW_MODES[1],
-    HALF_DAY: DEFAULT_VIEW_MODES[2],
-    DAY: DEFAULT_VIEW_MODES[3],
-    WEEK: DEFAULT_VIEW_MODES[4],
-    MONTH: DEFAULT_VIEW_MODES[5],
-    YEAR: DEFAULT_VIEW_MODES[6],
-};
-
 export default class Gantt {
     constructor(wrapper, tasks, options) {
         this.setup_wrapper(wrapper);
@@ -398,10 +388,10 @@ export default class Gantt {
             $el.textContent = 'Mode';
             $select.appendChild($el);
 
-            for (const key in VIEW_MODE) {
+            for (const mode of this.options.view_modes) {
                 const $option = document.createElement('option');
-                $option.value = VIEW_MODE[key];
-                $option.textContent = VIEW_MODE[key];
+                $option.value = mode.name;
+                $option.textContent = mode.name;
                 $select.appendChild($option);
             }
 
@@ -473,8 +463,7 @@ export default class Gantt {
     }
 
     make_grid_ticks() {
-        if (!['both', 'vertical', 'horizontal'].includes(this.options.lines))
-            return;
+        if (this.options.lines === 'none') return;
         let tick_x = 0;
         let tick_y = this.options.header_height + this.options.padding / 2;
         let tick_height =
@@ -504,34 +493,32 @@ export default class Gantt {
             }
         }
         if (this.options.lines === 'horizontal') return;
+
         for (let date of this.dates) {
             let tick_class = 'tick';
-            // thick tick for monday
-            if (this.view_is(VIEW_MODE.DAY) && date.getDate() === 1) {
-                tick_class += ' thick';
-            }
-            // thick tick for first week
             if (
-                this.view_is(VIEW_MODE.WEEK) &&
-                date.getDate() >= 1 &&
-                date.getDate() < 8
+                this.config.view_mode.thick_line &&
+                this.config.view_mode.thick_line(date)
             ) {
                 tick_class += ' thick';
             }
-            // thick ticks for quarters
-            if (this.view_is(VIEW_MODE.MONTH) && date.getMonth() % 3 === 0) {
-                tick_class += ' thick';
-            }
+
             createSVG('path', {
                 d: `M ${tick_x} ${tick_y} v ${tick_height}`,
                 class: tick_class,
                 append_to: this.layers.grid,
             });
-            if (this.view_is(VIEW_MODE.MONTH)) {
+
+            if (this.view_is('month')) {
                 tick_x +=
                     (date_utils.get_days_in_month(date) *
                         this.config.column_width) /
                     30;
+            } else if (this.view_is('year')) {
+                tick_x +=
+                    (date_utils.get_days_in_year(date) *
+                        this.config.column_width) /
+                    365;
             } else {
                 tick_x += this.config.column_width;
             }
@@ -539,6 +526,7 @@ export default class Gantt {
     }
 
     highlightWeekends() {
+        // FIX
         if (!this.view_is('Day') && !this.view_is('Half Day')) return;
         for (
             let d = new Date(this.gantt_start);
@@ -575,81 +563,41 @@ export default class Gantt {
     computeGridHighlightDimensions(view_mode) {
         const today = new Date();
         if (today < this.gantt_start || today > this.gantt_end) return null;
-        if (this.view_is(VIEW_MODE.DAY)) {
-            let diff_in_units = date_utils.diff(
-                today,
-                this.gantt_start,
-                this.config.unit,
-            );
-            return {
-                x:
-                    (diff_in_units / this.config.step) *
-                    this.config.column_width,
-                date: today,
-            };
-        }
-
-        let x = 0;
-        for (let date of this.dates) {
-            const todayDate = new Date();
-            const startDate = new Date(date);
-            const endDate = new Date(date);
-            switch (view_mode.name) {
-                case VIEW_MODE.WEEK.name:
-                    endDate.setDate(date.getDate() + 7);
-                    break;
-                case VIEW_MODE.MONTH.name:
-                    endDate.setMonth(date.getMonth() + 1);
-                    break;
-                case VIEW_MODE.YEAR.name:
-                    endDate.setFullYear(date.getFullYear() + 1);
-                    break;
-            }
-            if (todayDate >= startDate && todayDate <= endDate) {
-                return { x, date: startDate };
-            } else {
-                x += this.config.column_width;
-            }
-        }
-
-        return { x };
+        let diff_in_units = date_utils.diff(
+            today,
+            this.gantt_start,
+            this.config.unit,
+        );
+        return {
+            x: (diff_in_units / this.config.step) * this.config.column_width,
+            date: date_utils.format(today, this.config.view_mode.format_string),
+        };
     }
 
     make_grid_highlights() {
         if (this.options.highlight_weekend) this.highlightWeekends();
 
-        // highlight today's | week's | month's | year's
-        if (
-            this.view_is(VIEW_MODE.DAY) ||
-            this.view_is(VIEW_MODE.WEEK) ||
-            this.view_is(VIEW_MODE.MONTH) ||
-            this.view_is(VIEW_MODE.YEAR)
-        ) {
-            // Used as we must find the _end_ of session if view is not Day
-            const highlightDimensions = this.computeGridHighlightDimensions(
-                this.config.view_mode,
-            );
-            if (!highlightDimensions) return;
-            const { x: left, date } = highlightDimensions;
-            const top = this.options.header_height + this.options.padding / 2;
-            const height =
-                (this.options.bar_height + this.options.padding) *
-                this.tasks.length;
-            this.$current_highlight = this.create_el({
-                top,
-                left,
-                height,
-                classes: 'current-highlight',
-                append_to: this.$container,
-            });
-            let $today = document.getElementById(
-                date_utils.format(date).replaceAll(' ', '_'),
-            );
-            if ($today) {
-                $today.classList.add('current-date-highlight');
-                $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
-                $today.style.left = +$today.style.left.slice(0, -2) - 8 + 'px';
-            }
+        const highlightDimensions = this.computeGridHighlightDimensions(
+            this.config.view_mode,
+        );
+        if (!highlightDimensions) return;
+        const { x: left, date } = highlightDimensions;
+
+        const top = this.options.header_height + this.options.padding / 2;
+        const height =
+            (this.options.bar_height + this.options.padding) *
+            this.tasks.length;
+        this.$current_highlight = this.create_el({
+            top,
+            left,
+            height,
+            classes: 'current-highlight',
+            append_to: this.$container,
+        });
+        let $today = document.getElementById(date.replaceAll(' ', '_'));
+        if ($today) {
+            $today.classList.add('current-date-highlight');
+            $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
         }
     }
 
@@ -742,7 +690,9 @@ export default class Gantt {
 
         return {
             date,
-            formatted_date: date_utils.format(date).replaceAll(' ', '_'),
+            formatted_date: date_utils
+                .format(date, this.config.view_mode.format_string)
+                .replaceAll(' ', '_'),
             column_width: this.config.column_width,
             base_pos_x: base_pos.x,
             upper_text:
@@ -1198,7 +1148,15 @@ export default class Gantt {
     }
 }
 
-Gantt.VIEW_MODE = VIEW_MODE;
+Gantt.VIEW_MODE = {
+    HOUR: DEFAULT_VIEW_MODES[0],
+    QUARTER_DAY: DEFAULT_VIEW_MODES[1],
+    HALF_DAY: DEFAULT_VIEW_MODES[2],
+    DAY: DEFAULT_VIEW_MODES[3],
+    WEEK: DEFAULT_VIEW_MODES[4],
+    MONTH: DEFAULT_VIEW_MODES[5],
+    YEAR: DEFAULT_VIEW_MODES[6],
+};
 
 function generate_id(task) {
     return task.name + '_' + Math.random().toString(36).slice(2, 12);

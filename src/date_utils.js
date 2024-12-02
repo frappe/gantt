@@ -251,6 +251,10 @@ export default {
         }
         return 28;
     },
+
+    get_days_in_year(date) {
+        return date.getFullYear() % 4 ? 365 : 366;
+    },
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
