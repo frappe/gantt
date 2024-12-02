@@ -79,6 +79,7 @@ const DEFAULT_VIEW_MODES = [
                 ? date_utils.format(d, 'YYYY', lang)
                 : '',
         thick_line: (d) => d.getMonth() % 3 === 0,
+        default_snap: '7d',
     },
     {
         name: 'Year',
@@ -92,6 +93,7 @@ const DEFAULT_VIEW_MODES = [
                 ? date_utils.format(d, 'YYYY', lang)
                 : '',
         upper_text_frequency: 30,
+        default_snap: '1m',
     },
 ];
 
@@ -119,7 +121,7 @@ const DEFAULT_OPTIONS = {
     auto_move_label: true,
     today_button: true,
     view_mode_select: false,
-    snap_by_day: false,
+    default_snap: '1d',
 };
 
 export { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES };

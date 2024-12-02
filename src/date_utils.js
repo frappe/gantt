@@ -235,6 +235,21 @@ export default {
         ];
     },
 
+    convert_scales(period, to_scale) {
+        const TO_DAYS = {
+            millisecond: 1 / 60 / 60 / 24 / 1000,
+            second: 1 / 60 / 60 / 24,
+            minute: 1 / 60 / 24,
+            hour: 1 / 24,
+            day: 1,
+            month: 30,
+            year: 365,
+        };
+        const { duration, scale } = this.parse_duration(period);
+        let in_days = duration * TO_DAYS[scale];
+        return in_days / TO_DAYS[to_scale];
+    },
+
     get_days_in_month(date) {
         const no_of_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 

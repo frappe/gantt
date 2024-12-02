@@ -1054,24 +1054,25 @@ export default class Gantt {
         let odx = dx,
             rem,
             position;
+
         let unit_length = 1;
-        if (this.options.snap_by_day) {
-            const { duration, scale } = date_utils.parse_duration(
-                this.config.view_mode.step,
-            );
+        const default_snap =
+            this.config.view_mode.default_snap || this.options.default_snap;
+        if (default_snap !== 'unit') {
+            const { duration, scale } = date_utils.parse_duration(default_snap);
             unit_length =
-                duration *
-                ({ hour: 1 / 24, week: 7, month: 30, year: 365 }[scale] || 1);
+                date_utils.convert_scales(this.config.view_mode.step, scale) /
+                duration;
         }
 
         rem = dx % (this.config.column_width / unit_length);
+
         position =
             odx -
             rem +
-            (rem < this.config.column_width / unit_length / 2
+            (rem < (this.config.column_width / unit_length) * 2
                 ? 0
                 : this.config.column_width / unit_length);
-
         return position;
     }
 
