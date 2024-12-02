@@ -201,7 +201,8 @@ export default class Gantt {
         let { duration, scale } = date_utils.parse_duration(mode.step);
         this.config.step = duration;
         this.config.unit = scale;
-        this.config.column_width = mode.column_width || 38;
+        this.config.column_width =
+            mode.column_width || this.options.column_width;
     }
 
     setup_dates() {
@@ -526,7 +527,6 @@ export default class Gantt {
                 class: tick_class,
                 append_to: this.layers.grid,
             });
-
             if (this.view_is(VIEW_MODE.MONTH)) {
                 tick_x +=
                     (date_utils.get_days_in_month(date) *
@@ -547,7 +547,7 @@ export default class Gantt {
         ) {
             if (d.getDay() === 0 || d.getDay() === 6) {
                 const x =
-                    (date_utils.diff(d, this.gantt_start, 'hour') /
+                    (date_utils.diff(d, this.gantt_start, this.config.unit) /
                         this.config.step) *
                     this.config.column_width;
                 const height =
@@ -573,19 +573,19 @@ export default class Gantt {
      * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
      */
     computeGridHighlightDimensions(view_mode) {
-        const todayDate = new Date();
-        if (todayDate < this.gantt_start || todayDate > this.gantt_end)
-            return null;
-
-        let x = this.config.column_width / 2;
+        const today = new Date();
+        if (today < this.gantt_start || today > this.gantt_end) return null;
 
         if (this.view_is(VIEW_MODE.DAY)) {
+            let diff_in_units = date_utils.diff(
+                today,
+                this.gantt_start,
+                this.config.unit,
+            );
             return {
                 x:
-                    x +
-                    (date_utils.diff(today, this.gantt_start, 'hour') /
-                        this.config.step) *
-                        this.config.column_width,
+                    (diff_in_units / this.config.step) *
+                    this.config.column_width,
                 date: today,
             };
         }
@@ -631,7 +631,6 @@ export default class Gantt {
             );
             if (!highlightDimensions) return;
             const { x: left, date } = highlightDimensions;
-            if (!this.dates.find((d) => d.getTime() == date.getTime())) return;
             const top = this.options.header_height + this.options.padding / 2;
             const height =
                 (this.options.bar_height + this.options.padding) *
@@ -819,18 +818,19 @@ export default class Gantt {
         } else if (typeof date === 'string') {
             date = date_utils.parse(date);
         }
-
         const parent_element = this.$svg.parentElement;
         if (!parent_element) return;
-
-        const hours_before_first_task =
-            date_utils.diff(date, this.gantt_start, 'hour') + 24;
-
+        const units_since_first_task = date_utils.diff(
+            date,
+            this.gantt_start,
+            this.config.unit,
+        );
         const scroll_pos =
-            (hours_before_first_task / this.config.step) *
+            (units_since_first_task / this.config.step) *
                 this.config.column_width -
             this.config.column_width;
-        parent_element.scrollTo({ left: scroll_pos, behavior: 'smooth' });
+        console.log(scroll_pos);
+        parent_element.scrollTo({ left: 400, behavior: 'smooth' });
     }
 
     scroll_today() {
@@ -1143,10 +1143,10 @@ export default class Gantt {
         }
 
         if (Array.isArray(modes)) {
-            return modes.some((mode) => this.config.view_mode.name === mode);
+            return modes.some(view_is);
         }
 
-        return false;
+        return this.config.view_mode.name === modes.name;
     }
 
     get_task(id) {
