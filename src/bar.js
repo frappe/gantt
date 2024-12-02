@@ -305,7 +305,7 @@ export default class Bar {
                     (timeout = setTimeout(() => {
                         this.show_popup(e.offsetX || e.layerX);
                         document.getElementById(
-                            `${task_id}-highlight`,
+                            `highlight-${task_id}`,
                         ).style.display = 'block';
                     }, 200)),
             );
@@ -313,7 +313,7 @@ export default class Bar {
             $.on(this.group, 'mouseleave', () => {
                 clearTimeout(timeout);
                 this.gantt.popup?.hide?.();
-                document.getElementById(`${task_id}-highlight`).style.display =
+                document.getElementById(`highlight-${task_id}`).style.display =
                     'none';
             });
         }

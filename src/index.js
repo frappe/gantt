@@ -689,13 +689,14 @@ export default class Gantt {
     }
 
     /**
-    * Compute the horizontal x-axis distance and associated date for the current date and view.
-    * 
-    * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
-    */
+     * Compute the horizontal x-axis distance and associated date for the current date and view.
+     *
+     * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
+     */
     computeGridHighlightDimensions(view_mode) {
         const todayDate = new Date();
-        if (todayDate < this.gantt_start || todayDate > this.gantt_end) return null;
+        if (todayDate < this.gantt_start || todayDate > this.gantt_end)
+            return null;
 
         let x = this.options.column_width / 2;
 
@@ -703,10 +704,10 @@ export default class Gantt {
             return {
                 x:
                     x +
-                    (date_utils.diff(today, this.gantt_start, 'hour') /
+                    (date_utils.diff(todayDate, this.gantt_start, 'hour') /
                         this.options.step) *
                         this.options.column_width,
-                date: today,
+                date: todayDate,
             };
         }
 
@@ -746,7 +747,9 @@ export default class Gantt {
             this.view_is(VIEW_MODE.YEAR)
         ) {
             // Used as we must find the _end_ of session if view is not Day
-            const highlightDimensions = this.computeGridHighlightDimensions(this.options.view_mode);
+            const highlightDimensions = this.computeGridHighlightDimensions(
+                this.options.view_mode,
+            );
             if (!highlightDimensions) return;
             const { x: left, date } = highlightDimensions;
             if (!this.dates.find((d) => d.getTime() == date.getTime())) return;
@@ -1147,7 +1150,6 @@ export default class Gantt {
             }
 
             bar_wrapper.classList.add('active');
-            if (this.popup) this.popup.parent.classList.add('hidden');
 
             if (this.popup) this.popup.parent.classList.add('hidden');
 
@@ -1165,7 +1167,7 @@ export default class Gantt {
                 ids = [parent_bar_id];
             }
             bars = ids.map((id) => this.get_bar(id));
-
+            
             this.bar_being_dragged = parent_bar_id;
 
             bars.forEach((bar) => {
