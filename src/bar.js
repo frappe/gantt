@@ -505,11 +505,9 @@ export default class Bar {
         const task_start = this.task._start;
         const gantt_start = this.gantt.gantt_start;
 
-        const diff = date_utils.diff(
-            task_start,
-            gantt_start,
-            this.gantt.config.unit,
-        );
+        const diff =
+            date_utils.diff(task_start, gantt_start, this.gantt.config.unit) /
+            this.gantt.config.step;
         let x = diff * column_width;
 
         /* Since the column width is based on 30,
@@ -540,6 +538,13 @@ export default class Bar {
     }
 
     compute_duration() {
+        console.log(
+            date_utils.diff(
+                this.task._end,
+                this.task._start,
+                this.gantt.config.unit,
+            ),
+        );
         this.duration =
             date_utils.diff(
                 this.task._end,

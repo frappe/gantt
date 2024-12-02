@@ -349,6 +349,7 @@ export default class Gantt {
                 class: 'grid-row',
                 append_to: rows_layer,
             });
+            // FIX
             if (
                 this.options.lines === 'both' ||
                 this.options.lines === 'horizontal'
@@ -750,7 +751,7 @@ export default class Gantt {
                     ? date_utils.format(date, upper_text, this.options.language)
                     : upper_text(date, last_date, this.options.language),
             lower_text:
-                typeof upper_text === 'string'
+                typeof lower_text === 'string'
                     ? date_utils.format(date, lower_text, this.options.language)
                     : lower_text(date, last_date, this.options.language),
             upper_x: base_pos.x + x_pos[`${this.config.view_mode.name}_upper`],
