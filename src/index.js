@@ -79,85 +79,81 @@ export default class Gantt {
 
     setup_tasks(tasks) {
         // prepare tasks
-        this.tasks = tasks.map((task, i) => {
-            // convert to Date objects
-            task._start = date_utils.parse(task.start);
-            if (task.end === undefined && task.duration !== undefined) {
-                task.end = task._start;
-                let durations = task.duration.split(' ');
-
-                durations.forEach((tmpDuration) => {
-                    let { duration, scale } =
-                        date_utils.parse_duration(tmpDuration);
-                    task.end = date_utils.add(task.end, duration, scale);
-                });
-            }
-            task._end = date_utils.parse(task.end);
-            let diff = date_utils.diff(task._end, task._start, 'year');
-            if (diff < 0) {
-                throw Error(
-                    "start of task can't be after end of task: in task #, " +
-                        (i + 1),
-                );
-            }
-            // make task invalid if duration too large
-            if (date_utils.diff(task._end, task._start, 'year') > 10) {
-                task.end = null;
-            }
-
-            // cache index
-            task._index = i;
-
-            // invalid dates
-            if (!task.start && !task.end) {
-                const today = date_utils.today();
-                task._start = today;
-                task._end = date_utils.add(today, 2, 'day');
-            }
-
-            if (!task.start && task.end) {
-                task._start = date_utils.add(task._end, -2, 'day');
-            }
-
-            if (task.start && !task.end) {
-                task._end = date_utils.add(task._start, 2, 'day');
-            }
-
-            // if hours is not set, assume the last day is full day
-            // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
-            const task_end_values = date_utils.get_date_values(task._end);
-            if (task_end_values.slice(3).every((d) => d === 0)) {
-                task._end = date_utils.add(task._end, 24, 'hour');
-            }
-
-            // invalid flag
-            if (!task.start || !task.end) {
-                task.invalid = true;
-            }
-
-            // dependencies
-            if (typeof task.dependencies === 'string' || !task.dependencies) {
-                let deps = [];
-                if (task.dependencies) {
-                    deps = task.dependencies
-                        .split(',')
-                        .map((d) => d.trim().replaceAll(' ', '_'))
-                        .filter((d) => d);
+        this.tasks = tasks
+            .map((task, i) => {
+                // invalid flag
+                if (!task.start || !task.end) {
+                    console.error(`task "${task.id}" doesn't have valid dates`);
+                    return false;
                 }
-                task.dependencies = deps;
-            }
 
-            // uids
-            if (!task.id) {
-                task.id = generate_id(task);
-            } else if (typeof task.id === 'string') {
-                task.id = task.id.replaceAll(' ', '_');
-            } else {
-                task.id = `${task.id}`;
-            }
+                // convert to Date objects
+                task._start = date_utils.parse(task.start);
+                if (task.end === undefined && task.duration !== undefined) {
+                    task.end = task._start;
+                    let durations = task.duration.split(' ');
 
-            return task;
-        });
+                    durations.forEach((tmpDuration) => {
+                        let { duration, scale } =
+                            date_utils.parse_duration(tmpDuration);
+                        task.end = date_utils.add(task.end, duration, scale);
+                    });
+                }
+                task._end = date_utils.parse(task.end);
+
+                let diff = date_utils.diff(task._end, task._start, 'year');
+                if (diff < 0) {
+                    console.error(
+                        `start of task can't be after end of task: in task "${task.id}"`,
+                    );
+                    return false;
+                }
+
+                // make task invalid if duration too large
+                if (date_utils.diff(task._end, task._start, 'year') > 10) {
+                    console.error(
+                        `the duration of task "${task.id}" is too long (above ten years)`,
+                    );
+                    return false;
+                }
+
+                // cache index
+                task._index = i;
+
+                // if hours is not set, assume the last day is full day
+                // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
+                const task_end_values = date_utils.get_date_values(task._end);
+                if (task_end_values.slice(3).every((d) => d === 0)) {
+                    task._end = date_utils.add(task._end, 24, 'hour');
+                }
+
+                // dependencies
+                if (
+                    typeof task.dependencies === 'string' ||
+                    !task.dependencies
+                ) {
+                    let deps = [];
+                    if (task.dependencies) {
+                        deps = task.dependencies
+                            .split(',')
+                            .map((d) => d.trim().replaceAll(' ', '_'))
+                            .filter((d) => d);
+                    }
+                    task.dependencies = deps;
+                }
+
+                // uids
+                if (!task.id) {
+                    task.id = generate_id(task);
+                } else if (typeof task.id === 'string') {
+                    task.id = task.id.replaceAll(' ', '_');
+                } else {
+                    task.id = `${task.id}`;
+                }
+
+                return task;
+            })
+            .filter((t) => t);
         this.setup_dependencies();
     }
 
@@ -201,8 +197,12 @@ export default class Gantt {
     }
 
     setup_gantt_dates() {
-        // set global start and end date
         let gantt_start, gantt_end;
+        if (!this.tasks.length) {
+            gantt_start = new Date();
+            gantt_end = new Date();
+        }
+
         for (let task of this.tasks) {
             if (!gantt_start || task._start < gantt_start) {
                 gantt_start = task._start;
