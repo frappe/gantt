@@ -1167,7 +1167,7 @@ export default class Gantt {
                 ids = [parent_bar_id];
             }
             bars = ids.map((id) => this.get_bar(id));
-            
+
             this.bar_being_dragged = parent_bar_id;
 
             bars.forEach((bar) => {
