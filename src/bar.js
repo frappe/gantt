@@ -520,7 +520,11 @@ export default class Bar {
                 date_utils.diff(task_start, gantt_start, 'month') * 30;
             const dayInMonth = Math.min(
                 29,
-                date_utils.format(task_start, 'DD'),
+                date_utils.format(
+                    task_start,
+                    'DD',
+                    this.gantt.options.language,
+                ),
             );
             const diff = diffDaysBasedOn30DayMonths + dayInMonth;
 

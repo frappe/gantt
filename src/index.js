@@ -235,7 +235,11 @@ export default class Gantt {
             this.config.view_mode.format_string || 'YYYY-MM-DD HH';
 
         this.gantt_start = date_utils.parse(
-            date_utils.format(gantt_start, format_string),
+            date_utils.format(
+                gantt_start,
+                format_string,
+                this.options.language,
+            ),
         );
         this.gantt_start.setHours(0, 0, 0, 0);
         this.gantt_end = date_utils.add(
@@ -570,7 +574,11 @@ export default class Gantt {
         );
         return {
             x: (diff_in_units / this.config.step) * this.config.column_width,
-            date: date_utils.format(today, this.config.view_mode.format_string),
+            date: date_utils.format(
+                today,
+                this.config.view_mode.format_string,
+                this.options.language,
+            ),
         };
     }
 
@@ -869,6 +877,7 @@ export default class Gantt {
             let currentUpper = date_utils.format(
                 date_utils.add(this.gantt_start, daysSinceStart, 'day'),
                 format_str,
+                this.options.language,
             );
             const upperTexts = Array.from(
                 document.querySelectorAll('.upper-text'),
