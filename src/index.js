@@ -575,7 +575,6 @@ export default class Gantt {
     computeGridHighlightDimensions(view_mode) {
         const today = new Date();
         if (today < this.gantt_start || today > this.gantt_end) return null;
-
         if (this.view_is(VIEW_MODE.DAY)) {
             let diff_in_units = date_utils.diff(
                 today,
@@ -590,18 +589,19 @@ export default class Gantt {
             };
         }
 
+        let x = 0;
         for (let date of this.dates) {
             const todayDate = new Date();
             const startDate = new Date(date);
             const endDate = new Date(date);
-            switch (view_mode) {
-                case VIEW_MODE.WEEK:
+            switch (view_mode.name) {
+                case VIEW_MODE.WEEK.name:
                     endDate.setDate(date.getDate() + 7);
                     break;
-                case VIEW_MODE.MONTH:
+                case VIEW_MODE.MONTH.name:
                     endDate.setMonth(date.getMonth() + 1);
                     break;
-                case VIEW_MODE.YEAR:
+                case VIEW_MODE.YEAR.name:
                     endDate.setFullYear(date.getFullYear() + 1);
                     break;
             }
@@ -829,7 +829,6 @@ export default class Gantt {
             (units_since_first_task / this.config.step) *
                 this.config.column_width -
             this.config.column_width;
-        console.log(scroll_pos);
         parent_element.scrollTo({ left: 400, behavior: 'smooth' });
     }
 
@@ -1101,32 +1100,24 @@ export default class Gantt {
         let odx = dx,
             rem,
             position;
-
-        if (this.view_is(VIEW_MODE.WEEK)) {
-            rem = dx % (this.config.column_width / 7);
-            position =
-                odx -
-                rem +
-                (rem < this.config.column_width / 14
-                    ? 0
-                    : this.config.column_width / 7);
-        } else if (this.view_is(VIEW_MODE.MONTH)) {
-            rem = dx % (this.config.column_width / 30);
-            position =
-                odx -
-                rem +
-                (rem < this.config.column_width / 60
-                    ? 0
-                    : this.config.column_width / 30);
-        } else {
-            rem = dx % this.config.column_width;
-            position =
-                odx -
-                rem +
-                (rem < this.config.column_width / 2
-                    ? 0
-                    : this.config.column_width);
+        let unit_length = 1;
+        if (this.options.snap_by_day) {
+            const { duration, scale } = date_utils.parse_duration(
+                this.config.view_mode.step,
+            );
+            unit_length =
+                duration *
+                ({ hour: 1 / 24, week: 7, month: 30, year: 365 }[scale] || 1);
         }
+
+        rem = dx % (this.config.column_width / unit_length);
+        position =
+            odx -
+            rem +
+            (rem < this.config.column_width / unit_length / 2
+                ? 0
+                : this.config.column_width / unit_length);
+
         return position;
     }
 

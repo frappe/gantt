@@ -110,6 +110,7 @@ const DEFAULT_OPTIONS = {
     auto_move_label: true,
     today_button: true,
     view_mode_select: false,
+    snap_by_day: false,
 };
 
 export { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES };

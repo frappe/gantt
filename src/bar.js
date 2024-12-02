@@ -538,13 +538,6 @@ export default class Bar {
     }
 
     compute_duration() {
-        console.log(
-            date_utils.diff(
-                this.task._end,
-                this.task._start,
-                this.gantt.config.unit,
-            ),
-        );
         this.duration =
             date_utils.diff(
                 this.task._end,
@@ -558,31 +551,31 @@ export default class Bar {
             rem,
             position;
 
-        if (this.gantt.view_is('Week')) {
-            rem = dx % (this.gantt.config.column_width / 7);
-            position =
-                odx -
-                rem +
-                (rem < this.gantt.config.column_width / 14
-                    ? 0
-                    : this.gantt.config.column_width / 7);
-        } else if (this.gantt.view_is('Month')) {
-            rem = dx % (this.gantt.config.column_width / 30);
-            position =
-                odx -
-                rem +
-                (rem < this.gantt.config.column_width / 60
-                    ? 0
-                    : this.gantt.config.column_width / 30);
-        } else {
-            rem = dx % this.gantt.config.column_width;
-            position =
-                odx -
-                rem +
-                (rem < this.gantt.config.column_width / 2
-                    ? 0
-                    : this.gantt.config.column_width);
-        }
+        // if (this.gantt.view_is('Week')) {
+        //     rem = dx % (this.gantt.config.column_width / 7);
+        //     position =
+        //         odx -
+        //         rem +
+        //         (rem < this.gantt.config.column_width / 14
+        //             ? 0
+        //             : this.gantt.config.column_width / 7);
+        // } else if (this.gantt.view_is('Month')) {
+        //     rem = dx % (this.gantt.config.column_width / 30);
+        //     position =
+        //         odx -
+        //         rem +
+        //         (rem < this.gantt.config.column_width / 60
+        //             ? 0
+        //             : this.gantt.config.column_width / 30);
+        // } else {
+        rem = dx % this.gantt.config.column_width;
+        position =
+            odx -
+            rem +
+            (rem < this.gantt.config.column_width / 2
+                ? 0
+                : this.gantt.config.column_width);
+        // }
         return position;
     }
 
