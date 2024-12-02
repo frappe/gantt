@@ -569,7 +569,6 @@ export default class Gantt {
      * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
      */
     computeGridHighlightDimensions(view_mode) {
-
         const today = new Date();
         if (today < this.gantt_start || today > this.gantt_end) return null;
         let diff_in_units = date_utils.diff(
@@ -611,7 +610,6 @@ export default class Gantt {
         if ($today) {
             $today.classList.add('current-date-highlight');
             $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
-
         }
     }
 
@@ -660,26 +658,25 @@ export default class Gantt {
     }
 
     get_dates_to_draw() {
-        let last_date = null;
+        let last_date_info = null;
         const dates = this.dates.map((date, i) => {
-            const d = this.get_date_info(date, last_date, i);
-            last_date = d;
+            console.log('starting', date, last_date_info);
+            const d = this.get_date_info(date, last_date_info, i);
+            last_date_info = d;
             return d;
         });
         return dates;
     }
 
     get_date_info(date, last_date_info) {
-        let last_date = last_date_info
-            ? last_date_info.date
-            : date_utils.add(date, 1, 'day');
+        let last_date = last_date_info ? last_date_info.date : null;
 
         let column_width = this.config.column_width;
 
         const base_pos = {
             x: last_date_info
                 ? last_date_info.base_pos_x + last_date_info.column_width
-                : 0,
+                : 20,
             lower_y: this.options.header_height - 20,
             upper_y: this.options.header_height - 50,
         };
@@ -710,7 +707,7 @@ export default class Gantt {
                     1) /
                     2,
             upper_y: base_pos.upper_y,
-            lower_x: base_pos.x + column_width / 2,
+            lower_x: base_pos.x + column_width / 2 - 20,
             lower_y: base_pos.lower_y,
         };
     }

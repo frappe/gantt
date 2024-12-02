@@ -69,13 +69,13 @@ const DEFAULT_VIEW_MODES = [
     },
     {
         name: 'Month',
-        padding: '1m',
+        padding: '2m',
         step: '1m',
         column_width: 120,
         format_string: 'YYYY-MM',
         lower_text: 'MMMM',
         upper_text: (d, ld, lang) =>
-            d.getMonth() !== ld.getMonth()
+            !ld || d.getFullYear() !== ld.getFullYear()
                 ? date_utils.format(d, 'YYYY', lang)
                 : '',
         thick_line: (d) => d.getMonth() % 3 === 0,
@@ -83,16 +83,11 @@ const DEFAULT_VIEW_MODES = [
     },
     {
         name: 'Year',
-        padding: '1m',
+        padding: '2y',
         step: '1y',
         column_width: 120,
         format_string: 'YYYY',
-        lower_text: 'YYYY',
-        upper_text: (d, ld, lang) =>
-            d.getMonth() !== ld.getMonth()
-                ? date_utils.format(d, 'YYYY', lang)
-                : '',
-        upper_text_frequency: 30,
+        upper_text: 'YYYY',
         default_snap: '30d',
     },
 ];
