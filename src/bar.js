@@ -303,12 +303,18 @@ export default class Bar {
                 (e) =>
                     (timeout = setTimeout(() => {
                         this.show_popup(e.offsetX || e.layerX);
+                        document.getElementById(
+                            `highlight-${task_id}`,
+                        ).style.display = 'block';
                     }, 200)),
             );
 
             $.on(this.group, 'mouseleave', () => {
                 clearTimeout(timeout);
                 this.gantt.popup?.hide?.();
+
+                document.getElementById(`highlight-${task_id}`).style.display =
+                    'none';
             });
         }
 

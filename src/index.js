@@ -569,6 +569,7 @@ export default class Gantt {
      * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
      */
     computeGridHighlightDimensions(view_mode) {
+
         const today = new Date();
         if (today < this.gantt_start || today > this.gantt_end) return null;
         let diff_in_units = date_utils.diff(
@@ -610,6 +611,7 @@ export default class Gantt {
         if ($today) {
             $today.classList.add('current-date-highlight');
             $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
+
         }
     }
 
@@ -827,7 +829,6 @@ export default class Gantt {
             }
 
             bar_wrapper.classList.add('active');
-            if (this.popup) this.popup.parent.classList.add('hidden');
 
             if (this.popup) this.popup.parent.classList.add('hidden');
 
