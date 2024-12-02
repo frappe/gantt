@@ -6,7 +6,6 @@ const MINUTE = 'minute';
 const SECOND = 'second';
 const MILLISECOND = 'millisecond';
 
-
 export default {
     parse_duration(duration) {
         const regex = /([0-9]+)(y|m|d|h|min|s|ms)/gm;
@@ -84,7 +83,7 @@ export default {
             month: 'long',
         });
         const dateTimeFormatShort = new Intl.DateTimeFormat(lang, {
-            month: "short",
+            month: 'short',
         });
         const month_name = dateTimeFormat.format(date);
         const month_name_capitalized =
