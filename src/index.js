@@ -670,8 +670,10 @@ export default class Gantt {
             upper_y: this.options.header_height - 50,
         };
 
-        const upper_text = this.config.view_mode.upper_text;
-        const lower_text = this.config.view_mode.lower_text;
+        let upper_text = this.config.view_mode.upper_text;
+        let lower_text = this.config.view_mode.lower_text;
+        if (!upper_text) upper_text = () => '';
+        if (!lower_text) lower_text = () => '';
 
         return {
             date,
