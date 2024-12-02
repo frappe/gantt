@@ -81,13 +81,13 @@ export default class Gantt {
         // prepare tasks
         this.tasks = tasks
             .map((task, i) => {
-                // invalid flag
-                if (!task.start || !task.end) {
-                    console.error(`task "${task.id}" doesn't have valid dates`);
+                if (!task.start) {
+                    console.error(
+                        `task "${task.id}" doesn't have a start date`,
+                    );
                     return false;
                 }
 
-                // convert to Date objects
                 task._start = date_utils.parse(task.start);
                 if (task.end === undefined && task.duration !== undefined) {
                     task.end = task._start;
@@ -98,6 +98,10 @@ export default class Gantt {
                             date_utils.parse_duration(tmpDuration);
                         task.end = date_utils.add(task.end, duration, scale);
                     });
+                }
+                if (!task.end) {
+                    console.error(`task "${task.id}" doesn't have an end date`);
+                    return false;
                 }
                 task._end = date_utils.parse(task.end);
 
