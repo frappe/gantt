@@ -669,24 +669,9 @@ export default class Gantt {
             lower_y: this.options.header_height - 20,
             upper_y: this.options.header_height - 50,
         };
-        const x_pos = {
-            Hour_lower: column_width / 2,
-            Hour_upper: column_width * 12,
-            'Quarter Day_lower': column_width / 2,
-            'Quarter Day_upper': column_width * 2,
-            'Half Day_lower': column_width / 2,
-            'Half Day_upper': column_width,
-            Day_lower: column_width / 2,
-            Day_upper: column_width / 2,
-            Week_lower: column_width / 2,
-            Week_upper: (column_width * 4) / 2,
-            Month_lower: column_width / 2,
-            Month_upper: column_width / 2,
-            Year_lower: column_width / 2,
-            Year_upper: (column_width * 30) / 2,
-        };
-        let upper_text = this.config.view_mode.upper_text;
-        let lower_text = this.config.view_mode.lower_text;
+
+        const upper_text = this.config.view_mode.upper_text;
+        const lower_text = this.config.view_mode.lower_text;
 
         return {
             date,
@@ -703,9 +688,13 @@ export default class Gantt {
                 typeof lower_text === 'string'
                     ? date_utils.format(date, lower_text, this.options.language)
                     : lower_text(date, last_date, this.options.language),
-            upper_x: base_pos.x + x_pos[`${this.config.view_mode.name}_upper`],
+            upper_x:
+                base_pos.x +
+                (column_width * this.config.view_mode.upper_text_frequency ||
+                    1) /
+                    2,
             upper_y: base_pos.upper_y,
-            lower_x: base_pos.x + x_pos[`${this.config.view_mode.name}_lower`],
+            lower_x: base_pos.x + column_width / 2,
             lower_y: base_pos.lower_y,
         };
     }

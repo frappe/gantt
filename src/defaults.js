@@ -10,6 +10,7 @@ const DEFAULT_VIEW_MODES = [
             d.getDate() !== ld.getDate()
                 ? date_utils.format(d, 'D MMMM', lang)
                 : '',
+        upper_text_frequency: 24,
     },
     {
         name: 'Quarter Day',
@@ -21,6 +22,7 @@ const DEFAULT_VIEW_MODES = [
             d.getDate() !== ld.getDate()
                 ? date_utils.format(d, 'D MMM', lang)
                 : '',
+        upper_text_frequency: 4,
     },
     {
         name: 'Half Day',
@@ -34,6 +36,7 @@ const DEFAULT_VIEW_MODES = [
                     ? date_utils.format(d, 'D MMM', lang)
                     : date_utils.format(d, 'D', lang)
                 : '',
+        upper_text_frequency: 2,
     },
     {
         name: 'Day',
@@ -62,6 +65,7 @@ const DEFAULT_VIEW_MODES = [
                 ? date_utils.format(d, 'MMMM', lang)
                 : '',
         thick_line: (d) => d.getDate() >= 1 && d.getDate() <= 7,
+        upper_text_frequency: 4,
     },
     {
         name: 'Month',
@@ -87,6 +91,7 @@ const DEFAULT_VIEW_MODES = [
             d.getMonth() !== ld.getMonth()
                 ? date_utils.format(d, 'YYYY', lang)
                 : '',
+        upper_text_frequency: 30,
     },
 ];
 
