@@ -37,7 +37,7 @@
             let tasks = [
                 {
                     start: '2024-04-01',
-                    end: '2024-04-01',
+                    end: '2024-04-04',
                     name: 'Redesign website',
                     id: 'Task 0',
                     progress: 30,
@@ -68,8 +68,8 @@
                     dependencies: 'Task 2',
                 },
                 {
-                    start: '2024-04-08',
-                    end: '2024-04-10',
+                    start: '2024-03-08',
+                    end: '2024-05-10',
                     name: 'Deploy',
                     id: 'Task 4',
                     progress: 0,
@@ -77,7 +77,7 @@
                 },
                 {
                     start: '2024-04-21',
-                    end: '2024-04-29',
+                    end: '2024-05-29',
                     name: 'Go Live!',
                     id: 'Task 5',
                     progress: 0,
@@ -85,22 +85,22 @@
                     custom_class: 'bar-milestone',
                 },
                 // {
-                // 	start: '2014-01-05',
-                // 	end: '2019-10-12',
-                // 	name: 'Long term task',
-                // 	id: "Task 6",
-                // 	progress: 0
-                // }
+                //     start: '2014-01-05',
+                //     end: '2019-10-12',
+                //     name: 'Long term task',
+                //     id: 'Task 6',
+                //     progress: 0,
+                // },
             ];
 
             // Uncomment to test fixed header
-            tasks = [
-                ...tasks,
-                ...Array.from({ length: tasks.length * 3 }, (_, i) => ({
-                    ...tasks[i % 3],
-                    id: i,
-                })),
-            ];
+            // tasks = [
+            //     ...tasks,
+            //     ...Array.from({ length: tasks.length * 3 }, (_, i) => ({
+            //         ...tasks[i % 3],
+            //         id: i,
+            //     })),
+            // ];
             let gantt_chart = new Gantt('.gantt-target', tasks, {
                 on_click(task) {
                     console.log('Click', task);
@@ -108,16 +108,14 @@
                 // on_hover (task, x, y) {
                 //   console.log("Hover", x, y);
                 // }
-                view_mode: 'Day',
-                view_mode_padding: { DAY: '3d' },
-                custom_view_modes: [
-                    {
-                        name: 'Custom Day',
-                        padding: '1m',
-                        step: 3,
-                        unit: 'day',
-                    },
-                ],
+                view_mode: 'Month',
+                // view_modes: [
+                //     {
+                //         name: 'Custom Day',
+                //         padding: '1m',
+                //         step: '1d',
+                //     },
+                // ],
                 // popup_on: 'click',
                 // move_dependencies: false,
                 // scroll_to: 'today',
