@@ -93,7 +93,7 @@ const DEFAULT_VIEW_MODES = [
                 ? date_utils.format(d, 'YYYY', lang)
                 : '',
         upper_text_frequency: 30,
-        default_snap: '1m',
+        default_snap: '30d',
     },
 ];
 

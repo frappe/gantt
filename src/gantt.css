@@ -246,6 +246,10 @@
 
         & .bar-label {
             fill: var(--text-light);
+
+            &.big {
+                fill: var(--text-dark);
+            }
         }
 
         & .handle {
