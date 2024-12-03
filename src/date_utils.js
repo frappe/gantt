@@ -122,7 +122,7 @@ export default {
         return str;
     },
 
-    diff(date_a, date_b, scale = DAY) {
+    diff(date_a, date_b, scale = 'day') {
         let milliseconds, seconds, hours, minutes, days, months, years;
 
         milliseconds = date_a - date_b;
@@ -131,13 +131,14 @@ export default {
         hours = minutes / 60;
         days = hours / 24;
         // Calculate months across years
-        const yearDiff = date_a.getFullYear() - date_b.getFullYear();
-        const monthDiff = date_a.getMonth() - date_b.getMonth();
+        let yearDiff = date_a.getFullYear() - date_b.getFullYear();
+        let monthDiff = date_a.getMonth() - date_b.getMonth();
+        // calculate extra
+        monthDiff += (days % 30) / 30;
 
         /* If monthDiff is negative, date_b is in an earlier month than
         date_a and thus subtracted from the year difference in months */
         months = yearDiff * 12 + monthDiff;
-
         /* If date_a's (e.g. march 1st) day of the month is smaller than date_b (e.g. february 28th),
         adjust the month difference */
         if (date_a.getDate() < date_b.getDate()) {
@@ -151,16 +152,18 @@ export default {
             scale += 's';
         }
 
-        return Math.floor(
-            {
-                milliseconds,
-                seconds,
-                minutes,
-                hours,
-                days,
-                months,
-                years,
-            }[scale],
+        return (
+            Math.round(
+                {
+                    milliseconds,
+                    seconds,
+                    minutes,
+                    hours,
+                    days,
+                    months,
+                    years,
+                }[scale] * 100,
+            ) / 100
         );
     },
 
@@ -232,6 +235,21 @@ export default {
         ];
     },
 
+    convert_scales(period, to_scale) {
+        const TO_DAYS = {
+            millisecond: 1 / 60 / 60 / 24 / 1000,
+            second: 1 / 60 / 60 / 24,
+            minute: 1 / 60 / 24,
+            hour: 1 / 24,
+            day: 1,
+            month: 30,
+            year: 365,
+        };
+        const { duration, scale } = this.parse_duration(period);
+        let in_days = duration * TO_DAYS[scale];
+        return in_days / TO_DAYS[to_scale];
+    },
+
     get_days_in_month(date) {
         const no_of_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -247,6 +265,10 @@ export default {
             return 29;
         }
         return 28;
+    },
+
+    get_days_in_year(date) {
+        return date.getFullYear() % 4 ? 365 : 366;
     },
 };
 

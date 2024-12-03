@@ -10,10 +10,10 @@
     --light-border-color: #ebeff2;
     --light-yellow: #f6e796;
     --holiday-color: #f9fafa;
-    --text-muted: #666;
+    --text-muted: #7c7c7c;
     --text-grey: #98a1a9;
     --text-light: #fff;
-    --text-dark: #111;
+    --text-dark: #171717;
     --progress: #ebeef0;
     --handle-color: #dcdce4;
     --handle-color-important: #94c4f4;
@@ -74,7 +74,6 @@
     & .lower-text,
     & .upper-text {
         text-anchor: middle;
-        color: var(--text-dark);
     }
 
     & .upper-header {
@@ -90,6 +89,7 @@
         position: absolute;
         width: fit-content;
         transform: translateX(-50%);
+        color: var(--text-muted);
     }
 
     & .upper-text {
@@ -97,6 +97,7 @@
         width: fit-content;
         font-weight: 500;
         font-size: 16px;
+        color: var(--text-dark);
     }
 
     & .current-upper {
@@ -245,6 +246,10 @@
 
         & .bar-label {
             fill: var(--text-light);
+
+            &.big {
+                fill: var(--text-dark);
+            }
         }
 
         & .handle {
