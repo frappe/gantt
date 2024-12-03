@@ -534,31 +534,55 @@ export default class Gantt {
     }
 
     highlightWeekends() {
-        // FIX
-        if (!this.view_is('Day') && !this.view_is('Half Day')) return;
-        for (
-            let d = new Date(this.gantt_start);
-            d <= this.gantt_end;
-            d.setDate(d.getDate() + 1)
-        ) {
-            if (d.getDay() === 0 || d.getDay() === 6) {
-                const x =
-                    (date_utils.diff(d, this.gantt_start, this.config.unit) /
-                        this.config.step) *
-                    this.config.column_width;
-                const height =
-                    (this.options.bar_height + this.options.padding) *
-                    this.tasks.length;
-                createSVG('rect', {
-                    x,
-                    y: this.options.header_height + this.options.padding / 2,
-                    width:
-                        (this.view_is('Day') ? 1 : 2) *
-                        this.config.column_width,
-                    height,
-                    class: 'holiday-highlight',
-                    append_to: this.layers.grid,
-                });
+        for (let color in this.options.holiday_highlight) {
+            let check_highlight = this.options.holiday_highlight[color];
+            if (check_highlight === 'weekend')
+                check_highlight = (d) => d.getDay() === 0 || d.getDay() === 6;
+
+            console.log(check_highlight);
+            let extra_func;
+
+            if (typeof check_highlight === 'object') {
+                let f = check_highlight.find((k) => typeof k === 'function');
+                if (f) {
+                    extra_func = f;
+                }
+
+                check_highlight = (d) =>
+                    this.options.holiday_highlight[color]
+                        .filter((k) => typeof k !== 'function')
+                        .map((k) => new Date(k + ' ').getTime())
+                        .includes(d.getTime());
+            }
+
+            for (
+                let d = new Date(this.gantt_start);
+                d <= this.gantt_end;
+                d.setDate(d.getDate() + 1)
+            ) {
+                if (check_highlight(d) || (extra_func && extra_func(d))) {
+                    const x =
+                        (date_utils.diff(
+                            d,
+                            this.gantt_start,
+                            this.config.unit,
+                        ) /
+                            this.config.step) *
+                        this.config.column_width;
+                    const height =
+                        (this.options.bar_height + this.options.padding) *
+                        this.tasks.length;
+                    createSVG('rect', {
+                        x,
+                        y:
+                            this.options.header_height +
+                            this.options.padding / 2,
+                        width: this.config.column_width,
+                        height,
+                        style: `fill: ${color};`,
+                        append_to: this.layers.grid,
+                    });
+                }
             }
         }
     }

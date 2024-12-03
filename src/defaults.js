@@ -7,7 +7,7 @@ const DEFAULT_VIEW_MODES = [
         step: '1h',
         lower_text: 'HH',
         upper_text: (d, ld, lang) =>
-            d.getDate() !== ld.getDate()
+            !ld || d.getDate() !== ld.getDate()
                 ? date_utils.format(d, 'D MMMM', lang)
                 : '',
         upper_text_frequency: 24,
@@ -19,7 +19,7 @@ const DEFAULT_VIEW_MODES = [
         format_string: 'YYYY-MM-DD HH',
         lower_text: 'HH',
         upper_text: (d, ld, lang) =>
-            d.getDate() !== ld.getDate()
+            !ld || d.getDate() !== ld.getDate()
                 ? date_utils.format(d, 'D MMM', lang)
                 : '',
         upper_text_frequency: 4,
@@ -31,7 +31,7 @@ const DEFAULT_VIEW_MODES = [
         format_string: 'YYYY-MM-DD HH',
         lower_text: 'HH',
         upper_text: (d, ld, lang) =>
-            d.getDate() !== ld.getDate()
+            !ld || d.getDate() !== ld.getDate()
                 ? d.getMonth() !== d.getMonth()
                     ? date_utils.format(d, 'D MMM', lang)
                     : date_utils.format(d, 'D', lang)
@@ -44,9 +44,11 @@ const DEFAULT_VIEW_MODES = [
         format_string: 'YYYY-MM-DD',
         step: '1d',
         lower_text: (d, ld, lang) =>
-            d.getDate() !== ld.getDate() ? date_utils.format(d, 'D', lang) : '',
+            !ld || d.getDate() !== ld.getDate()
+                ? date_utils.format(d, 'D', lang)
+                : '',
         upper_text: (d, ld, lang) =>
-            d.getMonth() !== ld.getMonth()
+            !ld || d.getMonth() !== ld.getMonth()
                 ? date_utils.format(d, 'MMMM', lang)
                 : '',
         thick_line: (d) => d.getDay() === 1,
@@ -61,7 +63,7 @@ const DEFAULT_VIEW_MODES = [
                 ? date_utils.format(d, 'D MMM', lang)
                 : date_utils.format(d, 'D', lang),
         upper_text: (d, ld, lang) =>
-            d.getMonth() !== ld.getMonth()
+            !ld || d.getMonth() !== ld.getMonth()
                 ? date_utils.format(d, 'MMMM', lang)
                 : '',
         thick_line: (d) => d.getDate() >= 1 && d.getDate() <= 7,
@@ -117,6 +119,7 @@ const DEFAULT_OPTIONS = {
     today_button: true,
     view_mode_select: false,
     default_snap: '1d',
+    holiday_highlight: { green: 'weekend' },
 };
 
 export { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES };

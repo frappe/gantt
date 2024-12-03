@@ -186,10 +186,6 @@
         }
     }
 
-    & .holiday-highlight {
-        fill: var(--holiday-color);
-    }
-
     & .arrow {
         fill: none;
         stroke: #9fa9b1;
