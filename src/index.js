@@ -683,7 +683,7 @@ export default class Gantt {
                     !this.config.ignored_function(d))
             )
                 continue;
-            console.log(this.config.ignored_function);
+
             let diff =
                 date_utils.convert_scales(
                     date_utils.diff(d, this.gantt_start) + 'd',

@@ -119,14 +119,7 @@ const DEFAULT_OPTIONS = {
     view_mode_select: false,
     default_snap: '1d',
     holiday_highlight: {
-        green: [
-            '2024-03-01',
-            '2024-03-02',
-            '2024-03-03',
-            '2024-03-04',
-            '2024-03-05',
-            '2024-03-06',
-        ],
+        green: 'weekend',
     },
     ignore: [],
 };

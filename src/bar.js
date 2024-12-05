@@ -402,6 +402,7 @@ export default class Bar {
         if (this.gantt.options.show_expected_progress) {
             this.update_expected_progressbar_position();
         }
+
         this.update_progressbar_position();
         this.update_arrow_position();
     }
@@ -587,13 +588,14 @@ export default class Bar {
             if (
                 !this.gantt.config.ignored_dates.find(
                     (k) => k.getTime() === d.getTime(),
-                ) ||
-                (this.gantt.config.ignored_function &&
-                    !this.gantt.config.ignored_function(d))
+                ) &&
+                this.gantt.config.ignored_function &&
+                !this.gantt.config.ignored_function(d)
             ) {
                 actual_duration_in_days++;
             }
         }
+        console.log(this.actual_duration_in_days);
         this.actual_duration_in_days = actual_duration_in_days;
 
         this.duration =
@@ -644,18 +646,24 @@ export default class Bar {
     update_progressbar_position() {
         if (this.invalid || this.gantt.options.readonly) return;
         this.$bar_progress.setAttribute('x', this.$bar.getX());
-        let new_width =
-            this.actual_duration *
-            this.gantt.config.column_width *
-            (this.task.progress / 100);
-        const progress_area = this.x + this.progress_width;
-        new_width +=
+
+        const ignored_end = this.x + this.$bar.getWidth();
+        const progress_end = this.x + this.progress_width;
+        const total_ignored_area =
             this.gantt.config.ignored_positions.reduce((acc, val) => {
-                return acc + (val >= this.x && val <= progress_area);
+                return acc + (val >= this.x && val < ignored_end);
+            }, 0) * this.gantt.config.column_width;
+        const progress_ignored_area =
+            this.gantt.config.ignored_positions.reduce((acc, val) => {
+                return acc + (val >= this.x && val < progress_end);
             }, 0) * this.gantt.config.column_width;
 
-        this.progress_width = new_width;
-        this.$bar_progress.setAttribute('width', new_width);
+        let new_width =
+            (this.duration * this.gantt.config.column_width -
+                total_ignored_area) *
+            (this.task.progress / 100);
+        this.progress_width = progress_ignored_area + new_width;
+        this.$bar_progress.setAttribute('width', this.progress_width);
     }
 
     update_label_position() {
