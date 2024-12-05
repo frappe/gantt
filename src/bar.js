@@ -595,7 +595,6 @@ export default class Bar {
                 actual_duration_in_days++;
             }
         }
-        console.log(this.actual_duration_in_days);
         this.actual_duration_in_days = actual_duration_in_days;
 
         this.duration =

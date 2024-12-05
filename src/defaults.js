@@ -118,6 +118,7 @@ const DEFAULT_OPTIONS = {
     today_button: true,
     view_mode_select: false,
     default_snap: '1d',
+    extend_by_units: 7,
     holiday_highlight: {
         green: 'weekend',
     },

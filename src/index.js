@@ -858,6 +858,8 @@ export default class Gantt {
     set_scroll_position(date) {
         if (!date || date === 'start') {
             date = this.gantt_start;
+        } else if (date === 'end') {
+            date = this.gantt_end;
         } else if (date === 'today') {
             return this.scroll_today();
         } else if (typeof date === 'string') {
@@ -948,6 +950,54 @@ export default class Gantt {
             });
         });
 
+        let extended = false;
+        $.on(this.$container, 'mousewheel', (e) => {
+            if (!extended && e.currentTarget.scrollLeft === 0) {
+                extended = true;
+                this.gantt_start = date_utils.add(
+                    this.gantt_start,
+                    -this.options.extend_by_units,
+                    this.config.unit,
+                );
+                let old_scroll = this.options.scroll_to;
+                this.options.scroll_to = null;
+                this.setup_date_values();
+                this.render();
+                e.currentTarget.scrollLeft =
+                    this.config.column_width * this.options.extend_by_units;
+                this.options.scroll_to = old_scroll;
+                this.set_scroll_position();
+                setTimeout(() => (extended = false), 1000);
+            }
+
+            if (
+                !extended &&
+                e.currentTarget.scrollWidth - e.currentTarget.scrollLeft ===
+                    e.currentTarget.clientWidth
+            ) {
+                let old_scroll_left = e.currentTarget.scrollLeft;
+                extended = true;
+                this.gantt_end = date_utils.add(
+                    this.gantt_end,
+                    this.options.extend_by_units,
+                    this.config.unit,
+                );
+                let old_scroll = this.options.scroll_to;
+
+                this.options.scroll_to = 'end';
+                this.setup_date_values();
+                this.render();
+                this.options.scroll_to = old_scroll_left;
+                e.currentTarget.scrollTo({
+                    left:
+                        old_scroll_left +
+                        this.config.column_width * this.options.extend_by_units,
+                    behavior: 'smooth',
+                });
+                setTimeout(() => (extended = false), 1000);
+            }
+        });
+
         $.on(this.$container, 'scroll', (e) => {
             let elements = document.querySelectorAll('.bar-wrapper');
             let localBars = [];
@@ -956,6 +1006,7 @@ export default class Gantt {
             if (x_on_scroll_start) {
                 dx = e.currentTarget.scrollLeft - x_on_scroll_start;
             }
+
             const upperTexts = Array.from(
                 document.querySelectorAll('.upper-text'),
             );
