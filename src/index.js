@@ -627,20 +627,22 @@ export default class Gantt {
     highlightToday(view_mode) {
         const today = new Date();
         if (today < this.gantt_start || today > this.gantt_end) return null;
-        let diff_in_units = date_utils.diff(
+        const diff_in_units = date_utils.diff(
             today,
             this.gantt_start,
             this.config.unit,
         );
-        let left =
+        const left =
             (diff_in_units / this.config.step) * this.config.column_width;
-        let date = date_utils.format(
+        const height =
+            (this.options.bar_height + this.options.padding) *
+            this.tasks.length;
+        const date = date_utils.format(
             today,
             this.config.view_mode.format_string,
             this.options.language,
         );
-
-        this.$current_highlight = this.create_el({
+        this.$current_highlight = this.$current_highlight = this.create_el({
             top,
             left,
             height,
@@ -872,7 +874,7 @@ export default class Gantt {
             (units_since_first_task / this.config.step) *
                 this.config.column_width -
             this.config.column_width;
-        parent_element.scrollTo({ left: 400, behavior: 'smooth' });
+        parent_element.scrollTo({ left: scroll_pos, behavior: 'smooth' });
     }
 
     scroll_today() {
@@ -954,30 +956,28 @@ export default class Gantt {
             if (x_on_scroll_start) {
                 dx = e.currentTarget.scrollLeft - x_on_scroll_start;
             }
-
-            const daysSinceStart =
-                ((e.currentTarget.scrollLeft / this.config.column_width) *
-                    this.config.step) /
-                24;
-            let format_str = 'D MMM';
-            if (['Year', 'Month'].includes(this.config.view_mode.name))
-                format_str = 'YYYY';
-            else if (['Day', 'Week'].includes(this.config.view_mode.name))
-                format_str = 'MMMM';
-            else if (this.view_is('Half Day')) format_str = 'D';
-            else if (this.view_is('Hour')) format_str = 'D MMMM';
-
-            let currentUpper = date_utils.format(
-                date_utils.add(this.gantt_start, daysSinceStart, 'day'),
-                format_str,
-                this.options.language,
-            );
             const upperTexts = Array.from(
                 document.querySelectorAll('.upper-text'),
             );
-            const $el = upperTexts.find(
-                (el) => el.textContent === currentUpper,
+
+            let currentDate = date_utils.add(
+                this.gantt_start,
+                e.currentTarget.scrollLeft / this.config.column_width,
+                this.config.unit,
             );
+            let currentUpper = this.config.view_mode.upper_text(currentDate);
+            let $el = upperTexts.find((el) => el.textContent === currentUpper);
+
+            // Recalculate for smoother experience
+            currentDate = date_utils.add(
+                this.gantt_start,
+                (e.currentTarget.scrollLeft + $el.clientWidth) /
+                    this.config.column_width,
+                this.config.unit,
+            );
+            currentUpper = this.config.view_mode.upper_text(currentDate);
+            $el = upperTexts.find((el) => el.textContent === currentUpper);
+
             if ($el && !$el.classList.contains('current-upper')) {
                 const $current = document.querySelector('.current-upper');
                 if ($current) {
