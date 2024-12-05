@@ -100,16 +100,21 @@
     }
 
     & .current-upper {
-        position: fixed;
+        position: absolute;
+        left: 10px;
+        padding: 0 10px;
+        height: 20px;
+        background: white;
+        z-index: 1000;
+        top: 5px;
     }
 
     & .side-header {
-        position: fixed;
-        padding: 0 10px;
-        margin-right: 10px;
-        background: white;
+        position: absolute;
+        z-index: 1000;
         line-height: 20px;
         font-weight: 400;
+        top: 5px;
     }
 
     & .today-button,

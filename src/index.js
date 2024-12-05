@@ -305,7 +305,6 @@ export default class Gantt {
         this.map_arrows_on_bars();
         this.set_width();
         this.set_scroll_position(this.options.scroll_to);
-        this.update_button_position();
     }
 
     setup_layers() {
@@ -324,6 +323,7 @@ export default class Gantt {
         this.make_grid_background();
         this.make_grid_rows();
         this.make_grid_header();
+        this.make_side_header();
     }
 
     make_grid_extras() {
@@ -398,8 +398,6 @@ export default class Gantt {
         $lower_header.classList.add('lower-header');
         this.$lower_header = $lower_header;
         this.$header.appendChild($lower_header);
-
-        this.make_side_header();
     }
 
     make_side_header() {
@@ -443,52 +441,8 @@ export default class Gantt {
             this.$today_button = $today_button;
         }
 
-        this.$header.appendChild($side_header);
+        this.$container.appendChild($side_header);
         this.$side_header = $side_header;
-
-        window.addEventListener(
-            'scroll',
-            this.update_button_position.bind(this),
-        );
-        window.addEventListener(
-            'resize',
-            this.update_button_position.bind(this),
-        );
-    }
-
-    update_button_position() {
-        const containerRect = this.$container.getBoundingClientRect();
-        const buttonRect = this.$side_header.getBoundingClientRect();
-        const { left, y } = this.$header.getBoundingClientRect();
-
-        // Check if the button is scrolled out of the container vertically
-
-        if (
-            buttonRect.top < containerRect.top ||
-            buttonRect.bottom > containerRect.bottom
-        ) {
-            this.$side_header.style.position = 'absolute';
-            this.$side_header.style.top = `${containerRect.scrollTop + buttonRect.top}px`;
-        } else {
-            this.$side_header.style.position = 'fixed';
-            this.$side_header.style.top = y + 10 + 'px';
-        }
-        const width = Math.min(
-            this.$header.clientWidth,
-            this.$container.clientWidth,
-        );
-
-        this.$side_header.style.left =
-            left +
-            this.$container.scrollLeft +
-            width -
-            this.$side_header.clientWidth +
-            'px';
-
-        // Update the left value on page resize
-        if (this.$today_button) {
-            this.$today_button.style.left = `${containerRect.left + 20}px`;
-        }
     }
 
     make_grid_ticks() {
@@ -1006,11 +960,20 @@ export default class Gantt {
             if (x_on_scroll_start) {
                 dx = e.currentTarget.scrollLeft - x_on_scroll_start;
             }
+            this.$side_header.style.left =
+                e.currentTarget.clientWidth +
+                e.currentTarget.scrollLeft -
+                this.$side_header.clientWidth -
+                5 +
+                'px';
 
+            if (this.$current)
+                this.$current.style.left = e.currentTarget.scrollLeft + 'px';
+
+            // Calculate current scroll position's upper text
             const upperTexts = Array.from(
                 document.querySelectorAll('.upper-text'),
             );
-
             let currentDate = date_utils.add(
                 this.gantt_start,
                 e.currentTarget.scrollLeft / this.config.column_width,
@@ -1018,7 +981,6 @@ export default class Gantt {
             );
             let currentUpper = this.config.view_mode.upper_text(currentDate);
             let $el = upperTexts.find((el) => el.textContent === currentUpper);
-
             // Recalculate for smoother experience
             currentDate = date_utils.add(
                 this.gantt_start,
@@ -1029,21 +991,13 @@ export default class Gantt {
             currentUpper = this.config.view_mode.upper_text(currentDate);
             $el = upperTexts.find((el) => el.textContent === currentUpper);
 
-            if ($el && !$el.classList.contains('current-upper')) {
-                const $current = document.querySelector('.current-upper');
-                if ($current) {
-                    $current.classList.remove('current-upper');
-                    $current.style.left =
-                        this.upper_texts_x[$current.textContent] + 'px';
-                    $current.style.top = this.options.header_height - 50 + 'px';
-                }
+            if ($el !== this.$current) {
+                if (this.$current)
+                    this.$current.classList.remove('current-upper');
 
                 $el.classList.add('current-upper');
-                let dimensions = this.$svg.getBoundingClientRect();
-                $el.style.left =
-                    dimensions.x + this.$container.scrollLeft + 10 + 'px';
-                $el.style.top =
-                    dimensions.y + this.options.header_height - 50 + 'px';
+                $el.style.left = e.currentTarget.scrollLeft + 'px';
+                this.$current = $el;
             }
 
             Array.prototype.forEach.call(elements, function (el, i) {
@@ -1319,6 +1273,7 @@ export default class Gantt {
     clear() {
         this.$svg.innerHTML = '';
         this.$header?.remove?.();
+        this.$side_header?.remove?.();
         this.$current_highlight?.remove?.();
         this.popup?.hide?.();
     }
