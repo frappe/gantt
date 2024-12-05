@@ -559,7 +559,6 @@ export default class Gantt {
             let check_highlight = this.options.holiday_highlight[color];
             if (check_highlight === 'weekend')
                 check_highlight = (d) => d.getDay() === 0 || d.getDay() === 6;
-
             let extra_func;
 
             if (typeof check_highlight === 'object') {
@@ -600,13 +599,17 @@ export default class Gantt {
                     const height =
                         (this.options.bar_height + this.options.padding) *
                         this.tasks.length;
-
                     createSVG('rect', {
-                        x,
+                        x: Math.round(x),
                         y:
                             this.options.header_height +
                             this.options.padding / 2,
-                        width: this.config.column_width,
+                        width:
+                            this.config.column_width /
+                            date_utils.convert_scales(
+                                this.config.view_mode.step,
+                                'day',
+                            ),
                         height,
                         style: `fill: ${color};`,
                         append_to: this.layers.grid,
@@ -664,6 +667,7 @@ export default class Gantt {
                    M3,5 l2,-2"
                 style="stroke:black; stroke-width:0.5" />
         </pattern>`;
+
         for (
             let d = new Date(this.gantt_start);
             d <= this.gantt_end;
@@ -673,10 +677,11 @@ export default class Gantt {
                 !this.config.ignored_dates.find(
                     (k) => k.getDate() == d.getDate(),
                 ) &&
-                this.config.ignored_function &&
-                !this.config.ignored_function(d)
+                (!this.config.ignored_function ||
+                    !this.config.ignored_function(d))
             )
                 continue;
+            console.log(this.config.ignored_function);
             let diff =
                 date_utils.convert_scales(
                     date_utils.diff(d, this.gantt_start) + 'd',

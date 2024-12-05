@@ -587,9 +587,9 @@ export default class Bar {
             if (
                 !this.gantt.config.ignored_dates.find(
                     (k) => k.getTime() === d.getTime(),
-                ) &&
-                this.gantt.config.ignored_function &&
-                !this.gantt.config.ignored_function(d)
+                ) ||
+                (this.gantt.config.ignored_function &&
+                    !this.gantt.config.ignored_function(d))
             ) {
                 actual_duration_in_days++;
             }
