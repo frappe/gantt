@@ -112,7 +112,6 @@ const DEFAULT_OPTIONS = {
     readonly: false,
     progress_readonly: false,
     dates_readonly: false,
-    highlight_weekend: true,
     scroll_to: 'start',
     lines: 'both',
     auto_move_label: true,
@@ -120,6 +119,7 @@ const DEFAULT_OPTIONS = {
     view_mode_select: false,
     default_snap: '1d',
     holiday_highlight: { green: 'weekend' },
+    ignore: ['weekend'],
 };
 
 export { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES };

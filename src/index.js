@@ -75,10 +75,31 @@ export default class Gantt {
         if (custom_mode) this.options = { ...this.options, custom_mode };
 
         this.config = {};
+
+        this.config.ignored_dates = [];
+        this.config.ignored_positions = [];
+
+        if (typeof this.options.ignore !== 'function') {
+            if (typeof this.options.ignore === 'string')
+                this.options.ignore = [this.options.ignord];
+            for (let option of this.options.ignore) {
+                if (typeof option === 'function') {
+                    this.config.ignored_function = option;
+                    continue;
+                }
+                if (typeof option === 'string') {
+                    if (option === 'weekend')
+                        this.config.ignored_function = (d) =>
+                            d.getDay() == 6 || d.getDay() == 0;
+                    else this.config.ignored_dates.push(new Date(option + ' '));
+                }
+            }
+        } else {
+            this.config.ignored_function = this.options.ignore;
+        }
     }
 
     setup_tasks(tasks) {
-        // prepare tasks
         this.tasks = tasks
             .map((task, i) => {
                 if (!task.start) {
@@ -278,8 +299,8 @@ export default class Gantt {
         this.setup_layers();
         this.make_grid();
         this.make_dates();
-        this.make_bars();
         this.make_grid_extras();
+        this.make_bars();
         this.make_arrows();
         this.map_arrows_on_bars();
         this.set_width();
@@ -533,13 +554,12 @@ export default class Gantt {
         }
     }
 
-    highlightWeekends() {
+    highlightHolidays() {
         for (let color in this.options.holiday_highlight) {
             let check_highlight = this.options.holiday_highlight[color];
             if (check_highlight === 'weekend')
                 check_highlight = (d) => d.getDay() === 0 || d.getDay() === 6;
 
-            console.log(check_highlight);
             let extra_func;
 
             if (typeof check_highlight === 'object') {
@@ -560,6 +580,14 @@ export default class Gantt {
                 d <= this.gantt_end;
                 d.setDate(d.getDate() + 1)
             ) {
+                if (
+                    this.config.ignored_dates.find(
+                        (k) => k.getDate() == d.getDate(),
+                    ) ||
+                    (this.config.ignored_function &&
+                        this.config.ignored_function(d))
+                )
+                    continue;
                 if (check_highlight(d) || (extra_func && extra_func(d))) {
                     const x =
                         (date_utils.diff(
@@ -572,6 +600,7 @@ export default class Gantt {
                     const height =
                         (this.options.bar_height + this.options.padding) *
                         this.tasks.length;
+
                     createSVG('rect', {
                         x,
                         y:
@@ -592,7 +621,7 @@ export default class Gantt {
      *
      * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
      */
-    computeGridHighlightDimensions(view_mode) {
+    highlightToday(view_mode) {
         const today = new Date();
         if (today < this.gantt_start || today > this.gantt_end) return null;
         let diff_in_units = date_utils.diff(
@@ -600,29 +629,14 @@ export default class Gantt {
             this.gantt_start,
             this.config.unit,
         );
-        return {
-            x: (diff_in_units / this.config.step) * this.config.column_width,
-            date: date_utils.format(
-                today,
-                this.config.view_mode.format_string,
-                this.options.language,
-            ),
-        };
-    }
-
-    make_grid_highlights() {
-        if (this.options.highlight_weekend) this.highlightWeekends();
-
-        const highlightDimensions = this.computeGridHighlightDimensions(
-            this.config.view_mode,
+        let left =
+            (diff_in_units / this.config.step) * this.config.column_width;
+        let date = date_utils.format(
+            today,
+            this.config.view_mode.format_string,
+            this.options.language,
         );
-        if (!highlightDimensions) return;
-        const { x: left, date } = highlightDimensions;
 
-        const top = this.options.header_height + this.options.padding / 2;
-        const height =
-            (this.options.bar_height + this.options.padding) *
-            this.tasks.length;
         this.$current_highlight = this.create_el({
             top,
             left,
@@ -635,6 +649,55 @@ export default class Gantt {
             $today.classList.add('current-date-highlight');
             $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
         }
+    }
+
+    make_grid_highlights() {
+        this.highlightHolidays();
+
+        const top = this.options.header_height + this.options.padding / 2;
+        const height =
+            (this.options.bar_height + this.options.padding) *
+            this.tasks.length;
+        this.layers.grid.innerHTML += `<pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
+          <path d="M-1,1 l2,-2
+                   M0,4 l4,-4
+                   M3,5 l2,-2"
+                style="stroke:black; stroke-width:0.5" />
+        </pattern>`;
+        for (
+            let d = new Date(this.gantt_start);
+            d <= this.gantt_end;
+            d.setDate(d.getDate() + 1)
+        ) {
+            if (
+                !this.config.ignored_dates.find(
+                    (k) => k.getDate() == d.getDate(),
+                ) &&
+                this.config.ignored_function &&
+                !this.config.ignored_function(d)
+            )
+                continue;
+            let diff =
+                date_utils.convert_scales(
+                    date_utils.diff(d, this.gantt_start) + 'd',
+                    this.config.unit,
+                ) / this.config.step;
+
+            this.config.ignored_positions.push(diff * this.config.column_width);
+            createSVG('rect', {
+                x: diff * this.config.column_width,
+                y: top,
+                width: this.config.column_width,
+                height: height,
+                class: 'ignored-bar',
+                style: 'fill: url(#diagonalHatch);',
+                append_to: this.$svg,
+            });
+        }
+
+        const highlightDimensions = this.highlightToday(this.config.view_mode);
+
+        if (!highlightDimensions) return;
     }
 
     create_el({ left, top, width, height, id, classes, append_to }) {
@@ -684,7 +747,6 @@ export default class Gantt {
     get_dates_to_draw() {
         let last_date_info = null;
         const dates = this.dates.map((date, i) => {
-            console.log('starting', date, last_date_info);
             const d = this.get_date_info(date, last_date_info, i);
             last_date_info = d;
             return d;
@@ -994,6 +1056,7 @@ export default class Gantt {
                 const $bar = bar.$bar;
                 if (!$bar.finaldx) return;
                 bar.date_changed();
+                bar.compute_progress();
                 bar.set_action_completed();
             });
         });
@@ -1027,9 +1090,39 @@ export default class Gantt {
             $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
         });
 
+        const range_positions = this.config.ignored_positions.map((d) => [
+            d,
+            d + this.config.column_width,
+        ]);
+
         $.on(this.$svg, 'mousemove', (e) => {
             if (!is_resizing) return;
-            let dx = (e.offsetX || e.layerX) - x_on_start;
+            let now_x = e.offsetX || e.layerX;
+
+            let moving_right = now_x > x_on_start;
+            if (moving_right) {
+                let k = range_positions.find(
+                    ([begin, end]) => now_x >= begin && now_x < end,
+                );
+                while (k) {
+                    now_x = k[1];
+                    k = range_positions.find(
+                        ([begin, end]) => now_x >= begin && now_x < end,
+                    );
+                }
+            } else {
+                let k = range_positions.find(
+                    ([begin, end]) => now_x > begin && now_x <= end,
+                );
+                while (k) {
+                    now_x = k[0];
+                    k = range_positions.find(
+                        ([begin, end]) => now_x > begin && now_x <= end,
+                    );
+                }
+            }
+
+            let dx = now_x - x_on_start;
             if (dx > $bar_progress.max_dx) {
                 dx = $bar_progress.max_dx;
             }
