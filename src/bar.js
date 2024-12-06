@@ -166,8 +166,8 @@ export default class Bar {
             this.gantt.config.column_width;
 
         let $date_highlight = document.createElement('div');
-        $date_highlight.id = `highlight-${this.task.id}`;
         $date_highlight.classList.add('date-highlight');
+        $date_highlight.classList.add(`highlight-${this.task.id}`);
         $date_highlight.style.height = this.height * 0.8 + 'px';
         $date_highlight.style.width = this.width + 'px';
         $date_highlight.style.top =
@@ -243,7 +243,7 @@ export default class Bar {
 
         const bar = this.$bar;
         const handle_width = 8;
-        if (!this.gantt.options.dates_readonly) {
+        if (!this.gantt.options.readonly_dates) {
             createSVG('rect', {
                 x: bar.getX() + bar.getWidth() + handle_width - 4,
                 y: bar.getY() + 1,
@@ -266,7 +266,7 @@ export default class Bar {
                 append_to: this.handle_group,
             });
         }
-        if (!this.gantt.options.progress_readonly) {
+        if (!this.gantt.options.readonly_progress) {
             const bar_progress = this.$bar_progress;
             this.$handle_progress = createSVG('circle', {
                 cx: bar_progress.getEndX(),
@@ -299,8 +299,8 @@ export default class Bar {
             $.on(this.group, 'click', (e) => {
                 if (!opened) {
                     this.show_popup(e.offsetX || e.layerX);
-                    document.getElementById(
-                        `highlight-${task_id}`,
+                    this.gantt.$container.querySelector(
+                        `.highlight-${task_id}`,
                     ).style.display = 'block';
                 } else {
                     this.gantt.hide_popup();
@@ -315,8 +315,8 @@ export default class Bar {
                 (e) =>
                     (timeout = setTimeout(() => {
                         this.show_popup(e.offsetX || e.layerX);
-                        document.getElementById(
-                            `highlight-${task_id}`,
+                        this.gantt.$container.querySelector(
+                            `.highlight-${task_id}`,
                         ).style.display = 'block';
                     }, 200)),
             );
@@ -325,8 +325,9 @@ export default class Bar {
                 clearTimeout(timeout);
                 this.gantt.popup?.hide?.();
 
-                document.getElementById(`highlight-${task_id}`).style.display =
-                    'none';
+                this.gantt.$container.querySelector(
+                    `.highlight-${task_id}`,
+                ).style.display = 'none';
             });
         }
 
@@ -589,8 +590,8 @@ export default class Bar {
                 !this.gantt.config.ignored_dates.find(
                     (k) => k.getTime() === d.getTime(),
                 ) &&
-                this.gantt.config.ignored_function &&
-                !this.gantt.config.ignored_function(d)
+                (!this.gantt.config.ignored_function ||
+                    !this.gantt.config.ignored_function(d))
             ) {
                 actual_duration_in_days++;
             }

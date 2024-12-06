@@ -27,7 +27,7 @@
     position: relative;
     overflow: auto;
     font-size: 12px;
-    height: 500px;
+    height: 300px;
 
     & .popup-wrapper {
         position: absolute;
@@ -153,13 +153,14 @@
         position: absolute;
         background: var(--dark-blue);
         width: 1px;
+        z-index: 1000;
     }
 
     & .current-date-highlight {
         background: var(--dark-blue);
         color: var(--text-light);
         padding: 4px 8px;
-        border-radius: 200px;
+        border-radius: 5px;
     }
 }
 

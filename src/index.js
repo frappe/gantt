@@ -23,7 +23,13 @@ export default class Gantt {
 
         // CSS Selector is passed
         if (typeof element === 'string') {
-            element = document.querySelector(element);
+            let el = document.querySelector(element);
+            if (!el) {
+                throw new ReferenceError(
+                    `CSS selector "${element}" could not be found in DOM`,
+                );
+            }
+            element = el;
         }
 
         // get the SVGElement
@@ -66,16 +72,10 @@ export default class Gantt {
     }
 
     setup_options(options) {
+        this.original_options = options;
         this.options = { ...DEFAULT_OPTIONS, ...options };
-        const custom_mode = this.options.custom_view_modes
-            ? this.options.custom_view_modes.find(
-                  (m) => m.name === this.config.view_mode.name,
-              )
-            : null;
-        if (custom_mode) this.options = { ...this.options, custom_mode };
 
         this.config = {};
-
         this.config.ignored_dates = [];
         this.config.ignored_positions = [];
 
@@ -97,6 +97,11 @@ export default class Gantt {
         } else {
             this.config.ignored_function = this.options.ignore;
         }
+    }
+
+    update_options(options) {
+        this.setup_options({ ...this.original_options, ...options });
+        this.change_view_mode();
     }
 
     setup_tasks(tasks) {
@@ -201,6 +206,7 @@ export default class Gantt {
         if (typeof mode === 'string') {
             mode = this.options.view_modes.find((d) => d.name === mode);
         }
+
         this.config.view_mode = mode;
         this.update_view_scale(mode);
         this.setup_dates();
@@ -303,7 +309,7 @@ export default class Gantt {
         this.make_bars();
         this.make_arrows();
         this.map_arrows_on_bars();
-        this.set_width();
+        this.set_dimensions();
         this.set_scroll_position(this.options.scroll_to);
     }
 
@@ -348,7 +354,7 @@ export default class Gantt {
         });
 
         $.attr(this.$svg, {
-            height: grid_height + this.options.padding + 100,
+            height: grid_height + this.options.padding,
             width: '100%',
         });
     }
@@ -578,7 +584,7 @@ export default class Gantt {
      *
      * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
      */
-    highlightToday(view_mode) {
+    highlightToday() {
         const today = new Date();
         if (today < this.gantt_start || today > this.gantt_end) return null;
         const diff_in_units = date_utils.diff(
@@ -590,20 +596,25 @@ export default class Gantt {
             (diff_in_units / this.config.step) * this.config.column_width;
         const height =
             (this.options.bar_height + this.options.padding) *
-            this.tasks.length;
+                this.tasks.length +
+            20 +
+            this.options.padding / 2;
         const date = date_utils.format(
             today,
             this.config.view_mode.format_string,
             this.options.language,
         );
-        this.$current_highlight = this.$current_highlight = this.create_el({
-            top,
+        console.log(this.$header.clientHeight);
+        this.$current_highlight = this.create_el({
+            top: this.options.header_height - 20,
             left,
             height,
             classes: 'current-highlight',
             append_to: this.$container,
         });
-        let $today = document.getElementById(date.replaceAll(' ', '_'));
+        let $today = this.$container.querySelector(
+            '.date_' + date.replaceAll(' ', '_'),
+        );
         if ($today) {
             $today.classList.add('current-date-highlight');
             $today.style.top = +$today.style.top.slice(0, -2) - 4 + 'px';
@@ -663,7 +674,7 @@ export default class Gantt {
 
     create_el({ left, top, width, height, id, classes, append_to }) {
         let $el = document.createElement('div');
-        $el.classList.add(classes);
+        for (let cls of classes.split(' ')) $el.classList.add(cls);
         $el.style.top = top + 'px';
         $el.style.left = left + 'px';
         if (id) $el.id = id;
@@ -679,8 +690,7 @@ export default class Gantt {
             let $lower_text = this.create_el({
                 left: date.lower_x,
                 top: date.lower_y,
-                id: date.formatted_date,
-                classes: 'lower-text',
+                classes: 'lower-text date_' + date.formatted_date,
                 append_to: this.$lower_header,
             });
 
@@ -799,14 +809,17 @@ export default class Gantt {
         }
     }
 
-    set_width() {
-        const cur_width = this.$svg.getBoundingClientRect().width;
+    set_dimensions() {
+        const { width: cur_width, height } = this.$svg.getBoundingClientRect();
         const actual_width = this.$svg.querySelector('.grid .grid-row')
             ? this.$svg.querySelector('.grid .grid-row').getAttribute('width')
             : 0;
         if (cur_width < actual_width) {
             this.$svg.setAttribute('width', actual_width);
         }
+        this.$container.style.height =
+            { auto: height }[this.options.container_height] ||
+            this.options.container_height + 'px';
     }
 
     set_scroll_position(date) {
@@ -828,9 +841,43 @@ export default class Gantt {
         );
         const scroll_pos =
             (units_since_first_task / this.config.step) *
-                this.config.column_width -
             this.config.column_width;
         parent_element.scrollTo({ left: scroll_pos, behavior: 'smooth' });
+
+        this.$side_header.style.left =
+            this.$container.clientWidth +
+            this.$container.scrollLeft -
+            this.$side_header.clientWidth -
+            5 +
+            'px';
+
+        // Calculate current scroll position's upper text
+        if (this.$current) this.$current.classList.remove('current-upper');
+
+        this.upperTexts = Array.from(
+            this.$container.querySelectorAll('.upper-text'),
+        );
+        let currentDate = date_utils.add(
+            this.gantt_start,
+            this.$container.scrollLeft / this.config.column_width,
+            this.config.unit,
+        );
+        let currentUpper = this.config.view_mode.upper_text(currentDate);
+        let $el = this.upperTexts.find((el) => el.textContent === currentUpper);
+
+        // Recalculate
+        currentDate = date_utils.add(
+            this.gantt_start,
+            (this.$container.scrollLeft + $el.clientWidth) /
+                this.config.column_width,
+            this.config.unit,
+        );
+        currentUpper = this.config.view_mode.upper_text(currentDate);
+        $el = this.upperTexts.find((el) => el.textContent === currentUpper);
+
+        $el.classList.add('current-upper');
+        $el.style.left = this.$container.scrollLeft + 'px';
+        this.$current = $el;
     }
 
     scroll_today() {
@@ -953,7 +1000,7 @@ export default class Gantt {
         });
 
         $.on(this.$container, 'scroll', (e) => {
-            let elements = document.querySelectorAll('.bar-wrapper');
+            let elements = this.$container.querySelectorAll('.bar-wrapper');
             let localBars = [];
             const ids = [];
             let dx;
@@ -971,16 +1018,15 @@ export default class Gantt {
                 this.$current.style.left = e.currentTarget.scrollLeft + 'px';
 
             // Calculate current scroll position's upper text
-            const upperTexts = Array.from(
-                document.querySelectorAll('.upper-text'),
-            );
             let currentDate = date_utils.add(
                 this.gantt_start,
                 e.currentTarget.scrollLeft / this.config.column_width,
                 this.config.unit,
             );
             let currentUpper = this.config.view_mode.upper_text(currentDate);
-            let $el = upperTexts.find((el) => el.textContent === currentUpper);
+            let $el = this.upperTexts.find(
+                (el) => el.textContent === currentUpper,
+            );
             // Recalculate for smoother experience
             currentDate = date_utils.add(
                 this.gantt_start,
@@ -989,7 +1035,7 @@ export default class Gantt {
                 this.config.unit,
             );
             currentUpper = this.config.view_mode.upper_text(currentDate);
-            $el = upperTexts.find((el) => el.textContent === currentUpper);
+            $el = this.upperTexts.find((el) => el.textContent === currentUpper);
 
             if ($el !== this.$current) {
                 if (this.$current)
@@ -1047,7 +1093,7 @@ export default class Gantt {
                 } else if (
                     is_dragging &&
                     !this.options.readonly &&
-                    !this.options.dates_readonly
+                    !this.options.readonly_dates
                 ) {
                     bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
                 }
