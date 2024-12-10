@@ -102,7 +102,7 @@ const DEFAULT_OPTIONS = {
     container_height: 300,
     column_width: 30,
     date_format: 'YYYY-MM-DD',
-    default_snap: '1d',
+    snap_at: null,
     extend_by_units: 7,
     header_height: 65,
     holidays: { '#fff7ed': 'weekend' },

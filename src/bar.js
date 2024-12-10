@@ -31,18 +31,6 @@ export default class Bar {
         this.corner_radius = this.gantt.options.bar_corner_radius;
         this.width = this.gantt.config.column_width * this.duration;
 
-        this.progress_width =
-            this.gantt.config.column_width *
-                this.actual_duration *
-                (this.task.progress / 100) || 0;
-
-        // Adjust for ignored areas
-        const progress_area = this.x + this.progress_width;
-        this.progress_width +=
-            this.gantt.config.ignored_positions.reduce((acc, val) => {
-                return acc + (val >= this.x && val <= progress_area);
-            }, 0) * this.gantt.config.column_width;
-
         this.group = createSVG('g', {
             class:
                 'bar-wrapper' +
@@ -147,6 +135,7 @@ export default class Bar {
 
     draw_progress_bar() {
         if (this.invalid) return;
+        this.progress_width = this.calculate_progress_width();
 
         this.$bar_progress = createSVG('rect', {
             x: this.x,
@@ -181,6 +170,38 @@ export default class Bar {
         animateSVG(this.$bar_progress, 'width', 0, this.progress_width);
     }
 
+    calculate_progress_width() {
+        const width = this.$bar.getWidth();
+        const ignored_end = this.x + width;
+        const total_ignored_area =
+            this.gantt.config.ignored_positions.reduce((acc, val) => {
+                return acc + (val >= this.x && val < ignored_end);
+            }, 0) * this.gantt.config.column_width;
+        let progress_width =
+            ((width - total_ignored_area) * this.task.progress) / 100;
+
+        const progress_end = this.x + progress_width;
+        const total_ignored_progress =
+            this.gantt.config.ignored_positions.reduce((acc, val) => {
+                return acc + (val >= this.x && val < progress_end);
+            }, 0) * this.gantt.config.column_width;
+
+        progress_width += total_ignored_progress;
+
+        let ignored_regions = this.gantt.get_ignored_region(
+            this.x + progress_width,
+        );
+
+        while (ignored_regions.length) {
+            progress_width += this.gantt.config.column_width;
+            ignored_regions = this.gantt.get_ignored_region(
+                this.x + progress_width,
+            );
+        }
+        this.progress_width = progress_width;
+        return progress_width;
+    }
+
     draw_label() {
         let x_coord = this.x + this.$bar.getWidth() / 2;
 
@@ -198,6 +219,7 @@ export default class Bar {
         // labels get BBox in the next tick
         requestAnimationFrame(() => this.update_label_position());
     }
+
     draw_thumbnail() {
         let x_offset = 10,
             y_offset = 2;
@@ -638,36 +660,10 @@ export default class Bar {
         if (this.invalid || this.gantt.options.readonly) return;
         this.$bar_progress.setAttribute('x', this.$bar.getX());
 
-        const width = this.$bar.getWidth();
-        const ignored_end = this.x + width;
-        const total_ignored_area =
-            this.gantt.config.ignored_positions.reduce((acc, val) => {
-                return acc + (val >= this.x && val < ignored_end);
-            }, 0) * this.gantt.config.column_width;
-        let progress_width =
-            ((width - total_ignored_area) * this.task.progress) / 100;
-
-        const progress_end = this.x + progress_width;
-        const total_ignored_progress =
-            this.gantt.config.ignored_positions.reduce((acc, val) => {
-                return acc + (val >= this.x && val < progress_end);
-            }, 0) * this.gantt.config.column_width;
-
-        progress_width += total_ignored_progress;
-
-        let ignored_regions = this.gantt.get_ignored_region(
-            this.x + progress_width,
+        this.$bar_progress.setAttribute(
+            'width',
+            this.calculate_progress_width(),
         );
-
-        while (ignored_regions.length) {
-            progress_width += this.gantt.config.column_width;
-            ignored_regions = this.gantt.get_ignored_region(
-                this.x + progress_width,
-            );
-        }
-        this.progress_width = progress_width;
-
-        this.$bar_progress.setAttribute('width', this.progress_width);
     }
 
     update_label_position() {

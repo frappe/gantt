@@ -207,6 +207,8 @@ export default class Gantt {
             mode = this.options.view_modes.find((d) => d.name === mode);
         }
 
+        // For change
+        this.options.view_mode = mode.name;
         this.config.view_mode = mode;
         this.update_view_scale(mode);
         this.setup_dates();
@@ -311,7 +313,8 @@ export default class Gantt {
         this.make_arrows();
         this.map_arrows_on_bars();
         this.set_dimensions();
-        this.set_scroll_position(this.options.scroll_to);
+        if (this.options.scroll_to !== false)
+            this.set_scroll_position(this.options.scroll_to);
     }
 
     setup_layers() {
@@ -770,8 +773,20 @@ export default class Gantt {
 
         let upper_text = this.config.view_mode.upper_text;
         let lower_text = this.config.view_mode.lower_text;
-        if (!upper_text) upper_text = () => '';
-        if (!lower_text) lower_text = () => '';
+
+        if (!upper_text) {
+            this.config.view_mode.upper_text = () => '';
+        } else if (typeof upper_text === 'string') {
+            this.config.view_mode.upper_text = (date) =>
+                date_utils.format(date, upper_text, this.options.language);
+        }
+
+        if (!lower_text) {
+            this.config.view_mode.lower_text = () => '';
+        } else if (typeof lower_text === 'string') {
+            this.config.view_mode.lower_text = (date) =>
+                date_utils.format(date, lower_text, this.options.language);
+        }
 
         return {
             date,
@@ -780,14 +795,16 @@ export default class Gantt {
                 .replaceAll(' ', '_'),
             column_width: this.config.column_width,
             base_pos_x: base_pos.x,
-            upper_text:
-                typeof upper_text === 'string'
-                    ? date_utils.format(date, upper_text, this.options.language)
-                    : upper_text(date, last_date, this.options.language),
-            lower_text:
-                typeof lower_text === 'string'
-                    ? date_utils.format(date, lower_text, this.options.language)
-                    : lower_text(date, last_date, this.options.language),
+            upper_text: this.config.view_mode.upper_text(
+                date,
+                last_date,
+                this.options.language,
+            ),
+            lower_text: this.config.view_mode.lower_text(
+                date,
+                last_date,
+                this.options.language,
+            ),
             upper_x:
                 base_pos.x +
                 (column_width * this.config.view_mode.upper_text_frequency ||
@@ -888,23 +905,25 @@ export default class Gantt {
         this.upperTexts = Array.from(
             this.$container.querySelectorAll('.upper-text'),
         );
-        let currentDate = date_utils.add(
+        this.current_date = date_utils.add(
             this.gantt_start,
             this.$container.scrollLeft / this.config.column_width,
             this.config.unit,
         );
-        let currentUpper = this.config.view_mode.upper_text(currentDate);
-        let $el = this.upperTexts.find((el) => el.textContent === currentUpper);
+        let current_upper = this.config.view_mode.upper_text(this.current_date);
+        let $el = this.upperTexts.find(
+            (el) => el.textContent === current_upper,
+        );
 
         // Recalculate
-        currentDate = date_utils.add(
+        this.current_date = this.current_date = date_utils.add(
             this.gantt_start,
             (this.$container.scrollLeft + $el.clientWidth) /
                 this.config.column_width,
             this.config.unit,
         );
-        currentUpper = this.config.view_mode.upper_text(currentDate);
-        $el = this.upperTexts.find((el) => el.textContent === currentUpper);
+        current_upper = this.config.view_mode.upper_text(this.current_date);
+        $el = this.upperTexts.find((el) => el.textContent === current_upper);
 
         $el.classList.add('current-upper');
         $el.style.left = this.$container.scrollLeft + 'px';
@@ -1082,24 +1101,28 @@ export default class Gantt {
                 this.$current.style.left = e.currentTarget.scrollLeft + 'px';
 
             // Calculate current scroll position's upper text
-            let currentDate = date_utils.add(
+            this.current_date = date_utils.add(
                 this.gantt_start,
                 e.currentTarget.scrollLeft / this.config.column_width,
                 this.config.unit,
             );
-            let currentUpper = this.config.view_mode.upper_text(currentDate);
+            let current_upper = this.config.view_mode.upper_text(
+                this.current_date,
+            );
             let $el = this.upperTexts.find(
-                (el) => el.textContent === currentUpper,
+                (el) => el.textContent === current_upper,
             );
             // Recalculate for smoother experience
-            currentDate = date_utils.add(
+            this.current_date = date_utils.add(
                 this.gantt_start,
                 (e.currentTarget.scrollLeft + $el.clientWidth) /
                     this.config.column_width,
                 this.config.unit,
             );
-            currentUpper = this.config.view_mode.upper_text(currentDate);
-            $el = this.upperTexts.find((el) => el.textContent === currentUpper);
+            current_upper = this.config.view_mode.upper_text(this.current_date);
+            $el = this.upperTexts.find(
+                (el) => el.textContent === current_upper,
+            );
 
             if ($el !== this.$current) {
                 if (this.$current)
@@ -1288,7 +1311,7 @@ export default class Gantt {
     get_snap_position(dx, ox) {
         let unit_length = 1;
         const default_snap =
-            this.config.view_mode.default_snap || this.options.default_snap;
+            this.options.snap_at || this.config.view_mode.default_snap || '1d';
 
         if (default_snap !== 'unit') {
             const { duration, scale } = date_utils.parse_duration(default_snap);
@@ -1321,7 +1344,6 @@ export default class Gantt {
     get_ignored_region(pos, drn = 1) {
         if (drn === 1) {
             return this.config.ignored_positions.filter((val) => {
-                console.log(val, pos);
                 return pos > val && pos <= val + this.config.column_width;
             });
         } else {
