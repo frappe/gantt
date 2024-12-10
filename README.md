@@ -2,13 +2,13 @@
     <img src="https://github.com/frappe/design/blob/master/logos/logo-2019/frappe-gantt-logo.png" width="100">
     <h1>Frappe Gantt</h1>
 
-    **A modern, configurable, Gantt library for the web. Completely Open Source.**
+**A modern, configurable, Gantt library for the web. Completely Open Source.**
 
-    ![GitHub release (latest)](https://img.shields.io/github/v/release/frappe/gantt)
+![GitHub release (latest)](https://img.shields.io/github/v/release/frappe/gantt)
     <br/>
-    ![GitHub stars](https://img.shields.io/github/stars/frappe/gantt)
-    ![GitHub forks](https://img.shields.io/github/forks/frappe/gantt)
-
+![GitHub stars](https://img.shields.io/github/stars/frappe/gantt)
+![GitHub forks](https://img.shields.io/github/forks/frappe/gantt)
+    
 </div>
 
 <div align="center">
