@@ -1133,7 +1133,7 @@ export default class Gantt {
 
             bars.forEach((bar) => {
                 const $bar = bar.$bar;
-                $bar.finaldx = this.get_snap_position(dx);
+                $bar.finaldx = this.get_snap_position(dx, $bar.ox);
                 this.hide_popup();
                 if (is_resizing_left) {
                     if (parent_bar_id === bar.task.id) {
@@ -1283,14 +1283,11 @@ export default class Gantt {
         return out.filter(Boolean);
     }
 
-    get_snap_position(dx) {
-        let odx = dx,
-            rem,
-            position;
-
+    get_snap_position(dx, ox) {
         let unit_length = 1;
         const default_snap =
             this.config.view_mode.default_snap || this.options.default_snap;
+
         if (default_snap !== 'unit') {
             const { duration, scale } = date_utils.parse_duration(default_snap);
             unit_length =
@@ -1298,15 +1295,37 @@ export default class Gantt {
                 duration;
         }
 
-        rem = dx % (this.config.column_width / unit_length);
+        const rem = dx % (this.config.column_width / unit_length);
 
-        position =
-            odx -
+        let final_dx =
+            dx -
             rem +
             (rem < (this.config.column_width / unit_length) * 2
                 ? 0
                 : this.config.column_width / unit_length);
-        return position;
+        let final_pos = ox + final_dx;
+
+        const drn = final_dx > 0 ? 1 : -1;
+        let ignored_regions = this.get_ignored_region(final_pos, drn);
+        while (ignored_regions.length) {
+            final_pos += this.config.column_width * drn;
+            ignored_regions = this.get_ignored_region(final_pos, drn);
+            if (!ignored_regions.length)
+                final_pos -= this.config.column_width * drn;
+        }
+        return final_pos - ox;
+    }
+
+    get_ignored_region(pos, drn = 1) {
+        if (drn === 1) {
+            return this.config.ignored_positions.filter(
+                (val) => pos > val && pos <= val + this.config.column_width,
+            );
+        } else {
+            return this.config.ignored_positions.filter(
+                (val) => pos >= val && pos < val + this.config.column_width,
+            );
+        }
     }
 
     unselect_all() {
