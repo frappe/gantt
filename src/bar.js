@@ -13,6 +13,7 @@ export default class Bar {
         this.action_completed = false;
         this.gantt = gantt;
         this.task = task;
+        this.name = this.name || '';
     }
 
     prepare() {
@@ -34,6 +35,7 @@ export default class Bar {
             this.gantt.config.column_width *
                 this.actual_duration *
                 (this.task.progress / 100) || 0;
+
         // Adjust for ignored areas
         const progress_area = this.x + this.progress_width;
         this.progress_width +=
@@ -372,7 +374,7 @@ export default class Bar {
         });
     }
 
-    async update_bar_position({ x = null, width = null }) {
+    update_bar_position({ x = null, width = null }) {
         const bar = this.$bar;
 
         if (x) {
@@ -612,17 +614,6 @@ export default class Bar {
         this.ignored_duration = this.duration - this.actual_duration;
     }
 
-    get_snap_position(dx) {
-        let rem = odx % this.gantt.config.column_width;
-        let position =
-            odx -
-            rem +
-            (rem < this.gantt.config.column_width / 2
-                ? 0
-                : this.gantt.config.column_width);
-        return position;
-    }
-
     update_attr(element, attr, value) {
         value = +value;
         if (!isNaN(value)) {
@@ -647,22 +638,35 @@ export default class Bar {
         if (this.invalid || this.gantt.options.readonly) return;
         this.$bar_progress.setAttribute('x', this.$bar.getX());
 
-        const ignored_end = this.x + this.$bar.getWidth();
-        const progress_end = this.x + this.progress_width;
+        const width = this.$bar.getWidth();
+        const ignored_end = this.x + width;
         const total_ignored_area =
             this.gantt.config.ignored_positions.reduce((acc, val) => {
                 return acc + (val >= this.x && val < ignored_end);
             }, 0) * this.gantt.config.column_width;
-        const progress_ignored_area =
+        let progress_width =
+            ((width - total_ignored_area) * this.task.progress) / 100;
+
+        const progress_end = this.x + progress_width;
+        const total_ignored_progress =
             this.gantt.config.ignored_positions.reduce((acc, val) => {
                 return acc + (val >= this.x && val < progress_end);
             }, 0) * this.gantt.config.column_width;
 
-        let new_width =
-            (this.duration * this.gantt.config.column_width -
-                total_ignored_area) *
-            (this.task.progress / 100);
-        this.progress_width = progress_ignored_area + new_width;
+        progress_width += total_ignored_progress;
+
+        let ignored_regions = this.gantt.get_ignored_region(
+            this.x + progress_width,
+        );
+
+        while (ignored_regions.length) {
+            progress_width += this.gantt.config.column_width;
+            ignored_regions = this.gantt.get_ignored_region(
+                this.x + progress_width,
+            );
+        }
+        this.progress_width = progress_width;
+
         this.$bar_progress.setAttribute('width', this.progress_width);
     }
 

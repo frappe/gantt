@@ -162,6 +162,21 @@
         padding: 4px 8px;
         border-radius: 5px;
     }
+
+    & .holiday-label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        z-index: 1000;
+        background: #dcdce4;
+        border-radius: 5px;
+        padding: 2px 5px;
+
+        &.show {
+            opacity: 100;
+        }
+    }
 }
 
 .gantt {

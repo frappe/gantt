@@ -521,6 +521,8 @@ export default class Gantt {
 
     highlightHolidays() {
         let labels = {};
+        if (!this.options.holidays) return;
+
         for (let color in this.options.holidays) {
             let check_highlight = this.options.holidays[color];
             if (check_highlight === 'weekend')
@@ -558,7 +560,7 @@ export default class Gantt {
             ) {
                 if (
                     this.config.ignored_dates.find(
-                        (k) => k.getDate() == d.getDate(),
+                        (k) => k.getTime() == d.getTime(),
                     ) ||
                     (this.config.ignored_function &&
                         this.config.ignored_function(d))
@@ -671,13 +673,12 @@ export default class Gantt {
         ) {
             if (
                 !this.config.ignored_dates.find(
-                    (k) => k.getDate() == d.getDate(),
+                    (k) => k.getTime() == d.getTime(),
                 ) &&
                 (!this.config.ignored_function ||
                     !this.config.ignored_function(d))
             )
                 continue;
-
             let diff =
                 date_utils.convert_scales(
                     date_utils.diff(d, this.gantt_start) + 'd',
@@ -937,6 +938,7 @@ export default class Gantt {
             const label = this.$container.querySelector(
                 '.label_' + h.classList[1],
             );
+            if (!label) continue;
             let timeout;
             h.onmouseenter = (e) => {
                 timeout = setTimeout(() => {
@@ -1318,9 +1320,10 @@ export default class Gantt {
 
     get_ignored_region(pos, drn = 1) {
         if (drn === 1) {
-            return this.config.ignored_positions.filter(
-                (val) => pos > val && pos <= val + this.config.column_width,
-            );
+            return this.config.ignored_positions.filter((val) => {
+                console.log(val, pos);
+                return pos > val && pos <= val + this.config.column_width;
+            });
         } else {
             return this.config.ignored_positions.filter(
                 (val) => pos >= val && pos < val + this.config.column_width,
