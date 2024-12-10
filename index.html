@@ -12,16 +12,6 @@
                 width: 80%;
                 margin: 0 auto;
             }
-            /* custom class */
-            .gantt .bar-milestone .bar {
-                fill: tomato;
-            }
-            .heading {
-                text-align: center;
-            }
-            .gantt-target.dark {
-                background-color: #252525;
-            }
         </style>
         <link rel="stylesheet" href="dist/frappe-gantt.css" />
         <script src="dist/frappe-gantt.umd.js"></script>
@@ -31,102 +21,307 @@
             <h2 class="heading">
                 Interactive Gantt Chart entirely made in SVG!
             </h2>
-            <div class="gantt-target"></div>
+            <div id="mutability">
+                <h3>Control edit access with ease</h3>
+                <p>Allow your employees to change only what they need to.</p>
+                <button id="mutable-general">Make uneditable</button>
+                <button id="mutable-progress">Make progress uneditable</button>
+                <button id="mutable-dates">Make dates uneditable</button>
+            </div>
+
+            <div id="sideheader">
+                <h3>Versatile sidebar</h3>
+                <p>Change the view mode or scroll to today with you.</p>
+                <button id="toggle-today">Hide <em>Today</em> button</button>
+                <button id="toggle-view-mode">Hide View Mode Selector</button>
+            </div>
+            <div id="holidays">
+                <h3>Mark holidays</h3>
+                <p>
+                    Be it public holidays, company milestones, or just weekends,
+                    Frappe Gantt enables you to see it all.
+                </p>
+                <button id="toggle-weekends">Toggle weekends</button>
+            </div>
+
+            <div id="ignore">
+                <h3>...or <em>ignore</em> them</h3>
+                <p>
+                    Remove specific dates from your Gantt chart - it's now
+                    completely ignored.
+                </p>
+                <button id="ignore-weekends">Toggle weekends</button>
+            </div>
+
+            <div id="advanced">
+                <h2>So much configuration</h2>
+                <h4>Frappe Gantt - <em>for you</em>.</h4>
+                <p>Change the duration at which to snap changes to the Gantt</p>
+                <input id="snap-at-qty" type="number" value="1" />
+                <select id="snap-at-scale">
+                    <option value="s">Second</option>
+                    <option value="min">Minute</option>
+                    <option value="h">Hour</option>
+                    <option value="d" selected>Day</option>
+                    <option value="m">Month</option>
+                    <option value="y">Year</option>
+                </select>
+                <button id="snap-by">Snap By</button>
+                <p>Make the label to move with you</p>
+                <button id="auto-move-label">Toggle auto-moving label</button>
+            </div>
         </div>
         <script type="module">
+            const rawToday = new Date();
+            const today =
+                Date.UTC(
+                    rawToday.getFullYear(),
+                    rawToday.getMonth(),
+                    rawToday.getDate(),
+                ) +
+                new Date().getTimezoneOffset() * 60000;
+
+            function random(begin = 10, end = 90, multiple = 10) {
+                let k;
+                do {
+                    k = Math.floor(Math.random() * 100);
+                } while (k < begin || k > end || k % multiple !== 0);
+                return k;
+            }
+
+            const daysSince = (dx) => new Date(today + dx * 86400000);
             let tasks = [
                 {
-                    start: '2024-04-01',
-                    end: '2024-04-04',
+                    start: daysSince(-2),
+                    end: daysSince(2),
                     name: 'Redesign website',
                     id: 'Task 0',
-                    progress: 30,
+                    progress: random(),
                 },
                 {
-                    start: '2024-03-26',
-                    // Utilizes duration
+                    start: daysSince(3),
                     duration: '6d',
                     name: 'Write new content',
                     id: 'Task 1',
-                    progress: 5,
+                    progress: random(),
                     important: true,
                 },
                 {
-                    start: '2024-04-04',
-                    end: '2024-04-08',
+                    start: daysSince(4),
+                    duration: '2d',
                     name: 'Apply new styles',
                     id: 'Task 2',
-                    progress: 80,
-                    dependencies: 'Task 1',
+                    progress: random(),
                 },
                 {
-                    start: '2024-04-08',
-                    end: '2024-04-09',
+                    start: daysSince(-4),
+                    end: daysSince(0),
                     name: 'Review',
                     id: 'Task 3',
-                    progress: 5,
-                    dependencies: 'Task 2',
+                    custom_class: 'readonly',
+                    progress: random(),
+                },
+            ];
+            const tasksSpread = [
+                {
+                    start: daysSince(-30),
+                    end: daysSince(-10),
+                    name: 'Redesign website',
+                    id: 'Task 0',
+                    progress: random(),
                 },
                 {
-                    start: '2024-03-08',
-                    end: '2024-05-10',
-                    name: 'Deploy',
+                    start: daysSince(-15),
+                    duration: '21d',
+                    name: 'Write new content',
+                    id: 'Task 1',
+                    progress: random(),
+                    important: true,
+                },
+                {
+                    start: daysSince(10),
+                    duration: '14d',
+                    name: 'Review',
+                    id: 'Task 3',
+                    custom_class: 'readonly',
+                    progress: random(),
+                },
+                {
+                    start: daysSince(-3),
+                    duration: '4d',
+                    name: 'Publish',
                     id: 'Task 4',
-                    progress: 0,
-                    // dependencies: 'Task 2'
+                    custom_class: 'readonly',
+                    progress: random(),
                 },
-                {
-                    start: '2024-04-21',
-                    end: '2024-05-29',
-                    name: 'Go Live!',
-                    id: 'Task 5',
-                    progress: 0,
-                    dependencies: 'Task 2',
-                    custom_class: 'bar-milestone',
-                },
-                // {
-                //     start: '2014-01-05',
-                //     end: '2019-10-12',
-                //     name: 'Long term task',
-                //     id: 'Task 6',
-                //     progress: 0,
-                // },
             ];
 
-            // Uncomment to test fixed header
-            // tasks = [
-            //     ...tasks,
-            //     ...Array.from({ length: tasks.length * 3 }, (_, i) => ({
-            //         ...tasks[i % 3],
-            //         id: i,
-            //     })),
-            // ];
-            let gantt_chart = new Gantt('.gantt-target', tasks, {
-                on_click(task) {
-                    console.log('Click', task);
-                },
-                // on_hover (task, x, y) {
-                //   console.log("Hover", x, y);
-                // }
-                view_mode: 'Month',
-                // view_modes: [
-                //     {
-                //         name: 'Custom Day',
-                //         padding: '1m',
-                //         step: '1d',
-                //     },
-                // ],
-                // popup_on: 'click',
-                // move_dependencies: false,
-                // scroll_to: 'today',
-                // view_mode_select: true,
-                // dates_readonly: true,
-                // today_button: false,
-                // readonly: true,
-                // lines: 'vertical',
-                // lower_text: (date) => date.getDay(),
-                // upper_text: (date, view_mode, def) => def,
+            const HOLIDAYS = [
+                { name: 'Republic Day', date: '2024-01-26' },
+                { name: 'Maha Shivratri', date: '2024-02-23' },
+                { name: 'Holi', date: '2024-03-11' },
+                { name: 'Mahavir Jayanthi', date: '2024-04-07' },
+                { name: 'Good Friday', date: '2024-04-10' },
+                { name: 'May Day', date: '2024-05-01' },
+                { name: 'Buddha Purnima', date: '2024-05-08' },
+                { name: 'Krishna Janmastami', date: '2024-08-14' },
+                { name: 'Independence Day', date: '2024-08-15' },
+                { name: 'Ganesh Chaturthi', date: '2024-08-23' },
+                { name: 'Id-Ul-Fitr', date: '2024-09-21' },
+                { name: 'Vijaya Dashami', date: '2024-09-28' },
+                { name: 'Mahatma Gandhi Jayanti', date: '2024-10-02' },
+                { name: 'Diwali', date: '2024-10-17' },
+                { name: 'Guru Nanak Jayanthi', date: '2024-11-02' },
+                { name: 'Christmas', date: '2024-12-25' },
+            ];
+
+            const mutablity = new Gantt('#mutability', tasks, {
+                scroll_to: daysSince(-7),
             });
+            const sideheader = new Gantt('#sideheader', tasksSpread, {
+                today_button: true,
+                view_mode_select: true,
+                holidays: null,
+            });
+
+            const holidays = new Gantt('#holidays', tasksSpread, {
+                holidays: {
+                    '#bfdbfe': [],
+                    '#a3e635': HOLIDAYS,
+                },
+            });
+
+            const ignore = new Gantt('#ignore', tasks, {
+                ignore: ['weekend', ...HOLIDAYS.map((k) => k.date)],
+                holidays: null,
+                scroll_to: daysSince(-10),
+            });
+
+            const advanced = new Gantt('#advanced', tasksSpread, {
+                holidays: null,
+                view_mode: 'Month',
+                view_mode_select: true,
+                extend_by_units: 0,
+                snap_at: '1d',
+                auto_move_label: false,
+            });
+
+            const OPTIONS_UPDATE = [
+                [
+                    mutablity,
+                    {
+                        'mutable-general': { readonly: true },
+                        'mutable-dates': { readonly_dates: true },
+                        'mutable-progress': { readonly_progress: true },
+                    },
+                ],
+                [
+                    sideheader,
+                    {
+                        'toggle-today': { today_button: 'opp' },
+                        'toggle-view-mode': { view_mode_select: 'opp' },
+                    },
+                ],
+                [
+                    holidays,
+                    {
+                        'toggle-weekends': {
+                            holidays: [
+                                'config',
+                                (opts) =>
+                                    opts['#bfdbfe'].length !== 0
+                                        ? { ...opts, '#bfdbfe': [] }
+                                        : { ...opts, '#bfdbfe': 'weekend' },
+                            ],
+                        },
+                    },
+                ],
+                [
+                    ignore,
+                    {
+                        'ignore-weekends': {
+                            ignore: [
+                                'config',
+                                (opts) =>
+                                    opts.includes('weekend')
+                                        ? opts.filter((k) => k !== 'weekend')
+                                        : [...opts, 'weekend'],
+                            ],
+                        },
+                    },
+                ],
+                [
+                    advanced,
+                    {
+                        'snap-by': {
+                            BEFORE: (chart) => chart.$container.scrollLeft,
+                            snap_at: [
+                                'config',
+                                (scale) => {
+                                    return (
+                                        document.getElementById('snap-at-qty')
+                                            .value +
+                                        document.getElementById('snap-at-scale')
+                                            .value
+                                    );
+                                },
+                            ],
+                            view_mode: ['config', (k) => k],
+                            scroll_to: ['config', (_) => false],
+                            AFTER: (before, chart) =>
+                                (chart.$container.scrollLeft = before),
+                        },
+                        'auto-move-label': {
+                            BEFORE: (chart) =>
+                                chart.change_view_mode('Day') ||
+                                chart.$container.scrollLeft,
+                            view_mode: ['config', (k) => k],
+                            auto_move_label: 'opp',
+                            scroll_to: ['config', (_) => false],
+                            AFTER: (before, chart) =>
+                                (chart.$container.scrollLeft = before),
+                        },
+                    },
+                ],
+            ];
+
+            for (let [chart, options] of OPTIONS_UPDATE) {
+                for (let id in options) {
+                    let el = document.getElementById(id);
+                    el.onclick = () => {
+                        const before =
+                            options[id].BEFORE && options[id].BEFORE(chart);
+                        let newOptions = {};
+                        for (let k in options[id]) {
+                            if (k === 'AFTER' || k === 'BEFORE') continue;
+                            if (options[id][k] === 'opp') {
+                                newOptions[k] = !chart.options[k];
+                                if (chart.options[k]) {
+                                    el.innerHTML = el.innerHTML.replace(
+                                        'Hide',
+                                        'Show',
+                                    );
+                                } else {
+                                    el.innerHTML = el.innerHTML.replace(
+                                        'Show',
+                                        'Hide',
+                                    );
+                                }
+                            } else if (options[id][k][0] === 'config') {
+                                newOptions[k] = options[id][k][1](
+                                    chart.options[k],
+                                    chart,
+                                );
+                            } else {
+                                newOptions[k] = options[id][k];
+                            }
+                        }
+                        chart.update_options(newOptions);
+                        console.log(chart.options.view_mode);
+                        options[id].AFTER && options[id].AFTER(before, chart);
+                    };
+                }
+            }
         </script>
     </body>
 </html>
