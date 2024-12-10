@@ -1,19 +1,19 @@
-<div align="center">
-    <img src="https://github.com/frappe/design/blob/master/logos/logo-2019/frappe-gantt-logo.png" height="128">
-    <h2>Frappe Gantt</h2>
-    <p align="center">
-        <p>A simple, interactive, modern gantt chart library for the web</p>
-        <a href="https://frappe.github.io/gantt">
-            <b>View the demo »</b>
-        </a>
-    </p>
+<div align="center" markdown="1">
+    <img src="https://github.com/frappe/design/blob/master/logos/logo-2019/frappe-gantt-logo.png" width="100">
+    <h1>Frappe Gantt</h1>
+
+    **A modern, configurable, Gantt library for the web. Completely Open Source.**
+
+    ![GitHub release (latest)](https://img.shields.io/github/v/release/frappe/gantt)
+    <br/>
+    ![GitHub stars](https://img.shields.io/github/stars/frappe/gantt)
+    ![GitHub forks](https://img.shields.io/github/forks/frappe/gantt)
+
 </div>
 
-<p align="center">
-    <a href="https://frappe.github.io/gantt">
-        <img src="https://cloud.githubusercontent.com/assets/9355208/21537921/4a38b194-cdbd-11e6-8110-e0da19678a6d.png">
-    </a>
-</p>
+<div align="center">
+	<img src=".github/hero-image.png" alt="Hero Image" width="72%" />
+</div>
 
 ### Install
 
@@ -21,12 +21,32 @@
 npm install frappe-gantt
 ```
 
-### Usage
+## About
+A Gantt chart is a bar chart that visually illustrates a project's schedule, tasks, and dependencies. With Frappe Gantt, you can easily build beautiful Gantt charts, with extensive levels of configurability.
 
+You can use it anywhere from hobby projects to tracking the goals of your team at the worksplace.
+
+[ERPNext](https://erpnext.com/) uses Frappe Gantt.
+
+
+## Motivation
+We at Frappe built Gantt after realizing that although Gantt charts are everywhere, there was no open source implementation.
+
+Today, we pride ourselves on having the most aesthetically pleasing _and_ powerful Gantt library on the market - except it's free!
+
+
+## Key Features
+- A wide variety of modes - be it day, hour, or year, you have it. Or add your own modes!
+- Easily ignore time periods from your tasks' progress calculation
+- An incredible amount of configurability: spacing, edit access, labels, you can control it all.
+- Multi-lingual support
+- Powerful API to integrate Frappe Gantt into your product.
+
+### Usage
 Include it in your HTML:
 
 ```
-<script src="frappe-gantt.min.js"></script>
+<script src="frappe-gantt.umd.js"></script>
 <link rel="stylesheet" href="frappe-gantt.css">
 ```
 
@@ -35,89 +55,33 @@ Or from the CDN:
 <script src="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.umd.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.css">
 ```
-And start hacking:
 
+And start hacking:
 ```js
-var tasks = [
+let tasks = [
   {
-    id: 'Task 1',
+    id: '1',
     name: 'Redesign website',
     start: '2016-12-28',
     end: '2016-12-31',
-    progress: 20,
-    dependencies: 'Task 2, Task 3',
-    custom_class: 'bar-milestone' // optional
+    progress: 20
   },
   ...
 ]
-var gantt = new Gantt("#gantt", tasks);
+let gantt = new Gantt("#gantt", tasks);
 ```
 
-You can also pass various options to the Gantt constructor:
+To see the list of all options, check out [the docs](docs.frappe.io/gantt) (under development).
 
-```js
-var gantt = new Gantt('#gantt', tasks, {
-    header_height: 50,
-    column_width: 30,
-    step: 24,
-    view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
-    bar_height: 20,
-    bar_corner_radius: 3,
-    arrow_curve: 5,
-    padding: 18,
-    view_mode: 'Day',
-    date_format: 'YYYY-MM-DD',
-    language: 'en', // or 'es', 'it', 'ru', 'ptBr', 'fr', 'tr', 'zh', 'de', 'hu'
-    popup: null,
-});
-```
-
-You can add `dark` class to the container element to apply dark theme.
-
-```html
-<div class="gantt-target dark"></div>
-```
-
-### Contributing
-
+## Development Setup
 If you want to contribute enhancements or fixes:
 
 1. Clone this repo.
 2. `cd` into project directory
-3. `yarn`
-4. `yarn run dev`
-5. Open `index.html` in your browser, make your code changes and test them.
-
-### Publishing
-
-If you have publishing rights (Frappe Team), follow these steps to publish a new version.
-
-Assuming the last commit (or a couple of commits) were enhancements or fixes,
-
-1. Run `yarn build`
-
-    This will generate files in the `dist/` folder. These files need to be committed.
-
-1. Run `yarn publish`
-1. Type the new version at the prompt
-
-    Depending on the type of change, you can either bump the patch version or the minor version.
-    For e.g.,
-
-    ```
-    0.5.0 -> 0.6.0 (minor version bump)
-    0.5.0 -> 0.5.1 (patch version bump)
-    ```
-
-1. Now, there will be a commit named after the version you just entered. Include the generated files in `dist/` folder as part of this commit by running the command:
-    ```
-    git add dist
-    git commit --amend
-    git push origin master
-    ```
-
-License: MIT
+3. `pnpm i`
+4. `pnpm run build` - or `pnpm run build-dev` to watch for changes!
+5. Open `index.html` in your browser
+6. Make your code changes and test them.
 
 ---
-
-Project maintained by [frappe](https://github.com/frappe)
+License: MIT
