@@ -297,6 +297,7 @@ export default class Gantt {
     bind_events() {
         if (this.options.readonly) return;
         this.bind_grid_click();
+        this.bind_holiday_labels();
         this.bind_bar_events();
     }
 
@@ -315,7 +316,7 @@ export default class Gantt {
 
     setup_layers() {
         this.layers = {};
-        const layers = ['grid', 'arrow', 'progress', 'bar', 'details'];
+        const layers = ['grid', 'arrow', 'progress', 'bar'];
         // make group layers
         for (let layer of layers) {
             this.layers[layer] = createSVG('g', {
@@ -323,6 +324,10 @@ export default class Gantt {
                 append_to: this.$svg,
             });
         }
+        this.$extras = this.create_el({
+            classes: 'extras',
+            append_to: this.$container,
+        });
     }
 
     make_grid() {
@@ -515,8 +520,9 @@ export default class Gantt {
     }
 
     highlightHolidays() {
-        for (let color in this.options.holiday_highlight) {
-            let check_highlight = this.options.holiday_highlight[color];
+        let labels = {};
+        for (let color in this.options.holidays) {
+            let check_highlight = this.options.holidays[color];
             if (check_highlight === 'weekend')
                 check_highlight = (d) => d.getDay() === 0 || d.getDay() === 6;
             let extra_func;
@@ -526,14 +532,25 @@ export default class Gantt {
                 if (f) {
                     extra_func = f;
                 }
-
-                check_highlight = (d) =>
-                    this.options.holiday_highlight[color]
-                        .filter((k) => typeof k !== 'function')
-                        .map((k) => new Date(k + ' ').getTime())
-                        .includes(d.getTime());
+                if (this.options.holidays.name) {
+                    let dateObj = new Date(check_highlight.date + ' ');
+                    check_highlight = (d) => dateObj.getTime() === d.getTime();
+                    labels[dateObj] = check_highlight.name;
+                } else {
+                    check_highlight = (d) =>
+                        this.options.holidays[color]
+                            .filter((k) => typeof k !== 'function')
+                            .map((k) => {
+                                if (k.name) {
+                                    let dateObj = new Date(k.date + ' ');
+                                    labels[dateObj] = k.name;
+                                    return dateObj.getTime();
+                                }
+                                return new Date(k + ' ').getTime();
+                            })
+                            .includes(d.getTime());
+                }
             }
-
             for (
                 let d = new Date(this.gantt_start);
                 d <= this.gantt_end;
@@ -559,7 +576,18 @@ export default class Gantt {
                     const height =
                         (this.options.bar_height + this.options.padding) *
                         this.tasks.length;
-                    createSVG('rect', {
+                    const d_formatted = date_utils
+                        .format(d, 'YYYY-MM-DD')
+                        .replace(' ', '_');
+
+                    if (labels[d]) {
+                        let label = this.create_el({
+                            classes: 'holiday-label ' + 'label_' + d_formatted,
+                            append_to: this.$extras,
+                        });
+                        label.textContent = labels[d];
+                    }
+                    let el = createSVG('rect', {
                         x: Math.round(x),
                         y:
                             this.options.header_height +
@@ -571,6 +599,7 @@ export default class Gantt {
                                 'day',
                             ),
                         height,
+                        class: 'holiday-highlight ' + d_formatted,
                         style: `fill: ${color};`,
                         append_to: this.layers.grid,
                     });
@@ -604,15 +633,15 @@ export default class Gantt {
             this.config.view_mode.format_string,
             this.options.language,
         );
-        console.log(this.$header.clientHeight);
+
         this.$current_highlight = this.create_el({
             top: this.options.header_height - 20,
             left,
             height,
             classes: 'current-highlight',
-            append_to: this.$container,
+            append_to: this.$extras,
         });
-        let $today = this.$container.querySelector(
+        let $today = this.$extras.querySelector(
             '.date_' + date.replaceAll(' ', '_'),
         );
         if ($today) {
@@ -832,6 +861,7 @@ export default class Gantt {
         } else if (typeof date === 'string') {
             date = date_utils.parse(date);
         }
+
         const parent_element = this.$svg.parentElement;
         if (!parent_element) return;
         const units_since_first_task = date_utils.diff(
@@ -842,7 +872,7 @@ export default class Gantt {
         const scroll_pos =
             (units_since_first_task / this.config.step) *
             this.config.column_width;
-        parent_element.scrollTo({ left: scroll_pos, behavior: 'smooth' });
+        parent_element.scrollTo({ left: scroll_pos - 2, behavior: 'smooth' });
 
         this.$side_header.style.left =
             this.$container.clientWidth +
@@ -881,7 +911,16 @@ export default class Gantt {
     }
 
     scroll_today() {
-        this.set_scroll_position(new Date());
+        const today = new Date();
+        this.set_scroll_position(
+            new Date(
+                today.getFullYear() +
+                    '-' +
+                    (today.getMonth() + 1) +
+                    '-' +
+                    today.getDate(),
+            ),
+        );
     }
 
     bind_grid_click() {
@@ -889,6 +928,29 @@ export default class Gantt {
             this.unselect_all();
             this.hide_popup();
         });
+    }
+
+    bind_holiday_labels() {
+        const $highlights =
+            this.$container.querySelectorAll('.holiday-highlight');
+        for (let h of $highlights) {
+            const label = this.$container.querySelector(
+                '.label_' + h.classList[1],
+            );
+            let timeout;
+            h.onmouseenter = (e) => {
+                timeout = setTimeout(() => {
+                    label.classList.add('show');
+                    label.style.left = e.offsetX + 'px';
+                    label.style.top = e.offsetY + 'px';
+                }, 300);
+            };
+
+            h.onmouseleave = (e) => {
+                clearTimeout(timeout);
+                label.classList.remove('show');
+            };
+        }
     }
 
     bind_bar_events() {
@@ -1321,6 +1383,7 @@ export default class Gantt {
         this.$header?.remove?.();
         this.$side_header?.remove?.();
         this.$current_highlight?.remove?.();
+        this.$extras?.remove?.();
         this.popup?.hide?.();
     }
 }
