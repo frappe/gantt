@@ -75,9 +75,11 @@ export default class Gantt {
         this.original_options = options;
         this.options = { ...DEFAULT_OPTIONS, ...options };
 
-        this.config = {};
-        this.config.ignored_dates = [];
-        this.config.ignored_positions = [];
+        this.config = {
+            ignored_dates: [],
+            ignored_positions: [],
+            extend_by_units: 10,
+        };
 
         if (typeof this.options.ignore !== 'function') {
             if (typeof this.options.ignore === 'string')
@@ -249,37 +251,50 @@ export default class Gantt {
         gantt_end = date_utils.start_of(gantt_end, 'day');
 
         // handle single value for padding
-        if (typeof this.config.view_mode.padding === 'string')
-            this.config.view_mode.padding = [
-                this.config.view_mode.padding,
-                this.config.view_mode.padding,
-            ];
+        if (!this.options.infinite_padding) {
+            if (typeof this.config.view_mode.padding === 'string')
+                this.config.view_mode.padding = [
+                    this.config.view_mode.padding,
+                    this.config.view_mode.padding,
+                ];
 
-        let [padding_start, padding_end] = this.config.view_mode.padding.map(
-            date_utils.parse_duration,
-        );
-        gantt_start = date_utils.add(
+            let [padding_start, padding_end] =
+                this.config.view_mode.padding.map(date_utils.parse_duration);
+            gantt_start = date_utils.add(
+                gantt_start,
+                -padding_start.duration,
+                padding_start.scale,
+            );
+            gantt_end = date_utils.add(
+                gantt_end,
+                padding_end.duration,
+                padding_end.scale,
+            );
+        } else {
+            gantt_start = date_utils.add(
+                gantt_start,
+                -this.config.extend_by_units * 3,
+                this.config.unit,
+            );
+            gantt_end = date_utils.add(
+                gantt_end,
+                this.config.extend_by_units * 3,
+                this.config.unit,
+            );
+        }
+        console.log(
             gantt_start,
-            -padding_start.duration,
-            padding_start.scale,
+            gantt_end,
+            this.config.extend_by_units * 3,
+            this.config.unit,
         );
 
         let format_string =
             this.config.view_mode.format_string || 'YYYY-MM-DD HH';
 
-        this.gantt_start = date_utils.parse(
-            date_utils.format(
-                gantt_start,
-                format_string,
-                this.options.language,
-            ),
-        );
+        this.gantt_start = gantt_start;
         this.gantt_start.setHours(0, 0, 0, 0);
-        this.gantt_end = date_utils.add(
-            gantt_end,
-            padding_end.duration,
-            padding_end.scale,
-        );
+        this.gantt_end = gantt_end;
     }
 
     setup_date_values() {
@@ -1034,53 +1049,48 @@ export default class Gantt {
             });
         });
 
-        let extended = false;
-        $.on(this.$container, 'mousewheel', (e) => {
-            if (!extended && e.currentTarget.scrollLeft === 0) {
-                extended = true;
-                this.gantt_start = date_utils.add(
-                    this.gantt_start,
-                    -this.options.extend_by_units,
-                    this.config.unit,
-                );
-                let old_scroll = this.options.scroll_to;
-                this.options.scroll_to = null;
-                this.setup_date_values();
-                this.render();
-                e.currentTarget.scrollLeft =
-                    this.config.column_width * this.options.extend_by_units;
-                this.options.scroll_to = old_scroll;
-                this.set_scroll_position();
-                setTimeout(() => (extended = false), 1000);
-            }
+        if (this.options.infinite_padding) {
+            let extended = false;
+            $.on(this.$container, 'mousewheel', (e) => {
+                let trigger = this.$container.scrollWidth / 2;
+                if (!extended && e.currentTarget.scrollLeft <= trigger) {
+                    let old_scroll_left = e.currentTarget.scrollLeft;
+                    extended = true;
 
-            if (
-                !extended &&
-                e.currentTarget.scrollWidth - e.currentTarget.scrollLeft ===
-                    e.currentTarget.clientWidth
-            ) {
-                let old_scroll_left = e.currentTarget.scrollLeft;
-                extended = true;
-                this.gantt_end = date_utils.add(
-                    this.gantt_end,
-                    this.options.extend_by_units,
-                    this.config.unit,
-                );
-                let old_scroll = this.options.scroll_to;
-
-                this.options.scroll_to = 'end';
-                this.setup_date_values();
-                this.render();
-                this.options.scroll_to = old_scroll_left;
-                e.currentTarget.scrollTo({
-                    left:
+                    this.gantt_start = date_utils.add(
+                        this.gantt_start,
+                        -this.config.extend_by_units,
+                        this.config.unit,
+                    );
+                    this.setup_date_values();
+                    this.render();
+                    e.currentTarget.scrollLeft =
                         old_scroll_left +
-                        this.config.column_width * this.options.extend_by_units,
-                    behavior: 'smooth',
-                });
-                setTimeout(() => (extended = false), 1000);
-            }
-        });
+                        this.config.column_width * this.config.extend_by_units;
+                    setTimeout(() => (extended = false), 300);
+                }
+
+                if (
+                    !extended &&
+                    e.currentTarget.scrollWidth -
+                        (e.currentTarget.scrollLeft +
+                            e.currentTarget.clientWidth) <=
+                        trigger
+                ) {
+                    let old_scroll_left = e.currentTarget.scrollLeft;
+                    extended = true;
+                    this.gantt_end = date_utils.add(
+                        this.gantt_end,
+                        this.config.extend_by_units,
+                        this.config.unit,
+                    );
+                    this.setup_date_values();
+                    this.render();
+                    e.currentTarget.scrollLeft = old_scroll_left;
+                    setTimeout(() => (extended = false), 300);
+                }
+            });
+        }
 
         $.on(this.$container, 'scroll', (e) => {
             let elements = this.$container.querySelectorAll('.bar-wrapper');

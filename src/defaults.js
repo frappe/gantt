@@ -103,7 +103,7 @@ const DEFAULT_OPTIONS = {
     column_width: 30,
     date_format: 'YYYY-MM-DD',
     snap_at: null,
-    extend_by_units: 7,
+    infinite_padding: true,
     header_height: 65,
     holidays: { '#fff7ed': 'weekend' },
     ignore: [],
