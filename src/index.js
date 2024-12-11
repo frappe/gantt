@@ -223,7 +223,7 @@ export default class Gantt {
         this.config.step = duration;
         this.config.unit = scale;
         this.config.column_width =
-            mode.column_width || this.options.column_width;
+            this.options.column_width || mode.column_width || 30;
     }
 
     setup_dates() {
@@ -282,12 +282,6 @@ export default class Gantt {
                 this.config.unit,
             );
         }
-        console.log(
-            gantt_start,
-            gantt_end,
-            this.config.extend_by_units * 3,
-            this.config.unit,
-        );
 
         let format_string =
             this.config.view_mode.format_string || 'YYYY-MM-DD HH';
@@ -661,7 +655,8 @@ export default class Gantt {
             classes: 'current-highlight',
             append_to: this.$extras,
         });
-        let $today = this.$extras.querySelector(
+
+        let $today = this.$container.querySelector(
             '.date_' + date.replaceAll(' ', '_'),
         );
         if ($today) {
@@ -905,7 +900,7 @@ export default class Gantt {
         const scroll_pos =
             (units_since_first_task / this.config.step) *
             this.config.column_width;
-        parent_element.scrollTo({ left: scroll_pos - 2, behavior: 'smooth' });
+        parent_element.scrollTo({ left: scroll_pos - 4, behavior: 'smooth' });
 
         this.$side_header.style.left =
             this.$container.clientWidth +
@@ -947,15 +942,8 @@ export default class Gantt {
 
     scroll_today() {
         const today = new Date();
-        this.set_scroll_position(
-            new Date(
-                today.getFullYear() +
-                    '-' +
-                    (today.getMonth() + 1) +
-                    '-' +
-                    today.getDate(),
-            ),
-        );
+        today.setHours(0, 0, 0, 0);
+        this.set_scroll_position(today);
     }
 
     bind_grid_click() {

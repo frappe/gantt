@@ -273,8 +273,8 @@ export default class Bar {
                 y: bar.getY() + 1,
                 width: handle_width,
                 height: this.height - 2,
-                rx: this.corner_radius,
-                ry: this.corner_radius,
+                rx: 3,
+                ry: 3,
                 class: 'handle right',
                 append_to: this.handle_group,
             });
@@ -284,8 +284,8 @@ export default class Bar {
                 y: bar.getY() + 1,
                 width: handle_width,
                 height: this.height - 2,
-                rx: this.corner_radius,
-                ry: this.corner_radius,
+                rx: 3,
+                ry: 3,
                 class: 'handle left',
                 append_to: this.handle_group,
             });

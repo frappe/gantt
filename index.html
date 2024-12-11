@@ -3,57 +3,280 @@
     <head>
         <meta charset="UTF-8" />
         <title>Simple Gantt</title>
+        <link rel="stylesheet" href="dist/frappe-gantt.css" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
         <style>
-            body {
-                font-family: sans-serif;
-                background: #ccc;
-            }
             .container {
-                width: 80%;
+                width: 90%;
                 margin: 0 auto;
             }
+
+            .chart {
+                border: 1px dotted black;
+                border-radius: 4px;
+                height: fit-content;
+            }
+
+            .chart.active {
+                filter: drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.6));
+                border: unset;
+            }
+
+            small {
+                font-size: 0.775em;
+            }
         </style>
-        <link rel="stylesheet" href="dist/frappe-gantt.css" />
         <script src="dist/frappe-gantt.umd.js"></script>
     </head>
     <body>
         <div class="container">
-            <h2 class="heading">
-                Interactive Gantt Chart entirely made in SVG!
-            </h2>
-            <div id="mutability">
-                <h3>Control edit access with ease</h3>
-                <p>Allow your employees to change only what they need to.</p>
-                <button id="mutable-general">Make uneditable</button>
-                <button id="mutable-progress">Make progress uneditable</button>
-                <button id="mutable-dates">Make dates uneditable</button>
+            <h1 class="text-center pt-3 pb-2 font-serif">Frappe Gantt</h1>
+            <hr />
+            <div class="row my-5">
+                <div class="col-md-3 px-5 py-1">
+                    <h3 class="text-center">Set edit access</h3>
+                    <p>
+                        Easy make sure your employees change <em>only</em> what
+                        they need to.
+                    </p>
+                    <div class="form-check form-switch">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="mutable-general"
+                            checked
+                        />
+                        <label class="form-check-label" for="mutable-general"
+                            >Editable</label
+                        >
+                    </div>
+                    <div class="form-check form-switch">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="mutable-progress"
+                            checked
+                        />
+                        <label class="form-check-label" for="mutable-general"
+                            >Progress editable</label
+                        >
+                    </div>
+                    <div class="form-check form-switch">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="mutable-dates"
+                            checked
+                        />
+                        <label class="form-check-label" for="mutable-general"
+                            >Dates editable</label
+                        >
+                    </div>
+                </div>
+
+                <div class="chart col-md-9" id="mutability"></div>
+            </div>
+            <div class="row my-5">
+                <div class="chart col-md-9" id="sideheader"></div>
+                <div class="col-md-3 px-5 py-1">
+                    <h3 class="text-center">Versatile Actions</h3>
+                    <p>
+                        Change the view mode, or scroll to today, or add
+                        anything you like <sup>β</sup>.
+                    </p>
+                    <div class="form-check form-switch">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="toggle-today"
+                            checked
+                        />
+                        <label class="form-check-label" for="mutable-general"
+                            >Scroll to Today</label
+                        >
+                    </div>
+                    <div class="form-check form-switch">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="toggle-view-mode"
+                            checked
+                        />
+                        <label class="form-check-label" for="mutable-general"
+                            >Change View Mode</label
+                        >
+                    </div>
+                </div>
             </div>
 
-            <div id="sideheader">
-                <h3>Versatile sidebar</h3>
-                <p>Change the view mode or scroll to today with you.</p>
-                <button id="toggle-today">Hide <em>Today</em> button</button>
-                <button id="toggle-view-mode">Hide View Mode Selector</button>
-            </div>
-            <div id="holidays">
-                <h3>Mark holidays</h3>
-                <p>
-                    Be it public holidays, company milestones, or just weekends,
-                    Frappe Gantt enables you to see it all.
-                </p>
-                <button id="toggle-weekends">Toggle weekends</button>
-            </div>
-
-            <div id="ignore">
-                <h3>...or <em>ignore</em> them</h3>
-                <p>
-                    Remove specific dates from your Gantt chart - it's now
-                    completely ignored.
-                </p>
-                <button id="ignore-weekends">Toggle weekends</button>
+            <div class="row my-5">
+                <div class="col-md-3 px-5 py-1">
+                    <h3 class="text-center">Mark Holidays</h3>
+                    <p>
+                        Be it public holidays, company milestones, or just
+                        weekends, you can see it all.
+                    </p>
+                    <div class="form-check form-switch">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="toggle-weekends"
+                        />
+                        <label class="form-check-label" for="toggle-weekends"
+                            >Show weekends</label
+                        >
+                    </div>
+                </div>
+                <div class="chart col-md-9" id="holidays"></div>
             </div>
 
-            <div id="advanced">
+            <div class="row my-5">
+                <div class="col-md-3 px-5 py-1">
+                    <h3 class="text-center">...or <em>ignore</em> them</h3>
+                    <p>
+                        Remove time periods from your Gantt - they're now
+                        completely ignored.
+                    </p>
+                    <div class="form-check form-switch">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="ignore-weekends"
+                            checked
+                        />
+                        <label class="form-check-label" for="toggle-weekends"
+                            >Ignore weekends</label
+                        >
+                    </div>
+                </div>
+                <div class="chart col-md-9" id="ignore"></div>
+            </div>
+            <div class="row my-4">
+                <div class="col-md-9 chart" id="styling"></div>
+                <div class="col-md-3 px-4">
+                    <h3 class="text-center">Control the styles completely.</h3>
+                    <strong>Modify Grid</strong>
+                    <div class="input-group row">
+                        <label
+                            for="grid-height"
+                            class="form-label col-sm-5 col-form-label"
+                            ><small>Grid Height:</small></label
+                        >
+                        <div class="col-sm-7">
+                            <input
+                                id="grid-height"
+                                class="form-range align-items-end"
+                                type="range"
+                                min="150"
+                                max="600"
+                                value="300"
+                            />
+                        </div>
+                    </div>
+                    <div class="input-group row">
+                        <label
+                            for="padding"
+                            class="form-label col-sm-5 col-form-label"
+                            ><small>Padding:</small></label
+                        >
+                        <div class="col-sm-7">
+                            <input
+                                id="padding"
+                                class="form-range align-items-end"
+                                type="range"
+                                min="3"
+                                max="50"
+                                value="18"
+                            />
+                        </div>
+                    </div>
+                    <div class="input-group row">
+                        <label
+                            for="column-width"
+                            class="form-label col-sm-5 col-form-label"
+                            ><small>Column Width:</small></label
+                        >
+                        <div class="col-sm-7">
+                            <input
+                                id="column-width"
+                                class="form-range align-items-end"
+                                type="range"
+                                min="15"
+                                max="70"
+                                value="30"
+                            />
+                        </div>
+                    </div>
+                    <div class="pt-3">
+                        <strong>Modify Bar</strong>
+                    </div>
+                    <div class="input-group row">
+                        <label
+                            for="bar-height"
+                            class="form-label col-sm-5 col-form-label"
+                            ><small>Height:</small></label
+                        >
+                        <div class="col-sm-7">
+                            <input
+                                id="bar-height"
+                                class="form-range align-items-end"
+                                type="range"
+                                min="10"
+                                max="100"
+                                value="30"
+                            />
+                        </div>
+                    </div>
+                    <div class="input-group row">
+                        <label
+                            for="bar-radius"
+                            class="form-label col-sm-5 col-form-label"
+                            ><small>Radius:</small></label
+                        >
+                        <div class="col-sm-7">
+                            <input
+                                id="bar-radius"
+                                class="form-range align-items-end"
+                                type="range"
+                                min="1"
+                                max="50"
+                                value="3"
+                            />
+                        </div>
+                    </div>
+                    <div class="input-group row">
+                        <label
+                            for="arrow-curve"
+                            class="form-label col-sm-5 col-form-label"
+                            ><small>Arrow curving:</small></label
+                        >
+                        <div class="col-sm-7">
+                            <input
+                                id="arrow-curve"
+                                class="form-range align-items-end"
+                                type="range"
+                                min="1"
+                                max="50"
+                                value="3"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <div id="advanced">
                 <h2>So much configuration</h2>
                 <h4>Frappe Gantt - <em>for you</em>.</h4>
                 <p>Change the duration at which to snap changes to the Gantt</p>
@@ -69,7 +292,7 @@
                 <button id="snap-by">Snap By</button>
                 <p>Make the label to move with you</p>
                 <button id="auto-move-label">Toggle auto-moving label</button>
-            </div>
+            </div> -->
         </div>
         <script type="module">
             const rawToday = new Date();
@@ -118,10 +341,10 @@
                     end: daysSince(0),
                     name: 'Review',
                     id: 'Task 3',
-                    custom_class: 'readonly',
                     progress: random(),
                 },
             ];
+
             const tasksSpread = [
                 {
                     start: daysSince(-30),
@@ -143,7 +366,6 @@
                     duration: '14d',
                     name: 'Review',
                     id: 'Task 3',
-                    custom_class: 'readonly',
                     progress: random(),
                 },
                 {
@@ -151,8 +373,120 @@
                     duration: '4d',
                     name: 'Publish',
                     id: 'Task 4',
+                    progress: random(),
+                },
+            ];
+
+            const tasksDependencies = [
+                {
+                    start: daysSince(-2),
+                    end: daysSince(2),
+                    name: 'Redesign website',
+                    id: 'Task 0',
+                    progress: random(),
+                },
+                {
+                    start: daysSince(3),
+                    duration: '6d',
+                    name: 'Write new content',
+                    id: 'Task 1',
+                    progress: random(),
+                    dependencies: 'Task 0',
+                    important: true,
+                },
+                {
+                    start: daysSince(4),
+                    duration: '2d',
+                    name: 'Apply new styles',
+                    id: 'Task 2',
+                    progress: random(),
+                },
+                {
+                    start: daysSince(-4),
+                    end: daysSince(0),
+                    name: 'Review',
+                    id: 'Task 3',
                     custom_class: 'readonly',
                     progress: random(),
+                },
+            ];
+            let tasksMany = [
+                {
+                    start: daysSince(-7),
+                    end: daysSince(-5),
+                    name: 'Initial brainstorming',
+                    id: 'Task 0',
+                    progress: random(),
+                },
+                {
+                    start: daysSince(-3),
+                    end: daysSince(1),
+                    name: 'Develop wireframe',
+                    id: 'Task 1',
+                    progress: random(),
+                    dependencies: 'Task 0',
+                },
+                {
+                    start: daysSince(-1),
+                    duration: '4d',
+                    name: 'Client meeting',
+                    id: 'Task 2',
+                    progress: random(),
+                    important: true,
+                },
+                {
+                    start: daysSince(1),
+                    duration: '7d',
+                    name: 'Create prototype',
+                    id: 'Task 3',
+                    dependencies: 'Task 2',
+                    progress: random(),
+                },
+                {
+                    start: daysSince(3),
+                    duration: '5d',
+                    name: 'Test design with users',
+                    dependencies: 'Task 2',
+                    id: 'Task 4',
+                    progress: random(),
+                    important: true,
+                },
+                {
+                    start: daysSince(5),
+                    end: daysSince(10),
+                    name: 'Write technical documentation',
+                    id: 'Task 5',
+                    progress: random(),
+                },
+                {
+                    start: daysSince(8),
+                    duration: '3d',
+                    name: 'Prepare demo',
+                    id: 'Task 6',
+                    progress: random(),
+                },
+                {
+                    start: daysSince(10),
+                    end: daysSince(12),
+                    name: 'Final client review',
+                    id: 'Task 7',
+                    progress: random(),
+                    important: true,
+                },
+                {
+                    start: daysSince(14),
+                    duration: '6d',
+                    name: 'Implement feedback',
+                    id: 'Task 8',
+                    progress: random(),
+                },
+                {
+                    start: daysSince(16),
+                    duration: '4d',
+                    name: 'Launch website',
+                    id: 'Task 9',
+                    progress: random(),
+                    important: true,
                 },
             ];
 
@@ -189,139 +523,222 @@
                     '#bfdbfe': [],
                     '#a3e635': HOLIDAYS,
                 },
+                infinite_padding: false,
             });
 
             const ignore = new Gantt('#ignore', tasks, {
                 ignore: ['weekend', ...HOLIDAYS.map((k) => k.date)],
                 holidays: null,
                 scroll_to: daysSince(-10),
+                infinite_padding: false,
             });
 
-            const advanced = new Gantt('#advanced', tasksSpread, {
+            const styling = new Gantt('#styling', tasksMany, {
                 holidays: null,
-                view_mode: 'Month',
-                view_mode_select: true,
-                extend_by_units: 0,
-                snap_at: '1d',
-                auto_move_label: false,
+                infinite_padding: false,
+                scroll_to: daysSince(-10),
             });
 
-            const OPTIONS_UPDATE = [
+            // const advanced = new Gantt('#advanced', tasksSpread, {
+            //     holidays: null,
+            //     view_mode: 'Month',
+            //     view_mode_select: true,
+            //     snap_at: '1d',
+            //     auto_move_label: false,
+            // });
+
+            const UPDATES = [
                 [
                     mutablity,
                     {
-                        'mutable-general': { readonly: true },
-                        'mutable-dates': { readonly_dates: true },
-                        'mutable-progress': { readonly_progress: true },
+                        'mutable-general': 'opp__readonly',
+                        'mutable-dates': 'opp__readonly_dates',
+                        'mutable-progress': 'opp__readonly_progress',
+                    },
+                    (id, val) => {
+                        if (id === 'mutable-general') {
+                            document.getElementById('mutable-dates').checked =
+                                !val;
+                            document.getElementById(
+                                'mutable-progress',
+                            ).checked = !val;
+                        }
                     },
                 ],
                 [
                     sideheader,
                     {
-                        'toggle-today': { today_button: 'opp' },
-                        'toggle-view-mode': { view_mode_select: 'opp' },
+                        'toggle-today': 'today_button',
+                        'toggle-view-mode': 'view_mode_select',
                     },
                 ],
                 [
                     holidays,
                     {
-                        'toggle-weekends': {
-                            holidays: [
-                                'config',
-                                (opts) =>
-                                    opts['#bfdbfe'].length !== 0
-                                        ? { ...opts, '#bfdbfe': [] }
-                                        : { ...opts, '#bfdbfe': 'weekend' },
-                            ],
-                        },
+                        'toggle-weekends': [
+                            'holidays',
+                            { '#a3e635': HOLIDAYS, '#bfdbfe': 'weekend' },
+                            { '#a3e635': HOLIDAYS, '#bfdbfe': [] },
+                        ],
                     },
                 ],
                 [
                     ignore,
                     {
-                        'ignore-weekends': {
-                            ignore: [
-                                'config',
-                                (opts) =>
-                                    opts.includes('weekend')
-                                        ? opts.filter((k) => k !== 'weekend')
-                                        : [...opts, 'weekend'],
-                            ],
-                        },
+                        'ignore-weekends': ['ignore', ['weekend'], []],
                     },
                 ],
                 [
-                    advanced,
+                    styling,
                     {
-                        'snap-by': {
-                            BEFORE: (chart) => chart.$container.scrollLeft,
-                            snap_at: [
-                                'config',
-                                (scale) => {
-                                    return (
-                                        document.getElementById('snap-at-qty')
-                                            .value +
-                                        document.getElementById('snap-at-scale')
-                                            .value
-                                    );
-                                },
-                            ],
-                            view_mode: ['config', (k) => k],
-                            scroll_to: ['config', (_) => false],
-                            AFTER: (before, chart) =>
-                                (chart.$container.scrollLeft = before),
-                        },
-                        'auto-move-label': {
-                            BEFORE: (chart) =>
-                                chart.change_view_mode('Day') ||
-                                chart.$container.scrollLeft,
-                            view_mode: ['config', (k) => k],
-                            auto_move_label: 'opp',
-                            scroll_to: ['config', (_) => false],
-                            AFTER: (before, chart) =>
-                                (chart.$container.scrollLeft = before),
-                        },
+                        'bar-radius': 'bar_corner_radius',
+                        'bar-height': 'bar_height',
+                        'arrow-curve': 'arrow_curve',
+                        'column-width': 'column_width',
+                        'grid-height': 'container_height',
+                        padding: 'padding',
                     },
                 ],
             ];
 
-            for (let [chart, options] of OPTIONS_UPDATE) {
-                for (let id in options) {
+            for (let [chart, details, after] of UPDATES) {
+                for (let id in details) {
                     let el = document.getElementById(id);
-                    el.onclick = () => {
-                        const before =
-                            options[id].BEFORE && options[id].BEFORE(chart);
-                        let newOptions = {};
-                        for (let k in options[id]) {
-                            if (k === 'AFTER' || k === 'BEFORE') continue;
-                            if (options[id][k] === 'opp') {
-                                newOptions[k] = !chart.options[k];
-                                if (chart.options[k]) {
-                                    el.innerHTML = el.innerHTML.replace(
-                                        'Hide',
-                                        'Show',
-                                    );
-                                } else {
-                                    el.innerHTML = el.innerHTML.replace(
-                                        'Show',
-                                        'Hide',
-                                    );
-                                }
-                            } else if (options[id][k][0] === 'config') {
-                                newOptions[k] = options[id][k][1](
-                                    chart.options[k],
-                                    chart,
-                                );
+                    el.onchange = (e) => {
+                        let label = details[id];
+                        let val;
+
+                        if (e.currentTarget.type === 'switch') {
+                            if (typeof label === 'string') {
+                                let opposite = label.slice(0, 5) === 'opp__';
+                                if (opposite) label = label.slice(5);
+                                val = opposite
+                                    ? !e.currentTarget.checked
+                                    : e.currentTarget.checked;
                             } else {
-                                newOptions[k] = options[id][k];
+                                val = label[e.currentTarget.checked ? 1 : 2];
+                                label = label[0];
                             }
+                        } else {
+                            val = +e.currentTarget.value;
                         }
-                        chart.update_options(newOptions);
-                        console.log(chart.options.view_mode);
-                        options[id].AFTER && options[id].AFTER(before, chart);
+
+                        let store = chart.options.scroll_to;
+                        let scroll = chart.$container.scrollLeft;
+                        chart.update_options({
+                            [label]: val,
+                            scroll_to: null,
+                        });
+                        chart.options.scroll_to = store;
+                        chart.$container.scrollLeft = scroll;
+                        after && after(id, val, chart);
                     };
                 }
             }
+
+            // const OPTIONS_UPDATE = [
+            //     // [
+            //     //     styling,
+            //     //     {
+            //     //         'bar-spacing': {
+            //     //             bar_corner_radius: [
+            //     //                 'config',
+            //     //                 () =>
+            //     //                     +document.getElementById('bar-radius')
+            //     //                         .value,
+            //     //                 ,
+            //     //             ],
+            //     //             bar_height: [
+            //     //                 'config',
+            //     //                 () =>
+            //     //                     +document.getElementById('bar-height')
+            //     //                         .value,
+            //     //             ],
+            //     //             arrow_curve: [
+            //     //                 'config',
+            //     //                 () =>
+            //     //                     +document.getElementById('arrow-curve')
+            //     //                         .value,
+            //     //             ],
+            //     //         },
+            //     //     },
+            //     // ],
+            //     [
+            //         advanced,
+            //         {
+            //             'snap-by': {
+            //                 BEFORE: (chart) => chart.$container.scrollLeft,
+            //                 snap_at: [
+            //                     'config',
+            //                     (scale) => {
+            //                         return (
+            //                             document.getElementById('snap-at-qty')
+            //                                 .value +
+            //                             document.getElementById('snap-at-scale')
+            //                                 .value
+            //                         );
+            //                     },
+            //                 ],
+            //                 view_mode: ['config', (k) => k],
+            //                 scroll_to: ['config', (_) => false],
+            //                 AFTER: (before, chart) =>
+            //                     (chart.$container.scrollLeft = before),
+            //             },
+            //             'auto-move-label': {
+            //                 BEFORE: (chart) =>
+            //                     chart.change_view_mode('Day') ||
+            //                     chart.$container.scrollLeft,
+            //                 view_mode: ['config', (k) => k],
+            //                 auto_move_label: 'opp',
+            //                 scroll_to: ['config', (_) => false],
+            //                 AFTER: (before, chart) =>
+            //                     (chart.$container.scrollLeft = before),
+            //             },
+            //         },
+            //     ],
+            // ];
+
+            // for (let [chart, options] of OPTIONS_UPDATE) {
+            //     for (let id in options) {
+            //         let el = document.getElementById(id);
+            //         el.onclick = () => {
+            //             const before =
+            //                 options[id].BEFORE && options[id].BEFORE(chart);
+            //             let newOptions = {};
+            //             for (let k in options[id]) {
+            //                 if (k === 'AFTER' || k === 'BEFORE') continue;
+            //                 if (options[id][k] === 'opp') {
+            //                     newOptions[k] = !chart.options[k];
+            //                     if (chart.options[k]) {
+            //                         el.innerHTML = el.innerHTML.replace(
+            //                             'Hide',
+            //                             'Show',
+            //                         );
+            //                     } else {
+            //                         el.innerHTML = el.innerHTML.replace(
+            //                             'Show',
+            //                             'Hide',
+            //                         );
+            //                     }
+            //                 } else if (options[id][k][0] === 'config') {
+            //                     newOptions[k] = options[id][k][1](
+            //                         chart.options[k],
+            //                         chart,
+            //                     );
+            //                 } else {
+            //                     newOptions[k] = options[id][k];
+            //                 }
+            //             }
+            //             chart.update_options(newOptions);
+            //             options[id].AFTER && options[id].AFTER(before, chart);
+            //         };
+            //     }
+            // }
         </script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"
+        ></script>
     </body>
 </html>

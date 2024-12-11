@@ -100,7 +100,7 @@ const DEFAULT_OPTIONS = {
     bar_corner_radius: 3,
     bar_height: 30,
     container_height: 300,
-    column_width: 30,
+    column_width: null,
     date_format: 'YYYY-MM-DD',
     snap_at: null,
     infinite_padding: true,
