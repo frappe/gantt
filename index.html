@@ -608,7 +608,7 @@
                         let label = details[id];
                         let val;
 
-                        if (e.currentTarget.type === 'switch') {
+                        if (e.currentTarget.type === 'checkbox') {
                             if (typeof label === 'string') {
                                 let opposite = label.slice(0, 5) === 'opp__';
                                 if (opposite) label = label.slice(5);
