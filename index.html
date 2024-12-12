@@ -213,7 +213,7 @@
                                 id="column-width"
                                 class="form-range align-items-end"
                                 type="range"
-                                min="15"
+                                min="30"
                                 max="70"
                                 value="30"
                             />
@@ -276,23 +276,44 @@
                 </div>
             </div>
 
-            <!-- <div id="advanced">
-                <h2>So much configuration</h2>
-                <h4>Frappe Gantt - <em>for you</em>.</h4>
-                <p>Change the duration at which to snap changes to the Gantt</p>
-                <input id="snap-at-qty" type="number" value="1" />
-                <select id="snap-at-scale">
-                    <option value="s">Second</option>
-                    <option value="min">Minute</option>
-                    <option value="h">Hour</option>
-                    <option value="d" selected>Day</option>
-                    <option value="m">Month</option>
-                    <option value="y">Year</option>
-                </select>
-                <button id="snap-by">Snap By</button>
-                <p>Make the label to move with you</p>
-                <button id="auto-move-label">Toggle auto-moving label</button>
-            </div> -->
+            <div class="row my-4">
+                <div class="col-md-3">
+                    <h2>Frappe Gantt - <em>for you</em>.</h2>
+                    <p>
+                        Insane levels of customizability - change anything,
+                        everything.
+                    </p>
+                    <div class="input-group">
+                        <label class="input-group-text">Snap By: </label>
+                        <input
+                            class="form-control"
+                            id="snap-at-qty"
+                            type="number"
+                            value="1"
+                        />
+                        <select class="form-select" id="snap-at-scale">
+                            <option value="s">Second</option>
+                            <option value="min">Minute</option>
+                            <option value="h">Hour</option>
+                            <option value="d" selected>Day</option>
+                            <option value="m">Month</option>
+                            <option value="y">Year</option>
+                        </select>
+                    </div>
+                    <div class="form-check form-switch my-2">
+                        <label class="form-check-label" for="auto-move-label"
+                            >Toggle auto-moving label</label
+                        >
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="auto-move-label"
+                        />
+                    </div>
+                </div>
+                <div class="col-md-9 chart" id="advanced"></div>
+            </div>
         </div>
         <script type="module">
             const rawToday = new Date();
@@ -509,9 +530,7 @@
                 { name: 'Christmas', date: '2024-12-25' },
             ];
 
-            const mutablity = new Gantt('#mutability', tasks, {
-                scroll_to: daysSince(-7),
-            });
+            const mutablity = new Gantt('#mutability', tasks);
             const sideheader = new Gantt('#sideheader', tasksSpread, {
                 today_button: true,
                 view_mode_select: true,
@@ -523,29 +542,26 @@
                     '#bfdbfe': [],
                     '#a3e635': HOLIDAYS,
                 },
-                infinite_padding: false,
             });
 
             const ignore = new Gantt('#ignore', tasks, {
                 ignore: ['weekend', ...HOLIDAYS.map((k) => k.date)],
                 holidays: null,
                 scroll_to: daysSince(-10),
-                infinite_padding: false,
             });
 
             const styling = new Gantt('#styling', tasksMany, {
                 holidays: null,
-                infinite_padding: false,
                 scroll_to: daysSince(-10),
             });
 
-            // const advanced = new Gantt('#advanced', tasksSpread, {
-            //     holidays: null,
-            //     view_mode: 'Month',
-            //     view_mode_select: true,
-            //     snap_at: '1d',
-            //     auto_move_label: false,
-            // });
+            const advanced = new Gantt('#advanced', tasksSpread, {
+                holidays: null,
+                view_mode_select: true,
+                snap_at: '1d',
+                auto_move_label: false,
+                scroll_to: 'today',
+            });
 
             const UPDATES = [
                 [
@@ -599,6 +615,22 @@
                         padding: 'padding',
                     },
                 ],
+                [
+                    advanced,
+                    {
+                        'auto-move-label': 'auto_move_label',
+                        'snap-at-qty': (val) => ({
+                            snap_at:
+                                val +
+                                document.getElementById('snap-at-scale').value,
+                        }),
+                        'snap-at-scale': (val) => ({
+                            snap_at:
+                                document.getElementById('snap-at-qty').value +
+                                val,
+                        }),
+                    },
+                ],
             ];
 
             for (let [chart, details, after] of UPDATES) {
@@ -625,10 +657,22 @@
 
                         let store = chart.options.scroll_to;
                         let scroll = chart.$container.scrollLeft;
-                        chart.update_options({
-                            [label]: val,
-                            scroll_to: null,
-                        });
+                        if (typeof label === 'function') {
+                            console.log('k', {
+                                ...label(val),
+                                scroll_to: null,
+                            });
+                            chart.update_options({
+                                ...label(val),
+                                scroll_to: null,
+                            });
+                        } else {
+                            chart.update_options({
+                                [label]: val,
+                                scroll_to: null,
+                            });
+                        }
+
                         chart.options.scroll_to = store;
                         chart.$container.scrollLeft = scroll;
                         after && after(id, val, chart);
