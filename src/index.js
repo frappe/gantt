@@ -460,11 +460,11 @@ export default class Gantt {
             $today_button.classList.add('today-button');
             $today_button.textContent = 'Today';
             $today_button.onclick = this.scroll_today.bind(this);
-            $side_header.appendChild($today_button);
+            $side_header.prepend($today_button);
             this.$today_button = $today_button;
         }
 
-        this.$container.appendChild($side_header);
+        this.$upper_header.prepend($side_header);
         this.$side_header = $side_header;
     }
 
@@ -902,15 +902,10 @@ export default class Gantt {
             this.config.column_width;
         parent_element.scrollTo({ left: scroll_pos - 4, behavior: 'smooth' });
 
-        this.$side_header.style.left =
-            this.$container.clientWidth +
-            this.$container.scrollLeft -
-            this.$side_header.clientWidth -
-            5 +
-            'px';
-
         // Calculate current scroll position's upper text
-        if (this.$current) this.$current.classList.remove('current-upper');
+        if (this.$current) {
+            this.$current.classList.remove('current-upper');
+        }
 
         this.upperTexts = Array.from(
             this.$container.querySelectorAll('.upper-text'),
@@ -934,9 +929,7 @@ export default class Gantt {
         );
         current_upper = this.config.view_mode.upper_text(this.current_date);
         $el = this.upperTexts.find((el) => el.textContent === current_upper);
-
         $el.classList.add('current-upper');
-        $el.style.left = this.$container.scrollLeft + 'px';
         this.$current = $el;
     }
 
@@ -1088,15 +1081,6 @@ export default class Gantt {
             if (x_on_scroll_start) {
                 dx = e.currentTarget.scrollLeft - x_on_scroll_start;
             }
-            this.$side_header.style.left =
-                e.currentTarget.clientWidth +
-                e.currentTarget.scrollLeft -
-                this.$side_header.clientWidth -
-                5 +
-                'px';
-
-            if (this.$current)
-                this.$current.style.left = e.currentTarget.scrollLeft + 'px';
 
             // Calculate current scroll position's upper text
             this.current_date = date_utils.add(
@@ -1110,6 +1094,7 @@ export default class Gantt {
             let $el = this.upperTexts.find(
                 (el) => el.textContent === current_upper,
             );
+
             // Recalculate for smoother experience
             this.current_date = date_utils.add(
                 this.gantt_start,
@@ -1127,7 +1112,6 @@ export default class Gantt {
                     this.$current.classList.remove('current-upper');
 
                 $el.classList.add('current-upper');
-                $el.style.left = e.currentTarget.scrollLeft + 'px';
                 this.$current = $el;
             }
 

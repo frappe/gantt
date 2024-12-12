@@ -100,46 +100,50 @@
     }
 
     & .current-upper {
-        position: absolute;
-        left: 10px;
+        position: sticky;
+        left: 2px !important;
         padding: 0 10px;
         height: 20px;
         background: white;
-        z-index: 1000;
-        top: 5px;
     }
 
     & .side-header {
-        position: absolute;
+        position: sticky;
         z-index: 1000;
         line-height: 20px;
+        background: white;
         font-weight: 400;
         top: 5px;
+        width: max-content;
+        margin-left: auto;
+        right: 0;
+        padding-left: 5px;
     }
 
-    & .today-button,
-    & .viewmode-select {
+    & .side-header * {
         background: #f4f5f6;
         text-align: -webkit-center;
         text-align: center;
-        height: 25px;
-        border-radius: 8px;
-        border: none;
+        height: 30px;
+        border-radius: 0;
+        border: 1px dotted grey;
+        border-right: none;
         color: var(--text-dark);
         padding: 4px 10px;
-        border-radius: 8px;
-        height: 25px;
+        position: sticky;
+        float: right;
+        right: 0;
+        top: 5px;
     }
 
-    & .viewmode-select {
-        outline: none !important;
-        padding: 4px 8px;
-        margin-right: 4px;
+    & .side-header *:first-child {
+        border-radius: 0 8px 8px 0;
+        border-right: 1px dotted grey;
+    }
 
-        /* -webkit-appearance: none; */
-        /* -moz-appearance: none; */
-        text-indent: 1px;
-        text-overflow: '';
+    & .side-header *:last-child {
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
     }
 
     & .date-highlight {
