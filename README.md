@@ -5,8 +5,9 @@
 **A modern, configurable, Gantt library for the web.**
 
 ![GitHub release (latest)](https://img.shields.io/github/v/release/frappe/gantt)
-    <br/>
-
+<a href="https://github.com/frappe/gameplan/blob/main/LICENSE">
+    <img alt="license" src="https://img.shields.io/badge/license-MIT-blue">
+</a>
 </div>
 
 <div align="center">
@@ -36,7 +37,7 @@ A wide variety of modes - be it day, hour, or year, you have it. Or add your own
 - **Configure Anything**: spacing, edit access, labels, you can control it all. Change both the style and functionality to meet your needs.
 - **Multi-lingual Support**: suitable for companies with an international base.
 
-### Usage
+## Usage
 
 Install with:
 ```bash
