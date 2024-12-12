@@ -10,7 +10,7 @@
 </a>
 </div>
 
-![Hero Image](.github/hero_image.png)
+![Hero Image](.github/gantt_logo.png)
 
 ## Frappe Gantt
 Gantt charts are bar charts that visually illustrate a project's tasks, schedule, and dependencies. With Frappe Gantt, you can build beautiful, customizable, Gantt charts with ease.
