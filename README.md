@@ -3,11 +3,6 @@
     <h1>Frappe Gantt</h1>
 
 **A modern, configurable, Gantt library for the web.**
-
-![GitHub release (latest)](https://img.shields.io/github/v/release/frappe/gantt)
-<a href="https://github.com/frappe/gameplan/blob/main/LICENSE">
-    <img alt="license" src="https://img.shields.io/badge/license-MIT-blue">
-</a>
 </div>
 
 ![Hero Image](.github/hero-image.png)
