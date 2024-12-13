@@ -78,6 +78,8 @@ export default class Gantt {
         const CSS_VARIABLES = {
             'grid-height': 'container_height',
             'bar-height': 'bar_height',
+            'lower-header-height': 'lower_header_height',
+            'upper-header-height': 'upper_header_height',
         };
 
         for (let name in CSS_VARIABLES) {
@@ -240,7 +242,10 @@ export default class Gantt {
             '--gv-column-width',
             this.config.column_width + 'px',
         );
-        this.config.header_height = this.config.column_width * 2.5;
+        this.config.header_height =
+            this.options.lower_header_height +
+            this.options.upper_header_height +
+            10;
     }
 
     setup_dates() {
@@ -643,14 +648,47 @@ export default class Gantt {
      *
      * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
      */
-    highlightToday() {
-        const today = new Date();
-        if (today < this.gantt_start || today > this.gantt_end) return null;
+    highlightNow() {
+        let now = new Date();
+        if (now < this.gantt_start || now > this.gantt_end) return null;
+
+        let current = new Date(),
+            el = this.$container.querySelector(
+                '.date_' +
+                    sanitize(
+                        date_utils.format(
+                            current,
+                            this.config.view_mode.format_string,
+                            this.options.language,
+                        ),
+                    ),
+            );
+
+        // safety check to prevent infinite loop
+        let c = 0;
+        while (!el && c < this.config.step) {
+            current = date_utils.add(current, -1, this.config.unit);
+            el = this.$container.querySelector(
+                '.date_' +
+                    sanitize(
+                        date_utils.format(
+                            current,
+                            this.config.view_mode.format_string,
+                            this.options.language,
+                        ),
+                    ),
+            );
+            c++;
+        }
+
+        el.classList.add('current-date-highlight');
+
         const diff_in_units = date_utils.diff(
-            today,
+            now,
             this.gantt_start,
             this.config.unit,
         );
+
         const left =
             (diff_in_units / this.config.step) * this.config.column_width;
         const height =
@@ -658,11 +696,6 @@ export default class Gantt {
                 this.tasks.length +
             20 +
             this.options.padding / 2;
-        const date = date_utils.format(
-            today,
-            this.config.view_mode.format_string,
-            this.options.language,
-        );
 
         this.$current_highlight = this.create_el({
             top: this.config.header_height - 20,
@@ -671,10 +704,6 @@ export default class Gantt {
             classes: 'current-highlight',
             append_to: this.$extras,
         });
-
-        let $today = this.$container
-            .querySelector('.date_' + date.replaceAll(' ', '_'))
-            .classList.add('current-date-highlight');
     }
 
     make_grid_highlights() {
@@ -722,7 +751,7 @@ export default class Gantt {
             });
         }
 
-        const highlightDimensions = this.highlightToday(this.config.view_mode);
+        const highlightDimensions = this.highlightNow(this.config.view_mode);
 
         if (!highlightDimensions) return;
     }
@@ -742,16 +771,18 @@ export default class Gantt {
     make_dates() {
         this.upper_texts_x = {};
         this.get_dates_to_draw().forEach((date, i) => {
-            let $lower_text = this.create_el({
-                left: date.lower_x,
-                top: date.lower_y,
-                classes: 'lower-text date_' + date.formatted_date,
-                append_to: this.$lower_header,
-            });
+            if (date.lower_text) {
+                let $lower_text = this.create_el({
+                    left: date.lower_x,
+                    top: date.lower_y,
+                    classes: 'lower-text date_' + sanitize(date.formatted_date),
+                    append_to: this.$lower_header,
+                });
 
-            $lower_text.innerText = date.lower_text;
-            $lower_text.style.left =
-                +$lower_text.style.left.slice(0, -2) + 'px';
+                $lower_text.innerText = date.lower_text;
+                $lower_text.style.left =
+                    +$lower_text.style.left.slice(0, -2) + 'px';
+            }
 
             if (date.upper_text) {
                 this.upper_texts_x[date.upper_text] = date.upper_x;
@@ -785,13 +816,9 @@ export default class Gantt {
 
         let column_width = this.config.column_width;
 
-        const base_pos = {
-            x: last_date_info
-                ? last_date_info.base_pos_x + last_date_info.column_width
-                : 0,
-            lower_y: this.config.column_width * 1.5,
-            upper_y: 15,
-        };
+        const base_x = last_date_info
+            ? last_date_info.base_x + last_date_info.column_width
+            : 0;
 
         let upper_text = this.config.view_mode.upper_text;
         let lower_text = this.config.view_mode.lower_text;
@@ -812,11 +839,11 @@ export default class Gantt {
 
         return {
             date,
-            formatted_date: date_utils
-                .format(date, this.config.view_mode.format_string)
-                .replaceAll(' ', '_'),
+            formatted_date: sanitize(
+                date_utils.format(date, this.config.view_mode.format_string),
+            ),
             column_width: this.config.column_width,
-            base_pos_x: base_pos.x,
+            base_x,
             upper_text: this.config.view_mode.upper_text(
                 date,
                 last_date,
@@ -828,13 +855,13 @@ export default class Gantt {
                 this.options.language,
             ),
             upper_x:
-                base_pos.x +
+                base_x +
                 (column_width * this.config.view_mode.upper_text_frequency ||
                     1) /
                     2,
-            upper_y: base_pos.upper_y,
-            lower_x: base_pos.x,
-            lower_y: base_pos.lower_y,
+            upper_y: 15,
+            lower_x: base_x,
+            lower_y: this.options.upper_header_height + 5,
         };
     }
 
@@ -924,6 +951,7 @@ export default class Gantt {
             this.$container.scrollLeft / this.config.column_width,
             this.config.unit,
         );
+
         let current_upper = this.config.view_mode.upper_text(this.current_date);
         let $el = this.upperTexts.find(
             (el) => el.textContent === current_upper,
@@ -1094,9 +1122,11 @@ export default class Gantt {
             // Calculate current scroll position's upper text
             this.current_date = date_utils.add(
                 this.gantt_start,
-                e.currentTarget.scrollLeft / this.config.column_width,
+                (e.currentTarget.scrollLeft / this.config.column_width) *
+                    this.config.step,
                 this.config.unit,
             );
+
             let current_upper = this.config.view_mode.upper_text(
                 this.current_date,
             );
@@ -1107,8 +1137,9 @@ export default class Gantt {
             // Recalculate for smoother experience
             this.current_date = date_utils.add(
                 this.gantt_start,
-                (e.currentTarget.scrollLeft + $el.clientWidth) /
-                    this.config.column_width,
+                ((e.currentTarget.scrollLeft + $el.clientWidth) /
+                    this.config.column_width) *
+                    this.config.step,
                 this.config.unit,
             );
             current_upper = this.config.view_mode.upper_text(this.current_date);
@@ -1435,4 +1466,8 @@ Gantt.VIEW_MODE = {
 
 function generate_id(task) {
     return task.name + '_' + Math.random().toString(36).slice(2, 12);
+}
+
+function sanitize(s) {
+    return s.replaceAll(' ', '_').replaceAll(':', '_').replaceAll('.', '_');
 }

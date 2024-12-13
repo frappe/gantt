@@ -1,10 +1,16 @@
 import date_utils from './date_utils';
 
+function getDecade(d) {
+    const year = d.getFullYear();
+    return year - (year % 10) + '';
+}
+
 const DEFAULT_VIEW_MODES = [
     {
         name: 'Hour',
         padding: '7d',
         step: '1h',
+        format_string: 'YYYY-MM-DD HH',
         lower_text: 'HH',
         upper_text: (d, ld, lang) =>
             !ld || d.getDate() !== ld.getDate()
@@ -57,9 +63,10 @@ const DEFAULT_VIEW_MODES = [
         name: 'Week',
         padding: '1m',
         step: '7d',
+        format_string: 'YYYY-MM-DD',
         column_width: 140,
         lower_text: (d, ld, lang) =>
-            d.getMonth() !== ld.getMonth()
+            !ld || d.getMonth() !== ld.getMonth()
                 ? date_utils.format(d, 'D MMM', lang)
                 : date_utils.format(d, 'D', lang),
         upper_text: (d, ld, lang) =>
@@ -89,7 +96,9 @@ const DEFAULT_VIEW_MODES = [
         step: '1y',
         column_width: 120,
         format_string: 'YYYY',
-        upper_text: 'YYYY',
+        upper_text: (d, ld, lang) =>
+            !ld || getDecade(d) !== getDecade(ld) ? getDecade(d) : '',
+        lower_text: 'YYYY',
         default_snap: '30d',
     },
 ];
@@ -102,9 +111,11 @@ const DEFAULT_OPTIONS = {
     container_height: 300,
     column_width: null,
     date_format: 'YYYY-MM-DD',
+    upper_header_height: 45,
+    lower_header_height: 30,
     snap_at: null,
-    infinite_padding: true,
-    holidays: { '#fff7ed': 'weekend' },
+    infinite_padding: false,
+    holidays: { 'var(--g-weekend-highlight-color)': 'weekend' },
     ignore: [],
     language: 'en',
     lines: 'both',
