@@ -1,5 +1,5 @@
 <div align="center" markdown="1">
-    <img src=".github/gantt-logo.png" width="80">
+    <img src=".github/gantt-logo.jpg" width="80">
     <h1>Frappe Gantt</h1>
 
 **A modern, configurable, Gantt library for the web.**
@@ -10,7 +10,7 @@
 </a>
 </div>
 
-![Hero Image](.github/gantt_logo.png)
+![Hero Image](.github/hero-image.png)
 
 ## Frappe Gantt
 Gantt charts are bar charts that visually illustrate a project's tasks, schedule, and dependencies. With Frappe Gantt, you can build beautiful, customizable, Gantt charts with ease.
