@@ -6,6 +6,8 @@
     overflow: auto;
     font-size: 12px;
     height: var(--gv-grid-height);
+    width: 100%;
+    border-radius: 8px;
 
     & .popup-wrapper {
         position: absolute;
@@ -99,7 +101,7 @@
         top: 5px;
         width: max-content;
         margin-left: auto;
-        right: 0;
+        right: 5px;
         padding-left: 5px;
     }
 
@@ -198,7 +200,7 @@
 
     & .arrow {
         fill: none;
-        stroke: var(--arrow-color);
+        stroke: var(--g-arrow-color);
         stroke-width: 1;
     }
 

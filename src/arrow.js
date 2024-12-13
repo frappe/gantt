@@ -88,6 +88,7 @@ export default class Arrow {
             'data-from': this.from_task.task.id,
             'data-to': this.to_task.task.id,
         });
+        console.log(this.element);
     }
 
     update() {

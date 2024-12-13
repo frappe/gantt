@@ -393,7 +393,7 @@ export default class Gantt {
         });
 
         $.attr(this.$svg, {
-            height: grid_height + this.options.padding,
+            height: grid_height,
             width: '100%',
         });
     }
@@ -404,24 +404,18 @@ export default class Gantt {
         const row_width = this.dates.length * this.config.column_width;
         const row_height = this.options.bar_height + this.options.padding;
 
-        let row_y = this.config.header_height + this.options.padding / 2;
+        let y = this.config.header_height;
         for (let _ of this.tasks) {
             createSVG('rect', {
                 x: 0,
-                y: row_y,
+                y,
                 width: row_width,
                 height: row_height,
                 class: 'grid-row',
                 append_to: rows_layer,
             });
-            // FIX
-            if (
-                this.options.lines === 'both' ||
-                this.options.lines === 'horizontal'
-            ) {
-            }
 
-            row_y += this.options.bar_height + this.options.padding;
+            y += this.options.bar_height + this.options.padding;
         }
     }
 
@@ -487,7 +481,7 @@ export default class Gantt {
     make_grid_ticks() {
         if (this.options.lines === 'none') return;
         let tick_x = 0;
-        let tick_y = this.config.header_height + this.options.padding / 2;
+        let tick_y = this.config.header_height;
         let tick_height =
             (this.options.bar_height + this.options.padding) *
             this.tasks.length;
@@ -497,7 +491,7 @@ export default class Gantt {
             append_to: this.layers.grid,
         });
 
-        let row_y = this.config.header_height + this.options.padding / 2;
+        let row_y = this.config.header_height;
 
         const row_width = this.dates.length * this.config.column_width;
         const row_height = this.options.bar_height + this.options.padding;
@@ -617,9 +611,9 @@ export default class Gantt {
                         });
                         label.textContent = labels[d];
                     }
-                    let el = createSVG('rect', {
+                    createSVG('rect', {
                         x: Math.round(x),
-                        y: this.config.header_height + this.options.padding / 2,
+                        y: this.config.header_height,
                         width:
                             this.config.column_width /
                             date_utils.convert_scales(
@@ -686,12 +680,10 @@ export default class Gantt {
             (diff_in_units / this.config.step) * this.config.column_width;
         const height =
             (this.options.bar_height + this.options.padding) *
-                this.tasks.length +
-            20 +
-            this.options.padding / 2;
+            this.tasks.length;
 
         this.$current_highlight = this.create_el({
-            top: this.config.header_height - 20,
+            top: this.config.header_height,
             left,
             height,
             classes: 'current-highlight',
@@ -702,7 +694,6 @@ export default class Gantt {
     make_grid_highlights() {
         this.highlightHolidays();
 
-        const top = this.config.header_height + this.options.padding / 2;
         const height =
             (this.options.bar_height + this.options.padding) *
             this.tasks.length;
@@ -735,7 +726,7 @@ export default class Gantt {
             this.config.ignored_positions.push(diff * this.config.column_width);
             createSVG('rect', {
                 x: diff * this.config.column_width,
-                y: top,
+                y: this.config.header_height,
                 width: this.config.column_width,
                 height: height,
                 class: 'ignored-bar',
