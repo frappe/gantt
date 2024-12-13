@@ -1,33 +1,11 @@
-@import './dark.css';
-
-:root {
-    --bar-color: #fff;
-    --bar-color-important: #94c4f4;
-    --bar-stroke: #fff;
-    --dark-stroke-color: #e0e0e0;
-    --stroke-color: #ebeef0;
-    --light-bg: #f5f5f5;
-    --light-border-color: #ebeff2;
-    --light-yellow: #f6e796;
-    --holiday-color: #f9fafa;
-    --text-muted: #7c7c7c;
-    --text-grey: #98a1a9;
-    --text-light: #fff;
-    --text-dark: #171717;
-    --progress: #ebeef0;
-    --handle-color: #dcdce4;
-    --handle-color-important: #94c4f4;
-    --light-blue: #c4c4e9;
-    --middle-blue: #62b2f9;
-    --dark-blue: #2c94ec;
-}
+@import './light.css';
 
 .gantt-container {
     line-height: 14.5px;
     position: relative;
     overflow: auto;
     font-size: 12px;
-    height: 300px;
+    height: var(--gv-grid-height);
 
     & .popup-wrapper {
         position: absolute;
@@ -46,24 +24,23 @@
             margin-bottom: 5px;
             text-align: -webkit-center;
             text-align: center;
-            color: var(--text-light);
+            color: var(--g-text-light);
         }
 
         & .subtitle {
-            color: var(--text-grey);
+            color: var(--g-text-secondary);
         }
 
         & .pointer {
             position: absolute;
             height: 5px;
-            margin: 0 0 0 -5px;
             border: 5px solid transparent;
             border-bottom-color: rgba(0, 0, 0, 0.8);
         }
     }
 
     & .grid-header {
-        background-color: #ffffff;
+        background-color: var(--g-header-background);
         position: sticky;
         top: 0;
         left: 0;
@@ -76,19 +53,22 @@
     }
 
     & .upper-header {
-        height: 40px;
+        height: calc(var(--gv-column-width) * 1.5);
     }
 
     & .lower-header {
-        height: 30px;
+        height: var(--gv-column-width);
     }
 
     & .lower-text {
-        font-size: 14px;
+        font-size: 12px;
         position: absolute;
-        width: fit-content;
-        transform: translateX(-50%);
-        color: var(--text-muted);
+        width: calc(var(--gv-column-width) * 0.8);
+        height: calc(var(--gv-column-width) * 0.8);
+        margin: 0 calc(var(--gv-column-width) * 0.1);
+        align-content: center;
+        text-align: center;
+        color: var(--g-text-muted);
     }
 
     & .upper-text {
@@ -96,12 +76,12 @@
         width: fit-content;
         font-weight: 500;
         font-size: 16px;
-        color: var(--text-dark);
+        color: var(--g-text-dark);
     }
 
     & .current-upper {
         position: sticky;
-        left: 2px !important;
+        left: 0 !important;
         padding: 0 10px;
         height: 20px;
         background: white;
@@ -121,14 +101,14 @@
     }
 
     & .side-header * {
-        background: #f4f5f6;
+        background: var(--g-actions-background);
         text-align: -webkit-center;
         text-align: center;
         height: 30px;
         border-radius: 0;
         border: 1px dotted grey;
         border-right: none;
-        color: var(--text-dark);
+        color: var(--g-text-dark);
         padding: 4px 10px;
         position: sticky;
         float: right;
@@ -147,24 +127,25 @@
     }
 
     & .date-highlight {
-        background-color: var(--progress);
+        background-color: var(--g-progress-color);
         border-radius: 12px;
+        height: calc(var(--gv-bar-height) * 0.8);
+        top: calc(var(--gv-column-width) * 1.5);
         position: absolute;
         display: none;
     }
 
     & .current-highlight {
         position: absolute;
-        background: var(--dark-blue);
+        background: var(--g-blue-dark);
         width: 1px;
         z-index: 999;
     }
 
     & .current-date-highlight {
-        background: var(--dark-blue);
-        color: var(--text-light);
-        padding: 4px 8px;
-        border-radius: 5px;
+        background: var(--g-blue-dark);
+        color: var(--g-text-light);
+        border-radius: 100px;
     }
 
     & .holiday-label {
@@ -173,7 +154,7 @@
         left: 0;
         opacity: 0;
         z-index: 1000;
-        background: #dcdce4;
+        background: --g-holiday-label-color;
         border-radius: 5px;
         padding: 2px 5px;
 
@@ -193,96 +174,96 @@
     }
 
     & .grid-row {
-        fill: #ffffff;
+        fill: var(--g-row-color);
     }
 
     & .row-line {
-        stroke: var(--light-border-color);
+        stroke: var(--g-border-color);
     }
 
     & .tick {
-        stroke: var(--stroke-color);
+        stroke: var(--g-tick-color);
         stroke-width: 0.4;
 
         &.thick {
-            stroke: var(--dark-stroke-color);
+            stroke: var(--g-tick-color-thick);
             stroke-width: 0.7;
         }
     }
 
     & .arrow {
         fill: none;
-        stroke: #9fa9b1;
+        stroke: var(--arrow-color);
         stroke-width: 1;
     }
 
     & .bar-wrapper .bar {
-        fill: var(--bar-color);
-        stroke: var(--bar-stroke);
+        fill: var(--g-bar-color);
+        stroke: var(--g-bar-border);
         stroke-width: 0;
         transition: stroke-width 0.3s ease;
     }
 
     & .bar-progress {
-        fill: var(--progress);
+        fill: var(--g-progress-color);
     }
 
     & .bar-expected-progress {
-        fill: var(--light-blue);
+        fill: var(--g-blue-light);
     }
 
     & .bar-invalid {
         fill: transparent;
-        stroke: var(--bar-stroke);
+        stroke: var(--g-bar-border);
         stroke-width: 1;
         stroke-dasharray: 5;
 
         & ~ .bar-label {
-            fill: var(--text-light);
+            fill: var(--g-text-light);
         }
     }
 
     & .bar-label {
-        fill: var(--text-dark);
+        fill: var(--g-text-dark);
         dominant-baseline: central;
         font-family: Helvetica;
         font-size: 13px;
         font-weight: 400;
 
         &.big {
-            fill: var(--text-dark);
+            fill: var(--g-text-dark);
             text-anchor: start;
         }
     }
 
     & .bar-wrapper.important {
         & .bar {
-            fill: var(--bar-color-important);
+            fill: var(--g-bar-color-important);
         }
 
         & .bar-progress {
-            fill: var(--dark-blue);
+            fill: var(--g-blue-dark);
         }
 
         & .bar-label {
-            fill: var(--text-light);
+            fill: var(--g-text-light);
 
             &.big {
-                fill: var(--text-dark);
+                fill: var(--g-text-dark);
             }
         }
 
         & .handle {
-            fill: var(--handle-color-important);
+            fill: var(--g-handle-color-important);
         }
 
         & .handle.progress {
-            fill: var(--text-light);
+            fill: var(--g-text-light);
         }
     }
 
     & .handle {
-        fill: var(--handle-color);
+        fill: var(--g-handle-color);
         cursor: ew-resize;
         opacity: 0;
         visibility: hidden;
@@ -290,7 +271,7 @@
     }
 
     & .handle.progress {
-        fill: var(--text-muted);
+        fill: var(--g-text-muted);
     }
 
     & .bar-wrapper {

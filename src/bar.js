@@ -159,10 +159,9 @@ export default class Bar {
         let $date_highlight = document.createElement('div');
         $date_highlight.classList.add('date-highlight');
         $date_highlight.classList.add(`highlight-${this.task.id}`);
-        $date_highlight.style.height = this.height * 0.8 + 'px';
+        // $date_highlight.style.height = this.height * 0.8 + 'px';
         $date_highlight.style.width = this.width + 'px';
-        $date_highlight.style.top =
-            this.gantt.options.header_height - 25 + 'px';
+        // $date_highlight.style.top = this.gantt.config.header_height - 25 + 'px';
         $date_highlight.style.left = x + 'px';
         this.$date_highlight = $date_highlight;
         this.gantt.$lower_header.prepend($date_highlight);
@@ -596,7 +595,7 @@ export default class Bar {
 
     compute_y() {
         this.y =
-            this.gantt.options.header_height +
+            this.gantt.config.header_height +
             this.gantt.options.padding +
             this.task._index * (this.height + this.gantt.options.padding);
     }

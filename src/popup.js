@@ -50,7 +50,7 @@ export default class Popup {
 
         this.parent.classList.remove('hidden');
         this.pointer.style.left = this.parent.clientWidth / 2 + 'px';
-        this.pointer.style.top = '-15px';
+        this.pointer.style.top = '-10px';
 
         // show
         this.parent.style.opacity = 1;

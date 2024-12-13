@@ -23,7 +23,7 @@ export default class Arrow {
         }
 
         const start_y =
-            this.gantt.options.header_height +
+            this.gantt.config.header_height +
             this.gantt.options.bar_height +
             (this.gantt.options.padding + this.gantt.options.bar_height) *
                 this.from_task.task._index +
@@ -32,7 +32,7 @@ export default class Arrow {
         const end_x =
             this.to_task.$bar.getX() - this.gantt.options.padding / 2 - 7;
         const end_y =
-            this.gantt.options.header_height +
+            this.gantt.config.header_height +
             this.gantt.options.bar_height / 2 +
             (this.gantt.options.padding + this.gantt.options.bar_height) *
                 this.to_task.task._index +
