@@ -58,17 +58,16 @@ export default class Gantt {
         }
 
         // wrapper element
-        this.$container = document.createElement('div');
-        this.$container.classList.add('gantt-container');
+        this.$container = this.create_el({
+            classes: 'gantt-container',
+            append_to: this.$svg.parentElement,
+        });
 
-        const parent_element = this.$svg.parentElement;
-        parent_element.appendChild(this.$container);
         this.$container.appendChild(this.$svg);
-
-        // popup wrapper
-        this.$popup_wrapper = document.createElement('div');
-        this.$popup_wrapper.classList.add('popup-wrapper');
-        this.$container.appendChild(this.$popup_wrapper);
+        this.$popup_wrapper = this.create_el({
+            classes: 'popup-wrapper',
+            append_to: this.$container,
+        });
     }
 
     setup_options(options) {
@@ -427,28 +426,25 @@ export default class Gantt {
     }
 
     make_grid_header() {
-        let $header = document.createElement('div');
-        $header.style.height = this.config.header_height + 'px';
-        $header.style.width =
-            this.dates.length * this.config.column_width + 'px';
-        $header.classList.add('grid-header');
-        this.$header = $header;
-        this.$container.appendChild($header);
+        this.$header = this.create_el({
+            width: this.dates.length * this.config.column_width,
+            classes: 'grid-header',
+            append_to: this.$container,
+        });
 
-        let $upper_header = document.createElement('div');
-        $upper_header.classList.add('upper-header');
-        this.$upper_header = $upper_header;
-        this.$header.appendChild($upper_header);
-
-        let $lower_header = document.createElement('div');
-        $lower_header.classList.add('lower-header');
-        this.$lower_header = $lower_header;
-        this.$header.appendChild($lower_header);
+        this.$upper_header = this.create_el({
+            classes: 'upper-header',
+            append_to: this.$header,
+        });
+        this.$lower_header = this.create_el({
+            classes: 'lower-header',
+            append_to: this.$header,
+        });
     }
 
     make_side_header() {
-        let $side_header = document.createElement('div');
-        $side_header.classList.add('side-header');
+        this.$side_header = this.create_el({ classes: 'side-header' });
+        this.$upper_header.prepend(this.$side_header);
 
         // Create view mode change select
         if (this.options.view_mode_select) {
@@ -474,7 +470,7 @@ export default class Gantt {
                     this.change_view_mode($select.value);
                 }.bind(this),
             );
-            $side_header.appendChild($select);
+            this.$side_header.appendChild($select);
         }
 
         // Create today button
@@ -483,12 +479,9 @@ export default class Gantt {
             $today_button.classList.add('today-button');
             $today_button.textContent = 'Today';
             $today_button.onclick = this.scroll_today.bind(this);
-            $side_header.prepend($today_button);
+            this.$side_header.prepend($today_button);
             this.$today_button = $today_button;
         }
-
-        this.$upper_header.prepend($side_header);
-        this.$side_header = $side_header;
     }
 
     make_grid_ticks() {
@@ -762,41 +755,32 @@ export default class Gantt {
         $el.style.top = top + 'px';
         $el.style.left = left + 'px';
         if (id) $el.id = id;
-        if (width) $el.style.width = height + 'px';
+        if (width) $el.style.width = width + 'px';
         if (height) $el.style.height = height + 'px';
-        append_to.appendChild($el);
+        if (append_to) append_to.appendChild($el);
         return $el;
     }
 
     make_dates() {
-        this.upper_texts_x = {};
         this.get_dates_to_draw().forEach((date, i) => {
             if (date.lower_text) {
                 let $lower_text = this.create_el({
-                    left: date.lower_x,
+                    left: date.x,
                     top: date.lower_y,
                     classes: 'lower-text date_' + sanitize(date.formatted_date),
                     append_to: this.$lower_header,
                 });
-
                 $lower_text.innerText = date.lower_text;
-                $lower_text.style.left =
-                    +$lower_text.style.left.slice(0, -2) + 'px';
             }
 
             if (date.upper_text) {
-                this.upper_texts_x[date.upper_text] = date.upper_x;
-                let $upper_text = document.createElement('div');
-                $upper_text.classList.add('upper-text');
-                $upper_text.style.left = date.upper_x + 'px';
-                $upper_text.style.top = date.upper_y + 'px';
+                let $upper_text = this.create_el({
+                    left: date.x,
+                    top: date.upper_y,
+                    classes: 'upper-text',
+                    append_to: this.$upper_header,
+                });
                 $upper_text.innerText = date.upper_text;
-                this.$upper_header.appendChild($upper_text);
-
-                // remove out-of-bound dates
-                if (date.upper_x > this.layers.grid.getBBox().width) {
-                    $upper_text.remove();
-                }
             }
         });
     }
@@ -816,8 +800,8 @@ export default class Gantt {
 
         let column_width = this.config.column_width;
 
-        const base_x = last_date_info
-            ? last_date_info.base_x + last_date_info.column_width
+        const x = last_date_info
+            ? last_date_info.x + last_date_info.column_width
             : 0;
 
         let upper_text = this.config.view_mode.upper_text;
@@ -843,7 +827,7 @@ export default class Gantt {
                 date_utils.format(date, this.config.view_mode.format_string),
             ),
             column_width: this.config.column_width,
-            base_x,
+            x,
             upper_text: this.config.view_mode.upper_text(
                 date,
                 last_date,
@@ -854,13 +838,7 @@ export default class Gantt {
                 last_date,
                 this.options.language,
             ),
-            upper_x:
-                base_x +
-                (column_width * this.config.view_mode.upper_text_frequency ||
-                    1) /
-                    2,
             upper_y: 15,
-            lower_x: base_x,
             lower_y: this.options.upper_header_height + 5,
         };
     }

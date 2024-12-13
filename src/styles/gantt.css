@@ -40,6 +40,9 @@
     }
 
     & .grid-header {
+        height: calc(
+            var(--gv-lower-header-height) + var(--gv-upper-header-height) + 10px
+        );
         background-color: var(--g-header-background);
         position: sticky;
         top: 0;

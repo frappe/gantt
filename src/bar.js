@@ -156,13 +156,13 @@ export default class Bar {
                 this.gantt.config.step) *
             this.gantt.config.column_width;
 
-        let $date_highlight = document.createElement('div');
-        $date_highlight.classList.add('date-highlight');
-        $date_highlight.classList.add(`highlight-${this.task.id}`);
-        $date_highlight.style.width = this.width + 'px';
-        $date_highlight.style.left = x + 'px';
+        let $date_highlight = this.gantt.create_el({
+            classes: `date-highlight highlight-${this.task.id}`,
+            width: this.width,
+            left: x,
+        });
         this.$date_highlight = $date_highlight;
-        this.gantt.$lower_header.prepend($date_highlight);
+        this.gantt.$lower_header.prepend(this.$date_highlight);
 
         animateSVG(this.$bar_progress, 'width', 0, this.progress_width);
     }
