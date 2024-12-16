@@ -50,7 +50,7 @@ const DEFAULT_VIEW_MODES = [
     },
     {
         name: 'Day',
-        padding: '14d',
+        padding: '1m',
         format_string: 'YYYY-MM-DD',
         step: '1d',
         lower_text: (d, ld, lang) =>

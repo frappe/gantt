@@ -361,6 +361,12 @@ export default class Gantt {
             classes: 'extras',
             append_to: this.$container,
         });
+        this.$adjust = this.create_el({
+            classes: 'adjust hide',
+            append_to: this.$extras,
+            type: 'button',
+        });
+        this.$adjust.innerHTML = '&larr;';
     }
 
     make_grid() {
@@ -710,8 +716,8 @@ export default class Gantt {
         if (!highlightDimensions) return;
     }
 
-    create_el({ left, top, width, height, id, classes, append_to }) {
-        let $el = document.createElement('div');
+    create_el({ left, top, width, height, id, classes, append_to, type }) {
+        let $el = document.createElement(type || 'div');
         for (let cls of classes.split(' ')) $el.classList.add(cls);
         $el.style.top = top + 'px';
         $el.style.left = left + 'px';
@@ -1138,9 +1144,46 @@ export default class Gantt {
                 this.$current = $el;
             }
 
-            Array.prototype.forEach.call(elements, function (el, i) {
-                ids.push(el.getAttribute('data-id'));
-            });
+            x_on_scroll_start = e.currentTarget.scrollLeft;
+            let min_start, max_end, max_start;
+            if (elements.length) {
+                let { x, width } = elements[0].getBBox();
+                min_start = x;
+                max_start = x;
+                max_end = x + width;
+                Array.prototype.forEach.call(elements, function (el, i) {
+                    ids.push(el.getAttribute('data-id'));
+                    let { x, width } = el.getBBox();
+                    if (x < min_start) min_start = x;
+                    if (x > max_start) max_start = x;
+                    if (x + width > max_end) max_end = x + width;
+                });
+            }
+
+            if (x_on_scroll_start > max_end + 100) {
+                this.$adjust.innerHTML = '&larr;';
+                this.$adjust.classList.remove('hide');
+                this.$adjust.onclick = () => {
+                    this.$container.scrollTo({
+                        left: max_start,
+                        behavior: 'smooth',
+                    });
+                };
+            } else if (
+                x_on_scroll_start + e.currentTarget.offsetWidth <
+                min_start - 100
+            ) {
+                this.$adjust.innerHTML = '&rarr;';
+                this.$adjust.classList.remove('hide');
+                this.$adjust.onclick = () => {
+                    this.$container.scrollTo({
+                        left: min_start,
+                        behavior: 'smooth',
+                    });
+                };
+            } else {
+                this.$adjust.classList.add('hide');
+            }
 
             if (dx) {
                 localBars = ids.map((id) => this.get_bar(id));
@@ -1153,8 +1196,6 @@ export default class Gantt {
                     });
                 }
             }
-
-            x_on_scroll_start = e.currentTarget.scrollLeft;
         });
 
         $.on(this.$svg, 'mousemove', (e) => {

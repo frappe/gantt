@@ -170,6 +170,26 @@
             opacity: 100;
         }
     }
+
+    & .extras {
+        position: sticky;
+        left: 0px;
+
+        & .adjust {
+            position: absolute;
+            left: 8px;
+            top: calc(var(--gv-grid-height) - 60px);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 3px;
+        }
+    }
+
+    .hide {
+        display: none;
+    }
 }
 
 .gantt {
@@ -311,9 +331,5 @@
                 display: block;
             }
         }
-    }
-
-    & .hide {
-        display: none;
     }
 }
