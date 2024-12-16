@@ -304,7 +304,7 @@ export default class Gantt {
             );
         }
 
-        let format_string =
+        this.config.format_string =
             this.config.view_mode.format_string || 'YYYY-MM-DD HH';
 
         this.gantt_start = gantt_start;
@@ -636,42 +636,12 @@ export default class Gantt {
      * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
      */
     highlightNow() {
-        let now = new Date();
-        if (now < this.gantt_start || now > this.gantt_end) return null;
-
-        let current = new Date(),
-            el = this.$container.querySelector(
-                '.date_' +
-                    sanitize(
-                        date_utils.format(
-                            current,
-                            this.config.view_mode.format_string,
-                            this.options.language,
-                        ),
-                    ),
-            );
-
-        // safety check to prevent infinite loop
-        let c = 0;
-        while (!el && c < this.config.step) {
-            current = date_utils.add(current, -1, this.config.unit);
-            el = this.$container.querySelector(
-                '.date_' +
-                    sanitize(
-                        date_utils.format(
-                            current,
-                            this.config.view_mode.format_string,
-                            this.options.language,
-                        ),
-                    ),
-            );
-            c++;
-        }
+        const [_, el] = this.get_closest_date();
 
         el.classList.add('current-date-highlight');
 
         const diff_in_units = date_utils.diff(
-            now,
+            new Date(),
             this.gantt_start,
             this.config.unit,
         );
@@ -815,7 +785,7 @@ export default class Gantt {
         return {
             date,
             formatted_date: sanitize(
-                date_utils.format(date, this.config.view_mode.format_string),
+                date_utils.format(date, this.config.format_string),
             ),
             column_width: this.config.column_width,
             x,
@@ -940,9 +910,53 @@ export default class Gantt {
     }
 
     scroll_today() {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        let [today, _] = this.get_closest_date();
         this.set_scroll_position(today);
+    }
+
+    get_closest_date() {
+        let now = new Date();
+        if (now < this.gantt_start || now > this.gantt_end) return null;
+
+        let current = new Date(),
+            el = this.$container.querySelector(
+                '.date_' +
+                    sanitize(
+                        date_utils.format(
+                            current,
+                            this.config.format_string,
+                            this.options.language,
+                        ),
+                    ),
+            );
+
+        // safety check to prevent infinite loop
+        let c = 0;
+        while (!el && c < this.config.step) {
+            current = date_utils.add(current, -1, this.config.unit);
+            el = this.$container.querySelector(
+                '.date_' +
+                    sanitize(
+                        date_utils.format(
+                            current,
+                            this.config.format_string,
+                            this.options.language,
+                        ),
+                    ),
+            );
+            c++;
+        }
+
+        return [
+            new Date(
+                date_utils.format(
+                    current,
+                    this.config.format_string,
+                    this.options.language,
+                ) + ' ',
+            ),
+            el,
+        ];
     }
 
     bind_grid_click() {
@@ -1305,6 +1319,7 @@ export default class Gantt {
             this.options.snap_at || this.config.view_mode.default_snap || '1d';
 
         if (default_snap !== 'unit') {
+            console.log(default_snap);
             const { duration, scale } = date_utils.parse_duration(default_snap);
             unit_length =
                 date_utils.convert_scales(this.config.view_mode.step, scale) /

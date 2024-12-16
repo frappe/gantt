@@ -72,9 +72,6 @@ export default class Arrow {
                 m -5 -5
                 l 5 5
                 l -5 5`;
-
-            console.log(down_1, down_2, curve);
-            console.log(this.path);
         } else {
             if (end_x < start_x + curve) curve = end_x - start_x;
 

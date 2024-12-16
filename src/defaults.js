@@ -5,12 +5,18 @@ function getDecade(d) {
     return year - (year % 10) + '';
 }
 
+function formatWeek(d, ld, lang) {
+    let endOfWeek = date_utils.add(d, 6, 'day');
+    let endFormat = endOfWeek.getMonth() !== d.getMonth() ? 'D MMM' : 'D';
+    let beginFormat = !ld || d.getMonth() !== ld.getMonth() ? 'D MMM' : 'D';
+    return `${date_utils.format(d, beginFormat, lang)}-${date_utils.format(endOfWeek, endFormat, lang)}`;
+}
+
 const DEFAULT_VIEW_MODES = [
     {
         name: 'Hour',
         padding: '7d',
         step: '1h',
-        format_string: 'YYYY-MM-DD HH',
         lower_text: 'HH',
         upper_text: (d, ld, lang) =>
             !ld || d.getDate() !== ld.getDate()
@@ -22,7 +28,6 @@ const DEFAULT_VIEW_MODES = [
         name: 'Quarter Day',
         padding: '7d',
         step: '6h',
-        format_string: 'YYYY-MM-DD HH',
         lower_text: 'HH',
         upper_text: (d, ld, lang) =>
             !ld || d.getDate() !== ld.getDate()
@@ -34,7 +39,6 @@ const DEFAULT_VIEW_MODES = [
         name: 'Half Day',
         padding: '14d',
         step: '12h',
-        format_string: 'YYYY-MM-DD HH',
         lower_text: 'HH',
         upper_text: (d, ld, lang) =>
             !ld || d.getDate() !== ld.getDate()
@@ -65,10 +69,7 @@ const DEFAULT_VIEW_MODES = [
         step: '7d',
         format_string: 'YYYY-MM-DD',
         column_width: 140,
-        lower_text: (d, ld, lang) =>
-            !ld || d.getMonth() !== ld.getMonth()
-                ? date_utils.format(d, 'D MMM', lang)
-                : date_utils.format(d, 'D', lang),
+        lower_text: formatWeek,
         upper_text: (d, ld, lang) =>
             !ld || d.getMonth() !== ld.getMonth()
                 ? date_utils.format(d, 'MMMM', lang)

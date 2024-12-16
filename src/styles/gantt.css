@@ -17,6 +17,7 @@
         padding: 10px;
         border-radius: 5px;
         width: max-content;
+        z-index: 1000;
 
         &.hidden {
             opacity: 0 !important;
