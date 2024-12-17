@@ -91,9 +91,5 @@
         & .title {
             border-color: lighten(var(--g-blue-dark, 5));
         }
-
-        & .pointer {
-            border-top-color: #333;
-        }
     }
 }

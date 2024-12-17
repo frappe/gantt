@@ -669,6 +669,7 @@ export default class Gantt {
 
     make_grid_highlights() {
         this.highlightHolidays();
+        this.config.ignored_positions = [];
 
         const height =
             (this.options.bar_height + this.options.padding) *
@@ -1028,7 +1029,7 @@ export default class Gantt {
 
             bar_wrapper.classList.add('active');
 
-            if (this.popup) this.popup.parent.classList.add('hidden');
+            if (this.popup) this.popup.hide();
 
             x_on_start = e.offsetX || e.layerX;
             y_on_start = e.offsetY || e.layerY;
@@ -1360,7 +1361,6 @@ export default class Gantt {
             this.options.snap_at || this.config.view_mode.default_snap || '1d';
 
         if (default_snap !== 'unit') {
-            console.log(default_snap);
             const { duration, scale } = date_utils.parse_duration(default_snap);
             unit_length =
                 date_utils.convert_scales(this.config.view_mode.step, scale) /
@@ -1404,7 +1404,7 @@ export default class Gantt {
         [...this.$svg.querySelectorAll('.bar-wrapper')].forEach((el) => {
             el.classList.remove('active');
         });
-        if (this.popup) this.popup.parent.classList.remove('hidden');
+        if (this.popup) this.popup.parent.classList.remove('hide');
     }
 
     view_is(modes) {
@@ -1431,12 +1431,16 @@ export default class Gantt {
         });
     }
 
-    show_popup(options) {
+    show_popup(opts) {
         if (this.options.popup === false) return;
         if (!this.popup) {
-            this.popup = new Popup(this.$popup_wrapper, this.options.popup);
+            this.popup = new Popup(
+                this.$popup_wrapper,
+                this.options.popup,
+                this,
+            );
         }
-        this.popup.show(options);
+        this.popup.show(opts);
     }
 
     hide_popup() {

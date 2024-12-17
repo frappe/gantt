@@ -122,8 +122,47 @@ const DEFAULT_OPTIONS = {
     lines: 'both',
     move_dependencies: true,
     padding: 18,
-    popup: null,
-    popup_on: 'hover',
+    popup: (ctx) => {
+        ctx.set_title(ctx.task.name);
+        if (ctx.task.description) ctx.set_subtitle(ctx.task.description);
+        else ctx.set_subtitle('');
+
+        const start_date = date_utils.format(
+            ctx.task._start,
+            'MMM D',
+            ctx.chart.options.language,
+        );
+        const end_date = date_utils.format(
+            date_utils.add(ctx.task._end, -1, 'second'),
+            'MMM D',
+            ctx.chart.options.language,
+        );
+
+        ctx.set_details(
+            `${start_date} - ${end_date} (${ctx.task.actual_duration} days${ctx.task.ignored_duration ? ' + ' + ctx.task.ignored_duration + ' excluded' : ''})<br/>Progress: ${ctx.task.progress}%`,
+        );
+
+        ctx.add_action('Toggle Priority', (task, chart) => {
+            task.important = !task.important;
+            chart.refresh(
+                chart.tasks.map((t) => (t.id !== task.id ? t : task)),
+            );
+        });
+
+        ctx.add_action('+', (task, chart) => {
+            task.progress += (1 / task.actual_duration) * 100;
+            chart.refresh(
+                chart.tasks.map((t) => (t.id !== task.id ? t : task)),
+            );
+        });
+        ctx.add_action('-', (task, chart) => {
+            task.progress -= (1 / task.actual_duration) * 100;
+            chart.refresh(
+                chart.tasks.map((t) => (t.id !== task.id ? t : task)),
+            );
+        });
+    },
+    popup_on: 'click',
     readonly_progress: false,
     readonly_dates: false,
     readonly: false,

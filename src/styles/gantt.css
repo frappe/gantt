@@ -13,32 +13,56 @@
         position: absolute;
         top: 0;
         left: 0;
-        background: #171b1f;
+        background: #fff;
+        box-shadow: 0px 10px 24px -3px rgba(0, 0, 0, 0.2);
         padding: 10px;
         border-radius: 5px;
         width: max-content;
         z-index: 1000;
 
-        &.hidden {
-            opacity: 0 !important;
-        }
-
         & .title {
-            margin-bottom: 5px;
-            text-align: -webkit-center;
-            text-align: center;
-            color: var(--g-text-light);
+            margin-bottom: 2px;
+            color: var(--g-text-dark);
+            font-size: 0.85rem;
+            font-weight: 650;
+            line-height: 15px;
         }
 
         & .subtitle {
-            color: var(--g-text-secondary);
+            color: var(--g-text-dark);
+            font-size: 0.8rem;
+            margin-bottom: 5px;
         }
 
-        & .pointer {
-            position: absolute;
-            height: 5px;
-            border: 5px solid transparent;
-            border-bottom-color: rgba(0, 0, 0, 0.8);
+        & .details {
+            color: var(--g-text-muted);
+            font-size: 0.7rem;
+        }
+
+        & .actions {
+            margin-top: 10px;
+            margin-left: 3px;
+        }
+
+        & .action-btn {
+            border: none;
+            padding: 5px 8px;
+            background-color: #dbeafe;
+            border-right: 1px solid var(--g-text-light);
+
+            &:hover {
+                background-color: #93c5fd;
+            }
+
+            &:first-child {
+                border-top-left-radius: 4px;
+                border-bottom-left-radius: 4px;
+            }
+
+            &:last-child {
+                border-right: none;
+                border-radius: 0 4px 4px 0;
+            }
         }
     }
 
@@ -140,7 +164,6 @@
             var(--gv-upper-header-height) + var(--gv-lower-header-height) * 0.1
         );
         position: absolute;
-        display: none;
     }
 
     & .current-highlight {
