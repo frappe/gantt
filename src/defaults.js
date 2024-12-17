@@ -50,7 +50,7 @@ const DEFAULT_VIEW_MODES = [
     },
     {
         name: 'Day',
-        padding: '1m',
+        padding: '14d',
         format_string: 'YYYY-MM-DD',
         step: '1d',
         lower_text: (d, ld, lang) =>
@@ -158,7 +158,9 @@ const DEFAULT_OPTIONS = {
                     );
                 });
                 ctx.add_action('-', (task, chart) => {
-                    task.progress -= (1 / task.actual_duration) * 100;
+                    task.progress -=
+                        Math.floor((1 / task.actual_duration) * 10000) / 100;
+                    console.log(task.progress);
                     chart.refresh(
                         chart.tasks.map((t) => (t.id !== task.id ? t : task)),
                     );

@@ -642,8 +642,10 @@ export default class Gantt {
      * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
      */
     highlightNow() {
-        const [_, el] = this.get_closest_date();
+        const res = this.get_closest_date();
+        if (!res) return;
 
+        const [_, el] = res;
         el.classList.add('current-date-highlight');
 
         const diff_in_units = date_utils.diff(
@@ -751,6 +753,9 @@ export default class Gantt {
                 $upper_text.innerText = date.upper_text;
             }
         });
+        this.upperTexts = Array.from(
+            this.$container.querySelectorAll('.upper-text'),
+        );
     }
 
     get_dates_to_draw() {
@@ -889,9 +894,6 @@ export default class Gantt {
             this.$current.classList.remove('current-upper');
         }
 
-        this.upperTexts = Array.from(
-            this.$container.querySelectorAll('.upper-text'),
-        );
         this.current_date = date_utils.add(
             this.gantt_start,
             this.$container.scrollLeft / this.config.column_width,
@@ -904,7 +906,7 @@ export default class Gantt {
         );
 
         // Recalculate
-        this.current_date = this.current_date = date_utils.add(
+        this.current_date = date_utils.add(
             this.gantt_start,
             (this.$container.scrollLeft + $el.clientWidth) /
                 this.config.column_width,
@@ -917,8 +919,8 @@ export default class Gantt {
     }
 
     scroll_today() {
-        let [today, _] = this.get_closest_date();
-        this.set_scroll_position(today);
+        let res = this.get_closest_date();
+        if (res) this.set_scroll_position(res[0]);
     }
 
     get_closest_date() {
