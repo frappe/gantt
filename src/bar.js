@@ -485,17 +485,7 @@ export default class Bar {
             x_in_units * this.gantt.config.step,
             this.gantt.config.unit,
         );
-        const start_offset =
-            this.gantt.gantt_start.getTimezoneOffset() -
-            new_start_date.getTimezoneOffset();
-
-        if (start_offset) {
-            new_start_date = date_utils.add(
-                new_start_date,
-                start_offset,
-                'minute',
-            );
-        }
+        console.log(date_utils.diff(new_start_date, this.gantt.gantt_start));
 
         const width_in_units = bar.getWidth() / this.gantt.config.column_width;
         const new_end_date = date_utils.add(

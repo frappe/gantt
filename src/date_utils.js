@@ -125,7 +125,10 @@ export default {
     diff(date_a, date_b, scale = 'day') {
         let milliseconds, seconds, hours, minutes, days, months, years;
 
-        milliseconds = date_a - date_b;
+        milliseconds =
+            date_a -
+            date_b +
+            (date_b.getTimezoneOffset() - date_a.getTimezoneOffset()) * 60000;
         seconds = milliseconds / 1000;
         minutes = seconds / 60;
         hours = minutes / 60;
