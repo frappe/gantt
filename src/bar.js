@@ -46,6 +46,9 @@ export default class Bar {
             class: 'handle-group',
             append_to: this.group,
         });
+
+        if (this.task.progress < 0) this.task.progress = 0;
+        if (this.task.progress > 100) this.task.progress = 100;
     }
 
     prepare_helpers() {
@@ -156,7 +159,7 @@ export default class Bar {
             this.gantt.config.column_width;
 
         let $date_highlight = this.gantt.create_el({
-            classes: `date-highlight hide highlight-${this.task.id}`,
+            classes: `date-range-highlight hide highlight-${this.task.id}`,
             width: this.width,
             left: x,
         });
@@ -171,18 +174,10 @@ export default class Bar {
         const ignored_end = this.x + width;
         const total_ignored_area =
             this.gantt.config.ignored_positions.reduce((acc, val) => {
-                if (this.task._index === 2)
-                    console.log('IN', val >= this.x, val < ignored_end);
                 return acc + (val >= this.x && val < ignored_end);
             }, 0) * this.gantt.config.column_width;
         let progress_width =
             ((width - total_ignored_area) * this.task.progress) / 100;
-        console.log(
-            this.task,
-            this.gantt.config.ignored_positions.reduce((acc, val) => {
-                return acc + (val >= this.x && val < ignored_end);
-            }, 0),
-        );
         const progress_end = this.x + progress_width;
         const total_ignored_progress =
             this.gantt.config.ignored_positions.reduce((acc, val) => {
@@ -310,22 +305,6 @@ export default class Bar {
         this.setup_click_event();
     }
 
-    toggle_popup(e) {
-        if (
-            !this.gantt.popup ||
-            this.gantt.popup.parent.classList.contains('hide')
-        ) {
-            this.gantt.show_popup({
-                x: e.offsetX || e.layerX,
-                y: e.offsetY || e.layerY,
-                task: this.task,
-                target: this.$bar,
-            });
-        } else {
-            this.gantt.popup.hide();
-        }
-    }
-
     setup_click_event() {
         let task_id = this.task.id;
         $.on(this.group, 'mouseover', (e) => {
@@ -337,39 +316,43 @@ export default class Bar {
             ]);
         });
 
+        this.popup_opened = false;
         if (this.gantt.options.popup_on === 'click') {
             $.on(this.group, 'click', (e) => {
-                console.log('CLICKED');
-                this.toggle_popup(e);
+                if (!this.popup_opened)
+                    this.gantt.show_popup({
+                        x: e.offsetX || e.layerX,
+                        y: e.offsetY || e.layerY,
+                        task: this.task,
+                        target: this.$bar,
+                    });
+                this.popup_opened = !this.popup_opened;
                 this.gantt.$container
                     .querySelector(`.highlight-${task_id}`)
                     .classList.toggle('hide');
             });
         } else {
-            // let timeout;
-            // $.on(
-            //     this.group,
-            //     'mouseenter',
-            //     (e) =>
-            //         (timeout = setTimeout(() => {
-            //             this.gantt.show_popup({
-            //                 x: e.offsetX || e.layerX,
-            //                 y: e.offsetY || e.layerY,
-            //                 task: this.task,
-            //                 target: this.$bar,
-            //             });
-            //             this.gantt.$container.querySelector(
-            //                 `.highlight-${task_id}`,
-            //             ).style.display = 'block';
-            //         }, 200)),
-            // );
-            // $.on(this.group, 'mouseleave', () => {
-            //     clearTimeout(timeout);
-            //     this.gantt.popup?.hide?.();
-            //     this.gantt.$container.querySelector(
-            //         `.highlight-${task_id}`,
-            //     ).style.display = 'none';
-            // });
+            let timeout;
+            $.on(this.group, 'mouseenter', (e) => {
+                timeout = setTimeout(() => {
+                    this.gantt.show_popup({
+                        x: e.offsetX || e.layerX,
+                        y: e.offsetY || e.layerY,
+                        task: this.task,
+                        target: this.$bar,
+                    });
+                    this.gantt.$container
+                        .querySelector(`.highlight-${task_id}`)
+                        .classList.remove('hide');
+                }, 200);
+            });
+            $.on(this.group, 'mouseleave', () => {
+                clearTimeout(timeout);
+                this.gantt.popup?.hide?.();
+                this.gantt.$container
+                    .querySelector(`.highlight-${task_id}`)
+                    .classList.add('hide');
+            });
         }
 
         $.on(this.group, 'click', () => {

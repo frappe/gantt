@@ -663,7 +663,7 @@ export default class Gantt {
             left,
             height,
             classes: 'current-highlight',
-            append_to: this.$extras,
+            append_to: this.$container,
         });
     }
 
@@ -967,10 +967,15 @@ export default class Gantt {
     }
 
     bind_grid_click() {
-        $.on(this.$svg, 'click', '.grid-row, .grid-header', () => {
-            this.unselect_all();
-            this.hide_popup();
-        });
+        $.on(
+            this.$svg,
+            'click',
+            '.grid-row, .grid-header, .ignored-bar',
+            () => {
+                this.unselect_all();
+                this.hide_popup();
+            },
+        );
     }
 
     bind_holiday_labels() {
@@ -1404,7 +1409,7 @@ export default class Gantt {
         [...this.$svg.querySelectorAll('.bar-wrapper')].forEach((el) => {
             el.classList.remove('active');
         });
-        if (this.popup) this.popup.parent.classList.remove('hide');
+        if (this.popup) this.popup.parent.classList.add('hide');
     }
 
     view_is(modes) {

@@ -156,13 +156,11 @@
         border-bottom-left-radius: 8px;
     }
 
-    & .date-highlight {
+    & .date-range-highlight {
         background-color: var(--g-progress-color);
-        border-radius: 20px;
-        height: var(--gv-lower-header-height);
-        top: calc(
-            var(--gv-upper-header-height) + var(--gv-lower-header-height) * 0.1
-        );
+        border-radius: 12px;
+        height: calc(var(--gv-lower-header-height) - 6px);
+        top: calc(var(--gv-upper-header-height) + 5px);
         position: absolute;
     }
 
@@ -350,7 +348,7 @@
                 transition: transform 0.3s ease;
             }
 
-            .date-highlight {
+            .date-range-highlight {
                 display: block;
             }
         }

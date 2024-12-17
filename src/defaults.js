@@ -142,25 +142,29 @@ const DEFAULT_OPTIONS = {
             `${start_date} - ${end_date} (${ctx.task.actual_duration} days${ctx.task.ignored_duration ? ' + ' + ctx.task.ignored_duration + ' excluded' : ''})<br/>Progress: ${ctx.task.progress}%`,
         );
 
-        ctx.add_action('Toggle Priority', (task, chart) => {
-            task.important = !task.important;
-            chart.refresh(
-                chart.tasks.map((t) => (t.id !== task.id ? t : task)),
-            );
-        });
-
-        ctx.add_action('+', (task, chart) => {
-            task.progress += (1 / task.actual_duration) * 100;
-            chart.refresh(
-                chart.tasks.map((t) => (t.id !== task.id ? t : task)),
-            );
-        });
-        ctx.add_action('-', (task, chart) => {
-            task.progress -= (1 / task.actual_duration) * 100;
-            chart.refresh(
-                chart.tasks.map((t) => (t.id !== task.id ? t : task)),
-            );
-        });
+        if (!ctx.chart.options.readonly) {
+            ctx.add_action('Toggle Priority', (task, chart) => {
+                task.important = !task.important;
+                chart.refresh(
+                    chart.tasks.map((t) => (t.id !== task.id ? t : task)),
+                );
+            });
+            if (!ctx.chart.options.readonly_progress) {
+                ctx.add_action('+', (task, chart) => {
+                    task.progress +=
+                        Math.floor((1 / task.actual_duration) * 10000) / 100;
+                    chart.refresh(
+                        chart.tasks.map((t) => (t.id !== task.id ? t : task)),
+                    );
+                });
+                ctx.add_action('-', (task, chart) => {
+                    task.progress -= (1 / task.actual_duration) * 100;
+                    chart.refresh(
+                        chart.tasks.map((t) => (t.id !== task.id ? t : task)),
+                    );
+                });
+            }
+        }
     },
     popup_on: 'click',
     readonly_progress: false,
