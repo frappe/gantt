@@ -217,6 +217,11 @@ export default class Gantt {
         this.change_view_mode();
     }
 
+    update_task(task) {
+        let bar = this.bars[task._index];
+        bar.refresh();
+    }
+
     change_view_mode(mode = this.options.view_mode) {
         if (typeof mode === 'string') {
             mode = this.options.view_modes.find((d) => d.name === mode);
@@ -607,7 +612,7 @@ export default class Gantt {
                         (this.options.bar_height + this.options.padding) *
                         this.tasks.length;
                     const d_formatted = date_utils
-                        .format(d, 'YYYY-MM-DD')
+                        .format(d, 'YYYY-MM-DD', this.options.language)
                         .replace(' ', '_');
 
                     if (labels[d]) {
@@ -797,7 +802,11 @@ export default class Gantt {
         return {
             date,
             formatted_date: sanitize(
-                date_utils.format(date, this.config.format_string),
+                date_utils.format(
+                    date,
+                    this.config.format_string,
+                    this.options.language,
+                ),
             ),
             column_width: this.config.column_width,
             x,
@@ -900,10 +909,15 @@ export default class Gantt {
             this.config.unit,
         );
 
-        let current_upper = this.config.view_mode.upper_text(this.current_date);
+        let current_upper = this.config.view_mode.upper_text(
+            this.current_date,
+            null,
+            this.options.language,
+        );
         let $el = this.upperTexts.find(
             (el) => el.textContent === current_upper,
         );
+        console.log(current_upper, $el);
 
         // Recalculate
         this.current_date = date_utils.add(
@@ -912,7 +926,11 @@ export default class Gantt {
                 this.config.column_width,
             this.config.unit,
         );
-        current_upper = this.config.view_mode.upper_text(this.current_date);
+        current_upper = this.config.view_mode.upper_text(
+            this.current_date,
+            null,
+            this.options.language,
+        );
         $el = this.upperTexts.find((el) => el.textContent === current_upper);
         $el.classList.add('current-upper');
         this.$current = $el;
@@ -992,8 +1010,8 @@ export default class Gantt {
             h.onmouseenter = (e) => {
                 timeout = setTimeout(() => {
                     label.classList.add('show');
-                    label.style.left = e.offsetX + 'px';
-                    label.style.top = e.offsetY + 'px';
+                    label.style.left = (e.offsetX || e.layerX) + 'px';
+                    label.style.top = (e.offsetY || e.layerY) + 'px';
                 }, 300);
             };
 
@@ -1126,6 +1144,8 @@ export default class Gantt {
 
             let current_upper = this.config.view_mode.upper_text(
                 this.current_date,
+                null,
+                this.options.language,
             );
             let $el = this.upperTexts.find(
                 (el) => el.textContent === current_upper,
@@ -1139,7 +1159,11 @@ export default class Gantt {
                     this.config.step,
                 this.config.unit,
             );
-            current_upper = this.config.view_mode.upper_text(this.current_date);
+            current_upper = this.config.view_mode.upper_text(
+                this.current_date,
+                null,
+                this.options.language,
+            );
             $el = this.upperTexts.find(
                 (el) => el.textContent === current_upper,
             );
@@ -1412,6 +1436,9 @@ export default class Gantt {
             el.classList.remove('active');
         });
         if (this.popup) this.popup.parent.classList.add('hide');
+        this.$container
+            .querySelectorAll('.date-range-highlight')
+            .forEach((k) => k.classList.add('hide'));
     }
 
     view_is(modes) {

@@ -145,25 +145,16 @@ const DEFAULT_OPTIONS = {
         if (!ctx.chart.options.readonly) {
             ctx.add_action('Toggle Priority', (task, chart) => {
                 task.important = !task.important;
-                chart.refresh(
-                    chart.tasks.map((t) => (t.id !== task.id ? t : task)),
-                );
+                chart.update_task(task);
             });
             if (!ctx.chart.options.readonly_progress) {
                 ctx.add_action('+', (task, chart) => {
-                    task.progress +=
-                        Math.floor((1 / task.actual_duration) * 10000) / 100;
-                    chart.refresh(
-                        chart.tasks.map((t) => (t.id !== task.id ? t : task)),
-                    );
+                    task.progress += (1 / task.actual_duration) * 100;
+                    chart.update_task(task);
                 });
                 ctx.add_action('-', (task, chart) => {
-                    task.progress -=
-                        Math.floor((1 / task.actual_duration) * 10000) / 100;
-                    console.log(task.progress);
-                    chart.refresh(
-                        chart.tasks.map((t) => (t.id !== task.id ? t : task)),
-                    );
+                    task.progress -= (1 / task.actual_duration) * 100;
+                    chart.update_task(task);
                 });
             }
         }
