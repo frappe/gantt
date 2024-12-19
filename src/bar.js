@@ -347,10 +347,6 @@ export default class Bar {
                 this.gantt.$container
                     .querySelector(`.highlight-${task_id}`)
                     .classList.toggle('hide');
-                console.log(
-                    this.gantt.$container.querySelector(`.highlight-${task_id}`)
-                        .classList,
-                );
             });
         } else {
             let timeout;

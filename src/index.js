@@ -116,7 +116,7 @@ export default class Gantt {
 
     update_options(options) {
         this.setup_options({ ...this.original_options, ...options });
-        this.change_view_mode();
+        this.change_view_mode(undefined, true);
     }
 
     setup_tasks(tasks) {
@@ -222,17 +222,22 @@ export default class Gantt {
         bar.refresh();
     }
 
-    change_view_mode(mode = this.options.view_mode) {
+    change_view_mode(mode = this.options.view_mode, change = false) {
         if (typeof mode === 'string') {
             mode = this.options.view_modes.find((d) => d.name === mode);
         }
 
-        // For change
+        const old_scroll_pos = this.$container.scrollLeft;
+        const old_scroll_op = this.options.scroll_to;
+        this.options.scroll_to = null;
         this.options.view_mode = mode.name;
         this.config.view_mode = mode;
         this.update_view_scale(mode);
-        this.setup_dates();
+        this.setup_dates(change);
         this.render();
+
+        this.options.scroll_to = old_scroll_op;
+        this.$container.scrollLeft = old_scroll_pos;
         this.trigger_event('view_change', [mode]);
     }
 
@@ -252,12 +257,12 @@ export default class Gantt {
             10;
     }
 
-    setup_dates() {
-        this.setup_gantt_dates();
+    setup_dates(refresh = false) {
+        this.setup_gantt_dates(refresh);
         this.setup_date_values();
     }
 
-    setup_gantt_dates() {
+    setup_gantt_dates(refresh) {
         let gantt_start, gantt_end;
         if (!this.tasks.length) {
             gantt_start = new Date();
@@ -277,44 +282,44 @@ export default class Gantt {
         gantt_end = date_utils.start_of(gantt_end, 'day');
 
         // handle single value for padding
-        if (!this.options.infinite_padding) {
-            if (typeof this.config.view_mode.padding === 'string')
-                this.config.view_mode.padding = [
-                    this.config.view_mode.padding,
-                    this.config.view_mode.padding,
-                ];
+        if (!refresh) {
+            if (!this.options.infinite_padding) {
+                if (typeof this.config.view_mode.padding === 'string')
+                    this.config.view_mode.padding = [
+                        this.config.view_mode.padding,
+                        this.config.view_mode.padding,
+                    ];
 
-            let [padding_start, padding_end] =
-                this.config.view_mode.padding.map(date_utils.parse_duration);
-            gantt_start = date_utils.add(
-                gantt_start,
-                -padding_start.duration,
-                padding_start.scale,
-            );
-            gantt_end = date_utils.add(
-                gantt_end,
-                padding_end.duration,
-                padding_end.scale,
-            );
-        } else {
-            gantt_start = date_utils.add(
-                gantt_start,
-                -this.config.extend_by_units * 3,
-                this.config.unit,
-            );
-            gantt_end = date_utils.add(
-                gantt_end,
-                this.config.extend_by_units * 3,
-                this.config.unit,
-            );
+                let [padding_start, padding_end] =
+                    this.config.view_mode.padding.map(
+                        date_utils.parse_duration,
+                    );
+                this.gantt_start = date_utils.add(
+                    gantt_start,
+                    -padding_start.duration,
+                    padding_start.scale,
+                );
+                this.gantt_end = date_utils.add(
+                    gantt_end,
+                    padding_end.duration,
+                    padding_end.scale,
+                );
+            } else {
+                this.gantt_start = date_utils.add(
+                    gantt_start,
+                    -this.config.extend_by_units * 3,
+                    this.config.unit,
+                );
+                this.gantt_end = date_utils.add(
+                    gantt_end,
+                    this.config.extend_by_units * 3,
+                    this.config.unit,
+                );
+            }
         }
-
         this.config.format_string =
             this.config.view_mode.format_string || 'YYYY-MM-DD HH';
-
-        this.gantt_start = gantt_start;
         this.gantt_start.setHours(0, 0, 0, 0);
-        this.gantt_end = gantt_end;
     }
 
     setup_date_values() {
@@ -917,7 +922,6 @@ export default class Gantt {
         let $el = this.upperTexts.find(
             (el) => el.textContent === current_upper,
         );
-        console.log(current_upper, $el);
 
         // Recalculate
         this.current_date = date_utils.add(
