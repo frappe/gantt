@@ -109,7 +109,7 @@ const DEFAULT_OPTIONS = {
     auto_move_label: false,
     bar_corner_radius: 3,
     bar_height: 30,
-    container_height: 300,
+    container_height: 350,
     column_width: null,
     date_format: 'YYYY-MM-DD',
     upper_header_height: 45,
@@ -139,7 +139,7 @@ const DEFAULT_OPTIONS = {
         );
 
         ctx.set_details(
-            `${start_date} - ${end_date} (${ctx.task.actual_duration} days${ctx.task.ignored_duration ? ' + ' + ctx.task.ignored_duration + ' excluded' : ''})<br/>Progress: ${ctx.task.progress}%`,
+            `${start_date} - ${end_date} (${ctx.task.actual_duration} days${ctx.task.ignored_duration ? ' + ' + ctx.task.ignored_duration + ' excluded' : ''})<br/>Progress: ${Math.floor(ctx.task.progress * 100) / 100}%`,
         );
 
         if (!ctx.chart.options.readonly) {
