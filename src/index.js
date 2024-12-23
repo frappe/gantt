@@ -226,18 +226,21 @@ export default class Gantt {
         if (typeof mode === 'string') {
             mode = this.options.view_modes.find((d) => d.name === mode);
         }
-
-        const old_scroll_pos = this.$container.scrollLeft;
-        const old_scroll_op = this.options.scroll_to;
-        this.options.scroll_to = null;
+        let old_scroll_op, old_scroll_pos;
+        if (change) {
+            old_scroll_op = this.options.scroll_to;
+            this.options.scroll_to = null;
+            old_scroll_pos = this.$container.scrollLeft;
+        }
         this.options.view_mode = mode.name;
         this.config.view_mode = mode;
         this.update_view_scale(mode);
         this.setup_dates(change);
         this.render();
-
-        this.options.scroll_to = old_scroll_op;
-        this.$container.scrollLeft = old_scroll_pos;
+        if (change) {
+            this.options.scroll_to = old_scroll_op;
+            this.$container.scrollLeft = old_scroll_pos;
+        }
         this.trigger_event('view_change', [mode]);
     }
 
@@ -353,8 +356,7 @@ export default class Gantt {
         this.make_arrows();
         this.map_arrows_on_bars();
         this.set_dimensions();
-        if (this.options.scroll_to !== false)
-            this.set_scroll_position(this.options.scroll_to);
+        this.set_scroll_position(this.options.scroll_to);
     }
 
     setup_layers() {
@@ -881,6 +883,11 @@ export default class Gantt {
     }
 
     set_scroll_position(date) {
+        if (this.options.infinite_padding && (!date || date === 'start')) {
+            let [min_start, ..._] = this.get_start_end_positions();
+            this.$container.scrollLeft = min_start;
+            return;
+        }
         if (!date || date === 'start') {
             date = this.gantt_start;
         } else if (date === 'end') {
@@ -891,8 +898,8 @@ export default class Gantt {
             date = date_utils.parse(date);
         }
 
-        const parent_element = this.$svg.parentElement;
-        if (!parent_element) return;
+        // Weird bug where infinite padding results in one day offset in scroll
+        // Related to header-body displacement
         const units_since_first_task = date_utils.diff(
             date,
             this.gantt_start,
@@ -901,7 +908,11 @@ export default class Gantt {
         const scroll_pos =
             (units_since_first_task / this.config.step) *
             this.config.column_width;
-        parent_element.scrollTo({ left: scroll_pos - 4, behavior: 'smooth' });
+
+        this.$container.scrollTo({
+            left: scroll_pos - this.config.column_width / 6,
+            behavior: 'smooth',
+        });
 
         // Calculate current scroll position's upper text
         if (this.$current) {
@@ -1026,6 +1037,21 @@ export default class Gantt {
         }
     }
 
+    get_start_end_positions() {
+        if (!this.bars.length) return [0, 0, 0];
+        let { x, width } = this.bars[0].group.getBBox();
+        let min_start = x;
+        let max_start = x;
+        let max_end = x + width;
+        Array.prototype.forEach.call(this.bars, function ({ group }, i) {
+            let { x, width } = group.getBBox();
+            if (x < min_start) min_start = x;
+            if (x > max_start) max_start = x;
+            if (x + width > max_end) max_end = x + width;
+        });
+        return [min_start, max_start, max_end];
+    }
+
     bind_bar_events() {
         let is_dragging = false;
         let x_on_start = 0;
@@ -1130,9 +1156,10 @@ export default class Gantt {
         }
 
         $.on(this.$container, 'scroll', (e) => {
-            let elements = this.$container.querySelectorAll('.bar-wrapper');
             let localBars = [];
-            const ids = [];
+            const ids = this.bars.map(({ group }) =>
+                group.getAttribute('data-id'),
+            );
             let dx;
             if (x_on_scroll_start) {
                 dx = e.currentTarget.scrollLeft - x_on_scroll_start;
@@ -1181,20 +1208,8 @@ export default class Gantt {
             }
 
             x_on_scroll_start = e.currentTarget.scrollLeft;
-            let min_start, max_end, max_start;
-            if (elements.length) {
-                let { x, width } = elements[0].getBBox();
-                min_start = x;
-                max_start = x;
-                max_end = x + width;
-                Array.prototype.forEach.call(elements, function (el, i) {
-                    ids.push(el.getAttribute('data-id'));
-                    let { x, width } = el.getBBox();
-                    if (x < min_start) min_start = x;
-                    if (x > max_start) max_start = x;
-                    if (x + width > max_end) max_end = x + width;
-                });
-            }
+            let [min_start, max_start, max_end] =
+                this.get_start_end_positions();
 
             if (x_on_scroll_start > max_end + 100) {
                 this.$adjust.innerHTML = '&larr;';
