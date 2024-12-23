@@ -9,11 +9,9 @@ SWITCHES = {
         'toggle-today': 'Scroll to Today',
         'toggle-view-mode': 'Change View Mode',
     },
-    'holidays-form': {x
-        'toggle-weekends': ['Show weekends', false],
-    },
-    'ignore-form': {
-        'ignore-weekends': 'Ignore weekends',
+    'holidays-form': {
+        'ignore-weekends': 'Exclude weekends',
+        'toggle-weekends': ['Mark weekends', false],
     },
 };
 
@@ -100,40 +98,6 @@ const tasksSpread = [
     },
 ];
 
-const tasksDependencies = [
-    {
-        start: daysSince(-2),
-        end: daysSince(2),
-        name: 'Redesign website',
-        id: 'Task 0',
-        progress: random(),
-    },
-    {
-        start: daysSince(-5),
-        duration: '6d',
-        name: 'Write new content',
-        id: 'Task 1',
-        progress: random(),
-        dependencies: 'Task 0',
-        important: true,
-    },
-    {
-        start: daysSince(4),
-        duration: '2d',
-        name: 'Apply new styles',
-        id: 'Task 2',
-        progress: random(),
-    },
-    {
-        start: daysSince(-4),
-        end: daysSince(0),
-        name: 'Review',
-        id: 'Task 3',
-        custom_class: 'readonly',
-        progress: random(),
-    },
-];
-
 let tasksMany = [
     {
         start: daysSince(-7),
@@ -148,7 +112,7 @@ let tasksMany = [
         name: 'Develop wireframe',
         id: 'Task 1',
         progress: random(),
-        // dependencies: 'Task 0',
+        dependencies: 'Task 0',
     },
     {
         start: daysSince(-1),
@@ -241,7 +205,7 @@ const mutablity = new Gantt('#mutability', tasks, {
 const sideheader = new Gantt('#sideheader', tasks, {
     holidays: null,
     view_mode_select: true,
-    scroll_to: daysSince(-7),
+    scroll_to: null,
 });
 
 const holidays = new Gantt('#holidays', tasksSpread, {
@@ -249,13 +213,15 @@ const holidays = new Gantt('#holidays', tasksSpread, {
         '#bfdbfe': [],
         '#a3e635': HOLIDAYS,
     },
+    ignore: ['weekend'],
     scroll_to: daysSince(-7),
 });
 
-const ignore = new Gantt('#ignore', tasks, {
-    ignore: ['weekend', ...HOLIDAYS.map((k) => k.date)],
+const styling = new Gantt('#styling', tasksMany, {
     holidays: null,
-    scroll_to: daysSince(-7),
+    arrow_curve: 6,
+    column_width: 32,
+    scroll_to: daysSince(-10),
 });
 
 const UPDATES = [
@@ -267,9 +233,9 @@ const UPDATES = [
             'readonly-progress': 'opp__readonly_progress',
         },
         (id, val) => {
-            if (id === 'mutable-general') {
-                document.getElementById('mutable-dates').checked = !val;
-                document.getElementById('mutable-progress').checked = !val;
+            if (id === 'readonly-general') {
+                document.getElementById('readonly-dates').checked = !val;
+                document.getElementById('readonly-progress').checked = !val;
             }
         },
     ],
@@ -288,33 +254,79 @@ const UPDATES = [
                     '#a3e635': opts.holidays['#a3e635'],
                     '#bfdbfe': val ? 'weekend' : [],
                 },
+                ignore: [],
             }),
             'declare-holiday': (val, opts) => ({
                 holidays: {
                     '#a3e635': [...HOLIDAYS, { date: val, name: 'Kay' }],
-                    '#bfdbfe': opts.holidays['#bfdbfe']
+                    '#bfdbfe': opts.holidays['#bfdbfe'],
                 },
             }),
+            'ignore-weekends': (val, opts) => ({
+                ignore: [
+                    opts.ignore.filter((k) => k !== 'weekend')[0],
+                    ...(val ? ['weekend'] : []),
+                ],
+                holidays: { '#a3e635': opts.holidays['#a3e635'] },
+            }),
+            'declare-ignore': (val, opts) => ({
+                ignore: [
+                    ...(opts.ignore.includes('weekend') ? ['weekend'] : []),
+                    val,
+                ],
+            }),
+        },
+        (id, val) => {
+            let el = document.getElementById(id);
+            if (id === 'toggle-weekends' && val) {
+                document.getElementById('ignore-weekends').checked = false;
+            }
+            if (id === 'ignore-weekends' && val) {
+                document.getElementById('toggle-weekends').checked = false;
+            }
         },
     ],
     [
-        ignore,
+        styling,
         {
-            'ignore-weekends': (val, opts) => ({
-                ignore: [opts.ignore.filter(k => k !== 'weekend')[0], ...(val ? ['weekend'] : [])],
-            }),
-            'declare-ignore': (val, opts) => ({
-                ignore: [...(opts.ignore.includes('weekend') ? ['weekend'] : []), val],
-            }),
+            'arrow-curve': 'arrow_curve',
+            'column-width': 'column_width',
         },
     ],
 ];
 
+const BUTTONS = {
+    'radius-s': { bar_corner_radius: 3 },
+    'radius-m': { bar_corner_radius: 7 },
+    'radius-l': { bar_corner_radius: 14 },
+    'height-s': { bar_height: 20 },
+    'height-m': { bar_height: 30 },
+    'height-l': { bar_height: 45 },
+    'padding-s': { padding: 18 },
+    'padding-m': { padding: 30 },
+    'padding-l': { padding: 45 },
+};
+
+for (let id in BUTTONS) {
+    let el = document.getElementById(id);
+    el.onclick = (e) => {
+        e.preventDefault();
+        styling.update_options(BUTTONS[id]);
+        for (let k of document.querySelectorAll('.selected')) {
+            if (k.id.startsWith(el.id.split('-')[0])) {
+                k.classList.remove('selected');
+            }
+        }
+        e.currentTarget.classList.add('selected');
+    };
+}
+
 for (let [chart, details, after] of UPDATES) {
     for (let id in details) {
         let el = document.getElementById(id);
-        if (!el) continue;
+
         el.onchange = (e) => {
+            console.log('changed', e.currentTarget.id, e.currentTarget.value);
             let label = details[id];
             let val;
             if (e.currentTarget.type === 'checkbox') {
@@ -324,11 +336,14 @@ for (let [chart, details, after] of UPDATES) {
                     val = opposite
                         ? !e.currentTarget.checked
                         : e.currentTarget.checked;
-                } else if (typeof label ==='object') {
+                } else if (typeof label === 'object') {
                     val = label[e.currentTarget.checked ? 1 : 2];
                     label = label[0];
                 } else {
-                    val = e.currentTarget.checked
+                    val =
+                        e.currentTarget.type === 'checkbox'
+                            ? e.currentTarget.checked
+                            : e.currentTarget.value;
                 }
             } else {
                 val =
@@ -338,14 +353,13 @@ for (let [chart, details, after] of UPDATES) {
             }
 
             if (typeof label === 'function') {
-                console.log(label(val, chart.options))
+                console.log('ha', label(val, chart.options));
                 chart.update_options(label(val, chart.options));
             } else {
                 chart.update_options({
                     [label]: val,
                 });
             }
-
             after && after(id, val, chart);
         };
     }
