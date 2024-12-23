@@ -16,7 +16,7 @@ You can use it anywhere from hobby projects to tracking the goals of your team a
 
 
 ### Motivation
-I needed a Gantt View for ERPNext. Surprisingly, I couldn't find a visually appealing Gantt library that was open source - so I decided to build it. Initially, the design was heavily inspired by Google Gantt and DHTMLX.
+We needed a Gantt View for ERPNext. Surprisingly, we couldn't find a visually appealing Gantt library that was open source - so we decided to build it. Initially, the design was heavily inspired by Google Gantt and DHTMLX.
 
 
 ### Key Features
