@@ -247,7 +247,7 @@ export default class Gantt {
         this.config.step = duration;
         this.config.unit = scale;
         this.config.column_width =
-            this.options.column_width || mode.column_width || 30;
+            this.options.column_width || mode.column_width || 45;
         this.$container.style.setProperty(
             '--gv-column-width',
             this.config.column_width + 'px',

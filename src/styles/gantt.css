@@ -166,13 +166,13 @@
 
     & .current-highlight {
         position: absolute;
-        background: var(--g-blue-dark);
+        background: var(--g-today-highlight);
         width: 1px;
         z-index: 999;
     }
 
     & .current-date-highlight {
-        background: var(--g-blue-dark);
+        background: var(--g-today-highlight);
         color: var(--g-text-light);
         border-radius: 5px;
     }
@@ -243,7 +243,7 @@
     & .arrow {
         fill: none;
         stroke: var(--g-arrow-color);
-        stroke-width: 1;
+        stroke-width: 1.5;
     }
 
     & .bar-wrapper .bar {
@@ -258,7 +258,7 @@
     }
 
     & .bar-expected-progress {
-        fill: var(--g-blue-light);
+        fill: var(--g-expected-progress);
     }
 
     & .bar-invalid {
@@ -282,32 +282,6 @@
         &.big {
             fill: var(--g-text-dark);
             text-anchor: start;
-        }
-    }
-
-    & .bar-wrapper.important {
-        & .bar {
-            fill: var(--g-bar-color-important);
-        }
-
-        & .bar-progress {
-            fill: var(--g-blue-dark);
-        }
-
-        & .bar-label {
-            fill: var(--g-text-light);
-
-            &.big {
-                fill: var(--g-text-dark);
-            }
-        }
-
-        & .handle {
-            fill: var(--g-handle-color-important);
-        }
-
-        & .handle.progress {
-            fill: var(--g-text-light);
         }
     }
 

@@ -18,12 +18,6 @@ export default class Bar {
             this.group.classList = ['bar-wrapper'];
         }
 
-        if (this.task.important) {
-            this.group.classList.add('important');
-        } else {
-            this.group.classList.remove('important');
-        }
-
         this.prepare_values();
         this.draw();
         this.bind();
@@ -40,8 +34,7 @@ export default class Bar {
         this.group = createSVG('g', {
             class:
                 'bar-wrapper' +
-                (this.task.custom_class ? ' ' + this.task.custom_class : '') +
-                (this.task.important ? ' important' : ''),
+                (this.task.custom_class ? ' ' + this.task.custom_class : ''),
             'data-id': this.task.id,
         });
         this.bar_group = createSVG('g', {
@@ -118,8 +111,7 @@ export default class Bar {
             ry: this.corner_radius,
             class:
                 'bar' +
-                (/^((?!chrome|android).)*safari/i.test(navigator.userAgent) &&
-                !this.task.important
+                (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)
                     ? ' safari'
                     : ''),
             append_to: this.bar_group,

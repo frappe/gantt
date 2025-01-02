@@ -119,7 +119,7 @@ const DEFAULT_OPTIONS = {
     holidays: { 'var(--g-weekend-highlight-color)': 'weekend' },
     ignore: [],
     language: 'en',
-    lines: 'both',
+    lines: 'none',
     move_dependencies: true,
     padding: 18,
     popup: (ctx) => {
@@ -143,10 +143,6 @@ const DEFAULT_OPTIONS = {
         );
 
         if (!ctx.chart.options.readonly) {
-            ctx.add_action('Toggle Priority', (task, chart) => {
-                task.important = !task.important;
-                chart.update_task(task);
-            });
             if (!ctx.chart.options.readonly_progress) {
                 ctx.add_action('+', (task, chart) => {
                     task.progress += (1 / task.actual_duration) * 100;

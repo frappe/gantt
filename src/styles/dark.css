@@ -2,21 +2,17 @@
     --g-bar-stroke-dark: #c6ccd2;
     --g-border-color-dark: #616161;
     --g-bar-color-dark: #616161;
-    --g-light-bg-dark: #3e3e3e;
+    --g-bg-dark: #3e3e3e;
     --g-light-border-color-dark: #3e3e3e;
     --g-text-muted-dark: #eee;
     --g-text-light-dark: #ececec;
     --g-text-color-dark: #f7f7f7;
-    --g-blue-dark: #8a8aff;
+    --g-progress-color: #8a8aff;
 }
 
 .dark > .gantt-container .gantt {
     & .grid-row {
         fill: #252525;
-    }
-
-    & .grid-row:nth-child(even) {
-        fill: var(--g-light-bg-dark);
     }
 
     & .row-line {
@@ -25,10 +21,6 @@
 
     & .tick {
         stroke: var(--g-border-color-dark);
-    }
-
-    & .holiday-highlight {
-        fill: var(--g-light-bg-dark);
     }
 
     & .arrow {
@@ -41,7 +33,7 @@
     }
 
     & .bar-progress {
-        fill: var(--g-blue-dark);
+        fill: var(--g-progress-color);
     }
 
     & .bar-invalid {
@@ -64,7 +56,7 @@
             }
 
             & .bar-progress {
-                fill: lighten(var(--g-blue-dark, 5));
+                fill: lighten(var(--g-progress-color, 5));
             }
         }
 
@@ -74,7 +66,7 @@
             }
 
             & .bar-progress {
-                fill: lighten(var(--g-blue-dark, 5));
+                fill: lighten(var(--g-progress-color, 5));
             }
         }
     }
@@ -89,7 +81,7 @@
         background-color: #333;
 
         & .title {
-            border-color: lighten(var(--g-blue-dark, 5));
+            border-color: lighten(var(--g-progress-color, 5));
         }
     }
 }

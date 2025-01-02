@@ -1,23 +1,20 @@
 :root {
-    --g-arrow-color: #9fa9b1;
+    --g-arrow-color: #d7b15b;
     --g-bar-color: #fff;
-    --g-bar-color-important: #94c4f4;
     --g-bar-border: #fff;
     --g-tick-color-thick: #e0e0e0;
     --g-tick-color: #ebeef0;
-    --g-light-bg: #f5f5f5;
     --g-actions-background: #f4f5f6;
     --g-border-color: #ebeff2;
     --g-text-muted: #7c7c7c;
     --g-text-light: #fff;
     --g-text-dark: #171717;
-    --g-progress-color: #ebeef0;
+    --g-progress-color: #f3f3f3;
     --g-handle-color: #dcdce4;
-    --g-handle-color-important: #94c4f4;
     --g-holiday-label-color: #dcdce4;
-    --g-blue-light: #c4c4e9;
-    --g-blue-dark: #2c94ec;
+    --g-expected-progress: #c4c4e9;
     --g-header-background: #ffffff;
-    --g-row-color: #fff;
-    --g-weekend-highlight-color: #bfdbfe;
+    --g-row-color: #fdfdfd;
+    --g-today-highlight: #c45841;
+    --g-weekend-highlight-color: #f7f7f7;
 }
