@@ -80,12 +80,10 @@ export default class Gantt {
             'lower-header-height': 'lower_header_height',
             'upper-header-height': 'upper_header_height',
         };
-
         for (let name in CSS_VARIABLES) {
-            this.$container.style.setProperty(
-                '--gv-' + name,
-                this.options[CSS_VARIABLES[name]] + 'px',
-            );
+            let setting = this.options[CSS_VARIABLES[name]];
+            if (setting === 'auto') continue;
+            this.$container.style.setProperty('--gv-' + name, setting + 'px');
         }
 
         this.config = {
@@ -873,13 +871,15 @@ export default class Gantt {
     }
 
     set_dimensions() {
-        const { width: cur_width } = this.$svg.getBoundingClientRect();
+        const { width: cur_width, height } = this.$svg.getBoundingClientRect();
         const actual_width = this.$svg.querySelector('.grid .grid-row')
             ? this.$svg.querySelector('.grid .grid-row').getAttribute('width')
             : 0;
         if (cur_width < actual_width) {
             this.$svg.setAttribute('width', actual_width);
         }
+        if (this.options.container_height === 'auto')
+            this.$container.style.height = height + 'px';
     }
 
     set_scroll_position(date) {
