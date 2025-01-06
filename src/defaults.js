@@ -109,7 +109,7 @@ const DEFAULT_OPTIONS = {
     auto_move_label: false,
     bar_corner_radius: 3,
     bar_height: 30,
-    container_height: 350,
+    container_height: 'auto',
     column_width: null,
     date_format: 'YYYY-MM-DD',
     upper_header_height: 45,

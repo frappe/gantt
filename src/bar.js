@@ -272,29 +272,34 @@ export default class Bar {
         if (this.invalid || this.gantt.options.readonly) return;
 
         const bar = this.$bar;
-        const handle_width = 8;
+        const handle_width = 3;
+        this.handles = [];
         if (!this.gantt.options.readonly_dates) {
-            createSVG('rect', {
-                x: bar.getX() + bar.getWidth() + handle_width - 4,
-                y: bar.getY() + 1,
-                width: handle_width,
-                height: this.height - 2,
-                rx: 3,
-                ry: 3,
-                class: 'handle right',
-                append_to: this.handle_group,
-            });
+            this.handles.push(
+                createSVG('rect', {
+                    x: bar.getEndX(),
+                    y: bar.getY() + 1,
+                    width: handle_width,
+                    height: this.height - 2,
+                    rx: 1,
+                    ry: 1,
+                    class: 'handle right',
+                    append_to: this.handle_group,
+                }),
+            );
 
-            createSVG('rect', {
-                x: bar.getX() - handle_width - 4,
-                y: bar.getY() + 1,
-                width: handle_width,
-                height: this.height - 2,
-                rx: 3,
-                ry: 3,
-                class: 'handle left',
-                append_to: this.handle_group,
-            });
+            this.handles.push(
+                createSVG('rect', {
+                    x: bar.getX(),
+                    y: bar.getY() + 1,
+                    width: handle_width,
+                    height: this.height - 2,
+                    rx: 1,
+                    ry: 1,
+                    class: 'handle left',
+                    append_to: this.handle_group,
+                }),
+            );
         }
         if (!this.gantt.options.readonly_progress) {
             const bar_progress = this.$bar_progress;
@@ -305,6 +310,12 @@ export default class Bar {
                 class: 'handle progress',
                 append_to: this.handle_group,
             });
+            this.handles.push(this.$handle_progress);
+        }
+
+        for (let handle of this.handles) {
+            $.on(handle, 'mouseenter', () => handle.classList.add('active'));
+            $.on(handle, 'mouseleave', () => handle.classList.remove('active'));
         }
     }
 
@@ -327,6 +338,9 @@ export default class Bar {
         this.popup_opened = false;
         if (this.gantt.options.popup_on === 'click') {
             $.on(this.group, 'click', (e) => {
+                const posX = e.offsetX || e.layerX;
+                const cx = +this.$handle_progress.getAttribute('cx');
+                if (cx > posX - 1 && cx < posX + 1) return;
                 if (!this.popup_opened)
                     this.gantt.show_popup({
                         x: e.offsetX || e.layerX,
@@ -342,6 +356,7 @@ export default class Bar {
         } else {
             let timeout;
             $.on(this.group, 'mouseenter', (e) => {
+                const pos = e.offsetX || e.layerX;
                 timeout = setTimeout(() => {
                     this.gantt.show_popup({
                         x: e.offsetX || e.layerX,
@@ -390,15 +405,12 @@ export default class Bar {
             const valid_x = xs.reduce((_, curr) => {
                 return x >= curr;
             }, x);
-            if (!valid_x) {
-                width = null;
-                return;
-            }
+            if (!valid_x) return;
             this.update_attr(bar, 'x', x);
             this.x = x;
             this.$date_highlight.style.left = x + 'px';
         }
-        if (width) {
+        if (width > 0) {
             this.update_attr(bar, 'width', width);
             this.$date_highlight.style.width = width + 'px';
         }
@@ -534,7 +546,7 @@ export default class Bar {
     }
 
     compute_x() {
-        const { step, column_width } = this.gantt.config;
+        const { column_width } = this.gantt.config;
         const task_start = this.task._start;
         const gantt_start = this.gantt.gantt_start;
 
@@ -654,17 +666,11 @@ export default class Bar {
         if (labelWidth > barWidth) {
             label.classList.add('big');
             if (img) {
-                img.setAttribute('x', bar.getX() + bar.getWidth() + padding);
-                img_mask.setAttribute(
-                    'x',
-                    bar.getX() + bar.getWidth() + padding,
-                );
-                label.setAttribute(
-                    'x',
-                    bar.getX() + bar.getWidth() + x_offset_label_img,
-                );
+                img.setAttribute('x', bar.getEndX() + padding);
+                img_mask.setAttribute('x', bar.getEndX() + padding);
+                label.setAttribute('x', bar.getEndX() + x_offset_label_img);
             } else {
-                label.setAttribute('x', bar.getX() + bar.getWidth() + padding);
+                label.setAttribute('x', bar.getEndX() + padding);
             }
         } else {
             label.classList.remove('big');
@@ -689,10 +695,10 @@ export default class Bar {
         const bar = this.$bar;
         this.handle_group
             .querySelector('.handle.left')
-            .setAttribute('x', bar.getX() - 12);
+            .setAttribute('x', bar.getX());
         this.handle_group
             .querySelector('.handle.right')
-            .setAttribute('x', bar.getEndX() + 4);
+            .setAttribute('x', bar.getEndX());
         const handle = this.group.querySelector('.handle.progress');
         handle && handle.setAttribute('cx', this.$bar_progress.getEndX());
     }

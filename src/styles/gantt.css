@@ -183,7 +183,7 @@
         left: 0;
         opacity: 0;
         z-index: 1000;
-        background: --g-holiday-label-color;
+        background: --g-weekend-label-color;
         border-radius: 5px;
         padding: 2px 5px;
 
@@ -287,10 +287,12 @@
 
     & .handle {
         fill: var(--g-handle-color);
-        cursor: ew-resize;
         opacity: 0;
-        visibility: hidden;
         transition: opacity 0.3s ease;
+        &.active {
+            cursor: ew-resize;
+            opacity: 1;
+        }
     }
 
     & .handle.progress {
@@ -299,13 +301,6 @@
 
     & .bar-wrapper {
         cursor: pointer;
-
-        &.active {
-            & .handle {
-                visibility: visible;
-                opacity: 1;
-            }
-        }
 
         & .bar {
             -webkit-filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.9));
