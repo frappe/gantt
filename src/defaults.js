@@ -119,23 +119,11 @@ const DEFAULT_OPTIONS = {
     holidays: { 'var(--g-weekend-highlight-color)': 'weekend' },
     ignore: [],
     language: 'en',
-    lines: 'both',
+    lines: 'none',
     move_dependencies: true,
     padding: 18,
     popup: (ctx) => {
         ctx.set_title(ctx.task.name);
-        let title = ctx.get_title();
-        title.style.border = '0.5px solid black';
-        title.style.borderRadius = '1.5px';
-        title.style.padding = '3px 5px ';
-        title.style.backgroundColor = 'black';
-        title.style.opacity = '0.85';
-        title.style.color = 'white';
-        title.style.width = 'fit-content';
-        title.onclick = () => {
-            let ans = prompt('New Title: ');
-            if (ans) ctx.set_title(ans);
-        };
         if (ctx.task.description) ctx.set_subtitle(ctx.task.description);
         else ctx.set_subtitle('');
 
@@ -151,27 +139,18 @@ const DEFAULT_OPTIONS = {
         );
 
         ctx.set_details(
-            `<em>Progress</em>: ${ctx.task.progress.toFixed(2)}%<br/><em>Duration</em>: ${ctx.task.actual_duration} days<br/><em>Dates</em>: ${ctx.task._start.toLocaleDateString('en-US')} - ${ctx.task._end.toLocaleDateString('en-US')}`,
+            `${start_date} - ${end_date} (${ctx.task.actual_duration} days${ctx.task.ignored_duration ? ' + ' + ctx.task.ignored_duration + ' excluded' : ''})<br/>Progress: ${Math.floor(ctx.task.progress * 100) / 100}%`,
         );
-        let details = ctx.get_details();
-        details.style.lineHeight = '1.75';
-        details.style.margin = '10px 4px';
-        const COLORS = [
-            'FAEDCB',
-            'C9E4DE',
-            'C6DEF1',
-            'DBCDF0',
-            'F2C6DE',
-            'F7D9C4',
-        ];
+
         if (!ctx.chart.options.readonly) {
             if (!ctx.chart.options.readonly_progress) {
-                ctx.add_action('Set Color', (task, chart) => {
-                    const bar = chart.bars.find(
-                        ({ task: t }) => t.id === task.id,
-                    ).$bar;
-                    bar.style.fill =
-                        '#' + COLORS[Math.floor(Math.random() * 6)];
+                ctx.add_action('+', (task, chart) => {
+                    task.progress += (1 / task.actual_duration) * 100;
+                    chart.update_task(task);
+                });
+                ctx.add_action('-', (task, chart) => {
+                    task.progress -= (1 / task.actual_duration) * 100;
+                    chart.update_task(task);
                 });
             }
         }

@@ -44,7 +44,6 @@ export default class Popup {
                 action.onclick = (e) => func(task, this.gantt, e);
             },
         });
-        console.log(html);
         if (html === false) return;
         if (html) this.parent.innerHTML = html;
 

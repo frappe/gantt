@@ -81,8 +81,11 @@ export default class Gantt {
         };
         for (let name in CSS_VARIABLES) {
             let setting = this.options[CSS_VARIABLES[name]];
-            if (setting === 'auto') continue;
-            this.$container.style.setProperty('--gv-' + name, setting + 'px');
+            if (setting !== 'auto')
+                this.$container.style.setProperty(
+                    '--gv-' + name,
+                    setting + 'px',
+                );
         }
 
         this.config = {
@@ -396,7 +399,8 @@ export default class Gantt {
             this.config.header_height +
             this.options.padding +
             (this.options.bar_height + this.options.padding) *
-                this.tasks.length;
+                this.tasks.length -
+            10;
 
         createSVG('rect', {
             x: 0,
