@@ -341,6 +341,7 @@ export default class Bar {
                 const posX = e.offsetX || e.layerX;
                 const cx = +this.$handle_progress.getAttribute('cx');
                 if (cx > posX - 1 && cx < posX + 1) return;
+                console.log(this.gantt.bar_being_dragged);
                 if (this.gantt.bar_being_dragged) return;
                 if (!this.popup_opened)
                     this.gantt.show_popup({

@@ -1068,7 +1068,9 @@ export default class Gantt {
         this.$svg.onclick = (e) => {
             if (e.target.classList.contains('grid-row')) this.unselect_all();
         };
-
+        $.on(this.$svg, 'mousemove', '.bar-wrapper, .handle', () => {
+            if (this.bar_being_dragged === false) this.bar_being_dragged = true;
+        });
         $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
             const bar_wrapper = $.closest('.bar-wrapper', element);
             bars.forEach((bar) => bar.group.classList.remove('active'));
@@ -1099,7 +1101,7 @@ export default class Gantt {
             }
             bars = ids.map((id) => this.get_bar(id));
 
-            this.bar_being_dragged = parent_bar_id;
+            this.bar_being_dragged = false;
 
             bars.forEach((bar) => {
                 const $bar = bar.$bar;
