@@ -173,6 +173,13 @@
         z-index: 999;
     }
 
+    & .current-ball-highlight {
+        position: absolute;
+        background: var(--g-today-highlight);
+        z-index: 1001;
+        border-radius: 50%;
+    }
+
     & .current-date-highlight {
         background: var(--g-today-highlight);
         color: var(--g-text-light);

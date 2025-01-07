@@ -680,6 +680,14 @@ export default class Gantt {
             classes: 'current-highlight',
             append_to: this.$container,
         });
+        this.$current_highlight = this.create_el({
+            top: this.config.header_height - 6,
+            left: left - 2.5,
+            width: 6,
+            height: 6,
+            classes: 'current-ball-highlight',
+            append_to: this.$header,
+        });
     }
 
     make_grid_highlights() {
