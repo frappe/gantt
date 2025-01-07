@@ -337,10 +337,11 @@ export default class Bar {
 
         this.popup_opened = false;
         if (this.gantt.options.popup_on === 'click') {
-            $.on(this.group, 'click', (e) => {
+            $.on(this.group, 'mouseup', (e) => {
                 const posX = e.offsetX || e.layerX;
                 const cx = +this.$handle_progress.getAttribute('cx');
                 if (cx > posX - 1 && cx < posX + 1) return;
+                if (this.gantt.bar_being_dragged) return;
                 if (!this.popup_opened)
                     this.gantt.show_popup({
                         x: e.offsetX || e.layerX,

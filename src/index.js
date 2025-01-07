@@ -73,7 +73,6 @@ export default class Gantt {
     setup_options(options) {
         this.original_options = options;
         this.options = { ...DEFAULT_OPTIONS, ...options };
-
         const CSS_VARIABLES = {
             'grid-height': 'container_height',
             'bar-height': 'bar_height',
@@ -1063,9 +1062,8 @@ export default class Gantt {
         let bars = []; // instanceof Bar
         this.bar_being_dragged = null;
 
-        function action_in_progress() {
-            return is_dragging || is_resizing_left || is_resizing_right;
-        }
+        const action_in_progress = () =>
+            is_dragging || is_resizing_left || is_resizing_right;
 
         this.$svg.onclick = (e) => {
             if (e.target.classList.contains('grid-row')) this.unselect_all();
@@ -1284,7 +1282,7 @@ export default class Gantt {
             });
         });
 
-        document.addEventListener('mouseup', (e) => {
+        document.addEventListener('mouseup', () => {
             is_dragging = false;
             is_resizing_left = false;
             is_resizing_right = false;

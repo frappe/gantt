@@ -27,8 +27,11 @@ export default class Popup {
         let html = this.popup_func({
             task,
             chart: this.gantt,
+            get_title: () => this.title,
             set_title: (title) => (this.title.innerHTML = title),
+            get_subtitle: () => this.subtitle,
             set_subtitle: (subtitle) => (this.subtitle.innerHTML = subtitle),
+            get_details: () => this.details,
             set_details: (details) => (this.details.innerHTML = details),
             add_action: (html, func) => {
                 let action = this.gantt.create_el({
@@ -41,7 +44,8 @@ export default class Popup {
                 action.onclick = (e) => func(task, this.gantt, e);
             },
         });
-
+        console.log(html);
+        if (html === false) return;
         if (html) this.parent.innerHTML = html;
 
         // set position
