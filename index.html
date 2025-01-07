@@ -349,6 +349,7 @@
                     id: 'Task 1',
                     progress: random(),
                     important: true,
+                    dependencies: 'Task 0',
                 },
                 {
                     start: daysSince(4),
@@ -658,10 +659,6 @@
                         let store = chart.options.scroll_to;
                         let scroll = chart.$container.scrollLeft;
                         if (typeof label === 'function') {
-                            console.log('k', {
-                                ...label(val),
-                                scroll_to: null,
-                            });
                             chart.update_options({
                                 ...label(val),
                                 scroll_to: null,

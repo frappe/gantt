@@ -200,6 +200,7 @@ const HOLIDAYS = [
 const mutablity = new Gantt('#mutability', tasks, {
     holidays: null,
     scroll_to: daysSince(-7),
+    popup: () => false,
 });
 
 const sideheader = new Gantt('#sideheader', tasks, {
@@ -326,7 +327,6 @@ for (let [chart, details, after] of UPDATES) {
         let el = document.getElementById(id);
 
         el.onchange = (e) => {
-            console.log('changed', e.currentTarget.id, e.currentTarget.value);
             let label = details[id];
             let val;
             if (e.currentTarget.type === 'checkbox') {
@@ -353,7 +353,6 @@ for (let [chart, details, after] of UPDATES) {
             }
 
             if (typeof label === 'function') {
-                console.log('ha', label(val, chart.options));
                 chart.update_options(label(val, chart.options));
             } else {
                 chart.update_options({
