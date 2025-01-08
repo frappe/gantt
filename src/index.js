@@ -1100,16 +1100,15 @@ export default class Gantt {
 
         $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
             const bar_wrapper = $.closest('.bar-wrapper', element);
-            bars.forEach((bar) => bar.group.classList.remove('active'));
             if (element.classList.contains('left')) {
                 is_resizing_left = true;
+                element.classList.add('visible');
             } else if (element.classList.contains('right')) {
                 is_resizing_right = true;
+                element.classList.add('visible');
             } else if (element.classList.contains('bar-wrapper')) {
                 is_dragging = true;
             }
-
-            bar_wrapper.classList.add('active');
 
             if (this.popup) this.popup.hide();
 
@@ -1316,6 +1315,7 @@ export default class Gantt {
             is_dragging = false;
             is_resizing_left = false;
             is_resizing_right = false;
+            document.querySelector('.visible').classList.remove('visible');
         });
 
         $.on(this.$svg, 'mouseup', (e) => {
@@ -1479,9 +1479,6 @@ export default class Gantt {
     }
 
     unselect_all() {
-        [...this.$svg.querySelectorAll('.bar-wrapper')].forEach((el) => {
-            el.classList.remove('active');
-        });
         if (this.popup) this.popup.parent.classList.add('hide');
         this.$container
             .querySelectorAll('.date-range-highlight')
