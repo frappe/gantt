@@ -89,7 +89,7 @@ const DEFAULT_VIEW_MODES = [
                 ? date_utils.format(d, 'YYYY', lang)
                 : '',
         thick_line: (d) => d.getMonth() % 3 === 0,
-        default_snap: '7d',
+        snap_at: '7d',
     },
     {
         name: 'Year',
@@ -100,7 +100,7 @@ const DEFAULT_VIEW_MODES = [
         upper_text: (d, ld, lang) =>
             !ld || getDecade(d) !== getDecade(ld) ? getDecade(d) : '',
         lower_text: 'YYYY',
-        default_snap: '30d',
+        snap_at: '30d',
     },
 ];
 
@@ -119,7 +119,7 @@ const DEFAULT_OPTIONS = {
     holidays: { 'var(--g-weekend-highlight-color)': 'weekend' },
     ignore: [],
     language: 'en',
-    lines: 'none',
+    lines: 'both',
     move_dependencies: true,
     padding: 18,
     popup: (ctx) => {
@@ -145,12 +145,16 @@ const DEFAULT_OPTIONS = {
         if (!ctx.chart.options.readonly) {
             if (!ctx.chart.options.readonly_progress) {
                 ctx.add_action('+', (task, chart) => {
-                    task.progress += (1 / task.actual_duration) * 100;
-                    chart.update_task(task);
+                    chart.update_task(task.id, {
+                        progress:
+                            task.progress + (1 / task.actual_duration) * 100,
+                    });
                 });
                 ctx.add_action('-', (task, chart) => {
-                    task.progress -= (1 / task.actual_duration) * 100;
-                    chart.update_task(task);
+                    chart.update_task(task.id, {
+                        progress:
+                            task.progress - (1 / task.actual_duration) * 100,
+                    });
                 });
             }
         }

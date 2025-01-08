@@ -217,17 +217,19 @@ export default class Gantt {
         this.change_view_mode();
     }
 
-    update_task(task) {
+    update_task(id, new_details) {
+        let task = this.tasks.find((t) => t.id === id);
         let bar = this.bars[task._index];
+        Object.assign(task, new_details);
         bar.refresh();
     }
 
-    change_view_mode(mode = this.options.view_mode, change = false) {
+    change_view_mode(mode = this.options.view_mode, maintain_pos = false) {
         if (typeof mode === 'string') {
             mode = this.options.view_modes.find((d) => d.name === mode);
         }
         let old_scroll_op, old_scroll_pos;
-        if (change) {
+        if (maintain_pos) {
             old_scroll_op = this.options.scroll_to;
             this.options.scroll_to = null;
             old_scroll_pos = this.$container.scrollLeft;
@@ -235,9 +237,9 @@ export default class Gantt {
         this.options.view_mode = mode.name;
         this.config.view_mode = mode;
         this.update_view_scale(mode);
-        this.setup_dates(change);
+        this.setup_dates(maintain_pos);
         this.render();
-        if (change) {
+        if (maintain_pos) {
             this.options.scroll_to = old_scroll_op;
             this.$container.scrollLeft = old_scroll_pos;
         }
@@ -491,7 +493,7 @@ export default class Gantt {
             let $today_button = document.createElement('button');
             $today_button.classList.add('today-button');
             $today_button.textContent = 'Today';
-            $today_button.onclick = this.scroll_today.bind(this);
+            $today_button.onclick = this.scroll_current.bind(this);
             this.$side_header.prepend($today_button);
             this.$today_button = $today_button;
         }
@@ -560,7 +562,7 @@ export default class Gantt {
         }
     }
 
-    highlightHolidays() {
+    highlight_holidays() {
         let labels = {};
         if (!this.options.holidays) return;
 
@@ -654,7 +656,7 @@ export default class Gantt {
      *
      * @returns Object containing the x-axis distance and date of the current date, or null if the current date is out of the gantt range.
      */
-    highlightNow() {
+    highlight_current() {
         const res = this.get_closest_date();
         if (!res) return;
 
@@ -691,7 +693,7 @@ export default class Gantt {
     }
 
     make_grid_highlights() {
-        this.highlightHolidays();
+        this.highlight_holidays();
         this.config.ignored_positions = [];
 
         const height =
@@ -735,7 +737,9 @@ export default class Gantt {
             });
         }
 
-        const highlightDimensions = this.highlightNow(this.config.view_mode);
+        const highlightDimensions = this.highlight_current(
+            this.config.view_mode,
+        );
 
         if (!highlightDimensions) return;
     }
@@ -904,7 +908,7 @@ export default class Gantt {
         } else if (date === 'end') {
             date = this.gantt_end;
         } else if (date === 'today') {
-            return this.scroll_today();
+            return this.scroll_current();
         } else if (typeof date === 'string') {
             date = date_utils.parse(date);
         }
@@ -962,7 +966,7 @@ export default class Gantt {
         this.$current = $el;
     }
 
-    scroll_today() {
+    scroll_current() {
         let res = this.get_closest_date();
         if (res) this.set_scroll_position(res[0]);
     }
@@ -1420,7 +1424,7 @@ export default class Gantt {
     get_snap_position(dx, ox) {
         let unit_length = 1;
         const default_snap =
-            this.options.snap_at || this.config.view_mode.default_snap || '1d';
+            this.options.snap_at || this.config.view_mode.snap_at || '1d';
 
         if (default_snap !== 'unit') {
             const { duration, scale } = date_utils.parse_duration(default_snap);
