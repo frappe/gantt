@@ -340,7 +340,6 @@ export default class Bar {
                 const posX = e.offsetX || e.layerX;
                 if (this.$handle_progress) {
                     const cx = +this.$handle_progress.getAttribute('cx');
-                    console.log(cx, posX, this.gantt.bar_being_dragged);
                     if (cx > posX - 1 && cx < posX + 1) return;
                     if (this.gantt.bar_being_dragged) return;
                 }
@@ -427,7 +426,8 @@ export default class Bar {
     }
 
     update_label_position_on_horizontal_scroll({ x, sx }) {
-        const container = document.querySelector('.gantt-container');
+        const container =
+            this.gantt.$container.querySelector('.gantt-container');
         const label = this.group.querySelector('.bar-label');
         const img = this.group.querySelector('.bar-img') || '';
         const img_mask = this.bar_group.querySelector('.img_mask') || '';
@@ -551,6 +551,7 @@ export default class Bar {
         const diff =
             date_utils.diff(task_start, gantt_start, this.gantt.config.unit) /
             this.gantt.config.step;
+
         let x = diff * column_width;
 
         /* Since the column width is based on 30,
@@ -558,21 +559,21 @@ export default class Bar {
         and then add the days in the month, making sure the number does not exceed 29
         so it is within the column */
 
-        if (this.gantt.view_is('Month')) {
-            const diffDaysBasedOn30DayMonths =
-                date_utils.diff(task_start, gantt_start, 'month') * 30;
-            const dayInMonth = Math.min(
-                29,
-                date_utils.format(
-                    task_start,
-                    'DD',
-                    this.gantt.options.language,
-                ),
-            );
-            const diff = diffDaysBasedOn30DayMonths + dayInMonth;
+        // if (this.gantt.view_is('Month')) {
+        //     const diffDaysBasedOn30DayMonths =
+        //         date_utils.diff(task_start, gantt_start, 'month') * 30;
+        //     const dayInMonth = Math.min(
+        //         29,
+        //         date_utils.format(
+        //             task_start,
+        //             'DD',
+        //             this.gantt.options.language,
+        //         ),
+        //     );
+        //     const diff = diffDaysBasedOn30DayMonths + dayInMonth;
 
-            x = (diff * column_width) / 30;
-        }
+        //     x = (diff * column_width) / 30;
+        // }
 
         this.x = x;
     }

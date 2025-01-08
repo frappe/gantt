@@ -120,42 +120,51 @@
 
     & .side-header {
         position: sticky;
+        top: 5px;
+        right: 0;
+        float: right;
+
         z-index: 1000;
         line-height: 20px;
-        background: white;
         font-weight: 400;
-        top: 5px;
         width: max-content;
         margin-left: auto;
-        right: 5px;
         padding-left: 5px;
+        padding-top: 5px;
+        background: var(--g-header-background);
     }
 
     & .side-header * {
-        background: var(--g-actions-background);
+        transition-property: background-color;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+        background-color: var(--g-actions-background);
         text-align: -webkit-center;
         text-align: center;
-        height: 30px;
-        border-radius: 0;
-        border: 1px solid grey;
-        border-right: none;
+        height: 1.75rem;
+        border-radius: 0.5rem;
+        border: none;
+        padding: 0 0.5rem;
         color: var(--g-text-dark);
-        padding: 4px 10px;
         position: sticky;
-        float: right;
-        right: 0;
-        top: 5px;
-        font-size: 12px;
+        margin: 5px;
+        font-size: 14px;
+        line-height: 1.15;
+        letter-spacing: 0.02em;
+        font-weight: 420;
+
+        &:last-child {
+            margin-right: 0;
+        }
+
+        &:hover {
+            filter: brightness(97.5%);
+        }
     }
 
-    & .side-header *:first-child {
-        border-radius: 0 8px 8px 0;
-        border-right: 1px solid grey;
-    }
-
-    & .side-header *:last-child {
-        border-top-left-radius: 8px;
-        border-bottom-left-radius: 8px;
+    & .side-header select {
+        padding: 0;
+        width: 50%;
     }
 
     & .date-range-highlight {

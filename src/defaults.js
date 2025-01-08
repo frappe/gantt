@@ -9,7 +9,7 @@ function formatWeek(d, ld, lang) {
     let endOfWeek = date_utils.add(d, 6, 'day');
     let endFormat = endOfWeek.getMonth() !== d.getMonth() ? 'D MMM' : 'D';
     let beginFormat = !ld || d.getMonth() !== ld.getMonth() ? 'D MMM' : 'D';
-    return `${date_utils.format(d, beginFormat, lang)}-${date_utils.format(endOfWeek, endFormat, lang)}`;
+    return `${date_utils.format(d, beginFormat, lang)} - ${date_utils.format(endOfWeek, endFormat, lang)}`;
 }
 
 const DEFAULT_VIEW_MODES = [

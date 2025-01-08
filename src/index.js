@@ -283,9 +283,8 @@ export default class Gantt {
             }
         }
 
-        gantt_start = date_utils.start_of(gantt_start, 'day');
-        gantt_end = date_utils.start_of(gantt_end, 'day');
-
+        gantt_start = date_utils.start_of(gantt_start, this.config.unit);
+        gantt_end = date_utils.start_of(gantt_end, this.config.unit);
         // handle single value for padding
         if (!refresh) {
             if (!this.options.infinite_padding) {
@@ -325,6 +324,7 @@ export default class Gantt {
         this.config.format_string =
             this.config.view_mode.format_string || 'YYYY-MM-DD HH';
         this.gantt_start.setHours(0, 0, 0, 0);
+        console.log(this.gantt_start);
     }
 
     setup_date_values() {
@@ -485,6 +485,8 @@ export default class Gantt {
                 const $option = document.createElement('option');
                 $option.value = mode.name;
                 $option.textContent = mode.name;
+                if (mode.name === this.config.view_mode.name)
+                    $option.selected = true;
                 $select.appendChild($option);
             }
 
@@ -688,7 +690,7 @@ export default class Gantt {
             classes: 'current-highlight',
             append_to: this.$container,
         });
-        this.$current_highlight = this.create_el({
+        this.$current_ball_highlight = this.create_el({
             top: this.config.header_height - 6,
             left: left - 2.5,
             width: 6,
@@ -1315,7 +1317,9 @@ export default class Gantt {
             is_dragging = false;
             is_resizing_left = false;
             is_resizing_right = false;
-            document.querySelector('.visible').classList.remove('visible');
+            this.$container
+                .querySelector('.visible')
+                ?.classList?.remove?.('visible');
         });
 
         $.on(this.$svg, 'mouseup', (e) => {
