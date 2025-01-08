@@ -17,6 +17,7 @@ const DEFAULT_VIEW_MODES = [
         name: 'Hour',
         padding: '7d',
         step: '1h',
+        date_format: 'YYYY-MM-DD HH:',
         lower_text: 'HH',
         upper_text: (d, ld, lang) =>
             !ld || d.getDate() !== ld.getDate()
@@ -28,6 +29,7 @@ const DEFAULT_VIEW_MODES = [
         name: 'Quarter Day',
         padding: '7d',
         step: '6h',
+        date_format: 'YYYY-MM-DD HH:',
         lower_text: 'HH',
         upper_text: (d, ld, lang) =>
             !ld || d.getDate() !== ld.getDate()
@@ -39,6 +41,7 @@ const DEFAULT_VIEW_MODES = [
         name: 'Half Day',
         padding: '14d',
         step: '12h',
+        date_format: 'YYYY-MM-DD HH:',
         lower_text: 'HH',
         upper_text: (d, ld, lang) =>
             !ld || d.getDate() !== ld.getDate()
@@ -51,7 +54,7 @@ const DEFAULT_VIEW_MODES = [
     {
         name: 'Day',
         padding: '7d',
-        format_string: 'YYYY-MM-DD',
+        date_format: 'YYYY-MM-DD',
         step: '1d',
         lower_text: (d, ld, lang) =>
             !ld || d.getDate() !== ld.getDate()
@@ -67,7 +70,7 @@ const DEFAULT_VIEW_MODES = [
         name: 'Week',
         padding: '1m',
         step: '7d',
-        format_string: 'YYYY-MM-DD',
+        date_format: 'YYYY-MM-DD',
         column_width: 140,
         lower_text: formatWeek,
         upper_text: (d, ld, lang) =>
@@ -82,7 +85,7 @@ const DEFAULT_VIEW_MODES = [
         padding: '2m',
         step: '1m',
         column_width: 120,
-        format_string: 'YYYY-MM',
+        date_format: 'YYYY-MM',
         lower_text: 'MMMM',
         upper_text: (d, ld, lang) =>
             !ld || d.getFullYear() !== ld.getFullYear()
@@ -96,7 +99,7 @@ const DEFAULT_VIEW_MODES = [
         padding: '2y',
         step: '1y',
         column_width: 120,
-        format_string: 'YYYY',
+        date_format: 'YYYY',
         upper_text: (d, ld, lang) =>
             !ld || getDecade(d) !== getDecade(ld) ? getDecade(d) : '',
         lower_text: 'YYYY',
@@ -111,7 +114,7 @@ const DEFAULT_OPTIONS = {
     bar_height: 30,
     container_height: 'auto',
     column_width: null,
-    date_format: 'YYYY-MM-DD',
+    date_format: 'YYYY-MM-DD HH:mm',
     upper_header_height: 45,
     lower_header_height: 30,
     snap_at: null,
@@ -141,23 +144,6 @@ const DEFAULT_OPTIONS = {
         ctx.set_details(
             `${start_date} - ${end_date} (${ctx.task.actual_duration} days${ctx.task.ignored_duration ? ' + ' + ctx.task.ignored_duration + ' excluded' : ''})<br/>Progress: ${Math.floor(ctx.task.progress * 100) / 100}%`,
         );
-
-        if (!ctx.chart.options.readonly) {
-            if (!ctx.chart.options.readonly_progress) {
-                ctx.add_action('+', (task, chart) => {
-                    chart.update_task(task.id, {
-                        progress:
-                            task.progress + (1 / task.actual_duration) * 100,
-                    });
-                });
-                ctx.add_action('-', (task, chart) => {
-                    chart.update_task(task.id, {
-                        progress:
-                            task.progress - (1 / task.actual_duration) * 100,
-                    });
-                });
-            }
-        }
     },
     popup_on: 'click',
     readonly_progress: false,

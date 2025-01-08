@@ -280,12 +280,12 @@ export default class Bar {
         if (!this.gantt.options.readonly_dates) {
             this.handles.push(
                 createSVG('rect', {
-                    x: bar.getEndX(),
-                    y: bar.getY() + 1,
+                    x: bar.getEndX() - handle_width / 2,
+                    y: bar.getY() + this.height / 4,
                     width: handle_width,
-                    height: this.height - 2,
-                    rx: 1,
-                    ry: 1,
+                    height: this.height / 2,
+                    rx: 2,
+                    ry: 2,
                     class: 'handle right',
                     append_to: this.handle_group,
                 }),
@@ -293,12 +293,12 @@ export default class Bar {
 
             this.handles.push(
                 createSVG('rect', {
-                    x: bar.getX(),
-                    y: bar.getY() + 1,
+                    x: bar.getX() - handle_width / 2,
+                    y: bar.getY() + this.height / 4,
                     width: handle_width,
-                    height: this.height - 2,
-                    rx: 1,
-                    ry: 1,
+                    height: this.height / 2,
+                    rx: 2,
+                    ry: 2,
                     class: 'handle left',
                     append_to: this.handle_group,
                 }),
@@ -309,7 +309,7 @@ export default class Bar {
             this.$handle_progress = createSVG('circle', {
                 cx: bar_progress.getEndX(),
                 cy: bar_progress.getY() + bar_progress.getHeight() / 2,
-                r: 5,
+                r: 4.5,
                 class: 'handle progress',
                 append_to: this.handle_group,
             });

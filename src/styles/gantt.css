@@ -47,11 +47,11 @@
         & .action-btn {
             border: none;
             padding: 5px 8px;
-            background-color: #dbeafe;
+            background-color: var(--g-popup-actions);
             border-right: 1px solid var(--g-text-light);
 
             &:hover {
-                background-color: #93c5fd;
+                background-color: brightness(97%);
             }
 
             &:first-child {
@@ -165,7 +165,7 @@
     & .side-header select {
         padding: 0;
         padding-right: 1rem;
-        width: 50%;
+        width: 85px;
     }
 
     & .date-range-highlight {

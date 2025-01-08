@@ -228,11 +228,11 @@ export default class Gantt {
         if (typeof mode === 'string') {
             mode = this.options.view_modes.find((d) => d.name === mode);
         }
-        let old_scroll_op, old_scroll_pos;
+        let old_date, old_scroll_op;
         if (maintain_pos) {
+            old_date = this.current_date;
             old_scroll_op = this.options.scroll_to;
             this.options.scroll_to = null;
-            old_scroll_pos = this.$container.scrollLeft;
         }
         this.options.view_mode = mode.name;
         this.config.view_mode = mode;
@@ -241,7 +241,10 @@ export default class Gantt {
         this.render();
         if (maintain_pos) {
             this.options.scroll_to = old_scroll_op;
-            this.$container.scrollLeft = old_scroll_pos;
+            this.$container.scrollLeft =
+                (date_utils.diff(old_date, this.gantt_start, this.config.unit) /
+                    this.config.step) *
+                this.config.column_width;
         }
         this.trigger_event('view_change', [mode]);
     }
@@ -321,8 +324,8 @@ export default class Gantt {
                 );
             }
         }
-        this.config.format_string =
-            this.config.view_mode.format_string || 'YYYY-MM-DD HH';
+        this.config.date_format =
+            this.config.view_mode.date_format || this.options.date_format;
         this.gantt_start.setHours(0, 0, 0, 0);
     }
 
@@ -491,7 +494,7 @@ export default class Gantt {
             $select.addEventListener(
                 'change',
                 function () {
-                    this.change_view_mode($select.value);
+                    this.change_view_mode($select.value, true);
                 }.bind(this),
             );
             this.$side_header.appendChild($select);
@@ -830,7 +833,7 @@ export default class Gantt {
             formatted_date: sanitize(
                 date_utils.format(
                     date,
-                    this.config.format_string,
+                    this.config.date_format,
                     this.options.language,
                 ),
             ),
@@ -985,7 +988,7 @@ export default class Gantt {
                     sanitize(
                         date_utils.format(
                             current,
-                            this.config.format_string,
+                            this.config.date_format,
                             this.options.language,
                         ),
                     ),
@@ -1000,19 +1003,18 @@ export default class Gantt {
                     sanitize(
                         date_utils.format(
                             current,
-                            this.config.format_string,
+                            this.config.date_format,
                             this.options.language,
                         ),
                     ),
             );
             c++;
         }
-
         return [
             new Date(
                 date_utils.format(
                     current,
-                    this.config.format_string,
+                    this.config.date_format,
                     this.options.language,
                 ) + ' ',
             ),
@@ -1208,7 +1210,6 @@ export default class Gantt {
             let $el = this.upperTexts.find(
                 (el) => el.textContent === current_upper,
             );
-            console.log(this.current_date);
 
             // Recalculate for smoother experience
             this.current_date = date_utils.add(

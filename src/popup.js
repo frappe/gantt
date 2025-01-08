@@ -47,13 +47,8 @@ export default class Popup {
         if (html === false) return;
         if (html) this.parent.innerHTML = html;
 
-        // set position
-        let position_meta;
-        if (target instanceof HTMLElement) {
-            position_meta = target.getBoundingClientRect();
-        } else if (target instanceof SVGElement) {
-            position_meta = target.getBBox();
-        }
+        if (this.actions.innerHTML === '') this.actions.remove();
+        else this.parent.appendChild(this.actions);
 
         this.parent.style.left = x + 10 + 'px';
         this.parent.style.top = y - 10 + 'px';
