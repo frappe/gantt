@@ -341,7 +341,6 @@ export default class Gantt {
     }
 
     bind_events() {
-        if (this.options.readonly) return;
         this.bind_grid_click();
         this.bind_holiday_labels();
         this.bind_bar_events();
@@ -1209,6 +1208,7 @@ export default class Gantt {
             let $el = this.upperTexts.find(
                 (el) => el.textContent === current_upper,
             );
+            console.log(this.current_date);
 
             // Recalculate for smoother experience
             this.current_date = date_utils.add(
