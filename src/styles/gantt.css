@@ -129,7 +129,7 @@
         font-weight: 400;
         width: max-content;
         margin-left: auto;
-        padding-left: 5px;
+        padding-right: 5px;
         padding-top: 5px;
         background: var(--g-header-background);
     }
@@ -164,6 +164,7 @@
 
     & .side-header select {
         padding: 0;
+        padding-right: 1rem;
         width: 50%;
     }
 

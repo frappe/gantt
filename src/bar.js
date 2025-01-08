@@ -205,6 +205,7 @@ export default class Bar {
             );
         }
         this.progress_width = progress_width;
+        console.log(progress_width);
         return progress_width;
     }
 

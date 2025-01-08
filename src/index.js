@@ -285,7 +285,7 @@ export default class Gantt {
 
         gantt_start = date_utils.start_of(gantt_start, this.config.unit);
         gantt_end = date_utils.start_of(gantt_end, this.config.unit);
-        // handle single value for padding
+
         if (!refresh) {
             if (!this.options.infinite_padding) {
                 if (typeof this.config.view_mode.padding === 'string')
@@ -308,6 +308,7 @@ export default class Gantt {
                     padding_end.duration,
                     padding_end.scale,
                 );
+                console.log(this.gantt_start, this.gantt_end);
             } else {
                 this.gantt_start = date_utils.add(
                     gantt_start,
@@ -1185,6 +1186,7 @@ export default class Gantt {
         }
 
         $.on(this.$container, 'scroll', (e) => {
+            console.log('f', e.target.scrollLeft);
             let localBars = [];
             const ids = this.bars.map(({ group }) =>
                 group.getAttribute('data-id'),
