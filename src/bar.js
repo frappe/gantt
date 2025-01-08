@@ -116,6 +116,7 @@ export default class Bar {
                     : ''),
             append_to: this.bar_group,
         });
+        if (this.task.color) this.$bar.style.fill = this.task.color;
         animateSVG(this.$bar, 'width', 0, this.width);
 
         if (this.invalid) {
@@ -157,6 +158,8 @@ export default class Bar {
             class: 'bar-progress',
             append_to: this.bar_group,
         });
+        if (this.task.color_progress)
+            this.$bar_progress.style.fill = this.task.color;
         const x =
             (date_utils.diff(
                 this.task._start,
@@ -205,7 +208,6 @@ export default class Bar {
             );
         }
         this.progress_width = progress_width;
-        console.log(progress_width);
         return progress_width;
     }
 

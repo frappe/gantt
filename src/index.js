@@ -308,7 +308,6 @@ export default class Gantt {
                     padding_end.duration,
                     padding_end.scale,
                 );
-                console.log(this.gantt_start, this.gantt_end);
             } else {
                 this.gantt_start = date_utils.add(
                     gantt_start,
@@ -325,7 +324,6 @@ export default class Gantt {
         this.config.format_string =
             this.config.view_mode.format_string || 'YYYY-MM-DD HH';
         this.gantt_start.setHours(0, 0, 0, 0);
-        console.log(this.gantt_start);
     }
 
     setup_date_values() {
@@ -1186,7 +1184,6 @@ export default class Gantt {
         }
 
         $.on(this.$container, 'scroll', (e) => {
-            console.log('f', e.target.scrollLeft);
             let localBars = [];
             const ids = this.bars.map(({ group }) =>
                 group.getAttribute('data-id'),
