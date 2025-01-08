@@ -335,49 +335,46 @@ export default class Bar {
             ]);
         });
 
-        this.popup_opened = false;
         if (this.gantt.options.popup_on === 'click') {
             $.on(this.group, 'mouseup', (e) => {
                 const posX = e.offsetX || e.layerX;
-                const cx = +this.$handle_progress.getAttribute('cx');
-                if (cx > posX - 1 && cx < posX + 1) return;
-                if (this.gantt.bar_being_dragged) return;
-                if (!this.popup_opened)
-                    this.gantt.show_popup({
-                        x: e.offsetX || e.layerX,
-                        y: e.offsetY || e.layerY,
-                        task: this.task,
-                        target: this.$bar,
-                    });
-                this.popup_opened = !this.popup_opened;
-                this.gantt.$container
-                    .querySelector(`.highlight-${task_id}`)
-                    .classList.toggle('hide');
-            });
-        } else {
-            let timeout;
-            $.on(this.group, 'mouseenter', (e) => {
-                const pos = e.offsetX || e.layerX;
-                timeout = setTimeout(() => {
-                    this.gantt.show_popup({
-                        x: e.offsetX || e.layerX,
-                        y: e.offsetY || e.layerY,
-                        task: this.task,
-                        target: this.$bar,
-                    });
-                    this.gantt.$container
-                        .querySelector(`.highlight-${task_id}`)
-                        .classList.remove('hide');
-                }, 200);
-            });
-            $.on(this.group, 'mouseleave', () => {
-                clearTimeout(timeout);
-                this.gantt.popup?.hide?.();
-                this.gantt.$container
-                    .querySelector(`.highlight-${task_id}`)
-                    .classList.add('hide');
+                if (this.$handle_progress) {
+                    const cx = +this.$handle_progress.getAttribute('cx');
+                    console.log(cx, posX, this.gantt.bar_being_dragged);
+                    if (cx > posX - 1 && cx < posX + 1) return;
+                    if (this.gantt.bar_being_dragged) return;
+                }
+                this.gantt.show_popup({
+                    x: e.offsetX || e.layerX,
+                    y: e.offsetY || e.layerY,
+                    task: this.task,
+                    target: this.$bar,
+                });
             });
         }
+        let timeout;
+        $.on(this.group, 'mouseenter', (e) => {
+            timeout = setTimeout(() => {
+                if (this.gantt.options.popup_on === 'hover')
+                    this.gantt.show_popup({
+                        x: e.offsetX || e.layerX,
+                        y: e.offsetY || e.layerY,
+                        task: this.task,
+                        target: this.$bar,
+                    });
+                this.gantt.$container
+                    .querySelector(`.highlight-${task_id}`)
+                    .classList.remove('hide');
+            }, 200);
+        });
+        $.on(this.group, 'mouseleave', () => {
+            clearTimeout(timeout);
+            if (this.gantt.options.popup_on === 'hover')
+                this.gantt.popup?.hide?.();
+            this.gantt.$container
+                .querySelector(`.highlight-${task_id}`)
+                .classList.add('hide');
+        });
 
         $.on(this.group, 'click', () => {
             this.gantt.trigger_event('click', [this.task]);
