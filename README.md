@@ -108,7 +108,7 @@ Each object can have the following properties:
 - `thick_line` (function) - takes in `currentDate`, returns Boolean determining whether the line for that date should be thicker than the others.
 
 Three other options allow you to override general configuration for this view mode alone:
-- `format_string`
+- `date_format`
 - `column_width`
 - `snap_at`
 For details, see the above table.

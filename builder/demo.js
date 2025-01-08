@@ -1,81 +1,4 @@
-let today = new Date();
-today.setHours(0, 0, 0, 0);
-today = today.valueOf();
-
-function random(begin = 10, end = 90, multiple = 10) {
-    let k;
-    do {
-        k = Math.floor(Math.random() * 100);
-    } while (k < begin || k > end || k % multiple !== 0);
-    return k;
-}
-const daysSince = (dx) => new Date(today + dx * 86400000);
 const tasks = [
-    {
-        start: daysSince(-2),
-        end: daysSince(2),
-        name: 'Redesign website',
-        id: 'Task 0',
-        progress: random(),
-    },
-    {
-        start: daysSince(3),
-        duration: '6d',
-        name: 'Write new content',
-        id: 'Task 1',
-        progress: random(),
-        important: true,
-        dependencies: 'Task 0',
-    },
-    {
-        start: daysSince(4),
-        duration: '2d',
-        name: 'Apply new styles',
-        id: 'Task 2',
-        progress: random(),
-    },
-    {
-        start: daysSince(-4),
-        end: daysSince(0),
-        name: 'Review',
-        id: 'Task 3',
-        progress: random(),
-    },
-];
-
-const tasksSpread = [
-    {
-        start: daysSince(-30),
-        end: daysSince(-10),
-        name: 'Redesign website',
-        id: 'Task 0',
-        progress: random(),
-    },
-    {
-        start: daysSince(-15),
-        duration: '21d',
-        name: 'Write new content',
-        id: 'Task 1',
-        progress: random(),
-        important: true,
-    },
-    {
-        start: daysSince(10),
-        duration: '14d',
-        name: 'Review',
-        id: 'Task 3',
-        progress: random(),
-    },
-    {
-        start: daysSince(-3),
-        duration: '4d',
-        name: 'Publish',
-        id: 'Task 4',
-        progress: random(),
-    },
-];
-
-let tasksMany = [
     {
         start: daysSince(-7),
         end: daysSince(-5),
@@ -128,6 +51,7 @@ let tasksMany = [
         duration: '3d',
         name: 'Prepare demo',
         id: 'Task 6',
+        dependencies: 'Task 5',
         progress: random(),
     },
     {
@@ -135,7 +59,7 @@ let tasksMany = [
         end: daysSince(12),
         name: 'Final client review',
         id: 'Task 7',
-        progress: random(),
+        progress: 0,
         important: true,
     },
     {
@@ -143,83 +67,163 @@ let tasksMany = [
         duration: '6d',
         name: 'Implement feedback',
         id: 'Task 8',
+        progress: 0,
+    },
+];
+
+const tasksSmall = [
+    {
+        start: daysSince(-2),
+        end: daysSince(2),
+        name: 'Redesign website',
+        id: 'Task 0',
         progress: random(),
     },
     {
-        start: daysSince(16),
-        duration: '4d',
-        name: 'Launch website',
-        id: 'Task 9',
+        start: daysSince(3),
+        duration: '6d',
+        name: 'Write new content',
+        id: 'Task 1',
         progress: random(),
         important: true,
+        dependencies: 'Task 0',
+    },
+    {
+        start: daysSince(4),
+        duration: '2d',
+        name: 'Apply new styles',
+        id: 'Task 2',
+        progress: random(),
+    },
+    {
+        start: daysSince(-4),
+        end: daysSince(0),
+        name: 'Review',
+        id: 'Task 3',
+        progress: random(),
+    },
+];
+
+const tasksBlank = [
+    {
+        start: daysSince(1),
+        duration: '3d',
+        name: 'Marketing Strategy Review',
+        id: 'Task 1',
+        important: true,
+    },
+    {
+        start: daysSince(-2),
+        end: daysSince(12),
+        name: 'Mentor Sooriya',
+        id: 'Task 0',
+    },
+    {
+        start: daysSince(4),
+        end: daysSince(5),
+        name: 'Investors Meetup',
+        id: 'Task 3',
     },
 ];
 
 const HOLIDAYS = [
-    { name: 'Republic Day', date: '2024-01-26' },
-    { name: 'Maha Shivratri', date: '2024-02-23' },
-    { name: 'Holi', date: '2024-03-11' },
-    { name: 'Mahavir Jayanthi', date: '2024-04-07' },
-    { name: 'Good Friday', date: '2024-04-10' },
-    { name: 'May Day', date: '2024-05-01' },
-    { name: 'Buddha Purnima', date: '2024-05-08' },
-    { name: 'Krishna Janmastami', date: '2024-08-14' },
-    { name: 'Independence Day', date: '2024-08-15' },
-    { name: 'Ganesh Chaturthi', date: '2024-08-23' },
-    { name: 'Id-Ul-Fitr', date: '2024-09-21' },
-    { name: 'Vijaya Dashami', date: '2024-09-28' },
-    { name: 'Mahatma Gandhi Jayanti', date: '2024-10-02' },
-    { name: 'Diwali', date: '2024-10-17' },
-    { name: 'Guru Nanak Jayanthi', date: '2024-11-02' },
-    { name: 'Christmas', date: '2024-12-25' },
+    { name: 'New Years Day', date: '2025-01-01' },
+    { name: 'Republic Day', date: '2025-01-26' },
+    { name: 'Maha Shivratri', date: '2025-02-23' },
+    { name: 'Holi', date: '2025-03-11' },
+    { name: 'Mahavir Jayanthi', date: '2025-04-07' },
+    { name: 'Good Friday', date: '2025-04-10' },
+    { name: 'May Day', date: '2025-05-01' },
+    { name: 'Buddha Purnima', date: '2025-05-08' },
+    { name: 'Krishna Janmastami', date: '2025-08-14' },
+    { name: 'Independence Day', date: '2025-08-15' },
+    { name: 'Ganesh Chaturthi', date: '2025-08-23' },
+    { name: 'Id-Ul-Fitr', date: '2025-09-21' },
+    { name: 'Vijaya Dashami', date: '2025-09-28' },
+    { name: 'Mahatma Gandhi Jayanti', date: '2025-10-02' },
+    { name: 'Diwali', date: '2025-10-17' },
+    { name: 'Guru Nanak Jayanthi', date: '2025-11-02' },
+    { name: 'Christmas', date: '2025-12-25' },
 ];
 
-const mutablity = new Gantt('#mutability', tasks, {
-    holidays: null,
+new Gantt('#central-demo', tasks, {
     scroll_to: daysSince(-7),
     infinite_padding: false,
 });
 
-const sideheader = new Gantt('#sideheader', tasks, {
-    holidays: null,
+const sideheader = new Gantt('#sideheader', tasksSmall, {
+    scroll_to: daysSince(-20),
     view_mode_select: true,
-    scroll_to: null,
     infinite_padding: false,
 });
 
-const holidays = new Gantt('#holidays', tasksSpread, {
+const popup = new Gantt('#popup', tasksBlank, {
+    scroll_to: daysSince(-7),
+    infinite_padding: false,
+    container_height: 350,
+    popup: (ctx) => {
+        ctx.set_title(ctx.task.name);
+        let title = ctx.get_title();
+        title.style.border = '0.5px solid black';
+        title.style.borderRadius = '1.5px';
+        title.style.padding = '3px 5px ';
+        title.style.backgroundColor = 'black';
+        title.style.opacity = '0.85';
+        title.style.color = 'white';
+        title.style.width = 'fit-content';
+        title.onclick = () => {
+            let ans = prompt('New Title: ');
+            if (ans) ctx.set_title(ans);
+        };
+        if (ctx.task.description) ctx.set_subtitle(ctx.task.description);
+        else ctx.set_subtitle('');
+
+        ctx.set_details(
+            `<em>Duration</em>: ${ctx.task.actual_duration} days<br/><em>Dates</em>: ${ctx.task._start.toLocaleDateString('en-US')} - ${ctx.task._end.toLocaleDateString('en-US')}`,
+        );
+        let details = ctx.get_details();
+        details.style.lineHeight = '1.75';
+        details.style.margin = '10px 4px';
+        if (!ctx.chart.options.readonly) {
+            if (!ctx.chart.options.readonly_progress) {
+                ctx.add_action('Set Color', (task, chart) => {
+                    const bar = chart.bars.find(
+                        ({ task: t }) => t.id === task.id,
+                    ).$bar;
+                    bar.style.fill = `hsla(${~~(360 * Math.random())}, 70%,  72%, 0.8)`;
+                });
+            }
+        }
+    },
+});
+
+const holidays = new Gantt('#holidays', tasks, {
     holidays: {
-        '#dcdce4': [],
-        '#a3e635': HOLIDAYS,
+        'var(--g-weekend-highlight-color)': [],
+        '#fffddb': HOLIDAYS,
     },
     ignore: ['weekend'],
     infinite_padding: false,
+    container_height: 350,
     scroll_to: daysSince(-7),
 });
 
-const styling = new Gantt('#styling', tasksMany, {
-    holidays: null,
-    arrow_curve: 6,
-    column_width: 32,
-    infinite_padding: true,
-});
-
-// Creates forms
 SWITCHES = {
-    'mutability-form': {
-        'readonly-progress': 'Progress',
-        'readonly-dates': 'Dates',
-        'readonly-general': 'Editable',
-    },
     'sideheader-form': {
-        'toggle-today': 'Scroll to Today',
-        'toggle-view-mode': 'Change View Mode',
+        'toggle-today': 'Scroll to today: ',
+        'toggle-view-mode': 'Change view mode: ',
     },
-    'holidays-form': {
-        'toggle-weekends': ['Mark weekends', false],
-        'ignore-weekends': 'Exclude weekends',
+    'holiday-subform': {
+        'toggle-weekends': ['Mark weekends: ', false],
+        'ignore-weekends': 'Exclude weekends: ',
     },
 };
+
+for (let form of ['sideheader-form', 'holiday-form']) {
+    let formNode = document.getElementById(form);
+    let parent = formNode.parentElement;
+    parent.appendChild(formNode);
+}
 
 for (let form in SWITCHES) {
     for (let id in SWITCHES[form]) {
@@ -227,23 +231,7 @@ for (let form in SWITCHES) {
     }
 }
 
-// Manipulation
-
 const UPDATES = [
-    [
-        mutablity,
-        {
-            'readonly-general': 'opp__readonly',
-            'readonly-dates': 'opp__readonly_dates',
-            'readonly-progress': 'opp__readonly_progress',
-        },
-        (id, val) => {
-            if (id === 'readonly-general') {
-                document.getElementById('readonly-dates').checked = !val;
-                document.getElementById('readonly-progress').checked = !val;
-            }
-        },
-    ],
     [
         sideheader,
         {
@@ -256,15 +244,16 @@ const UPDATES = [
         {
             'toggle-weekends': (val, opts) => ({
                 holidays: {
-                    '#a3e635': opts.holidays['#a3e635'],
-                    '#dcdce4': val ? 'weekend' : [],
+                    '#fffddb': opts.holidays['#fffddb'],
+                    'var(--g-weekend-highlight-color)': val ? 'weekend' : [],
                 },
                 ignore: [],
             }),
             'declare-holiday': (val, opts) => ({
                 holidays: {
-                    '#a3e635': [...HOLIDAYS, { date: val, name: 'Kay' }],
-                    '#dcdce4': opts.holidays['#dcdce4'],
+                    '#fffddb': [...HOLIDAYS, { date: val, name: 'Kay' }],
+                    'var(--g-weekend-highlight-color)':
+                        opts.holidays['var(--g-weekend-highlight-color)'],
                 },
             }),
             'ignore-weekends': (val, opts) => ({
@@ -272,7 +261,7 @@ const UPDATES = [
                     opts.ignore.filter((k) => k !== 'weekend')[0],
                     ...(val ? ['weekend'] : []),
                 ],
-                holidays: { '#a3e635': opts.holidays['#a3e635'] },
+                holidays: { '#fffddb': opts.holidays['#fffddb'] },
             }),
             'declare-ignore': (val, opts) => ({
                 ignore: [
@@ -291,53 +280,13 @@ const UPDATES = [
             }
         },
     ],
-    [
-        styling,
-        {
-            'arrow-curve': 'arrow_curve',
-            'column-width': 'column_width',
-        },
-    ],
 ];
-
-const BUTTONS = {
-    'radius-s': { bar_corner_radius: 3 },
-    'radius-m': { bar_corner_radius: 7 },
-    'radius-l': { bar_corner_radius: 14 },
-    'height-s': { bar_height: 20 },
-    'height-m': { bar_height: 30 },
-    'height-l': { bar_height: 45 },
-    'curve-s': { arrow_curve: 2 },
-    'curve-m': { bar_height: 5 },
-    'curve-l': { bar_height: 10 },
-    'width-s': { column_width: 25 },
-    'width-m': { column_width: 32 },
-    'width-l': { column_width: 50 },
-    'padding-s': { padding: 18 },
-    'padding-m': { padding: 30 },
-    'padding-l': { padding: 45 },
-};
-
-for (let id in BUTTONS) {
-    let el = document.getElementById(id);
-    el.onclick = (e) => {
-        e.preventDefault();
-        styling.update_options(BUTTONS[id]);
-        for (let k of document.querySelectorAll('.selected')) {
-            if (k.id.startsWith(el.id.split('-')[0])) {
-                k.classList.remove('selected');
-            }
-        }
-        e.currentTarget.classList.add('selected');
-    };
-}
 
 for (let [chart, details, after] of UPDATES) {
     for (let id in details) {
         let el = document.getElementById(id);
 
         el.onchange = (e) => {
-            console.log('changed', e.currentTarget.id, e.currentTarget.value);
             let label = details[id];
             let val;
             if (e.currentTarget.type === 'checkbox') {
