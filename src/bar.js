@@ -4,7 +4,21 @@ import { $, createSVG, animateSVG } from './svg_utils';
 export default class Bar {
     constructor(gantt, task) {
         this.set_defaults(gantt, task);
-        this.prepare();
+        this.prepare_wrappers();
+        this.prepare_helpers();
+        this.refresh();
+    }
+
+    refresh() {
+        this.bar_group.innerHTML = '';
+        this.handle_group.innerHTML = '';
+        if (this.task.custom_class) {
+            this.group.classList.add(this.task.custom_class);
+        } else {
+            this.group.classList = ['bar-wrapper'];
+        }
+
+        this.prepare_values();
         this.draw();
         this.bind();
     }
@@ -13,11 +27,24 @@ export default class Bar {
         this.action_completed = false;
         this.gantt = gantt;
         this.task = task;
+        this.name = this.name || '';
     }
 
-    prepare() {
-        this.prepare_values();
-        this.prepare_helpers();
+    prepare_wrappers() {
+        this.group = createSVG('g', {
+            class:
+                'bar-wrapper' +
+                (this.task.custom_class ? ' ' + this.task.custom_class : ''),
+            'data-id': this.task.id,
+        });
+        this.bar_group = createSVG('g', {
+            class: 'bar-group',
+            append_to: this.group,
+        });
+        this.handle_group = createSVG('g', {
+            class: 'handle-group',
+            append_to: this.group,
+        });
     }
 
     prepare_values() {
@@ -29,25 +56,8 @@ export default class Bar {
         this.compute_duration();
         this.corner_radius = this.gantt.options.bar_corner_radius;
         this.width = this.gantt.config.column_width * this.duration;
-        this.progress_width =
-            this.gantt.config.column_width *
-                this.duration *
-                (this.task.progress / 100) || 0;
-        this.group = createSVG('g', {
-            class:
-                'bar-wrapper' +
-                (this.task.custom_class ? ' ' + this.task.custom_class : '') +
-                (this.task.important ? ' important' : ''),
-            'data-id': this.task.id,
-        });
-        this.bar_group = createSVG('g', {
-            class: 'bar-group',
-            append_to: this.group,
-        });
-        this.handle_group = createSVG('g', {
-            class: 'handle-group',
-            append_to: this.group,
-        });
+        if (this.task.progress < 0) this.task.progress = 0;
+        if (this.task.progress > 100) this.task.progress = 100;
     }
 
     prepare_helpers() {
@@ -101,12 +111,12 @@ export default class Bar {
             ry: this.corner_radius,
             class:
                 'bar' +
-                (/^((?!chrome|android).)*safari/i.test(navigator.userAgent) &&
-                !this.task.important
+                (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)
                     ? ' safari'
                     : ''),
             append_to: this.bar_group,
         });
+        if (this.task.color) this.$bar.style.fill = this.task.color;
         animateSVG(this.$bar, 'width', 0, this.width);
 
         if (this.invalid) {
@@ -137,7 +147,7 @@ export default class Bar {
 
     draw_progress_bar() {
         if (this.invalid) return;
-
+        this.progress_width = this.calculate_progress_width();
         this.$bar_progress = createSVG('rect', {
             x: this.x,
             y: this.y,
@@ -148,23 +158,57 @@ export default class Bar {
             class: 'bar-progress',
             append_to: this.bar_group,
         });
+        if (this.task.color_progress)
+            this.$bar_progress.style.fill = this.task.color;
         const x =
-            (date_utils.diff(this.task._start, this.gantt.gantt_start, 'hour') /
+            (date_utils.diff(
+                this.task._start,
+                this.gantt.gantt_start,
+                this.gantt.config.unit,
+            ) /
                 this.gantt.config.step) *
             this.gantt.config.column_width;
 
-        let $date_highlight = document.createElement('div');
-        $date_highlight.id = `highlight-${this.task.id}`;
-        $date_highlight.classList.add('date-highlight');
-        $date_highlight.style.height = this.height * 0.8 + 'px';
-        $date_highlight.style.width = this.width + 'px';
-        $date_highlight.style.top =
-            this.gantt.options.header_height - 25 + 'px';
-        $date_highlight.style.left = x + 'px';
+        let $date_highlight = this.gantt.create_el({
+            classes: `date-range-highlight hide highlight-${this.task.id}`,
+            width: this.width,
+            left: x,
+        });
         this.$date_highlight = $date_highlight;
-        this.gantt.$lower_header.prepend($date_highlight);
+        this.gantt.$lower_header.prepend(this.$date_highlight);
 
         animateSVG(this.$bar_progress, 'width', 0, this.progress_width);
+    }
+
+    calculate_progress_width() {
+        const width = this.$bar.getWidth();
+        const ignored_end = this.x + width;
+        const total_ignored_area =
+            this.gantt.config.ignored_positions.reduce((acc, val) => {
+                return acc + (val >= this.x && val < ignored_end);
+            }, 0) * this.gantt.config.column_width;
+        let progress_width =
+            ((width - total_ignored_area) * this.task.progress) / 100;
+        const progress_end = this.x + progress_width;
+        const total_ignored_progress =
+            this.gantt.config.ignored_positions.reduce((acc, val) => {
+                return acc + (val >= this.x && val < progress_end);
+            }, 0) * this.gantt.config.column_width;
+
+        progress_width += total_ignored_progress;
+
+        let ignored_regions = this.gantt.get_ignored_region(
+            this.x + progress_width,
+        );
+
+        while (ignored_regions.length) {
+            progress_width += this.gantt.config.column_width;
+            ignored_regions = this.gantt.get_ignored_region(
+                this.x + progress_width,
+            );
+        }
+        this.progress_width = progress_width;
+        return progress_width;
     }
 
     draw_label() {
@@ -184,6 +228,7 @@ export default class Bar {
         // labels get BBox in the next tick
         requestAnimationFrame(() => this.update_label_position());
     }
+
     draw_thumbnail() {
         let x_offset = 10,
             y_offset = 2;
@@ -230,39 +275,50 @@ export default class Bar {
         if (this.invalid || this.gantt.options.readonly) return;
 
         const bar = this.$bar;
-        const handle_width = 8;
-        if (!this.gantt.options.dates_readonly) {
-            createSVG('rect', {
-                x: bar.getX() + bar.getWidth() + handle_width - 4,
-                y: bar.getY() + 1,
-                width: handle_width,
-                height: this.height - 2,
-                rx: this.corner_radius,
-                ry: this.corner_radius,
-                class: 'handle right',
-                append_to: this.handle_group,
-            });
+        const handle_width = 3;
+        this.handles = [];
+        if (!this.gantt.options.readonly_dates) {
+            this.handles.push(
+                createSVG('rect', {
+                    x: bar.getEndX() - handle_width / 2,
+                    y: bar.getY() + this.height / 4,
+                    width: handle_width,
+                    height: this.height / 2,
+                    rx: 2,
+                    ry: 2,
+                    class: 'handle right',
+                    append_to: this.handle_group,
+                }),
+            );
 
-            createSVG('rect', {
-                x: bar.getX() - handle_width - 4,
-                y: bar.getY() + 1,
-                width: handle_width,
-                height: this.height - 2,
-                rx: this.corner_radius,
-                ry: this.corner_radius,
-                class: 'handle left',
-                append_to: this.handle_group,
-            });
+            this.handles.push(
+                createSVG('rect', {
+                    x: bar.getX() - handle_width / 2,
+                    y: bar.getY() + this.height / 4,
+                    width: handle_width,
+                    height: this.height / 2,
+                    rx: 2,
+                    ry: 2,
+                    class: 'handle left',
+                    append_to: this.handle_group,
+                }),
+            );
         }
-        if (!this.gantt.options.progress_readonly) {
+        if (!this.gantt.options.readonly_progress) {
             const bar_progress = this.$bar_progress;
             this.$handle_progress = createSVG('circle', {
                 cx: bar_progress.getEndX(),
                 cy: bar_progress.getY() + bar_progress.getHeight() / 2,
-                r: 5,
+                r: 4.5,
                 class: 'handle progress',
                 append_to: this.handle_group,
             });
+            this.handles.push(this.$handle_progress);
+        }
+
+        for (let handle of this.handles) {
+            $.on(handle, 'mouseenter', () => handle.classList.add('active'));
+            $.on(handle, 'mouseleave', () => handle.classList.remove('active'));
         }
     }
 
@@ -283,40 +339,44 @@ export default class Bar {
         });
 
         if (this.gantt.options.popup_on === 'click') {
-            let opened = false;
-            $.on(this.group, 'click', (e) => {
-                if (!opened) {
-                    this.show_popup(e.offsetX || e.layerX);
-                    document.getElementById(
-                        `highlight-${task_id}`,
-                    ).style.display = 'block';
-                } else {
-                    this.gantt.hide_popup();
+            $.on(this.group, 'mouseup', (e) => {
+                const posX = e.offsetX || e.layerX;
+                if (this.$handle_progress) {
+                    const cx = +this.$handle_progress.getAttribute('cx');
+                    if (cx > posX - 1 && cx < posX + 1) return;
+                    if (this.gantt.bar_being_dragged) return;
                 }
-                opened = !opened;
-            });
-        } else {
-            let timeout;
-            $.on(
-                this.group,
-                'mouseenter',
-                (e) =>
-                    (timeout = setTimeout(() => {
-                        this.show_popup(e.offsetX || e.layerX);
-                        document.getElementById(
-                            `highlight-${task_id}`,
-                        ).style.display = 'block';
-                    }, 200)),
-            );
-
-            $.on(this.group, 'mouseleave', () => {
-                clearTimeout(timeout);
-                this.gantt.popup?.hide?.();
-
-                document.getElementById(`highlight-${task_id}`).style.display =
-                    'none';
+                this.gantt.show_popup({
+                    x: e.offsetX || e.layerX,
+                    y: e.offsetY || e.layerY,
+                    task: this.task,
+                    target: this.$bar,
+                });
             });
         }
+        let timeout;
+        $.on(this.group, 'mouseenter', (e) => {
+            timeout = setTimeout(() => {
+                if (this.gantt.options.popup_on === 'hover')
+                    this.gantt.show_popup({
+                        x: e.offsetX || e.layerX,
+                        y: e.offsetY || e.layerY,
+                        task: this.task,
+                        target: this.$bar,
+                    });
+                this.gantt.$container
+                    .querySelector(`.highlight-${task_id}`)
+                    .classList.remove('hide');
+            }, 200);
+        });
+        $.on(this.group, 'mouseleave', () => {
+            clearTimeout(timeout);
+            if (this.gantt.options.popup_on === 'hover')
+                this.gantt.popup?.hide?.();
+            this.gantt.$container
+                .querySelector(`.highlight-${task_id}`)
+                .classList.add('hide');
+        });
 
         $.on(this.group, 'click', () => {
             this.gantt.trigger_event('click', [this.task]);
@@ -329,70 +389,48 @@ export default class Bar {
             }
             this.group.classList.remove('active');
             if (this.gantt.popup)
-                this.gantt.popup.parent.classList.remove('hidden');
+                this.gantt.popup.parent.classList.remove('hide');
 
             this.gantt.trigger_event('double_click', [this.task]);
         });
     }
 
-    show_popup(x) {
-        if (this.gantt.bar_being_dragged) return;
-
-        const start_date = date_utils.format(
-            this.task._start,
-            'MMM D',
-            this.gantt.options.language,
-        );
-        const end_date = date_utils.format(
-            date_utils.add(this.task._end, -1, 'second'),
-            'MMM D',
-            this.gantt.options.language,
-        );
-        const subtitle = `${start_date} -  ${end_date}<br/>Progress: ${this.task.progress}`;
-        this.gantt.show_popup({
-            x,
-            target_element: this.$bar,
-            title: this.task.name,
-            subtitle: subtitle,
-            task: this.task,
-        });
-    }
-
     update_bar_position({ x = null, width = null }) {
         const bar = this.$bar;
+
         if (x) {
-            // get all x values of parent task
             const xs = this.task.dependencies.map((dep) => {
                 return this.gantt.get_bar(dep).$bar.getX();
             });
-            // child task must not go before parent
             const valid_x = xs.reduce((_, curr) => {
                 return x >= curr;
             }, x);
-            if (!valid_x) {
-                width = null;
-                return;
-            }
+            if (!valid_x) return;
             this.update_attr(bar, 'x', x);
+            this.x = x;
             this.$date_highlight.style.left = x + 'px';
         }
-        if (width) {
+        if (width > 0) {
             this.update_attr(bar, 'width', width);
             this.$date_highlight.style.width = width + 'px';
         }
+
         this.update_label_position();
         this.update_handle_position();
+        this.date_changed();
+        this.compute_duration();
+
         if (this.gantt.options.show_expected_progress) {
-            this.date_changed();
-            this.compute_duration();
             this.update_expected_progressbar_position();
         }
+
         this.update_progressbar_position();
         this.update_arrow_position();
     }
 
     update_label_position_on_horizontal_scroll({ x, sx }) {
-        const container = document.querySelector('.gantt-container');
+        const container =
+            this.gantt.$container.querySelector('.gantt-container');
         const label = this.group.querySelector('.bar-label');
         const img = this.group.querySelector('.bar-img') || '';
         const img_mask = this.bar_group.querySelector('.img_mask') || '';
@@ -448,9 +486,11 @@ export default class Bar {
     }
 
     progress_changed() {
-        const new_progress = this.compute_progress();
-        this.task.progress = new_progress;
-        this.gantt.trigger_event('progress_change', [this.task, new_progress]);
+        this.task.progress = this.compute_progress();
+        this.gantt.trigger_event('progress_change', [
+            this.task,
+            this.task.progress,
+        ]);
     }
 
     set_action_completed() {
@@ -466,17 +506,6 @@ export default class Bar {
             x_in_units * this.gantt.config.step,
             this.gantt.config.unit,
         );
-        const start_offset =
-            this.gantt.gantt_start.getTimezoneOffset() -
-            new_start_date.getTimezoneOffset();
-
-        if (start_offset) {
-            new_start_date = date_utils.add(
-                new_start_date,
-                start_offset,
-                'minute',
-            );
-        }
 
         const width_in_units = bar.getWidth() / this.gantt.config.column_width;
         const new_end_date = date_utils.add(
@@ -489,9 +518,20 @@ export default class Bar {
     }
 
     compute_progress() {
+        this.progress_width = this.$bar_progress.getWidth();
+        this.x = this.$bar_progress.getBBox().x;
+        const progress_area = this.x + this.progress_width;
         const progress =
-            (this.$bar_progress.getWidth() / this.$bar.getWidth()) * 100;
-        return parseInt(progress, 10);
+            this.progress_width -
+            this.gantt.config.ignored_positions.reduce((acc, val) => {
+                return acc + (val >= this.x && val <= progress_area);
+            }, 0) *
+                this.gantt.config.column_width;
+        if (progress < 0) return 0;
+        const total =
+            this.$bar.getWidth() -
+            this.ignored_duration_raw * this.gantt.config.column_width;
+        return parseInt((progress / total) * 100, 10);
     }
 
     compute_expected_progress() {
@@ -507,13 +547,14 @@ export default class Bar {
     }
 
     compute_x() {
-        const { step, column_width } = this.gantt.config;
+        const { column_width } = this.gantt.config;
         const task_start = this.task._start;
         const gantt_start = this.gantt.gantt_start;
 
         const diff =
             date_utils.diff(task_start, gantt_start, this.gantt.config.unit) /
             this.gantt.config.step;
+
         let x = diff * column_width;
 
         /* Since the column width is based on 30,
@@ -521,72 +562,67 @@ export default class Bar {
         and then add the days in the month, making sure the number does not exceed 29
         so it is within the column */
 
-        if (this.gantt.view_is('Month')) {
-            const diffDaysBasedOn30DayMonths =
-                date_utils.diff(task_start, gantt_start, 'month') * 30;
-            const dayInMonth = Math.min(
-                29,
-                date_utils.format(
-                    task_start,
-                    'DD',
-                    this.gantt.options.language,
-                ),
-            );
-            const diff = diffDaysBasedOn30DayMonths + dayInMonth;
+        // if (this.gantt.view_is('Month')) {
+        //     const diffDaysBasedOn30DayMonths =
+        //         date_utils.diff(task_start, gantt_start, 'month') * 30;
+        //     const dayInMonth = Math.min(
+        //         29,
+        //         date_utils.format(
+        //             task_start,
+        //             'DD',
+        //             this.gantt.options.language,
+        //         ),
+        //     );
+        //     const diff = diffDaysBasedOn30DayMonths + dayInMonth;
 
-            x = (diff * column_width) / 30;
-        }
+        //     x = (diff * column_width) / 30;
+        // }
 
         this.x = x;
     }
 
     compute_y() {
         this.y =
-            this.gantt.options.header_height +
-            this.gantt.options.padding +
+            this.gantt.config.header_height +
+            this.gantt.options.padding / 2 +
             this.task._index * (this.height + this.gantt.options.padding);
     }
 
     compute_duration() {
+        let actual_duration_in_days = 0,
+            duration_in_days = 0;
+        for (
+            let d = new Date(this.task._start);
+            d < this.task._end;
+            d.setDate(d.getDate() + 1)
+        ) {
+            duration_in_days++;
+            if (
+                !this.gantt.config.ignored_dates.find(
+                    (k) => k.getTime() === d.getTime(),
+                ) &&
+                (!this.gantt.config.ignored_function ||
+                    !this.gantt.config.ignored_function(d))
+            ) {
+                actual_duration_in_days++;
+            }
+        }
+        this.task.actual_duration = actual_duration_in_days;
+        this.task.ignored_duration = duration_in_days - actual_duration_in_days;
+
         this.duration =
-            date_utils.diff(
-                this.task._end,
-                this.task._start,
+            date_utils.convert_scales(
+                duration_in_days + 'd',
                 this.gantt.config.unit,
             ) / this.gantt.config.step;
-    }
 
-    get_snap_position(dx) {
-        let odx = dx,
-            rem,
-            position;
+        this.actual_duration_raw =
+            date_utils.convert_scales(
+                actual_duration_in_days + 'd',
+                this.gantt.config.unit,
+            ) / this.gantt.config.step;
 
-        // if (this.gantt.view_is('Week')) {
-        //     rem = dx % (this.gantt.config.column_width / 7);
-        //     position =
-        //         odx -
-        //         rem +
-        //         (rem < this.gantt.config.column_width / 14
-        //             ? 0
-        //             : this.gantt.config.column_width / 7);
-        // } else if (this.gantt.view_is('Month')) {
-        //     rem = dx % (this.gantt.config.column_width / 30);
-        //     position =
-        //         odx -
-        //         rem +
-        //         (rem < this.gantt.config.column_width / 60
-        //             ? 0
-        //             : this.gantt.config.column_width / 30);
-        // } else {
-        rem = dx % this.gantt.config.column_width;
-        position =
-            odx -
-            rem +
-            (rem < this.gantt.config.column_width / 2
-                ? 0
-                : this.gantt.config.column_width);
-        // }
-        return position;
+        this.ignored_duration_raw = this.duration - this.actual_duration_raw;
     }
 
     update_attr(element, attr, value) {
@@ -604,7 +640,7 @@ export default class Bar {
         this.$expected_bar_progress.setAttribute(
             'width',
             this.gantt.config.column_width *
-                this.duration *
+                this.actual_duration_raw *
                 (this.expected_progress / 100) || 0,
         );
     }
@@ -612,9 +648,10 @@ export default class Bar {
     update_progressbar_position() {
         if (this.invalid || this.gantt.options.readonly) return;
         this.$bar_progress.setAttribute('x', this.$bar.getX());
+
         this.$bar_progress.setAttribute(
             'width',
-            this.$bar.getWidth() * (this.task.progress / 100),
+            this.calculate_progress_width(),
         );
     }
 
@@ -631,17 +668,11 @@ export default class Bar {
         if (labelWidth > barWidth) {
             label.classList.add('big');
             if (img) {
-                img.setAttribute('x', bar.getX() + bar.getWidth() + padding);
-                img_mask.setAttribute(
-                    'x',
-                    bar.getX() + bar.getWidth() + padding,
-                );
-                label.setAttribute(
-                    'x',
-                    bar.getX() + bar.getWidth() + x_offset_label_img,
-                );
+                img.setAttribute('x', bar.getEndX() + padding);
+                img_mask.setAttribute('x', bar.getEndX() + padding);
+                label.setAttribute('x', bar.getEndX() + x_offset_label_img);
             } else {
-                label.setAttribute('x', bar.getX() + bar.getWidth() + padding);
+                label.setAttribute('x', bar.getEndX() + padding);
             }
         } else {
             label.classList.remove('big');
@@ -666,10 +697,10 @@ export default class Bar {
         const bar = this.$bar;
         this.handle_group
             .querySelector('.handle.left')
-            .setAttribute('x', bar.getX() - 12);
+            .setAttribute('x', bar.getX());
         this.handle_group
             .querySelector('.handle.right')
-            .setAttribute('x', bar.getEndX() + 4);
+            .setAttribute('x', bar.getEndX());
         const handle = this.group.querySelector('.handle.progress');
         handle && handle.setAttribute('cx', this.$bar_progress.getEndX());
     }
@@ -680,12 +711,4 @@ export default class Bar {
             arrow.update();
         }
     }
-}
-
-function isFunction(functionToCheck) {
-    let getType = {};
-    return (
-        functionToCheck &&
-        getType.toString.call(functionToCheck) === '[object Function]'
-    );
 }

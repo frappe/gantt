@@ -78,7 +78,7 @@ export default {
         return date_string + (with_time ? ' ' + time_string : '');
     },
 
-    format(date, format_string = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
+    format(date, date_format = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
         const dateTimeFormat = new Intl.DateTimeFormat(lang, {
             month: 'long',
         });
@@ -103,7 +103,7 @@ export default {
             MMM: dateTimeFormatShort.format(date),
         };
 
-        let str = format_string;
+        let str = date_format;
         const formatted_values = [];
 
         Object.keys(format_map)
@@ -125,7 +125,10 @@ export default {
     diff(date_a, date_b, scale = 'day') {
         let milliseconds, seconds, hours, minutes, days, months, years;
 
-        milliseconds = date_a - date_b;
+        milliseconds =
+            date_a -
+            date_b +
+            (date_b.getTimezoneOffset() - date_a.getTimezoneOffset()) * 60000;
         seconds = milliseconds / 1000;
         minutes = seconds / 60;
         hours = minutes / 60;

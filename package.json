@@ -1,11 +1,10 @@
 {
     "name": "frappe-gantt",
-    "version": "0.9.0",
+    "version": "1.0.0",
     "description": "A simple, modern, interactive gantt library for the web",
     "main": "src/index.js",
     "type": "module",
     "scripts": {
-        "start": "yarn run dev",
         "dev": "vite",
         "build-dev": "vite build --watch",
         "build": "vite build",

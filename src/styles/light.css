@@ -1,0 +1,21 @@
+:root {
+    --g-arrow-color: #d7b15b;
+    --g-bar-color: #fff;
+    --g-bar-border: #fff;
+    --g-tick-color-thick: #e0e0e0;
+    --g-tick-color: #ebeef0;
+    --g-actions-background: #f3f3f3;
+    --g-border-color: #ebeff2;
+    --g-text-muted: #7c7c7c;
+    --g-text-light: #fff;
+    --g-text-dark: #171717;
+    --g-progress-color: #f3f3f3;
+    --g-handle-color: #37352f;
+    --g-weekend-label-color: #dcdce4;
+    --g-expected-progress: #c4c4e9;
+    --g-header-background: #fff;
+    --g-row-color: #fdfdfd;
+    --g-today-highlight: #37352f;
+    --g-popup-actions: #ebeff2;
+    --g-weekend-highlight-color: #f7f7f7;
+}
