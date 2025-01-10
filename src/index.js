@@ -1101,13 +1101,13 @@ export default class Gantt {
         let is_resizing_left = false;
         let is_resizing_right = false;
         let parent_bar_id = null;
-        let bars = []; // instanceof Bars, the dragged bar and its children
+        let bars = []; // instanceof Bar
+        this.bar_being_dragged = null;
         const min_y = this.config.header_height;
         const max_y =
             this.config.header_height +
             this.tasks.length *
                 (this.options.bar_height + this.options.padding);
-        this.bar_being_dragged = null; // instanceof dragged bar
 
         const action_in_progress = () =>
             is_dragging || is_resizing_left || is_resizing_right;
@@ -1359,7 +1359,7 @@ export default class Gantt {
                 is_dragging &&
                 !this.options.readonly &&
                 !this.options.readonly_dates &&
-                Math.abs(dy - bar_dragging.$bar.finaldy) > bar_dragging.height
+                Math.abs(dy - bar_dragging.$bar.finaldy) >= bar_dragging.height
             ) {
                 const changed_bars = this.sort_bars();
                 changed_bars.map((bar) => {
@@ -1382,8 +1382,7 @@ export default class Gantt {
                 ?.classList?.remove?.('visible');
         });
 
-        $.on(this.$svg, 'mouseup', (e) => {
-            const dy = (e.offsetY || e.layerY) - y_on_start;
+        $.on(this.$svg, 'mouseup', () => {
             this.bar_being_dragged = null;
             bars.forEach((bar) => {
                 const $bar = bar.$bar;
@@ -1391,8 +1390,8 @@ export default class Gantt {
                     bar.date_changed();
                     bar.compute_progress();
                 }
-                if (dy !== $bar.finaldy) {
-                    bar.update_bar_position({ y: $bar.oy + $bar.finaldy });
+                if (parent_bar_id === bar.task.id) {
+                    bar.update_bar_position({ y: bar.y });
                 }
                 bar.set_action_completed();
             });
