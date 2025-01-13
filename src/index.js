@@ -165,6 +165,11 @@ export default class Gantt {
                 // cache index
                 task._index = i;
 
+                // To support tasks for same row
+                if (typeof task.custom_index === 'number') {
+                    task._index = task.custom_index;
+                }
+
                 // if hours is not set, assume the last day is full day
                 // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
                 const task_end_values = date_utils.get_date_values(task._end);
