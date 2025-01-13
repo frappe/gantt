@@ -165,9 +165,9 @@ export default class Gantt {
                 // cache index
                 task._index = i;
 
-                // To support tasks for same row
-                if (typeof task.custom_index === 'number') {
-                    task._index = task.custom_index;
+                // override the default row index with a custom value for custom row positioning.
+                if (typeof task.row_override === 'number') {
+                    task._index = task.row_override;
                 }
 
                 // if hours is not set, assume the last day is full day
