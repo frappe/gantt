@@ -51,6 +51,8 @@ export default class Bar {
         this.invalid = this.task.invalid;
         this.height = this.gantt.options.bar_height;
         this.image_size = this.height - 5;
+        this.task._start = new Date(this.task.start);
+        this.task._end = new Date(this.task.end);
         this.compute_x();
         this.compute_y();
         this.compute_duration();
