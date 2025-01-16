@@ -153,8 +153,8 @@ export default class Bar {
             y: this.y,
             width: this.progress_width,
             height: this.height,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
+            rx: this.corner_radius + 2,
+            ry: this.corner_radius + 2,
             class: 'bar-progress',
             append_to: this.bar_group,
         });
