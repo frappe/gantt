@@ -1,10 +1,16 @@
 @import './light.css';
 
+.main-wrapper {
+    display: flex;
+    position: relative;
+}
+
 .gantt-container {
     line-height: 14.5px;
     position: relative;
     overflow: auto;
     font-size: 12px;
+    flex: 1;
     height: var(--gv-grid-height);
     width: 100%;
     border-radius: 8px;
@@ -341,5 +347,31 @@
                 display: block;
             }
         }
+    }
+}
+
+.side-task-list {
+    border-right: var(--g-border-color);
+    bottom: 0;
+    box-shadow: 5px 0px 5px -5px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    position: absolute;
+    z-index: 1001;
+
+    & .side-task-list-row {
+        align-items: center;
+        background: var(--g-row-color);
+        display: flex;
+        dominant-baseline: central;
+        font-family: Helvetica;
+        font-size: 13px;
+        font-weight: 400;
+        justify-content: center;
+        text-align: left;
+    }
+
+    & .side-task-list-row:not(:last-child) {
+        border-bottom: 1px solid var(--g-border-color);
+        box-sizing: border-box;
     }
 }

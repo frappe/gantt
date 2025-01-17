@@ -45,11 +45,16 @@ export default class Gantt {
             );
         }
 
+        this.$main_wrapper = this.create_el({
+            classes: 'main-wrapper',
+            append_to: wrapper_element,
+        });
+
         // svg element
         if (!svg_element) {
             // create it
             this.$svg = createSVG('svg', {
-                append_to: wrapper_element,
+                append_to: this.$main_wrapper,
                 class: 'gantt',
             });
         } else {
@@ -363,6 +368,7 @@ export default class Gantt {
         this.make_bars();
         this.make_arrows();
         this.map_arrows_on_bars();
+        this.fill_side_task_list();
         this.set_dimensions();
         this.set_scroll_position(this.options.scroll_to);
     }
@@ -393,6 +399,7 @@ export default class Gantt {
         this.make_grid_background();
         this.make_grid_rows();
         this.make_grid_header();
+        this.make_side_task_list();
         this.make_side_header();
     }
 
@@ -470,6 +477,27 @@ export default class Gantt {
             classes: 'lower-header',
             append_to: this.$header,
         });
+    }
+
+    make_side_task_list() {
+        if (!this.options.enable_side_task_list) {
+            return;
+        }
+
+        this.$side_task_list_fixer_container = this.create_el({
+            width: this.options.side_task_list.width,
+            classes: 'side-task-list-fixer',
+            prepend_to: this.$main_wrapper,
+        });
+
+        this.$side_task_list_container = this.create_el({
+            width: this.options.side_task_list.width,
+            classes: 'side-task-list',
+            append_to: this.$main_wrapper,
+        });
+
+        this.$side_task_list_fixer_container.style.flexBasis =
+            this.options.side_task_list.width + 'px';
     }
 
     make_side_header() {
@@ -758,7 +786,17 @@ export default class Gantt {
         if (!highlightDimensions) return;
     }
 
-    create_el({ left, top, width, height, id, classes, append_to, type }) {
+    create_el({
+        left,
+        top,
+        width,
+        height,
+        id,
+        classes,
+        append_to,
+        prepend_to,
+        type,
+    }) {
         let $el = document.createElement(type || 'div');
         for (let cls of classes.split(' ')) $el.classList.add(cls);
         $el.style.top = top + 'px';
@@ -767,6 +805,7 @@ export default class Gantt {
         if (width) $el.style.width = width + 'px';
         if (height) $el.style.height = height + 'px';
         if (append_to) append_to.appendChild($el);
+        if (prepend_to) prepend_to.prepend($el);
         return $el;
     }
 
@@ -857,6 +896,32 @@ export default class Gantt {
             upper_y: 15,
             lower_y: this.options.upper_header_height + 5,
         };
+    }
+
+    fill_side_task_list() {
+        if (!this.options.enable_side_task_list) {
+            return;
+        }
+
+        this.tasks.forEach((task, index) => {
+            const taskRow = this.create_el({
+                classes: 'side-task-list-row',
+                append_to: this.$side_task_list_container,
+            });
+            taskRow.textContent = task.name;
+
+            taskRow.style.height =
+                this.options.bar_height + this.options.padding + 'px';
+        });
+
+        // add empty row for cover little empty row from grid
+        const emptyTaskRow = this.create_el({
+            classes: 'side-task-list-row',
+            append_to: this.$side_task_list_container,
+        });
+
+        // adding -1 to remove unnecessary scroll
+        emptyTaskRow.style.height = -1 + this.options.padding / 2 + 'px';
     }
 
     make_bars() {
