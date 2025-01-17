@@ -238,9 +238,9 @@ export default class Gantt {
         if (typeof mode === 'string') {
             mode = this.options.view_modes.find((d) => d.name === mode);
         }
-        let old_date, old_scroll_op;
+        let old_pos, old_scroll_op;
         if (maintain_pos) {
-            old_date = this.current_date;
+            old_pos = this.$container.scrollLeft;
             old_scroll_op = this.options.scroll_to;
             this.options.scroll_to = null;
         }
@@ -250,11 +250,8 @@ export default class Gantt {
         this.setup_dates(maintain_pos);
         this.render();
         if (maintain_pos) {
+            this.$container.scrollLeft = old_pos;
             this.options.scroll_to = old_scroll_op;
-            this.$container.scrollLeft =
-                (date_utils.diff(old_date, this.gantt_start, this.config.unit) /
-                    this.config.step) *
-                this.config.column_width;
         }
         this.trigger_event('view_change', [mode]);
     }
@@ -1094,9 +1091,9 @@ export default class Gantt {
 
     bind_grid_click() {
         $.on(
-            this.$svg,
+            this.$container,
             'click',
-            '.grid-row, .grid-header, .ignored-bar',
+            '.grid-row, .grid-header, .ignored-bar, .holiday-highlight',
             () => {
                 this.unselect_all();
                 this.hide_popup();

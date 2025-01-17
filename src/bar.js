@@ -51,6 +51,8 @@ export default class Bar {
         this.invalid = this.task.invalid;
         this.height = this.gantt.options.bar_height;
         this.image_size = this.height - 5;
+        this.task._start = new Date(this.task.start);
+        this.task._end = new Date(this.task.end);
         this.compute_x();
         this.compute_y();
         this.compute_duration();
@@ -153,8 +155,8 @@ export default class Bar {
             y: this.y,
             width: this.progress_width,
             height: this.height,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
+            rx: this.corner_radius + 2,
+            ry: this.corner_radius + 2,
             class: 'bar-progress',
             append_to: this.bar_group,
         });
