@@ -404,9 +404,9 @@ export default class Bar {
             const xs = this.task.dependencies.map((dep) => {
                 return this.gantt.get_bar(dep).$bar.getX();
             });
-            const valid_x = xs.reduce((_, curr) => {
-                return x >= curr;
-            }, x);
+            const valid_x = xs.reduce((prev, curr) => {
+                return prev && x >= curr;
+            }, true);
             if (!valid_x) return;
             this.update_attr(bar, 'x', x);
             this.x = x;
