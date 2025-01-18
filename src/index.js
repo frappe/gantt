@@ -118,7 +118,7 @@ export default class Gantt {
             this.config.ignored_function = this.options.ignore;
         }
 
-        if (this.options.enable_side_task_list) {
+        if (this.options.enable_left_sidebar_list) {
             this.options.scroll_to = 'start';
         }
 
@@ -399,7 +399,7 @@ export default class Gantt {
         this.make_bars();
         this.make_arrows();
         this.map_arrows_on_bars();
-        this.fill_side_task_list();
+        this.fill_left_sidebar_list();
         this.set_dimensions();
         this.set_scroll_position(this.options.scroll_to);
     }
@@ -430,7 +430,7 @@ export default class Gantt {
         this.make_grid_background();
         this.make_grid_rows();
         this.make_grid_header();
-        this.make_side_task_list();
+        this.make_left_sidebar_list();
         this.make_side_header();
     }
 
@@ -513,25 +513,25 @@ export default class Gantt {
         });
     }
 
-    make_side_task_list() {
-        if (!this.options.enable_side_task_list) {
+    make_left_sidebar_list() {
+        if (!this.options.enable_left_sidebar_list) {
             return;
         }
 
-        this.$side_task_list_fixer_container = this.create_el({
-            width: this.options.side_task_list.width,
-            classes: 'side-task-list-fixer',
+        this.$left_sidebar_list_fixer_container = this.create_el({
+            width: this.options.left_sidebar_list.width,
+            classes: 'left-sidebar-list-fixer',
             prepend_to: this.$main_wrapper,
         });
 
-        this.$side_task_list_container = this.create_el({
-            width: this.options.side_task_list.width,
-            classes: 'side-task-list',
+        this.$left_sidebar_list_container = this.create_el({
+            width: this.options.left_sidebar_list.width,
+            classes: 'left-sidebar-list',
             append_to: this.$main_wrapper,
         });
 
-        this.$side_task_list_fixer_container.style.flexBasis =
-            this.options.side_task_list.width + 'px';
+        this.$left_sidebar_list_fixer_container.style.flexBasis =
+            this.options.left_sidebar_list.width + 'px';
     }
 
     make_side_header() {
@@ -932,8 +932,8 @@ export default class Gantt {
         };
     }
 
-    fill_side_task_list() {
-        if (!this.options.enable_side_task_list) {
+    fill_left_sidebar_list() {
+        if (!this.options.enable_left_sidebar_list) {
             return;
         }
 
@@ -943,8 +943,8 @@ export default class Gantt {
 
         itemList.forEach((item, index) => {
             const row = this.create_el({
-                classes: 'side-task-list-row',
-                append_to: this.$side_task_list_container,
+                classes: 'left-sidebar-list-row',
+                append_to: this.$left_sidebar_list_container,
             });
             row.textContent = item.name;
 
@@ -954,8 +954,8 @@ export default class Gantt {
 
         // add empty row for cover little empty row from grid
         const emptyRow = this.create_el({
-            classes: 'side-task-list-row',
-            append_to: this.$side_task_list_container,
+            classes: 'left-sidebar-list-row',
+            append_to: this.$left_sidebar_list_container,
         });
 
         // adding -1 to remove unnecessary scroll

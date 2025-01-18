@@ -346,7 +346,7 @@
     }
 }
 
-.side-task-list {
+.left-sidebar-list {
     border-right: var(--g-border-color);
     bottom: 0;
     box-shadow: 5px 0px 5px -5px rgba(0, 0, 0, 0.3);
@@ -354,7 +354,7 @@
     position: absolute;
     z-index: 1001;
 
-    & .side-task-list-row {
+    & .left-sidebar-list-row {
         align-items: center;
         background: var(--g-row-color);
         display: flex;
@@ -366,7 +366,7 @@
         text-align: left;
     }
 
-    & .side-task-list-row:not(:last-child) {
+    & .left-sidebar-list-row:not(:last-child) {
         border-bottom: 1px solid var(--g-border-color);
         box-sizing: border-box;
     }

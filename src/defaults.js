@@ -115,7 +115,7 @@ const DEFAULT_OPTIONS = {
     container_height: 'auto',
     column_width: null,
     date_format: 'YYYY-MM-DD HH:mm',
-    enable_side_task_list: false,
+    enable_left_sidebar_list: false,
     holidays: { 'var(--g-weekend-highlight-color)': 'weekend' },
     ignore: [],
     infinite_padding: true,
@@ -155,7 +155,7 @@ const DEFAULT_OPTIONS = {
     readonly: false,
     scroll_to: 'today',
     show_expected_progress: false,
-    side_task_list: {
+    left_sidebar_list: {
         display_bar_labels: false,
         width: 200,
     },
