@@ -125,7 +125,12 @@ const DEFAULT_OPTIONS = {
     move_dependencies: true,
     padding: 18,
     popup: (ctx) => {
-        ctx.set_title(ctx.task.name);
+        let title = ctx.task.name;
+        if (ctx.task_group) {
+            title = `${ctx.task.name} (${ctx.task_group.name})`;
+        }
+        ctx.set_title(title);
+
         if (ctx.task.description) ctx.set_subtitle(ctx.task.description);
         else ctx.set_subtitle('');
 
