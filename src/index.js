@@ -441,11 +441,14 @@ export default class Gantt {
 
     make_grid_background() {
         const grid_width = this.dates.length * this.config.column_width;
+        const itemList = this.options.task_groups_enabled
+            ? this.options.task_groups
+            : this.tasks;
         const grid_height = Math.max(
             this.config.header_height +
                 this.options.padding +
                 (this.options.bar_height + this.options.padding) *
-                    this.tasks.length -
+                    itemList.length -
                 10,
             this.options.container_height !== 'auto'
                 ? this.options.container_height
@@ -934,25 +937,29 @@ export default class Gantt {
             return;
         }
 
-        this.tasks.forEach((task, index) => {
-            const taskRow = this.create_el({
+        const itemList = this.options.task_groups_enabled
+            ? this.options.task_groups
+            : this.tasks;
+
+        itemList.forEach((item, index) => {
+            const row = this.create_el({
                 classes: 'side-task-list-row',
                 append_to: this.$side_task_list_container,
             });
-            taskRow.textContent = task.name;
+            row.textContent = item.name;
 
-            taskRow.style.height =
+            row.style.height =
                 this.options.bar_height + this.options.padding + 'px';
         });
 
         // add empty row for cover little empty row from grid
-        const emptyTaskRow = this.create_el({
+        const emptyRow = this.create_el({
             classes: 'side-task-list-row',
             append_to: this.$side_task_list_container,
         });
 
         // adding -1 to remove unnecessary scroll
-        emptyTaskRow.style.height = -1 + this.options.padding / 2 + 'px';
+        emptyRow.style.height = -1 + this.options.padding / 2 + 'px';
     }
 
     make_bars() {
@@ -1649,6 +1656,12 @@ export default class Gantt {
             .reduce((prev_date, cur_date) =>
                 cur_date <= prev_date ? cur_date : prev_date,
             );
+    }
+
+    get_task_group_for_task(task) {
+        return this.options.task_groups.find(
+            (task_group) => task_group.id === task.task_group_id,
+        );
     }
 
     /**

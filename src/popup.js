@@ -25,9 +25,7 @@ export default class Popup {
     show({ x, y, task, target }) {
         this.actions.innerHTML = '';
         // TODO: if task_group is not found, should this fail?
-        const task_group = this.gantt.options.task_groups.find(
-            (task_group) => task_group.id === task.task_group_id,
-        );
+        const task_group = this.gantt.get_task_group_for_task(task);
         let html = this.popup_func({
             task,
             task_group,
