@@ -95,7 +95,7 @@ Frappe Gantt offers a wide range of options to customize your chart.
 | `view_mode`                | The initial view mode of the Gantt chart.                                          | `Day`, `Week`, `Month`, `Year`.           | `Day`                            |
 | `view_mode_select`         | Allows selecting the view mode from a dropdown.                                 | `true`, `false`                                    | `false`                            |
 
-Apart from these ones, four options - `left_sidebar_list_config`, `popup`, `task_groups` and `view_modes` (plural, not singular) - are available. They have "sub"-APIs, and thus are listed separately.
+Apart from these ones, four options - `custom_config_bar`, `left_sidebar_list_config`, `popup`, `task_groups` and `view_modes` (plural, not singular) - are available. They have "sub"-APIs, and thus are listed separately.
 
 #### View Mode Configuration
 The `view_modes` option determines all the available view modes for the chart. It should be an array of objects.
@@ -129,9 +129,12 @@ The function receives one object as an argument, containing:
 - `set_title`, `set_subtitle`, `set_details` (functions) - take in the HTML of the relevant section
 - `add_action` (function) - accepts two parameters, `html` and `func` - respectively determining the HTML of the action and the callback when the action is pressed.
 
+#### Custom Config Bar
+`custom_config_bar` is an function that should return an object to configure bars. Options from this object:
+- `label` (string) - the label displayed inside the bar. If it's not defined, name of task will be used
+
 #### Left Sidebar List Configuration
 `left_sidebar_list_config` is an object.
-- `display_bar_labels` (boolean) - define if labels are displayed in bars
 - `width`, the width of the sidebar (in pixels)
 
 #### Task Groups Configuration

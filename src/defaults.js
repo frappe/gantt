@@ -114,6 +114,7 @@ const DEFAULT_OPTIONS = {
     bar_height: 30,
     container_height: 'auto',
     column_width: null,
+    custom_config_bar: null,
     date_format: 'YYYY-MM-DD HH:mm',
     enable_left_sidebar_list: false,
     holidays: { 'var(--g-weekend-highlight-color)': 'weekend' },
@@ -121,7 +122,6 @@ const DEFAULT_OPTIONS = {
     infinite_padding: true,
     language: 'en',
     left_sidebar_list_config: {
-        display_bar_labels: false,
         width: 200,
     },
     lines: 'both',

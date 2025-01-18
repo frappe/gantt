@@ -48,6 +48,9 @@ export default class Bar {
     }
 
     prepare_values() {
+        const { label } = this.get_config();
+        this.label = label;
+
         this.invalid = this.task.invalid;
         this.height = this.gantt.options.bar_height;
         this.image_size = this.height - 5;
@@ -60,6 +63,21 @@ export default class Bar {
         this.width = this.gantt.config.column_width * this.duration;
         if (this.task.progress < 0) this.task.progress = 0;
         if (this.task.progress > 100) this.task.progress = 100;
+    }
+
+    get_config() {
+        const default_config = {
+            label: this.task.name,
+        };
+
+        if (typeof this.gantt.options.custom_config_bar === 'function') {
+            return {
+                ...default_config,
+                ...this.gantt.options.custom_config_bar({ task: this.task }),
+            };
+        }
+
+        return default_config;
     }
 
     prepare_helpers() {
@@ -220,15 +238,10 @@ export default class Bar {
             x_coord = this.x + this.image_size + 5;
         }
 
-        const displayBarLabel =
-            !this.gantt.options.enable_left_sidebar_list ||
-            (this.gantt.options.enable_left_sidebar_list &&
-                this.gantt.options.left_sidebar_list_config.display_bar_labels);
-
         createSVG('text', {
             x: x_coord,
             y: this.y + this.height / 2,
-            innerHTML: displayBarLabel ? this.task.name : '',
+            innerHTML: this.label,
             class: 'bar-label',
             append_to: this.bar_group,
         });

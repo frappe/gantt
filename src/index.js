@@ -118,7 +118,10 @@ export default class Gantt {
             this.config.ignored_function = this.options.ignore;
         }
 
-        if (this.options.enable_left_sidebar_list) {
+        if (
+            !this.original_options.scroll_to &&
+            this.options.enable_left_sidebar_list
+        ) {
             this.options.scroll_to = 'start';
         }
 
