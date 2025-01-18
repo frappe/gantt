@@ -77,7 +77,7 @@ export default class Gantt {
 
     setup_options(options) {
         this.original_options = options;
-        this.options = { ...DEFAULT_OPTIONS, ...options };
+        this.options = deepMerge(DEFAULT_OPTIONS, options);
         const CSS_VARIABLES = {
             'grid-height': 'container_height',
             'bar-height': 'bar_height',
@@ -1648,4 +1648,15 @@ function generate_id(task) {
 
 function sanitize(s) {
     return s.replaceAll(' ', '_').replaceAll(':', '_').replaceAll('.', '_');
+}
+
+function deepMerge(target, source) {
+    for (const key in source) {
+        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+            target[key] = deepMerge(target[key] || {}, source[key]);
+        } else {
+            target[key] = source[key];
+        }
+    }
+    return target;
 }

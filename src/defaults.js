@@ -151,6 +151,7 @@ const DEFAULT_OPTIONS = {
     scroll_to: 'today',
     show_expected_progress: false,
     side_task_list: {
+        display_bar_labels: false,
         width: 200,
     },
     snap_at: null,
