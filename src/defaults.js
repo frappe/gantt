@@ -120,6 +120,10 @@ const DEFAULT_OPTIONS = {
     ignore: [],
     infinite_padding: true,
     language: 'en',
+    left_sidebar_list_config: {
+        display_bar_labels: false,
+        width: 200,
+    },
     lines: 'both',
     lower_header_height: 30,
     move_dependencies: true,
@@ -150,15 +154,11 @@ const DEFAULT_OPTIONS = {
         );
     },
     popup_on: 'click',
+    readonly: false,
     readonly_progress: false,
     readonly_dates: false,
-    readonly: false,
     scroll_to: 'today',
     show_expected_progress: false,
-    left_sidebar_list_config: {
-        display_bar_labels: false,
-        width: 200,
-    },
     snap_at: null,
     task_groups: [],
     task_groups_enabled: false,
