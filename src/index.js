@@ -441,14 +441,14 @@ export default class Gantt {
 
     make_grid_background() {
         const grid_width = this.dates.length * this.config.column_width;
-        const itemList = this.options.task_groups_enabled
+        const sidebar_list_items = this.options.task_groups_enabled
             ? this.options.task_groups
             : this.tasks;
         const grid_height = Math.max(
             this.config.header_height +
                 this.options.padding +
                 (this.options.bar_height + this.options.padding) *
-                    itemList.length -
+                    sidebar_list_items.length -
                 10,
             this.options.container_height !== 'auto'
                 ? this.options.container_height
@@ -937,11 +937,11 @@ export default class Gantt {
             return;
         }
 
-        const itemList = this.options.task_groups_enabled
+        const sidebar_list_items = this.options.task_groups_enabled
             ? this.options.task_groups
             : this.tasks;
 
-        itemList.forEach((item, index) => {
+        sidebar_list_items.forEach((item, index) => {
             const row = this.create_el({
                 classes: 'left-sidebar-list-row',
                 append_to: this.$left_sidebar_list_container,
