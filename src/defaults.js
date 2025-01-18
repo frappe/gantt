@@ -155,7 +155,7 @@ const DEFAULT_OPTIONS = {
     readonly: false,
     scroll_to: 'today',
     show_expected_progress: false,
-    left_sidebar_list: {
+    left_sidebar_list_config: {
         display_bar_labels: false,
         width: 200,
     },

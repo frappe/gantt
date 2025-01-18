@@ -519,19 +519,19 @@ export default class Gantt {
         }
 
         this.$left_sidebar_list_fixer_container = this.create_el({
-            width: this.options.left_sidebar_list.width,
+            width: this.options.left_sidebar_list_config.width,
             classes: 'left-sidebar-list-fixer',
             prepend_to: this.$main_wrapper,
         });
 
         this.$left_sidebar_list_container = this.create_el({
-            width: this.options.left_sidebar_list.width,
+            width: this.options.left_sidebar_list_config.width,
             classes: 'left-sidebar-list',
             append_to: this.$main_wrapper,
         });
 
         this.$left_sidebar_list_fixer_container.style.flexBasis =
-            this.options.left_sidebar_list.width + 'px';
+            this.options.left_sidebar_list_config.width + 'px';
     }
 
     make_side_header() {

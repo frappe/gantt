@@ -223,7 +223,7 @@ export default class Bar {
         const displayBarLabel =
             !this.gantt.options.enable_left_sidebar_list ||
             (this.gantt.options.enable_left_sidebar_list &&
-                this.gantt.options.left_sidebar_list.display_bar_labels);
+                this.gantt.options.left_sidebar_list_config.display_bar_labels);
 
         createSVG('text', {
             x: x_coord,
