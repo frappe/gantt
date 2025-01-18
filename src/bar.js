@@ -220,7 +220,10 @@ export default class Bar {
             x_coord = this.x + this.image_size + 5;
         }
 
-        const displayBarLabel = !this.gantt.options.enable_side_task_list || this.gantt.options.enable_side_task_list && this.gantt.options.side_task_list.display_bar_labels;
+        const displayBarLabel =
+            !this.gantt.options.enable_side_task_list ||
+            (this.gantt.options.enable_side_task_list &&
+                this.gantt.options.side_task_list.display_bar_labels);
 
         createSVG('text', {
             x: x_coord,
