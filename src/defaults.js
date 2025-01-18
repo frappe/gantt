@@ -155,6 +155,8 @@ const DEFAULT_OPTIONS = {
         width: 200,
     },
     snap_at: null,
+    task_groups: [],
+    task_groups_enabled: false,
     today_button: true,
     upper_header_height: 45,
     view_mode: 'Day',

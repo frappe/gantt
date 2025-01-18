@@ -121,6 +121,10 @@ export default class Gantt {
         if (this.options.enable_side_task_list) {
             this.options.scroll_to = 'start';
         }
+
+        this.options.task_groups_enabled =
+            Array.isArray(this.options.task_groups) &&
+            this.options.task_groups.length > 0;
     }
 
     update_options(options) {
@@ -171,12 +175,10 @@ export default class Gantt {
                     return false;
                 }
 
-                // cache index
-                task._index = i;
-
-                // override the default row index with a custom value for custom row positioning.
-                if (typeof task.row_override === 'number') {
-                    task._index = task.row_override;
+                const { is_valid, message } = this.cache_index(task, i);
+                if (!is_valid) {
+                    console.error(message);
+                    return false;
                 }
 
                 // if hours is not set, assume the last day is full day
@@ -214,6 +216,34 @@ export default class Gantt {
             })
             .filter((t) => t);
         this.setup_dependencies();
+    }
+
+    cache_index(task, index) {
+        if (!this.options.task_groups_enabled) {
+            // set to default behavior
+            task._index = index;
+            return { is_valid: true };
+        }
+
+        if (!task.task_group_id) {
+            return {
+                is_valid: false,
+                message: `missing "task_group_id" property on task "${task.id}" since "task_groups" are defined`,
+            };
+        }
+
+        const task_group_index = this.options.task_groups.findIndex(
+            (task_group) => task_group.id === task.task_group_id,
+        );
+        if (task_group_index < 0) {
+            return {
+                is_valid: false,
+                message: `"task_group_id" not found in "task_groups" for task "${task.id}"`,
+            };
+        }
+
+        task._index = task_group_index;
+        return { is_valid: true };
     }
 
     setup_dependencies() {
