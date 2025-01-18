@@ -117,6 +117,10 @@ export default class Gantt {
         } else {
             this.config.ignored_function = this.options.ignore;
         }
+
+        if (this.options.enable_side_task_list) {
+            this.options.scroll_to = 'start';
+        }
     }
 
     update_options(options) {
