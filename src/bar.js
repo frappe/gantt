@@ -1,3 +1,4 @@
+import color_utils from './color_utils';
 import date_utils from './date_utils';
 import { $, createSVG, animateSVG } from './svg_utils';
 
@@ -243,13 +244,27 @@ export default class Bar {
             x_coord = this.x + this.image_size + 5;
         }
 
-        createSVG('text', {
+        const labelEl = createSVG('text', {
             x: x_coord,
             y: this.y + this.height / 2,
             innerHTML: this.label,
             class: 'bar-label',
             append_to: this.bar_group,
         });
+
+        if (this.task.color) {
+            try {
+                labelEl.style.fill = color_utils.getTextColorForBackground(
+                    this.task.color,
+                );
+            } catch (err) {
+                // do not fail if the text color was invalid
+                // maybe the passed was a name like 'red'
+                // and this feature only supports HEX, HSL and RGB
+                console.warn(err);
+            }
+        }
+
         // labels get BBox in the next tick
         requestAnimationFrame(() => this.update_label_position());
     }
