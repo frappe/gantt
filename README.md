@@ -130,7 +130,13 @@ The function receives one object as an argument, containing:
 - `add_action` (function) - accepts two parameters, `html` and `func` - respectively determining the HTML of the action and the callback when the action is pressed.
 
 #### Custom Config Bar
-`custom_config_bar` is an function that should return an object to configure bars. Options from this object:
+`custom_config_bar` is a function that should return an object to configure bars. Options from this object:
+
+The function receives one object as an argument, containing:
+- `task` - the task as an object
+- `task_group` - the related task group as an object. **NOTE:** it is `undefined` if task groups feature is disabled
+
+The returned object may contain:
 - `label` (string) - the label displayed inside the bar. If it's not defined, name of task will be used
 
 #### Left Sidebar List Configuration

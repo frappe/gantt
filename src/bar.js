@@ -71,9 +71,14 @@ export default class Bar {
         };
 
         if (typeof this.gantt.options.custom_config_bar === 'function') {
+            // TODO: if task_group is not found, should this fail?
+            const task_group = this.gantt.get_task_group_for_task(this.task);
             return {
                 ...default_config,
-                ...this.gantt.options.custom_config_bar({ task: this.task }),
+                ...this.gantt.options.custom_config_bar({
+                    task: this.task,
+                    task_group,
+                }),
             };
         }
 
