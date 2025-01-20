@@ -141,7 +141,6 @@
         background-color: var(--g-actions-background);
         text-align: -webkit-center;
         text-align: center;
-        height: 1.75rem;
         border-radius: 0.5rem;
         border: none;
         padding: 5px 8px;
@@ -153,6 +152,8 @@
         height: 20px;
         box-sizing: content-box;
 
+        margin-right: 5px;
+
         &:last-child {
             margin-right: 0;
         }
@@ -163,9 +164,9 @@
     }
 
     & .side-header select {
-        padding: 0;
-        padding-right: 1rem;
-        width: 85px;
+        padding-right: 1.25rem;
+        width: 50px;
+        padding-left: 4px;
     }
 
     & .date-range-highlight {
