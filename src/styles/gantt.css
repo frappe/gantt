@@ -114,13 +114,13 @@
     & .current-upper {
         position: sticky;
         left: 0 !important;
-        padding: 0 calc(var(--gv-lower-header-height) * 0.33);
+        padding: 0 15px;
         background: white;
     }
 
     & .side-header {
         position: sticky;
-        top: 5px;
+        top: 0;
         right: 0;
         float: right;
 
@@ -129,8 +129,8 @@
         font-weight: 400;
         width: max-content;
         margin-left: auto;
-        padding-right: 5px;
-        padding-top: 5px;
+        padding-right: 15px;
+        padding-top: 10px;
         background: var(--g-header-background);
     }
 
@@ -144,14 +144,14 @@
         height: 1.75rem;
         border-radius: 0.5rem;
         border: none;
-        padding: 0 0.5rem;
+        padding: 5px 8px;
         color: var(--g-text-dark);
         position: sticky;
-        margin: 5px;
         font-size: 14px;
-        line-height: 1.15;
         letter-spacing: 0.02em;
         font-weight: 420;
+        height: 20px;
+        box-sizing: content-box;
 
         &:last-child {
             margin-right: 0;
