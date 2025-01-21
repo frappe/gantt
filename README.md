@@ -55,6 +55,14 @@ let tasks = [
     end: '2016-12-31',
     progress: 20,
     task_group_id: 'task-group-1',
+    annotations: {
+      'red': [
+        {
+          date: '2016-12-30',
+          name: 'Mom\'s birthday'
+        },
+      ]
+    }
   },
   ...
 ]

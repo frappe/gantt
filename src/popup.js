@@ -22,13 +22,10 @@ export default class Popup {
         this.actions = this.parent.querySelector('.actions');
     }
 
-    show({ x, y, task, target }) {
+    show({ x, y, target, ...data }) {
         this.actions.innerHTML = '';
-        // TODO: if task_group is not found, should this fail?
-        const task_group = this.gantt.get_task_group_for_task(task);
         let html = this.popup_func({
-            task,
-            task_group,
+            ...data,
             chart: this.gantt,
             get_title: () => this.title,
             set_title: (title) => (this.title.innerHTML = title),

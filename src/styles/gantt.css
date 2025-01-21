@@ -16,7 +16,7 @@
     border-radius: 8px;
 
     & .popup-wrapper {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         background: #fff;
@@ -24,7 +24,7 @@
         padding: 10px;
         border-radius: 5px;
         width: max-content;
-        z-index: 1000;
+        z-index: 1001;
 
         & .title {
             margin-bottom: 2px;

@@ -115,6 +115,7 @@ export default class Bar {
     draw() {
         this.draw_bar();
         this.draw_progress_bar();
+        this.draw_all_annotations();
         if (this.gantt.options.show_expected_progress) {
             this.prepare_expected_progress_values();
             this.draw_expected_progress_bar();
@@ -204,6 +205,90 @@ export default class Bar {
         this.gantt.$lower_header.prepend(this.$date_highlight);
 
         animateSVG(this.$bar_progress, 'width', 0, this.progress_width);
+    }
+
+    draw_all_annotations() {
+        if (!this.task.annotations) {
+            return;
+        }
+
+        for (let color in this.task.annotations) {
+            const annotations = this.task.annotations[color];
+            for (let index = 0; index < annotations.length; index++) {
+                const bar_annotation = this.draw_annotation(
+                    color,
+                    annotations[index],
+                );
+                this.setup_annotation_popup(annotations[index], bar_annotation);
+            }
+        }
+    }
+
+    draw_annotation(color, annotation) {
+        const x =
+            (date_utils.diff(
+                date_utils.parse(annotation.date),
+                this.gantt.gantt_start,
+                this.gantt.config.unit,
+            ) /
+                this.gantt.config.step) *
+            this.gantt.config.column_width;
+
+        const bar_annotation = createSVG('rect', {
+            // TODO: so far, 4 pixels need to be substracted
+            // from the x position to match properly in the UI.
+            // Is there a way to improve this?
+            x: x - 4,
+            y: this.y,
+            width:
+                this.gantt.config.column_width /
+                date_utils.convert_scales(
+                    this.gantt.config.view_mode.step,
+                    'day',
+                ),
+            height: this.height,
+            rx: this.corner_radius + 2,
+            ry: this.corner_radius + 2,
+            class: 'bar-progress',
+            append_to: this.bar_group,
+        });
+        bar_annotation.style.fill = color;
+
+        return bar_annotation;
+    }
+
+    setup_annotation_popup(annotation, bar_annotation) {
+        let timeout;
+
+        $.on(bar_annotation, 'mouseenter', (e) => {
+            timeout = setTimeout(() => {
+                this.gantt.show_popup({
+                    x: e.clientX,
+                    y: e.clientY,
+                    // TODO: creating and passing a task object
+                    // from annotations since current popup implementation
+                    // depends entirely on tasks and now we have multiple
+                    // components like sidebar items or annotations.
+                    task: {
+                        name: annotation.name,
+                        _start: date_utils.parse(annotation.date),
+                        _end: date_utils.add(
+                            date_utils.parse(annotation.date),
+                            1,
+                            'day',
+                        ),
+                        actual_duration: 1,
+                        progress: this.task.progress,
+                    },
+                    target: bar_annotation,
+                });
+            }, 200);
+        });
+
+        $.on(bar_annotation, 'mouseleave', () => {
+            clearTimeout(timeout);
+            this.gantt.popup?.hide?.();
+        });
     }
 
     calculate_progress_width() {
@@ -387,9 +472,10 @@ export default class Bar {
                     if (this.gantt.bar_being_dragged) return;
                 }
                 this.gantt.show_popup({
-                    x: e.offsetX || e.layerX,
-                    y: e.offsetY || e.layerY,
+                    x: e.clientX,
+                    y: e.clientY,
                     task: this.task,
+                    task_group: this.gantt.get_task_group_for_task(this.task),
                     target: this.$bar,
                 });
             });
@@ -399,9 +485,12 @@ export default class Bar {
             timeout = setTimeout(() => {
                 if (this.gantt.options.popup_on === 'hover')
                     this.gantt.show_popup({
-                        x: e.offsetX || e.layerX,
-                        y: e.offsetY || e.layerY,
+                        x: e.clientX,
+                        y: e.clientY,
                         task: this.task,
+                        task_group: this.gantt.get_task_group_for_task(
+                            this.task,
+                        ),
                         target: this.$bar,
                     });
                 this.gantt.$container
