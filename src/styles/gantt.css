@@ -75,6 +75,7 @@
         position: sticky;
         top: 0;
         left: 0;
+        border-bottom: 1px solid var(--g-row-border-color);
         z-index: 1000;
     }
 
@@ -106,7 +107,7 @@
         position: absolute;
         width: fit-content;
         font-weight: 500;
-        font-size: 16px;
+        font-size: 14px;
         color: var(--g-text-dark);
         height: calc(var(--gv-lower-header-height) * 0.66);
     }
@@ -114,7 +115,7 @@
     & .current-upper {
         position: sticky;
         left: 0 !important;
-        padding: 0 15px;
+        padding-left: 17px;
         background: white;
     }
 
@@ -129,9 +130,10 @@
         font-weight: 400;
         width: max-content;
         margin-left: auto;
-        padding-right: 15px;
+        padding-right: 10px;
         padding-top: 10px;
         background: var(--g-header-background);
+        display: flex;
     }
 
     & .side-header * {
@@ -145,7 +147,6 @@
         border: none;
         padding: 5px 8px;
         color: var(--g-text-dark);
-        position: sticky;
         font-size: 14px;
         letter-spacing: 0.02em;
         font-weight: 420;
@@ -325,7 +326,7 @@
             cursor: pointer;
 
         & .bar {
-            outline: 1px solid black;
+            outline: 1px solid var(--g-row-border-color);
             border-radius: 3px;
         }
 

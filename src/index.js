@@ -240,7 +240,7 @@ export default class Gantt {
         this.setup_dates(maintain_pos);
         this.render();
         if (maintain_pos) {
-            this.$container.scrollLeft =old_pos;
+            this.$container.scrollLeft = old_pos;
             this.options.scroll_to = old_scroll_op;
         }
         this.trigger_event('view_change', [mode]);
@@ -846,7 +846,7 @@ export default class Gantt {
                 last_date,
                 this.options.language,
             ),
-            upper_y: 15,
+            upper_y: 17,
             lower_y: this.options.upper_header_height + 5,
         };
     }
