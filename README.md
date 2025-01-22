@@ -130,6 +130,7 @@ For details, see the above table.
 - a HTML string, the popup will be that string.
 
 The function receives one object as an argument, containing:
+- `type` - a string defining the type of component related: `annotation` or `task`
 - `task` - the task as an object
 - `task_group` - the related task group as an object. **NOTE:** it is `undefined` if task groups feature is disabled
 - `chart` - the entire Gantt chart

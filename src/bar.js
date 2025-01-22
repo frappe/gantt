@@ -265,6 +265,7 @@ export default class Bar {
                 this.gantt.show_popup({
                     x: e.clientX,
                     y: e.clientY,
+                    type: 'annotation',
                     // TODO: creating and passing a task object
                     // from annotations since current popup implementation
                     // depends entirely on tasks and now we have multiple
@@ -474,6 +475,7 @@ export default class Bar {
                 this.gantt.show_popup({
                     x: e.clientX,
                     y: e.clientY,
+                    type: 'task',
                     task: this.task,
                     task_group: this.gantt.get_task_group_for_task(this.task),
                     target: this.$bar,
@@ -487,6 +489,7 @@ export default class Bar {
                     this.gantt.show_popup({
                         x: e.clientX,
                         y: e.clientY,
+                        type: 'task',
                         task: this.task,
                         task_group: this.gantt.get_task_group_for_task(
                             this.task,
