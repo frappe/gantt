@@ -142,7 +142,6 @@
         transition-duration: 150ms;
         background-color: var(--g-actions-background);
         text-align: -webkit-center;
-        text-align: center;
         border-radius: 0.5rem;
         border: none;
         padding: 5px 8px;
@@ -150,7 +149,6 @@
         font-size: 14px;
         letter-spacing: 0.02em;
         font-weight: 420;
-        height: 20px;
         box-sizing: content-box;
 
         margin-right: 5px;
@@ -167,7 +165,6 @@
     & .side-header select {
         padding-right: 1.25rem;
         width: 50px;
-        padding-left: 4px;
     }
 
     & .date-range-highlight {
