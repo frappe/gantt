@@ -58,7 +58,7 @@ export default class Bar {
         this.compute_duration();
         this.corner_radius = this.gantt.options.bar_corner_radius;
         this.width = this.gantt.config.column_width * this.duration;
-        if (this.task.progress < 0) this.task.progress = 0;
+        if (!this.task.progress || this.task.progress < 0) this.task.progress = 0;
         if (this.task.progress > 100) this.task.progress = 100;
     }
 
@@ -111,11 +111,7 @@ export default class Bar {
             height: this.height,
             rx: this.corner_radius,
             ry: this.corner_radius,
-            class:
-                'bar' +
-                (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)
-                    ? ' safari'
-                    : ''),
+            class: 'bar',
             append_to: this.bar_group,
         });
         if (this.task.color) this.$bar.style.fill = this.task.color;
@@ -150,13 +146,16 @@ export default class Bar {
     draw_progress_bar() {
         if (this.invalid) return;
         this.progress_width = this.calculate_progress_width();
+        let r = this.corner_radius;
+        if (!/^((?!chrome|android).)*safari/i.test(navigator.userAgent))
+            r = this.corner_radius + 2;
         this.$bar_progress = createSVG('rect', {
             x: this.x,
             y: this.y,
             width: this.progress_width,
             height: this.height,
-            rx: this.corner_radius + 2,
-            ry: this.corner_radius + 2,
+            rx: r,
+            ry: r,
             class: 'bar-progress',
             append_to: this.bar_group,
         });

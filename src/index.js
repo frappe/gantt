@@ -846,7 +846,7 @@ export default class Gantt {
                 last_date,
                 this.options.language,
             ),
-            upper_y: 15,
+            upper_y: 17,
             lower_y: this.options.upper_header_height + 5,
         };
     }
@@ -1335,7 +1335,6 @@ export default class Gantt {
 
     bind_bar_progress() {
         let x_on_start = 0;
-        let y_on_start = 0;
         let is_resizing = null;
         let bar = null;
         let $bar_progress = null;
