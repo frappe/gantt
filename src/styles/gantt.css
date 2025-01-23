@@ -75,6 +75,7 @@
         position: sticky;
         top: 0;
         left: 0;
+        border-bottom: 1px solid var(--g-row-border-color);
         z-index: 1000;
     }
 
@@ -106,7 +107,7 @@
         position: absolute;
         width: fit-content;
         font-weight: 500;
-        font-size: 16px;
+        font-size: 14px;
         color: var(--g-text-dark);
         height: calc(var(--gv-lower-header-height) * 0.66);
     }
@@ -114,13 +115,13 @@
     & .current-upper {
         position: sticky;
         left: 0 !important;
-        padding: 0 calc(var(--gv-lower-header-height) * 0.33);
+        padding-left: 17px;
         background: white;
     }
 
     & .side-header {
         position: sticky;
-        top: 5px;
+        top: 0;
         right: 0;
         float: right;
 
@@ -129,9 +130,10 @@
         font-weight: 400;
         width: max-content;
         margin-left: auto;
-        padding-right: 5px;
-        padding-top: 5px;
+        padding-right: 10px;
+        padding-top: 10px;
         background: var(--g-header-background);
+        display: flex;
     }
 
     & .side-header * {
@@ -140,18 +142,16 @@
         transition-duration: 150ms;
         background-color: var(--g-actions-background);
         text-align: -webkit-center;
-        text-align: center;
-        height: 1.75rem;
         border-radius: 0.5rem;
         border: none;
-        padding: 0 0.5rem;
+        padding: 5px 8px;
         color: var(--g-text-dark);
-        position: sticky;
-        margin: 5px;
         font-size: 14px;
-        line-height: 1.15;
         letter-spacing: 0.02em;
         font-weight: 420;
+        box-sizing: content-box;
+
+        margin-right: 5px;
 
         &:last-child {
             margin-right: 0;
@@ -163,9 +163,8 @@
     }
 
     & .side-header select {
-        padding: 0;
-        padding-right: 1rem;
-        width: 85px;
+        padding-right: 1.25rem;
+        width: 50px;
     }
 
     & .date-range-highlight {
@@ -274,6 +273,7 @@
 
     & .bar-progress {
         fill: var(--g-progress-color);
+        border-radius: 4px;
     }
 
     & .bar-expected-progress {
@@ -320,16 +320,11 @@
     }
 
     & .bar-wrapper {
-        cursor: pointer;
+            cursor: pointer;
 
         & .bar {
-            -webkit-filter: drop-shadow(1px 1px 2px rgba(15, 15, 15, 0.2));
-            filter: drop-shadow(1px 1px 2px rgba(15, 15, 15, 0.2));
+            outline: 1px solid var(--g-row-border-color);
             border-radius: 3px;
-        }
-
-        & .bar.safari {
-            outline: 1px solid black;
         }
 
         &:hover {
