@@ -1,4 +1,4 @@
-import date_utils from './date_utils';
+import date_utils from './date_utils.js';
 
 function getDecade(d) {
     const year = d.getFullYear();

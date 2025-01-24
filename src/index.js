@@ -1,11 +1,11 @@
-import date_utils from './date_utils';
-import { $, createSVG } from './svg_utils';
+import date_utils from './date_utils.js';
+import { $, createSVG } from './svg_utils.js';
 
-import Arrow from './arrow';
-import Bar from './bar';
-import Popup from './popup';
+import Arrow from './arrow.js';
+import Bar from './bar.js';
+import Popup from './popup.js';
 
-import { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES } from './defaults';
+import { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES } from './defaults.js';
 
 import './styles/gantt.css';
 
