@@ -716,6 +716,7 @@ export default class Gantt {
                         class: 'holiday-highlight',
                         style: `fill: ${color};`,
                         append_to: this.layers.grid,
+                        date: date_utils.format(d, 'YYYY-MM-DD', this.options.language),
                     });
 
                     if (labels[d]) {
@@ -729,37 +730,46 @@ export default class Gantt {
     setup_holiday_popup(label, bar_holiday) {
         let timeout;
 
-        $.on(bar_holiday, 'mouseenter', (e) => {
-            timeout = setTimeout(() => {
-                console.log('hello')
-                this.show_popup({
-                    x: e.clientX,
-                    y: e.clientY,
-                    type: 'holiday',
-                    // TODO: creating and passing a task object
-                    // from annotations since current popup implementation
-                    // depends entirely on tasks and now we have multiple
-                    // components like sidebar items or annotations.
-                    task: {
-                        name: label,
-                        _start: date_utils.parse('2025-01-10'),
-                        _end: date_utils.add(
-                            date_utils.parse('2025-01-10'),
-                            1,
-                            'day',
-                        ),
-                        actual_duration: 1,
-                        progress: 1,
-                    },
-                    target: bar_holiday,
-                });
-            }, 200);
-        });
+        $.on(
+            this.$container,
+            'mouseover',
+            '.holiday-highlight',
+            (e) => {
+                timeout = setTimeout(() => {
+                    this.show_popup({
+                        x: e.clientX,
+                        y: e.clientY,
+                        type: 'holiday',
+                        // TODO: creating and passing a task object
+                        // from holidays since current popup implementation
+                        // depends entirely on tasks and now we have multiple
+                        // components like sidebar items or annotations.
+                        task: {
+                            name: label,
+                            _start: date_utils.parse(e.target.getAttribute('date')),
+                            _end: date_utils.add(
+                                date_utils.parse(e.target.getAttribute('date')),
+                                1,
+                                'day',
+                            ),
+                            actual_duration: 1,
+                            progress: 1,
+                        },
+                        target: bar_holiday,
+                    });
+                }, 200);
+            },
+        );
 
-        $.on(bar_holiday, 'mouseenter', () => {
-            clearTimeout(timeout);
-            this.popup?.hide?.();
-        });
+        $.on(
+            this.$container,
+            'mouseout',
+            '.holiday-highlight',
+            () => {
+                clearTimeout(timeout);
+                this.popup?.hide?.();
+            },
+        );
     }
 
     /**
@@ -1166,7 +1176,7 @@ export default class Gantt {
         $.on(
             this.$container,
             'click',
-            '.grid-row, .grid-header, .ignored-bar, .holiday-highlight',
+            '.grid-row, .grid-header, .ignored-bar',
             () => {
                 this.unselect_all();
                 this.hide_popup();
