@@ -702,7 +702,7 @@ export default class Gantt {
                             this.config.step) *
                         this.config.column_width;
                     const height = this.grid_height - this.config.header_height;
-                 
+
                     const bar_holiday = createSVG('rect', {
                         x: Math.round(x),
                         y: this.config.header_height,
@@ -716,7 +716,11 @@ export default class Gantt {
                         class: 'holiday-highlight',
                         style: `fill: ${color};`,
                         append_to: this.layers.grid,
-                        date: date_utils.format(d, 'YYYY-MM-DD', this.options.language),
+                        date: date_utils.format(
+                            d,
+                            'YYYY-MM-DD',
+                            this.options.language,
+                        ),
                     });
 
                     if (labels[d]) {
@@ -730,46 +734,36 @@ export default class Gantt {
     setup_holiday_popup(label, bar_holiday) {
         let timeout;
 
-        $.on(
-            this.$container,
-            'mouseover',
-            '.holiday-highlight',
-            (e) => {
-                timeout = setTimeout(() => {
-                    this.show_popup({
-                        x: e.clientX,
-                        y: e.clientY,
-                        type: 'holiday',
-                        // TODO: creating and passing a task object
-                        // from holidays since current popup implementation
-                        // depends entirely on tasks and now we have multiple
-                        // components like sidebar items or annotations.
-                        task: {
-                            name: label,
-                            _start: date_utils.parse(e.target.getAttribute('date')),
-                            _end: date_utils.add(
-                                date_utils.parse(e.target.getAttribute('date')),
-                                1,
-                                'day',
-                            ),
-                            actual_duration: 1,
-                            progress: 1,
-                        },
-                        target: bar_holiday,
-                    });
-                }, 200);
-            },
-        );
+        $.on(this.$container, 'mouseover', '.holiday-highlight', (e) => {
+            timeout = setTimeout(() => {
+                this.show_popup({
+                    x: e.clientX,
+                    y: e.clientY,
+                    type: 'holiday',
+                    // TODO: creating and passing a task object
+                    // from holidays since current popup implementation
+                    // depends entirely on tasks and now we have multiple
+                    // components like sidebar items or annotations.
+                    task: {
+                        name: label,
+                        _start: date_utils.parse(e.target.getAttribute('date')),
+                        _end: date_utils.add(
+                            date_utils.parse(e.target.getAttribute('date')),
+                            1,
+                            'day',
+                        ),
+                        actual_duration: 1,
+                        progress: 1,
+                    },
+                    target: bar_holiday,
+                });
+            }, 200);
+        });
 
-        $.on(
-            this.$container,
-            'mouseout',
-            '.holiday-highlight',
-            () => {
-                clearTimeout(timeout);
-                this.popup?.hide?.();
-            },
-        );
+        $.on(this.$container, 'mouseout', '.holiday-highlight', () => {
+            clearTimeout(timeout);
+            this.popup?.hide?.();
+        });
     }
 
     /**
