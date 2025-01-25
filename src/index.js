@@ -713,29 +713,35 @@ export default class Gantt {
                                 'day',
                             ),
                         height,
-                        class: 'holiday-highlight',
                         style: `fill: ${color};`,
                         append_to: this.layers.grid,
-                        date: date_utils.format(
+                    });
+
+                    if (d && labels[d]) {
+                        // this means is a holiday
+                        bar_holiday.setAttribute('label', labels[d])
+                        bar_holiday.setAttribute('date', date_utils.format(
                             d,
                             'YYYY-MM-DD',
                             this.options.language,
-                        ),
-                    });
-
-                    if (labels[d]) {
-                        this.setup_holiday_popup(labels[d], bar_holiday);
+                        ))
+                        bar_holiday.classList.add('holiday-highlight');
                     }
                 }
             }
+
+            this.setup_holiday_popup();
         }
     }
 
-    setup_holiday_popup(label, bar_holiday) {
+    setup_holiday_popup() {
         let timeout;
 
         $.on(this.$container, 'mouseover', '.holiday-highlight', (e) => {
             timeout = setTimeout(() => {
+                const date = e.target.getAttribute('date');
+                const label = e.target.getAttribute('label');
+
                 this.show_popup({
                     x: e.clientX,
                     y: e.clientY,
@@ -755,7 +761,7 @@ export default class Gantt {
                         actual_duration: 1,
                         progress: 1,
                     },
-                    target: bar_holiday,
+                    target: e.target,
                 });
             }, 200);
         });
