@@ -719,12 +719,15 @@ export default class Gantt {
 
                     if (d && labels[d]) {
                         // this means is a holiday
-                        bar_holiday.setAttribute('label', labels[d])
-                        bar_holiday.setAttribute('date', date_utils.format(
-                            d,
-                            'YYYY-MM-DD',
-                            this.options.language,
-                        ))
+                        bar_holiday.setAttribute('label', labels[d]);
+                        bar_holiday.setAttribute(
+                            'date',
+                            date_utils.format(
+                                d,
+                                'YYYY-MM-DD',
+                                this.options.language,
+                            ),
+                        );
                         bar_holiday.classList.add('holiday-highlight');
                     }
                 }
