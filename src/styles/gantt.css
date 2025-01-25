@@ -202,23 +202,13 @@
         border-radius: 5px;
     }
 
-    & .holiday-label {
-        position: absolute;
-        top: 0;
-        left: 0;
-        opacity: 0;
-        z-index: 1000;
-        background: --g-weekend-label-color;
-        border-radius: 5px;
-        padding: 2px 5px;
-
-        &.show {
-            opacity: 100;
-        }
+    & .holiday-highlight {
+        cursor: pointer;
     }
 
     & .extras {
-        position: sticky;
+        position: fixed;
+        top: 0px;
         left: 0px;
 
         & .adjust {
