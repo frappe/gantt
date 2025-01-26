@@ -161,7 +161,7 @@ export default class Bar {
             append_to: this.bar_group,
         });
         if (this.task.color_progress)
-            this.$bar_progress.style.fill = this.task.color;
+            this.$bar_progress.style.fill = this.task.color_progress;
         const x =
             (date_utils.diff(
                 this.task._start,
