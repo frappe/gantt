@@ -810,7 +810,7 @@ export default class Bar {
                     label.setAttribute('x', bar.getEndX() + padding);
                 }
             } else {
-                label.style.display = "none";
+                label.style.display = 'none';
             }
         } else {
             label.classList.remove('big');
