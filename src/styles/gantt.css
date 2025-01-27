@@ -354,6 +354,14 @@
         font-weight: 400;
         justify-content: center;
         text-align: left;
+
+        &.clickable {
+            cursor: pointer;
+
+            &:hover {
+                background: var(--g-weekend-highlight-color);
+            }
+        }
     }
 
     & .left-sidebar-list-row:not(:last-child) {

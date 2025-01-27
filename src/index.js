@@ -995,6 +995,25 @@ export default class Gantt {
 
             row.style.height =
                 this.options.bar_height + this.options.padding + 'px';
+
+            if (
+                typeof this.options.left_sidebar_list_config.on_click ===
+                'function'
+            ) {
+                row.classList.add('clickable');
+
+                $.on(row, 'click', () => {
+                    const payload = this.options.task_groups_enabled
+                        ? {
+                              task_group: item,
+                          }
+                        : {
+                              task: item,
+                          };
+
+                    this.options.left_sidebar_list_config.on_click(payload);
+                });
+            }
         });
 
         // add empty row for cover little empty row from grid
@@ -1696,6 +1715,8 @@ export default class Gantt {
         this.$side_header?.remove?.();
         this.$current_highlight?.remove?.();
         this.$extras?.remove?.();
+        this.$left_sidebar_list_fixer_container?.remove?.();
+        this.$left_sidebar_list_container?.remove?.();
         this.popup?.hide?.();
     }
 }
