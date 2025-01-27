@@ -49,8 +49,9 @@ export default class Bar {
     }
 
     prepare_values() {
-        const { label } = this.get_config();
+        const { label, show_label_on_offset } = this.get_config();
         this.label = label;
+        this.show_label_on_offset = show_label_on_offset;
 
         this.invalid = this.task.invalid;
         this.height = this.gantt.options.bar_height;
@@ -69,6 +70,7 @@ export default class Bar {
     get_config() {
         const default_config = {
             label: this.task.name,
+            show_label_on_offset: true,
         };
 
         if (typeof this.gantt.options.custom_config_bar === 'function') {
@@ -798,13 +800,17 @@ export default class Bar {
         const labelWidth = label.getBBox().width;
         const barWidth = bar.getWidth();
         if (labelWidth > barWidth) {
-            label.classList.add('big');
-            if (img) {
-                img.setAttribute('x', bar.getEndX() + padding);
-                img_mask.setAttribute('x', bar.getEndX() + padding);
-                label.setAttribute('x', bar.getEndX() + x_offset_label_img);
+            if (this.show_label_on_offset) {
+                label.classList.add('big');
+                if (img) {
+                    img.setAttribute('x', bar.getEndX() + padding);
+                    img_mask.setAttribute('x', bar.getEndX() + padding);
+                    label.setAttribute('x', bar.getEndX() + x_offset_label_img);
+                } else {
+                    label.setAttribute('x', bar.getEndX() + padding);
+                }
             } else {
-                label.setAttribute('x', bar.getEndX() + padding);
+                label.style.display = "none";
             }
         } else {
             label.classList.remove('big');
