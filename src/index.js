@@ -128,6 +128,8 @@ export default class Gantt {
         this.options.task_groups_enabled =
             Array.isArray(this.options.task_groups) &&
             this.options.task_groups.length > 0;
+
+        this.$popup_wrapper.style.zIndex = this.options.base_z_index + 2;
     }
 
     update_options(options) {
@@ -504,6 +506,7 @@ export default class Gantt {
             classes: 'grid-header',
             append_to: this.$container,
         });
+        this.$header.style.zIndex = this.options.base_z_index + 1;
 
         this.$upper_header = this.create_el({
             classes: 'upper-header',
@@ -531,6 +534,8 @@ export default class Gantt {
             classes: 'left-sidebar-list',
             append_to: this.$main_wrapper,
         });
+        this.$left_sidebar_list_container.style.zIndex =
+            this.options.base_z_index + 2;
 
         this.$left_sidebar_list_fixer_container.style.flexBasis =
             this.options.left_sidebar_list_config.width + 'px';
@@ -538,6 +543,7 @@ export default class Gantt {
 
     make_side_header() {
         this.$side_header = this.create_el({ classes: 'side-header' });
+        this.$side_header.style.zIndex = this.options.base_z_index + 1;
         this.$upper_header.prepend(this.$side_header);
 
         // Create view mode change select
@@ -803,6 +809,7 @@ export default class Gantt {
             classes: 'current-highlight',
             append_to: this.$container,
         });
+        this.$current_highlight.style.zIndex = this.options.base_z_index;
         this.$current_ball_highlight = this.create_el({
             top: this.config.header_height - 6,
             left: left - 2.5,
@@ -811,6 +818,8 @@ export default class Gantt {
             classes: 'current-ball-highlight',
             append_to: this.$header,
         });
+        this.$current_ball_highlight.style.zIndex =
+            this.options.base_z_index + 2;
     }
 
     make_grid_highlights() {

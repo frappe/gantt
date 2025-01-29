@@ -112,6 +112,7 @@ const DEFAULT_OPTIONS = {
     auto_move_label: false,
     bar_corner_radius: 3,
     bar_height: 30,
+    base_z_index: 1000,
     container_height: 'auto',
     column_width: null,
     custom_config_bar: null,

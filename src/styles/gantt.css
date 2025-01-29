@@ -24,7 +24,6 @@
         padding: 10px;
         border-radius: 5px;
         width: max-content;
-        z-index: 1001;
 
         & .title {
             margin-bottom: 2px;
@@ -81,7 +80,6 @@
         position: sticky;
         top: 0;
         left: 0;
-        z-index: 1000;
     }
 
     & .lower-text,
@@ -130,7 +128,6 @@
         right: 0;
         float: right;
 
-        z-index: 1000;
         line-height: 20px;
         font-weight: 400;
         width: max-content;
@@ -186,13 +183,11 @@
         position: absolute;
         background: var(--g-today-highlight);
         width: 1px;
-        z-index: 999;
     }
 
     & .current-ball-highlight {
         position: absolute;
         background: var(--g-today-highlight);
-        z-index: 1001;
         border-radius: 50%;
     }
 
@@ -342,7 +337,6 @@
     box-shadow: 5px 0px 5px -5px rgba(0, 0, 0, 0.3);
     overflow-y: auto;
     position: absolute;
-    z-index: 1001;
 
     & .left-sidebar-list-row {
         align-items: center;
