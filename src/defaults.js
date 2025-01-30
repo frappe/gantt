@@ -112,10 +112,12 @@ const DEFAULT_OPTIONS = {
     auto_move_label: false,
     bar_corner_radius: 3,
     bar_height: 30,
+    bar_config: {
+        show_label_on_offset: true,
+    },
     base_z_index: 1000,
     container_height: 'auto',
     column_width: null,
-    custom_config_bar: null,
     date_format: 'YYYY-MM-DD HH:mm',
     enable_left_sidebar_list: false,
     holidays: { 'var(--g-weekend-highlight-color)': 'weekend' },

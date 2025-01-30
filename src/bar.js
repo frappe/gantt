@@ -49,11 +49,6 @@ export default class Bar {
     }
 
     prepare_values() {
-        const { label, show_label_on_offset, on_click } = this.get_config();
-        this.label = label;
-        this.show_label_on_offset = show_label_on_offset;
-        this.on_click = on_click;
-
         this.invalid = this.task.invalid;
         this.height = this.gantt.options.bar_height;
         this.image_size = this.height - 5;
@@ -66,28 +61,6 @@ export default class Bar {
         this.width = this.gantt.config.column_width * this.duration;
         if (this.task.progress < 0) this.task.progress = 0;
         if (this.task.progress > 100) this.task.progress = 100;
-    }
-
-    get_config() {
-        const default_config = {
-            label: this.task.name,
-            show_label_on_offset: true,
-            on_click: null,
-        };
-
-        if (typeof this.gantt.options.custom_config_bar === 'function') {
-            // TODO: if task_group is not found, should this fail?
-            const task_group = this.gantt.get_task_group_for_task(this.task);
-            return {
-                ...default_config,
-                ...this.gantt.options.custom_config_bar({
-                    task: this.task,
-                    task_group,
-                }),
-            };
-        }
-
-        return default_config;
     }
 
     prepare_helpers() {
@@ -334,10 +307,19 @@ export default class Bar {
             x_coord = this.x + this.image_size + 5;
         }
 
+        let label = this.task.name;
+        if (typeof this.gantt.options.bar_config.get_label === 'function') {
+            const task_group = this.gantt.get_task_group_for_task(this.task);
+            label = this.gantt.options.bar_config.get_label({
+                task: this.task,
+                task_group,
+            });
+        }
+
         const labelEl = createSVG('text', {
             x: x_coord,
             y: this.y + this.height / 2,
-            innerHTML: this.label,
+            innerHTML: label,
             class: 'bar-label',
             append_to: this.bar_group,
         });
@@ -458,9 +440,15 @@ export default class Bar {
     }
 
     setup_click_event() {
-        if (this.on_click) {
+        if (this.gantt.options.bar_config.on_click) {
             $.on(this.$bar, 'click', () => {
-                this.on_click();
+                const task_group = this.gantt.get_task_group_for_task(
+                    this.task,
+                );
+                this.gantt.options.bar_config.on_click({
+                    task: this.task,
+                    task_group,
+                });
             });
         }
 
@@ -808,7 +796,7 @@ export default class Bar {
         const labelWidth = label.getBBox().width;
         const barWidth = bar.getWidth();
         if (labelWidth > barWidth) {
-            if (this.show_label_on_offset) {
+            if (this.gantt.options.bar_config.show_label_on_offset) {
                 label.classList.add('big');
                 if (img) {
                     img.setAttribute('x', bar.getEndX() + padding);
