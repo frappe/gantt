@@ -49,9 +49,10 @@ export default class Bar {
     }
 
     prepare_values() {
-        const { label, show_label_on_offset } = this.get_config();
+        const { label, show_label_on_offset, on_click } = this.get_config();
         this.label = label;
         this.show_label_on_offset = show_label_on_offset;
+        this.on_click = on_click;
 
         this.invalid = this.task.invalid;
         this.height = this.gantt.options.bar_height;
@@ -71,6 +72,7 @@ export default class Bar {
         const default_config = {
             label: this.task.name,
             show_label_on_offset: true,
+            on_click: null,
         };
 
         if (typeof this.gantt.options.custom_config_bar === 'function') {
@@ -456,6 +458,12 @@ export default class Bar {
     }
 
     setup_click_event() {
+        if (this.on_click) {
+            $.on(this.$bar, 'click', () => {
+                this.on_click();
+            });
+        }
+
         let task_id = this.task.id;
         $.on(this.group, 'mouseover', (e) => {
             this.gantt.trigger_event('hover', [
