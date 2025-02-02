@@ -212,10 +212,7 @@ export default class Bar {
             this.gantt.config.column_width;
 
         const bar_annotation = createSVG('rect', {
-            // TODO: so far, 4 pixels need to be substracted
-            // from the x position to match properly in the UI.
-            // Is there a way to improve this?
-            x: x - 4,
+            x,
             y: this.y,
             width:
                 this.gantt.config.column_width /
@@ -440,18 +437,6 @@ export default class Bar {
     }
 
     setup_click_event() {
-        if (this.gantt.options.bar_config.on_click) {
-            $.on(this.$bar, 'click', () => {
-                const task_group = this.gantt.get_task_group_for_task(
-                    this.task,
-                );
-                this.gantt.options.bar_config.on_click({
-                    task: this.task,
-                    task_group,
-                });
-            });
-        }
-
         let task_id = this.task.id;
         $.on(this.group, 'mouseover', (e) => {
             this.gantt.trigger_event('hover', [
@@ -509,6 +494,15 @@ export default class Bar {
         });
 
         $.on(this.group, 'click', () => {
+            if (this.gantt.options.bar_config.on_click) {
+                const task_group = this.gantt.get_task_group_for_task(
+                    this.task,
+                );
+                this.gantt.options.bar_config.on_click({
+                    task: this.task,
+                    task_group,
+                });
+            }
             this.gantt.trigger_event('click', [this.task]);
         });
 
@@ -685,7 +679,10 @@ export default class Bar {
             date_utils.diff(task_start, gantt_start, this.gantt.config.unit) /
             this.gantt.config.step;
 
-        let x = diff * column_width;
+        // TODO: so far, 4 pixels need to be substracted
+        // from the x position to match properly in the UI.
+        // Is there a way to improve this?
+        let x = diff * column_width + 4;
 
         /* Since the column width is based on 30,
         we count the month-difference, multiply it by 30 for a "pseudo-month"
@@ -723,7 +720,10 @@ export default class Bar {
             duration_in_days = 0;
         for (
             let d = new Date(this.task._start);
-            d < this.task._end;
+            // Possible hack: last update changed comparison from '<' to '<=
+            // This in order to make tasks to take final day as well.
+            // Even this is good to tasks that lasts one day only
+            d <= this.task._end;
             d.setDate(d.getDate() + 1)
         ) {
             duration_in_days++;
