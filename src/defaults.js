@@ -163,7 +163,6 @@ const DEFAULT_OPTIONS = {
     scroll_to: 'today',
     show_expected_progress: false,
     snap_at: null,
-    task_groups: [],
     task_groups_enabled: false,
     today_button: true,
     upper_header_height: 45,

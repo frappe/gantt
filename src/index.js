@@ -10,9 +10,10 @@ import { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES } from './defaults';
 import './styles/gantt.css';
 
 export default class Gantt {
-    constructor(wrapper, tasks, options) {
+    constructor(wrapper, tasks, options, task_groups = []) {
         this.setup_wrapper(wrapper);
         this.setup_options(options);
+        this.setup_task_groups(task_groups);
         this.setup_tasks(tasks);
         this.change_view_mode();
         this.bind_events();
@@ -125,16 +126,21 @@ export default class Gantt {
             this.options.scroll_to = 'start';
         }
 
-        this.options.task_groups_enabled =
-            Array.isArray(this.options.task_groups) &&
-            this.options.task_groups.length > 0;
-
         this.$popup_wrapper.style.zIndex = this.options.base_z_index + 2;
     }
 
     update_options(options) {
         this.setup_options({ ...this.original_options, ...options });
         this.change_view_mode(undefined, true);
+    }
+
+    setup_task_groups(task_groups) {
+        if (!Array.isArray(task_groups)) {
+            throw new TypeError('task_groups must be an array when defined');
+        }
+
+        this.task_groups = task_groups;
+        this.options.task_groups_enabled = this.task_groups.length > 0;
     }
 
     setup_tasks(tasks) {
@@ -237,7 +243,7 @@ export default class Gantt {
             };
         }
 
-        const task_group_index = this.options.task_groups.findIndex(
+        const task_group_index = this.task_groups.findIndex(
             (task_group) => task_group.id === task.task_group_id,
         );
         if (task_group_index < 0) {
@@ -261,7 +267,8 @@ export default class Gantt {
         }
     }
 
-    refresh(tasks) {
+    refresh(tasks, task_groups = []) {
+        this.setup_task_groups(task_groups);
         this.setup_tasks(tasks);
         this.change_view_mode();
     }
@@ -446,7 +453,7 @@ export default class Gantt {
     make_grid_background() {
         const grid_width = this.dates.length * this.config.column_width;
         const sidebar_list_items = this.options.task_groups_enabled
-            ? this.options.task_groups
+            ? this.task_groups
             : this.tasks;
         const grid_height = Math.max(
             this.config.header_height +
@@ -992,7 +999,7 @@ export default class Gantt {
         }
 
         const sidebar_list_items = this.options.task_groups_enabled
-            ? this.options.task_groups
+            ? this.task_groups
             : this.tasks;
 
         sidebar_list_items.forEach((item, index) => {
@@ -1708,7 +1715,7 @@ export default class Gantt {
     }
 
     get_task_group_for_task(task) {
-        return this.options.task_groups.find(
+        return this.task_groups.find(
             (task_group) => task_group.id === task.task_group_id,
         );
     }

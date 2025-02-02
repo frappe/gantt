@@ -65,8 +65,15 @@ let tasks = [
     }
   },
   ...
+];
+const task_groups = [
+  {
+    id: 'task-group-1',
+    name: 'Task Group 1',
+  },
+  ...
 ]
-let gantt = new Gantt("#gantt", tasks);
+let gantt = new Gantt("#gantt", tasks, {}, task_groups);
 ```
 
 ### Configuration
@@ -103,7 +110,7 @@ Frappe Gantt offers a wide range of options to customize your chart.
 | `view_mode`                | The initial view mode of the Gantt chart.                                          | `Day`, `Week`, `Month`, `Year`.           | `Day`                            |
 | `view_mode_select`         | Allows selecting the view mode from a dropdown.                                 | `true`, `false`                                    | `false`                            |
 
-Apart from these ones, four options - `custom_config_bar`, `left_sidebar_list_config`, `popup`, `task_groups` and `view_modes` (plural, not singular) - are available. They have "sub"-APIs, and thus are listed separately.
+Apart from these ones, four options - `bar_config`, `left_sidebar_list_config`, `popup` and `view_modes` (plural, not singular) - are available. They have "sub"-APIs, and thus are listed separately.
 
 #### View Mode Configuration
 The `view_modes` option determines all the available view modes for the chart. It should be an array of objects.
@@ -138,27 +145,18 @@ The function receives one object as an argument, containing:
 - `set_title`, `set_subtitle`, `set_details` (functions) - take in the HTML of the relevant section
 - `add_action` (function) - accepts two parameters, `html` and `func` - respectively determining the HTML of the action and the callback when the action is pressed.
 
-#### Custom Config Bar
-`custom_config_bar` is a function that should return an object to configure bars. Options from this object:
-
-The function receives one object as an argument, containing:
-- `task` - the task as an object
-- `task_group` - the related task group as an object. **NOTE:** it is `undefined` if task groups feature is disabled
+#### Bar config
+`bar_config` is an object to configure bars. Options from this object:
 
 The returned object may contain:
-- `label` (string) - the label displayed inside the bar. If it's not defined, name of task will be used
+- `get_label` (function) - the label displayed inside the bar. If it's not defined, name of task will be used. This function receives an object as an argument containing `task` and `task_group` if defined.
+- `on_click` (function) - the function that will be triggered when a bar is clicked. This function receives an object as an argument containing `task` and `task_group` if defined.
+- `show_label_on_offset` (boolean) - When the bar label has more width that the bar, label is relocated with an offset to the right to improve UI. This boolean defines if the label should be displayed in that scenario.
 
 #### Left Sidebar List Configuration
 `left_sidebar_list_config` is an object.
+- `on_click` (function) - the function that will be triggered when an item from the list is clicked. This function receives an object as an argument containing `task` and `task_group` if defined.
 - `width`, the width of the sidebar (in pixels)
-
-#### Task Groups Configuration
-`task_groups` is an array of objects representing groupings or categories for tasks. By passing it, bars will be gather in the same row. It should be an array of objects.
-**NOTE:** This feature **doesn't support** date overlaps for tasks within the same task group.
-
-Each object can have the following properties:
-- `id` (string) - the id of the task group.
-- `name` (string) - the name of the task group.
 
 ### API
 Frappe Gantt exposes a few helpful methods for you to interact with the chart:
