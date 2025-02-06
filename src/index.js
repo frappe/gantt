@@ -267,10 +267,10 @@ export default class Gantt {
         }
     }
 
-    refresh(tasks, task_groups = []) {
+    refresh(tasks, task_groups = [], reset_scroll = false) {
         this.setup_task_groups(task_groups);
         this.setup_tasks(tasks);
-        this.change_view_mode();
+        this.change_view_mode(undefined, !reset_scroll);
     }
 
     update_task(id, new_details) {
