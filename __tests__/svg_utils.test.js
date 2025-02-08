@@ -76,6 +76,27 @@ describe('svg_utils', () => {
             });
             expect(rect.getAttribute('clip-path')).toBe('url(#test-clip)');
         });
+
+        test('should create complex SVG structure', () => {
+            const svg = createSVG('svg', {
+                width: 200,
+                height: 100
+            });
+            const g = createSVG('g', {
+                class: 'group',
+                append_to: svg
+            });
+            const circle = createSVG('circle', {
+                cx: 50,
+                cy: 50,
+                r: 25,
+                append_to: g
+            });
+
+            expect(svg.children[0]).toBe(g);
+            expect(g.children[0]).toBe(circle);
+            expect(circle.getAttribute('r')).toBe('25');
+        });
     });
 
     describe('animateSVG', () => {
@@ -98,6 +119,23 @@ describe('svg_utils', () => {
             expect(animate.getAttribute('attributeName')).toBe('width');
             expect(animate.getAttribute('from')).toBe('0');
             expect(animate.getAttribute('to')).toBe('100');
+        });
+
+        test('should handle multiple attribute animations', () => {
+            const rect = createSVG('rect');
+
+            // Create width animation
+            animateSVG(rect, 'width', '0', '100');
+            const widthAnim = rect.querySelector('animate');
+            expect(widthAnim.getAttribute('attributeName')).toBe('width');
+            expect(widthAnim.getAttribute('from')).toBe('0');
+            expect(widthAnim.getAttribute('to')).toBe('100');
+
+            // Update to height animation
+            animateSVG(rect, 'height', '0', '50');
+            expect(widthAnim.getAttribute('attributeName')).toBe('height');
+            expect(widthAnim.getAttribute('from')).toBe('0');
+            expect(widthAnim.getAttribute('to')).toBe('50');
         });
     });
 
@@ -125,9 +163,25 @@ describe('svg_utils', () => {
             container.innerHTML = '<div class="parent"><button class="child">Click</button></div>';
             const handler = jest.fn();
             $.delegate(container, 'click', '.child', handler);
-            
+
             const button = container.querySelector('.child');
             button.click();
+            expect(handler).toHaveBeenCalled();
+        });
+
+        test('should handle event delegation with nested elements', () => {
+            container.innerHTML = `
+                <div class="parent">
+                    <div class="child">
+                        <span class="grandchild">Click me</span>
+                    </div>
+                </div>
+            `;
+            const handler = jest.fn();
+            $.delegate(container, 'click', '.child', handler);
+
+            const span = container.querySelector('.grandchild');
+            span.click();
             expect(handler).toHaveBeenCalled();
         });
 
@@ -157,6 +211,16 @@ describe('svg_utils', () => {
             const result = $.closest('.non-existent', element);
             expect(result).toBeNull();
         });
+
+        test('should handle multiple class selectors', () => {
+            container.innerHTML = '<div class="parent class1"><span class="child"><button>Click</button></span></div>';
+            const button = container.querySelector('button');
+            const parent = $.closest('.parent.class1', button);
+
+            expect(parent).toBeTruthy();
+            expect(parent.classList.contains('parent')).toBe(true);
+            expect(parent.classList.contains('class1')).toBe(true);
+        });
     });
 
     describe('$.attr', () => {
@@ -181,6 +245,18 @@ describe('svg_utils', () => {
             element.setAttribute('data-test', 'value');
             const result = $.attr(element, 'data-test');
             expect(result).toBe('value');
+        });
+
+        test('should handle boolean attributes', () => {
+            const element = document.createElement('input');
+            $.attr(element, 'disabled', true);
+            expect(element.hasAttribute('disabled')).toBe(true);
+        });
+
+        test('should handle numeric attributes', () => {
+            const element = document.createElement('div');
+            $.attr(element, 'data-number', 42);
+            expect(element.getAttribute('data-number')).toBe('42');
         });
     });
 }); 
