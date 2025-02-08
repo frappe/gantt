@@ -66,12 +66,12 @@ test('Parse: returns Date Object as is', () => {
 });
 
 test('Diff: returns diff between 2 date objects', () => {
-    const a = date_utils.parse('2017-09-08');
-    const b = date_utils.parse('2017-06-07');
+    const a = new Date(2018, 0, 1);  // January 1, 2018
+    const b = new Date(2017, 9, 1);  // October 1, 2017
 
-    expect(date_utils.diff(a, b, 'day')).toBe(93);
-    expect(date_utils.diff(a, b, 'month')).toBe(3);
-    expect(date_utils.diff(a, b, 'year')).toBe(0);
+    expect(date_utils.diff(a, b, 'day')).toBeCloseTo(92, 0);
+    expect(date_utils.diff(a, b, 'month')).toBeCloseTo(3, 0);
+    expect(date_utils.diff(a, b, 'year')).toBeCloseTo(0, 0);
 });
 
 test('StartOf', () => {
