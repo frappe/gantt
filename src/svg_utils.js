@@ -1,3 +1,15 @@
+/**
+ * svg_utils.js
+ *
+ * This file provides utility functions for SVG manipulation and DOM operations.
+ * It includes functionality to:
+ * - Create and modify SVG elements
+ * - Handle SVG animations
+ * - Manage event listeners and delegation
+ * - Provide DOM helper functions
+ * - Handle element attributes and properties
+ */
+
 export function $(expr, con) {
     return typeof expr === 'string'
         ? (con || document).querySelector(expr)

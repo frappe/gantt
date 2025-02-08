@@ -1,3 +1,15 @@
+/**
+ * date_utils.js
+ * 
+ * This file provides utility functions for date manipulation and formatting.
+ * It includes functionality to:
+ * - Parse and format dates in various formats
+ * - Calculate date differences and durations
+ * - Handle different time scales (year, month, day, hour, etc.)
+ * - Convert between different time scales
+ * - Provide helper functions for date arithmetic
+ */
+
 const YEAR = 'year';
 const MONTH = 'month';
 const DAY = 'day';

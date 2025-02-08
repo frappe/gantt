@@ -1,3 +1,15 @@
+/**
+ * defaults.js
+ *
+ * This file contains default configuration settings for the Gantt chart.
+ * It includes:
+ * - Default view modes (Hour, Quarter Day, Half Day, Day, Week, Month, Year)
+ * - Default styling and layout options
+ * - Date formatting configurations
+ * - Default behaviors and interaction settings
+ * - Popup and UI configuration defaults
+ */
+
 import date_utils from './date_utils';
 
 function getDecade(d) {

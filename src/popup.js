@@ -1,3 +1,15 @@
+/**
+ * popup.js
+ * 
+ * This file manages the popup/tooltip functionality in the Gantt chart.
+ * It provides functionality to:
+ * - Create and manage popup windows for task information
+ * - Show/hide popups based on user interactions
+ * - Display customizable task details and information
+ * - Handle popup positioning and content updates
+ * - Support custom actions and buttons in popups
+ */
+
 export default class Popup {
     constructor(parent, popup_func, gantt) {
         this.parent = parent;

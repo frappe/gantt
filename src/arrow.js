@@ -1,3 +1,13 @@
+/**
+ * arrow.js
+ *
+ * This file handles the creation and management of dependency arrows in the Gantt chart.
+ * It provides functionality to:
+ * - Calculate and draw SVG paths for arrows connecting dependent tasks
+ * - Update arrow positions when tasks move
+ * - Handle different arrow path calculations based on task positions
+ */
+
 import { createSVG } from './svg_utils';
 
 export default class Arrow {

@@ -1,3 +1,17 @@
+/**
+ * index.js
+ *
+ * This is the main Gantt chart class that coordinates all functionality.
+ * It provides:
+ * - Chart initialization and setup
+ * - Task management and rendering
+ * - View mode handling and date navigation
+ * - Event handling and user interactions
+ * - Coordination between bars, arrows, and other components
+ * - Grid creation and management
+ * - Scroll and zoom functionality
+ */
+
 import date_utils from './date_utils';
 import { $, createSVG } from './svg_utils';
 

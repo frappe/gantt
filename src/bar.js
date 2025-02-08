@@ -1,3 +1,15 @@
+/**
+ * bar.js
+ * 
+ * This file manages the task bars in the Gantt chart.
+ * It provides functionality to:
+ * - Create and render task bars with progress indicators
+ * - Handle bar positioning, resizing, and dragging
+ * - Manage bar labels and progress updates
+ * - Handle user interactions with bars (click, drag, resize)
+ * - Update bar positions and dependencies
+ */
+
 import date_utils from './date_utils';
 import { $, createSVG, animateSVG } from './svg_utils';
 
