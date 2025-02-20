@@ -85,8 +85,8 @@ export default class Bar {
         this.compute_expected_progress();
         this.expected_progress_width =
             this.gantt.options.column_width *
-                this.duration *
-                (this.expected_progress / 100) || 0;
+            this.duration *
+            (this.expected_progress / 100) || 0;
     }
 
     draw() {
@@ -395,6 +395,27 @@ export default class Bar {
 
             this.gantt.trigger_event('double_click', [this.task]);
         });
+        let tapedTwice = false;
+        $.on(this.group, 'touchstart', (e) => {
+            if (!tapedTwice) {
+                tapedTwice = true;
+                setTimeout(function () { tapedTwice = false; }, 300);
+                return false;
+            }
+            e.preventDefault();
+            //action on double tap goes below
+
+
+            if (this.action_completed) {
+                // just finished a move action, wait for a few seconds
+                return;
+            }
+            this.group.classList.remove('active');
+            if (this.gantt.popup)
+                this.gantt.popup.parent.classList.remove('hide');
+
+            this.gantt.trigger_event('double_click', [this.task]);
+        });
     }
 
     update_bar_position({ x = null, width = null }) {
@@ -528,7 +549,7 @@ export default class Bar {
             this.gantt.config.ignored_positions.reduce((acc, val) => {
                 return acc + (val >= this.x && val <= progress_area);
             }, 0) *
-                this.gantt.config.column_width;
+            this.gantt.config.column_width;
         if (progress < 0) return 0;
         const total =
             this.$bar.getWidth() -
@@ -642,8 +663,8 @@ export default class Bar {
         this.$expected_bar_progress.setAttribute(
             'width',
             this.gantt.config.column_width *
-                this.actual_duration_raw *
-                (this.expected_progress / 100) || 0,
+            this.actual_duration_raw *
+            (this.expected_progress / 100) || 0,
         );
     }
 
