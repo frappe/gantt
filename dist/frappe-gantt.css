@@ -16,7 +16,7 @@
   stroke: #ebeff2;
 }
 .gantt .tick {
-  stroke: #e0e0e0;
+  stroke: #333;
   stroke-width: 0.2;
 }
 .gantt .tick.thick {
@@ -97,6 +97,9 @@
 }
 .gantt .lower-text {
   fill: #333;
+}
+.gantt .weekend {
+  fill: red;
 }
 .gantt .hide {
   display: none;

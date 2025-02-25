@@ -35,19 +35,19 @@ const month_names = {
         'Noviembre',
         'Diciembre',
     ],
-    ru: [
-        'Январь',
-        'Февраль',
-        'Март',
-        'Апрель',
-        'Май',
-        'Июнь',
-        'Июль',
-        'Август',
-        'Сентябрь',
-        'Октябрь',
-        'Ноябрь',
-        'Декабрь',
+    ua: [
+        'Січень',
+        'Лютий',
+        'Березень',
+        'Квітень',
+        'Травень',
+        'Червень',
+        'Липень',
+        'Серпень',
+        'Вересень',
+        'Жовтень',
+        'Листопад',
+        'Грудень'
     ],
     ptBr: [
         'Janeiro',
@@ -105,6 +105,16 @@ const month_names = {
         '十一月',
         '十二月',
     ],
+};
+
+const day_names = {
+    ua: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    en: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+};
+
+const weekend = {
+    ua: ['Нд', 'Сб'],
+    en: ['Su', 'Sa']
 };
 
 export default {
@@ -171,6 +181,7 @@ export default {
             ss: values[5],
             SSS: values[6],
             D: values[2],
+            DOW: day_names?.[lang]?.[parseInt(values[7])] || day_names.en[parseInt(values[7])],
             MMMM: month_names[lang][+values[1]],
             MMM: month_names[lang][+values[1]],
         };
@@ -287,6 +298,7 @@ export default {
             date.getMinutes(),
             date.getSeconds(),
             date.getMilliseconds(),
+            date.getDay(),
         ];
     },
 
@@ -305,6 +317,10 @@ export default {
             return 29;
         }
         return 28;
+    },
+
+    is_weekend(lang, day) {
+        return (weekend[lang] || weekend.en)?.includes(day);
     },
 };
 

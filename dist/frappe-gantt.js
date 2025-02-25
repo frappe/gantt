@@ -38,19 +38,19 @@ var Gantt = (function () {
             'Noviembre',
             'Diciembre',
         ],
-        ru: [
-            'Январь',
-            'Февраль',
-            'Март',
-            'Апрель',
-            'Май',
-            'Июнь',
-            'Июль',
-            'Август',
-            'Сентябрь',
-            'Октябрь',
-            'Ноябрь',
-            'Декабрь',
+        ua: [
+            'Січень',
+            'Лютий',
+            'Березень',
+            'Квітень',
+            'Травень',
+            'Червень',
+            'Липень',
+            'Серпень',
+            'Вересень',
+            'Жовтень',
+            'Листопад',
+            'Грудень'
         ],
         ptBr: [
             'Janeiro',
@@ -108,6 +108,16 @@ var Gantt = (function () {
             '十一月',
             '十二月',
         ],
+    };
+
+    const day_names = {
+        ua: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+        en: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+    };
+
+    const weekend = {
+        ua: ['Нд', 'Сб'],
+        en: ['Su', 'Sa']
     };
 
     var date_utils = {
@@ -174,6 +184,7 @@ var Gantt = (function () {
                 ss: values[5],
                 SSS: values[6],
                 D: values[2],
+                DOW: day_names?.[lang]?.[parseInt(values[7])] || day_names.en[parseInt(values[7])],
                 MMMM: month_names[lang][+values[1]],
                 MMM: month_names[lang][+values[1]],
             };
@@ -290,6 +301,7 @@ var Gantt = (function () {
                 date.getMinutes(),
                 date.getSeconds(),
                 date.getMilliseconds(),
+                date.getDay(),
             ];
         },
 
@@ -308,6 +320,10 @@ var Gantt = (function () {
                 return 29;
             }
             return 28;
+        },
+
+        is_weekend(lang, day) {
+            return (weekend[lang] || weekend.en)?.includes(day);
         },
     };
 
@@ -1038,6 +1054,7 @@ var Gantt = (function () {
         QUARTER_DAY: 'Quarter Day',
         HALF_DAY: 'Half Day',
         DAY: 'Day',
+        DAY_OF_WEEK: 'Day Of Week',
         WEEK: 'Week',
         MONTH: 'Month',
         YEAR: 'Year',
@@ -1117,6 +1134,10 @@ var Gantt = (function () {
                 language: 'en',
             };
             this.options = Object.assign({}, default_options, options);
+
+            if (this.options.view_mode === 'Day Of Week') {
+                this.options.header_height = this.options.header_height + 25;
+            }
         }
 
         setup_tasks(tasks) {
@@ -1211,6 +1232,9 @@ var Gantt = (function () {
             this.options.view_mode = view_mode;
 
             if (view_mode === VIEW_MODE.DAY) {
+                this.options.step = 24;
+                this.options.column_width = 38;
+            } else if (view_mode === VIEW_MODE.DAY_OF_WEEK) {
                 this.options.step = 24;
                 this.options.column_width = 38;
             } else if (view_mode === VIEW_MODE.HALF_DAY) {
@@ -1339,7 +1363,7 @@ var Gantt = (function () {
 
             createSVG('rect', {
                 x: 0,
-                y: 0,
+                y: 25,
                 width: grid_width,
                 height: grid_height,
                 class: 'grid-background',
@@ -1357,7 +1381,7 @@ var Gantt = (function () {
             const lines_layer = createSVG('g', { append_to: this.layers.grid });
 
             const row_width = this.dates.length * this.options.column_width;
-            const row_height = this.options.bar_height + this.options.padding;
+            const row_height = this.options.bar_height + this.options.padding + 25;
 
             let row_y = this.options.header_height + this.options.padding / 2;
 
@@ -1407,7 +1431,7 @@ var Gantt = (function () {
             for (let date of this.dates) {
                 let tick_class = 'tick';
                 // thick tick for monday
-                if (this.view_is(VIEW_MODE.DAY) && date.getDate() === 1) {
+                if ((this.view_is(VIEW_MODE.DAY) || this.view_is(VIEW_MODE.DAY_OF_WEEK)) && date.getDate() === 1) {
                     tick_class += ' thick';
                 }
                 // thick tick for first week
@@ -1445,7 +1469,7 @@ var Gantt = (function () {
 
         make_grid_highlights() {
             // highlight today's date
-            if (this.view_is(VIEW_MODE.DAY)) {
+            if (this.view_is(VIEW_MODE.DAY) || this.view_is(VIEW_MODE.DAY_OF_WEEK)) {
                 const x =
                     (date_utils.diff(date_utils.today(), this.gantt_start, 'hour') /
                         this.options.step) *
@@ -1476,9 +1500,19 @@ var Gantt = (function () {
                     x: date.lower_x,
                     y: date.lower_y,
                     innerHTML: date.lower_text,
-                    class: 'lower-text',
+                    class: date_utils.is_weekend(this.options.language, date?.middle_text) ? 'lower-text weekend' : 'lower-text',
                     append_to: this.layers.date,
                 });
+
+                if (date?.middle_text) {
+                    createSVG('text', {
+                        x: date.middle_x,
+                        y: date.middle_y,
+                        innerHTML: date.middle_text,
+                        class: date_utils.is_weekend(this.options.language, date?.middle_text) ? 'lower-text weekend' : 'lower-text',
+                        append_to: this.layers.date,
+                    });
+                }
 
                 if (date.upper_text) {
                     const $upper_text = createSVG('text', {
@@ -1528,6 +1562,18 @@ var Gantt = (function () {
                     date.getDate() !== last_date.getDate()
                         ? date_utils.format(date, 'D', this.options.language)
                         : '',
+                'Day Of Week_lower':
+                    date.getDate() !== last_date.getDate()
+                        ? date_utils.format(date, 'D', this.options.language)
+                        : '',
+                'Day Of Week_upper':
+                    date.getMonth() !== last_date.getMonth()
+                        ? date_utils.format(date, 'MMMM', this.options.language)
+                        : '',
+                'Day Of Week_middle':
+                    date.getDate() !== last_date.getDate()
+                        ? date_utils.format(date, 'DOW', this.options.language)
+                        : '',
                 Week_lower:
                     date.getMonth() !== last_date.getMonth()
                         ? date_utils.format(date, 'D MMM', this.options.language)
@@ -1568,8 +1614,27 @@ var Gantt = (function () {
 
             const base_pos = {
                 x: i * this.options.column_width,
-                lower_y: this.options.header_height,
-                upper_y: this.options.header_height - 25,
+                lower_y: this.options.header_height - 25,
+                upper_y: this.options.header_height - 50,
+                middle_y: this.options.header_height - 50
+            };
+
+            const y_pos = {
+                'Quarter Day_lower': base_pos.lower_y,
+                'Quarter Day_upper': base_pos.upper_y,
+                'Half Day_lower': base_pos.lower_y,
+                'Half Day_upper': base_pos.upper_y,
+                Day_lower: base_pos.lower_y,
+                Day_upper: base_pos.upper_y,
+                'Day Of Week_lower': base_pos.lower_y + 25,
+                'Day Of Week_upper': base_pos.upper_y,
+                'Day Of Week_middle': base_pos.middle_y + 25,
+                Week_lower: base_pos.lower_y,
+                Week_upper: base_pos.upper_y,
+                Month_lower: base_pos.lower_y,
+                Month_upper: base_pos.upper_y,
+                Year_lower: base_pos.lower_y,
+                Year_upper: base_pos.upper_y,
             };
 
             const x_pos = {
@@ -1579,6 +1644,9 @@ var Gantt = (function () {
                 'Half Day_upper': 0,
                 Day_lower: this.options.column_width / 2,
                 Day_upper: (this.options.column_width * 30) / 2,
+                'Day Of Week_lower': this.options.column_width / 2,
+                'Day Of Week_upper': (this.options.column_width * 30) / 2,
+                'Day Of Week_middle': this.options.column_width / 2,
                 Week_lower: 0,
                 Week_upper: (this.options.column_width * 4) / 2,
                 Month_lower: this.options.column_width / 2,
@@ -1586,14 +1654,16 @@ var Gantt = (function () {
                 Year_lower: this.options.column_width / 2,
                 Year_upper: (this.options.column_width * 30) / 2,
             };
-
             return {
                 upper_text: date_text[`${this.options.view_mode}_upper`],
                 lower_text: date_text[`${this.options.view_mode}_lower`],
+                middle_text: date_text[`${this.options.view_mode}_middle`],
                 upper_x: base_pos.x + x_pos[`${this.options.view_mode}_upper`],
-                upper_y: base_pos.upper_y,
+                upper_y: y_pos[`${this.options.view_mode}_upper`],
                 lower_x: base_pos.x + x_pos[`${this.options.view_mode}_lower`],
-                lower_y: base_pos.lower_y,
+                lower_y: y_pos[`${this.options.view_mode}_lower`],
+                middle_x: base_pos.x + x_pos[`${this.options.view_mode}_middle`],
+                middle_y: y_pos[`${this.options.view_mode}_middle`],
             };
         }
 
@@ -1782,7 +1852,7 @@ var Gantt = (function () {
 
         bind_bar_progress() {
             let x_on_start = 0;
-            let y_on_start = 0;
+            let y_on_start = 25;
             let is_resizing = null;
             let bar = null;
             let $bar_progress = null;

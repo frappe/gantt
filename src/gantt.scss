@@ -29,7 +29,7 @@ $handle-color: #ddd !default;
 		stroke: $light-border-color;
 	}
 	.tick {
-		stroke: $border-color;
+		stroke: #333;
 		stroke-width: 0.2;
 		&.thick {
 			stroke-width: 0.4;
@@ -126,6 +126,9 @@ $handle-color: #ddd !default;
 	}
 	.lower-text {
 		fill: $text-color;
+	}
+	.weekend {
+		fill: red;
 	}
 
 	.hide {
