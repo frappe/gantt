@@ -347,7 +347,7 @@
         font-size: 13px;
         font-weight: 400;
         justify-content: center;
-        text-align: left;
+        text-align: center;
 
         &.clickable {
             cursor: pointer;
