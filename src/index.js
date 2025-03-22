@@ -1,4 +1,5 @@
 import date_utils from './date_utils';
+import { gettext, addLocales } from './i18n';
 import { $, createSVG } from './svg_utils';
 
 import Arrow from './arrow';
@@ -13,6 +14,9 @@ export default class Gantt {
     constructor(wrapper, tasks, options) {
         this.setup_wrapper(wrapper);
         this.setup_options(options);
+        if (options.locales) {
+            addLocales(options.locales);
+        }
         this.setup_tasks(tasks);
         this.change_view_mode();
         this.bind_events();
@@ -124,7 +128,7 @@ export default class Gantt {
             .map((task, i) => {
                 if (!task.start) {
                     console.error(
-                        `task "${task.id}" doesn't have a start date`,
+                        gettext('task_no_start_date', this.options.language, { id: task.id || '' }),
                     );
                     return false;
                 }
@@ -141,7 +145,9 @@ export default class Gantt {
                     });
                 }
                 if (!task.end) {
-                    console.error(`task "${task.id}" doesn't have an end date`);
+                    console.error(
+                        gettext('task_no_end_date', this.options.language, { id: task.id || '' }),
+                    );
                     return false;
                 }
                 task._end = date_utils.parse(task.end);
@@ -149,7 +155,7 @@ export default class Gantt {
                 let diff = date_utils.diff(task._end, task._start, 'year');
                 if (diff < 0) {
                     console.error(
-                        `start of task can't be after end of task: in task "${task.id}"`,
+                        gettext('task_start_after_end', this.options.language, { id: task.id || '' }),
                     );
                     return false;
                 }
@@ -157,7 +163,7 @@ export default class Gantt {
                 // make task invalid if duration too large
                 if (date_utils.diff(task._end, task._start, 'year') > 10) {
                     console.error(
-                        `the duration of task "${task.id}" is too long (above ten years)`,
+                        gettext('task_duration_too_long', this.options.language, { id: task.id || '' }),
                     );
                     return false;
                 }
@@ -476,13 +482,13 @@ export default class Gantt {
             const $el = document.createElement('option');
             $el.selected = true;
             $el.disabled = true;
-            $el.textContent = 'Mode';
+            $el.textContent = gettext('Mode', this.options.language);
             $select.appendChild($el);
 
             for (const mode of this.options.view_modes) {
                 const $option = document.createElement('option');
                 $option.value = mode.name;
-                $option.textContent = mode.name;
+                $option.textContent = gettext(mode.name, this.options.language);
                 if (mode.name === this.config.view_mode.name)
                     $option.selected = true;
                 $select.appendChild($option);
@@ -501,7 +507,7 @@ export default class Gantt {
         if (this.options.today_button) {
             let $today_button = document.createElement('button');
             $today_button.classList.add('today-button');
-            $today_button.textContent = 'Today';
+            $today_button.textContent = gettext('Today', this.options.language);
             $today_button.onclick = this.scroll_current.bind(this);
             this.$side_header.prepend($today_button);
             this.$today_button = $today_button;

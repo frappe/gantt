@@ -136,6 +136,51 @@ Frappe Gantt exposes a few helpful methods for you to interact with the chart:
 | `.scroll_current` | Scrolls to the current date | No parameters. |
 | `.update_task` | Re-renders a specific task bar alone | `task_id` - id of task and `new_details` - object containing the task properties to be updated. |
 
+## Internationalization (i18n)
+
+The Gantt chart supports multiple languages. By default, it's in English, but you can easily switch to other languages:
+
+### Basic usage
+
+```javascript
+import Gantt from 'frappe-gantt';
+
+// Create Gantt chart with English (default)
+const gantt = new Gantt('#gantt', tasks);
+```
+
+### Using a specific language
+
+```javascript
+import Gantt from 'frappe-gantt';
+
+const gantt = new Gantt('#gantt', tasks, {
+  language: 'it', // or 'it-IT'
+});
+```
+
+### Adding custom translations
+
+You can also create your own translations:
+
+```javascript
+import Gantt from 'frappe-gantt';
+
+const myEoLocale = {
+  Mode: 'Modo',
+  Today: 'Hodiaŭ',
+  Year: 'Jaro',
+  // ...
+};
+
+const gantt = new Gantt('#gantt', tasks, {
+  language: 'eo',
+  locales: {
+    'eo': myEoLocale,
+  },
+});
+```
+
 ## Development Setup
 If you want to contribute enhancements or fixes:
 

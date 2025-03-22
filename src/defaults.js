@@ -1,4 +1,5 @@
 import date_utils from './date_utils';
+import { gettext } from './i18n';
 
 function getDecade(d) {
     const year = d.getFullYear();
@@ -130,19 +131,24 @@ const DEFAULT_OPTIONS = {
         if (ctx.task.description) ctx.set_subtitle(ctx.task.description);
         else ctx.set_subtitle('');
 
+        const lang = ctx.chart.options.language;
         const start_date = date_utils.format(
             ctx.task._start,
             'MMM D',
-            ctx.chart.options.language,
+            lang,
         );
         const end_date = date_utils.format(
             date_utils.add(ctx.task._end, -1, 'second'),
             'MMM D',
-            ctx.chart.options.language,
+            lang,
         );
 
+        const excluded_text = ctx.task.ignored_duration
+            ? ` + ${ctx.task.ignored_duration} ${gettext('excluded', lang)}`
+            : '';
+
         ctx.set_details(
-            `${start_date} - ${end_date} (${ctx.task.actual_duration} days${ctx.task.ignored_duration ? ' + ' + ctx.task.ignored_duration + ' excluded' : ''})<br/>Progress: ${Math.floor(ctx.task.progress * 100) / 100}%`,
+            `${gettext('Dates', lang)}: ${start_date} - ${end_date} (${ctx.task.actual_duration} ${gettext(ctx.task.actual_duration === 1 ? 'day' : 'days', lang)}${excluded_text})<br/>${gettext('Progress', lang)}: ${Math.floor(ctx.task.progress * 100) / 100}%`,
         );
     },
     popup_on: 'click',
