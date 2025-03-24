@@ -1281,7 +1281,12 @@ export default class Gantt {
 
             bars.forEach((bar) => {
                 const $bar = bar.$bar;
+                const tempdx = $bar.finaldx;
                 $bar.finaldx = this.get_snap_position(dx, $bar.ox);
+
+                //better to update when position of x axis is changed
+                if (tempdx === $bar.finaldx) return;
+
                 this.hide_popup();
                 if (is_resizing_left) {
                     if (parent_bar_id === bar.task.id) {
