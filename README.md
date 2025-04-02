@@ -106,6 +106,7 @@ Each object can have the following properties:
 - `upper_text` (date format string _or_ function) - the format for text in upper header. Blank string for none. The function takes in `currentDate`, `previousDate`, and `lang`, and should return a string.
 - `upper_text_frequency` (number) - how often the upper text has a value. Utilized in internal calculation to improve performance.
 - `thick_line` (function) - takes in `currentDate`, returns Boolean determining whether the line for that date should be thicker than the others.
+- `dow_force_start` (number) - if you want the chart to start on a specific day of the week, add this property and the desired value (0 for Sunday, 1 for Monday, 2 for Tuesday, ..., 6 for Saturday). The start date will then be moved backward from 0 to 6 days depending on the initial calculated start date and your input value).
 
 Three other options allow you to override general configuration for this view mode alone:
 - `date_format`
