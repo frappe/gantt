@@ -415,7 +415,7 @@ export default class Gantt {
             this.config.header_height +
                 this.options.padding +
                 (this.options.bar_height + this.options.padding) *
-                this.groups.length;
+                this.groups.length,
                 10,
             this.options.container_height !== 'auto'
                 ? this.options.container_height
@@ -446,12 +446,12 @@ export default class Gantt {
         const row_width = this.dates.length * this.config.column_width;
         const row_height = this.options.bar_height + this.options.padding;
 
-        let row_y = this.options.header_height;
+        let row_y = this.config.header_height;
 
         for (let _ of this.groups) {
             createSVG('rect', {
                 x: 0,
-                y,
+                y : row_y,
                 width: row_width,
                 height: row_height,
                 class: 'grid-row',
