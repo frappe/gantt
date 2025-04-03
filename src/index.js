@@ -165,11 +165,10 @@ export default class Gantt {
                 // cache index
                 task._index = i;
 
-            // ********** Fix for single row grouping
-            if (this.options.enable_grouping && typeof task.group === 'number') {
-                task._index = task.group;
-            }
-            // ********** end of fix
+                // enables singe row grouping
+                if (this.options.enable_grouping && typeof task.group === 'number') {
+                    task._index = task.group;
+                }
 
                 // if hours is not set, assume the last day is full day
                 // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
@@ -205,6 +204,7 @@ export default class Gantt {
                 return task;
             })
             .filter((t) => t);
+        
         this.groups = this.tasks;
         if (this.options?.enable_grouping) {
             if (this.options?.groups) {
@@ -213,7 +213,6 @@ export default class Gantt {
                 this.groups = [...new Set(this.tasks.map((t) => t.group))];
             }
         }
-        console.log(this.groups);
 
         this.setup_dependencies();
     }
@@ -415,7 +414,7 @@ export default class Gantt {
             this.config.header_height +
                 this.options.padding +
                 (this.options.bar_height + this.options.padding) *
-                this.groups.length,
+                    this.groups.length -
                 10,
             this.options.container_height !== 'auto'
                 ? this.options.container_height
