@@ -416,7 +416,6 @@
                     name: 'Publish',
                     id: 'Task 4',
                     progress: random(),
-                    group : 3,
                 },
             ];
 
@@ -567,7 +566,7 @@
                     '#a3e635': HOLIDAYS,
                 },
                 enable_grouping: true,
-                groups: [0, 1, 2, 3],
+                groups: [0, 1, 2],
             });
 
             const ignore = new Gantt('#ignore', tasks, {

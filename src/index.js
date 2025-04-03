@@ -165,11 +165,6 @@ export default class Gantt {
                 // cache index
                 task._index = i;
 
-                // enables singe row grouping
-                if (this.options.enable_grouping && typeof task.group === 'number') {
-                    task._index = task.group;
-                }
-
                 // if hours is not set, assume the last day is full day
                 // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
                 const task_end_values = date_utils.get_date_values(task._end);
@@ -201,19 +196,35 @@ export default class Gantt {
                     task.id = `${task.id}`;
                 }
 
+                // setting a dummy group if the group is not specified
+                if (typeof task.group == 'undefined') {
+                    task.group = 'group-' + task.id;
+                }
+
                 return task;
             })
             .filter((t) => t);
         
         this.groups = this.tasks;
         if (this.options?.enable_grouping) {
+            // the groups are the union of the specified groups and the groups
+            // from the tasks.
+            let groupset = new Set()
             if (this.options?.groups) {
-                this.groups = this.options.groups;
-            } else {
-                this.groups = [...new Set(this.tasks.map((t) => t.group))];
+                groupset = groupset.union(new Set(this.options.groups));
             }
-        }
+            const extendedset = groupset.union(new Set(this.tasks.map((t) => t.group)));
+            this.groups = Array.from(extendedset);
 
+            // the index of the tasks depend on the groups array. This allows
+            // for arbitrary naming of groups (not only numeric). Further, if
+            // the group is not specified, then the index of the task is
+            // updated correctly.
+            for (let task of this.tasks) {
+                task._index = this.groups.indexOf(task.group);
+            }
+
+        }
         this.setup_dependencies();
     }
 
