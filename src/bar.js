@@ -274,12 +274,12 @@ export default class Bar {
     }
 
     draw_resize_handles() {
-        if (this.invalid || this.gantt.options.readonly) return;
+        if (this.invalid || this.gantt.options.readonly || this.task.readonly) return;
 
         const bar = this.$bar;
         const handle_width = 3;
         this.handles = [];
-        if (!this.gantt.options.readonly_dates) {
+        if (!this.gantt.options.readonly_dates && !this.task.readonly_dates) {
             this.handles.push(
                 createSVG('rect', {
                     x: bar.getEndX() - handle_width / 2,
@@ -306,7 +306,7 @@ export default class Bar {
                 }),
             );
         }
-        if (!this.gantt.options.readonly_progress) {
+        if (!this.gantt.options.readonly_progress && !this.task.readonly_progress) {
             const bar_progress = this.$bar_progress;
             this.$handle_progress = createSVG('circle', {
                 cx: bar_progress.getEndX(),
