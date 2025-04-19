@@ -200,6 +200,7 @@ export default class Gantt {
             })
             .filter((t) => t);
         this.setup_dependencies();
+        this.setup_precedences();
     }
 
     setup_dependencies() {
@@ -208,6 +209,16 @@ export default class Gantt {
             for (let d of t.dependencies) {
                 this.dependency_map[d] = this.dependency_map[d] || [];
                 this.dependency_map[d].push(t.id);
+            }
+        }
+    }
+
+    setup_precedences() {
+        this.precedence_map = {};
+        for (let t of this.tasks) {
+            for (let d of t.dependencies) {
+                this.precedence_map[t.id] = this.precedence_map[t.id] || [];
+                this.precedence_map[t.id].push(d);
             }
         }
     }
@@ -1115,14 +1126,14 @@ export default class Gantt {
             y_on_start = e.offsetY || e.layerY;
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
-            let ids;
-            if (this.options.move_dependencies) {
-                ids = [
-                    parent_bar_id,
-                    ...this.get_all_dependent_tasks(parent_bar_id),
-                ];
-            } else {
-                ids = [parent_bar_id];
+            let ids = [parent_bar_id];
+            if ((!this.options.maintain_dependency_position || !is_resizing_left)
+                && this.options.move_dependencies) {
+                ids.push(...this.get_all_dependent_tasks(parent_bar_id));
+            }
+            if ((!this.options.maintain_dependency_position || !is_resizing_right)
+                && this.options.move_precedences) {
+                ids.push(...this.get_all_precedent_tasks(parent_bar_id));
             }
             bars = ids.map((id) => this.get_bar(id));
 
@@ -1300,6 +1311,11 @@ export default class Gantt {
                             width: $bar.owidth + $bar.finaldx,
                         });
                     }
+                    else if (this.options.maintain_dependency_position) {
+                        bar.update_bar_position({
+                            x: $bar.ox + $bar.finaldx,
+                        });
+                    }
                 } else if (
                     is_dragging &&
                     !this.options.readonly &&
@@ -1428,6 +1444,22 @@ export default class Gantt {
 
             out = out.concat(deps);
             to_process = deps.filter((d) => !to_process.includes(d));
+        }
+
+        return out.filter(Boolean);
+    }
+
+    get_all_precedent_tasks(task_id) {
+        let out = [];
+        let from_process = [task_id];
+        while (from_process.length) {
+            const preds = from_process.reduce((acc, curr) => {
+                acc = acc.concat(this.precedence_map[curr]);
+                return acc;
+            }, []);
+
+            out = out.concat(preds);
+            from_process = preds.filter((d) => !from_process.includes(d));
         }
 
         return out.filter(Boolean);

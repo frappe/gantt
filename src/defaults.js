@@ -121,9 +121,11 @@ const DEFAULT_OPTIONS = {
     infinite_padding: true,
     holidays: { 'var(--g-weekend-highlight-color)': 'weekend' },
     ignore: [],
+    maintain_dependency_position : false,
     language: 'en',
     lines: 'both',
     move_dependencies: true,
+    move_precedences: false,
     padding: 18,
     popup: (ctx) => {
         ctx.set_title(ctx.task.name);
