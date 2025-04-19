@@ -73,6 +73,7 @@ Frappe Gantt offers a wide range of options to customize your chart.
 | `container_height`       | Height of the container.                                                       | `auto` - dynamic container height to fit all tasks - _or_ any positive integer (for pixels).            | `auto`                           |
 | `column_width`           | Width of each column in the timeline.                                          | Any positive integer.                  | 45                             |
 | `date_format`            | Format for displaying dates.                                                   | Any valid JS date format string.                     | `YYYY-MM-DD`                     |
+| `display_arrows`         | Should the arrows linking dependencies be displayed                            | `true`, `false`                     | `true`                     |
 | `upper_header_height`    | Height of the upper header in the timeline (in pixels).                                     | Any positive integer.                              | `45`                               |
 | `lower_header_height`    | Height of the lower header in the timeline (in pixels).                                     | Any positive integer.                              | `30`                               |
 | `snap_at`                | Snap tasks at particular intervel while resizing or dragging.                                              | Any _interval_ (see below)                  | `1d`                             |
