@@ -418,7 +418,7 @@ export default class Bar {
         });
     }
 
-    update_bar_position({ x = null, width = null }) {
+    update_bar_position({ x = null, y = null, width = null }) {
         const bar = this.$bar;
 
         if (x) {
@@ -433,6 +433,10 @@ export default class Bar {
             this.x = x;
             this.$date_highlight.style.left = x + 'px';
         }
+        if (y) {
+            this.update_attr(bar, 'y', y);
+            this.y = y;
+        }
         if (width > 0) {
             this.update_attr(bar, 'width', width);
             this.$date_highlight.style.width = width + 'px';
@@ -441,6 +445,7 @@ export default class Bar {
         this.update_label_position();
         this.update_handle_position();
         this.date_changed();
+        this.task_index_changed();
         this.compute_duration();
 
         if (this.gantt.options.show_expected_progress) {
@@ -508,6 +513,23 @@ export default class Bar {
         ]);
     }
 
+    task_index_changed() {
+        let changed = false;
+        const new_index = this.compute_task_index();
+        const old_index = this.task._index;
+        if (this.task._index != new_index) {
+            changed = true;
+            this.task._index = new_index;
+        }
+
+        if (!changed) return;
+
+        this.gantt.trigger_event('task_index_change', [
+            this.task,
+            new_index,
+        ]);
+    }
+
     progress_changed() {
         this.task.progress = this.compute_progress();
         this.gantt.trigger_event('progress_change', [
@@ -538,6 +560,19 @@ export default class Bar {
         );
 
         return { new_start_date, new_end_date };
+    }
+
+    compute_task_index() {
+        const bar = this.$bar;
+        let new_index =
+            (
+                bar.getY()
+                - this.gantt.config.header_height
+                - this.gantt.options.padding / 2
+            ) /
+                (bar.getHeight() + this.gantt.options.padding);
+
+        return new_index;
     }
 
     compute_progress() {
@@ -659,6 +694,7 @@ export default class Bar {
     update_expected_progressbar_position() {
         if (this.invalid) return;
         this.$expected_bar_progress.setAttribute('x', this.$bar.getX());
+        this.$expected_bar_progress.setAttribute('y', this.$bar.getY());
         this.compute_expected_progress();
         this.$expected_bar_progress.setAttribute(
             'width',
@@ -671,6 +707,7 @@ export default class Bar {
     update_progressbar_position() {
         if (this.invalid || this.gantt.options.readonly) return;
         this.$bar_progress.setAttribute('x', this.$bar.getX());
+        this.$bar_progress.setAttribute('y', this.$bar.getY());
 
         this.$bar_progress.setAttribute(
             'width',
@@ -694,8 +731,13 @@ export default class Bar {
                 img.setAttribute('x', bar.getEndX() + padding);
                 img_mask.setAttribute('x', bar.getEndX() + padding);
                 label.setAttribute('x', bar.getEndX() + x_offset_label_img);
+
+                img.setAttribute('y', bar.getY() + bar.getHeight()/ 2);
+                img_mask.setAttribute('y', bar.getY() + bar.getHeight()/ 2);
+                label.setAttribute('y', bar.getY() + bar.getHeight()/ 2);
             } else {
                 label.setAttribute('x', bar.getEndX() + padding);
+                label.setAttribute('y', bar.getY() + bar.getHeight()/ 2);
             }
         } else {
             label.classList.remove('big');
@@ -706,11 +748,16 @@ export default class Bar {
                     'x',
                     bar.getX() + barWidth / 2 + x_offset_label_img,
                 );
+
+                img.setAttribute('y', bar.getY() + bar.getHeight()/ 2);
+                img_mask.setAttribute('y', bar.getY() + bar.getHeight()/ 2);
+                label.setAttribute('y', bar.getY() + bar.getHeight()/ 2);
             } else {
                 label.setAttribute(
                     'x',
                     bar.getX() + barWidth / 2 - labelWidth / 2,
                 );
+                label.setAttribute('y', bar.getY() + bar.getHeight()/ 2);
             }
         }
     }
@@ -722,10 +769,21 @@ export default class Bar {
             .querySelector('.handle.left')
             .setAttribute('x', bar.getX());
         this.handle_group
+            .querySelector('.handle.left')
+            .setAttribute('y', bar.getY() + bar.getHeight() / 4);
+        this.handle_group
             .querySelector('.handle.right')
             .setAttribute('x', bar.getEndX());
+        this.handle_group
+            .querySelector('.handle.right')
+            .setAttribute('y', bar.getY() + bar.getHeight() / 4);
         const handle = this.group.querySelector('.handle.progress');
-        handle && handle.setAttribute('cx', this.$bar_progress.getEndX());
+        handle
+            && handle.setAttribute('cx', this.$bar_progress.getEndX())
+            && handle.setAttribute(
+                'cy',
+                this.$bar_progress.getY() + this.$bar_progress.getHeight() / 2
+            );
     }
 
     update_arrow_position() {
