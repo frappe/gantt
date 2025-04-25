@@ -1310,11 +1310,16 @@ export default class Gantt {
                     !this.options.readonly &&
                     !this.options.readonly_dates
                 ) {
-                    $bar.finaldy = this.get_snap_row_position(dy, $bar.oy);
                     bar.update_bar_position({
                         x: $bar.ox + $bar.finaldx,
-                        y: $bar.oy + $bar.finaldy
                     });
+                    if (parent_bar_id === bar.task.id) {
+                        $bar.finaldy = this.get_snap_row_position(dy, $bar.oy);
+                        bar.update_bar_position({
+                            x: $bar.ox + $bar.finaldx,
+                            y: $bar.oy + $bar.finaldy
+                        });
+                    }
                 }
             });
         });
