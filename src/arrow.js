@@ -72,7 +72,7 @@ export default class Arrow {
             this.path = `
               M ${start_x} ${start_y}
               V ${offset}
-              a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve}
+              a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
               L ${end_x} ${end_y}
               m -5 -5
               l 5 5
