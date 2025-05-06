@@ -123,7 +123,9 @@ const DEFAULT_OPTIONS = {
     ignore: [],
     language: 'en',
     lines: 'both',
+    maintain_dependency_position : false,
     move_dependencies: true,
+    move_precedences: false,
     padding: 18,
     popup: (ctx) => {
         ctx.set_title(ctx.task.name);
