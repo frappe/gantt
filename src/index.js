@@ -1086,6 +1086,7 @@ export default class Gantt {
         let x_on_start = 0;
         let x_on_scroll_start = 0;
         let y_on_start = 0;
+        let width_on_start = 0;
         let is_resizing_left = false;
         let is_resizing_right = false;
         let parent_bar_id = null;
@@ -1126,6 +1127,8 @@ export default class Gantt {
             y_on_start = e.offsetY || e.layerY;
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
+            let parent_bar = this.get_bar(parent_bar_id);
+            width_on_start = parent_bar.$bar.getWidth();
             let ids = [parent_bar_id];
             if ((!this.options.maintain_dependency_position || !is_resizing_left)
                 && this.options.move_dependencies) {
@@ -1295,26 +1298,36 @@ export default class Gantt {
                 $bar.finaldx = this.get_snap_position(dx, $bar.ox);
                 this.hide_popup();
                 if (is_resizing_left) {
-                    if (parent_bar_id === bar.task.id) {
-                        bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx,
-                            width: $bar.owidth - $bar.finaldx,
-                        });
-                    } else {
-                        bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx,
-                        });
+                    if (
+                        !this.options.maintain_dependency_position ||
+                        width_on_start - ($bar.finaldx + this.get_unit_length()) > 0
+                    ) {
+                        if (parent_bar_id === bar.task.id) {
+                            bar.update_bar_position({
+                                x: $bar.ox + $bar.finaldx,
+                                width: $bar.owidth - $bar.finaldx,
+                            });
+                        } else {
+                            bar.update_bar_position({
+                                x: $bar.ox + $bar.finaldx,
+                            });
+                        }
                     }
                 } else if (is_resizing_right) {
-                    if (parent_bar_id === bar.task.id) {
-                        bar.update_bar_position({
-                            width: $bar.owidth + $bar.finaldx,
-                        });
-                    }
-                    else if (this.options.maintain_dependency_position) {
-                        bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx,
-                        });
+                    if (
+                        !this.options.maintain_dependency_position ||
+                        width_on_start + ($bar.finaldx - this.get_unit_length()) > 0
+                    ) {
+                        if (parent_bar_id === bar.task.id) {
+                            bar.update_bar_position({
+                                width: $bar.owidth + $bar.finaldx,
+                            });
+                        }
+                        else if (this.options.maintain_dependency_position) {
+                            bar.update_bar_position({
+                                x: $bar.ox + $bar.finaldx,
+                            });
+                        }
                     }
                 } else if (
                     is_dragging &&
@@ -1465,7 +1478,7 @@ export default class Gantt {
         return out.filter(Boolean);
     }
 
-    get_snap_position(dx, ox) {
+    get_unit_length() {
         let unit_length = 1;
         const default_snap =
             this.options.snap_at || this.config.view_mode.snap_at || '1d';
@@ -1476,6 +1489,12 @@ export default class Gantt {
                 date_utils.convert_scales(this.config.view_mode.step, scale) /
                 duration;
         }
+
+        return unit_length;
+    }
+
+    get_snap_position(dx, ox) {
+        let unit_length = this.get_unit_length();
 
         const rem = dx % (this.config.column_width / unit_length);
 
