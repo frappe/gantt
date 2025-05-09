@@ -1,6 +1,6 @@
 {
     "name": "@onduty-cms-incentro/gantt",
-    "version": "1.0.3",
+    "version": "1.0.4-beta.0",
     "publishConfig": {
         "registry": "https://npm.pkg.github.com/"
     },
