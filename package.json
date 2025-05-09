@@ -1,6 +1,9 @@
 {
-    "name": "frappe-gantt",
+    "name": "@onduty-cms-incentro/gantt",
     "version": "1.0.3",
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com/"
+    },
     "description": "A simple, modern, interactive gantt library for the web",
     "main": "src/index.js",
     "type": "module",
