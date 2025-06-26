@@ -335,37 +335,18 @@
 
             const daysSince = (dx) => new Date(today + dx * 86400000);
             let tasks = [
-                {
-                    start: daysSince(-2),
-                    end: daysSince(2),
-                    name: 'Redesign website',
-                    id: 'Task 0',
-                    progress: random(),
-                },
-                {
-                    start: daysSince(3),
-                    duration: '6d',
-                    name: 'Write new content',
-                    id: 'Task 1',
-                    progress: random(),
-                    important: true,
-                    dependencies: 'Task 0',
-                },
-                {
-                    start: daysSince(4),
-                    duration: '2d',
-                    name: 'Apply new styles',
-                    id: 'Task 2',
-                    progress: random(),
-                },
-                {
-                    start: daysSince(-4),
-                    end: daysSince(0),
-                    name: 'Review',
-                    id: 'Task 3',
-                    progress: random(),
-                },
-            ];
+                        // Diese beiden überlappen sich NICHT → gleiche Zeile
+                        { id: '1', row_id: 'person1', name: 'Meeting', start: '2025-06-26', end: '2025-06-28' },
+                        { id: '2', row_id: 'person1', name: 'Training', start: '2025-06-29', end: '2025-07-09' },
+                        
+                        // Diese beiden überlappen sich → verschiedene Unterzeilen
+                        { id: '3', row_id: 'person2', name: 'Projekt A', start: '2025-06-26', end: '2025-06-27' },
+                        { id: '4', row_id: 'person2', name: 'Projekt B', start: '2025-06-26', end: '2025-06-29' },
+
+                        { id: '5', row_id: 'person3', name: 'One', start: '2025-06-26', end: '2025-06-27' },
+                        { id: '6', row_id: 'person3', name: 'Two', start: '2025-06-29', end: '2025-06-30' },
+                        { id: '7', row_id: 'person3', name: 'Three', start: '2025-07-01', end: '2025-07-02' },
+                    ];
 
             const tasksSpread = [
                 {

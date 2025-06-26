@@ -199,6 +199,57 @@ export default class Gantt {
                 return task;
             })
             .filter((t) => t);
+        
+        // NEUE LOGIK: Gruppierung und Zeilenzuweisung
+        const row_mapping = new Map();
+        let current_row = 0;
+        
+        // Gruppiere Tasks nach row_id
+        const grouped_tasks = {};
+        this.tasks.forEach(task => {
+            const row_id = task.row_id || `single_${task.id}`;
+            if (!grouped_tasks[row_id]) {
+                grouped_tasks[row_id] = [];
+            }
+            grouped_tasks[row_id].push(task);
+        });
+        
+        // Weise Zeilen zu und behandle Überlappungen
+        Object.keys(grouped_tasks).forEach(row_id => {
+            const row_tasks = grouped_tasks[row_id];
+            
+            // Sortiere nach Startdatum
+            row_tasks.sort((a, b) => a._start - b._start);
+            
+            // Prüfe Überlappungen und weise sub_rows zu
+            const sub_rows = [];
+            row_tasks.forEach(task => {
+                let placed = false;
+                
+                // Versuche in existierenden sub_rows zu platzieren
+                for (let i = 0; i < sub_rows.length; i++) {
+                    const last_in_row = sub_rows[i][sub_rows[i].length - 1];
+                    
+                    // Keine Überlappung?
+                    if (task._start >= last_in_row._end) {
+                        sub_rows[i].push(task);
+                        task._index = current_row + i;
+                        placed = true;
+                        break;
+                    }
+                }
+                
+                // Neue sub_row nötig
+                if (!placed) {
+                    sub_rows.push([task]);
+                    task._index = current_row + sub_rows.length - 1;
+                }
+            });
+            
+            // Nächste Hauptzeile
+            current_row += sub_rows.length;
+        });
+        
         this.setup_dependencies();
     }
 
@@ -344,6 +395,18 @@ export default class Gantt {
         this.bind_grid_click();
         this.bind_holiday_labels();
         this.bind_bar_events();
+        this.bind_row_labels_scroll(); // NEU
+    }
+
+    bind_row_labels_scroll() {
+        if (!this.$row_labels) return;
+        
+        // Synchronisiere vertikales Scrollen
+        $.on(this.$container, 'scroll', (e) => {
+            if (this.$row_labels) {
+                this.$row_labels.style.transform = `translateY(-${e.currentTarget.scrollTop}px)`;
+            }
+        });
     }
 
     render() {
@@ -1343,7 +1406,6 @@ export default class Gantt {
         $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
             is_resizing = true;
             x_on_start = e.offsetX || e.layerX;
-            y_on_start = e.offsetY || e.layerY;
 
             const $bar_wrapper = $.closest('.bar-wrapper', handle);
             const id = $bar_wrapper.getAttribute('data-id');
@@ -1557,6 +1619,7 @@ export default class Gantt {
         this.$side_header?.remove?.();
         this.$current_highlight?.remove?.();
         this.$extras?.remove?.();
+        this.$row_labels?.remove?.(); // NEU
         this.popup?.hide?.();
     }
 }
