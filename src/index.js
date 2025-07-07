@@ -204,17 +204,13 @@ export default class Gantt {
                 return task;
             })
             .filter((t) => t);
-        
+
         this.groups = this.tasks;
         if (this.options?.enable_grouping) {
             // the groups are the union of the specified groups and the groups
             // from the tasks.
-            let groupset = new Set()
-            if (this.options?.groups) {
-                groupset = groupset.union(new Set(this.options.groups));
-            }
-            const extendedset = groupset.union(new Set(this.tasks.map((t) => t.group)));
-            this.groups = Array.from(extendedset);
+            let groups = this.options?.groups ? this.options.groups : [];
+            this.groups = Array.from(new Set([...groups, ...this.tasks.map((t) => t.group)]));
 
             // the index of the tasks depend on the groups array. This allows
             // for arbitrary naming of groups (not only numeric). Further, if
