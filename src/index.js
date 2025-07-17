@@ -1343,7 +1343,6 @@ export default class Gantt {
         $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
             is_resizing = true;
             x_on_start = e.offsetX || e.layerX;
-            y_on_start = e.offsetY || e.layerY;
 
             const $bar_wrapper = $.closest('.bar-wrapper', handle);
             const id = $bar_wrapper.getAttribute('data-id');
