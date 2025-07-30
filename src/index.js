@@ -580,7 +580,7 @@ export default class Gantt {
         for (let color in this.options.holidays) {
             let check_highlight = this.options.holidays[color];
             if (check_highlight === 'weekend')
-                check_highlight = (d) => d.getDay() === 0 || d.getDay() === 6;
+                check_highlight = this.options.custom_weekends;
             let extra_func;
 
             if (typeof check_highlight === 'object') {
