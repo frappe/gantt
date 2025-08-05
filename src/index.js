@@ -685,32 +685,34 @@ export default class Gantt {
                 d.setDate(d.getDate() + 1)
             ) {
                 const dateKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-                if (!overlappingDates.has(dateKey)) {
-                    overlappingDates.add(dateKey);
 
-                    const diff =
-                        date_utils.convert_scales(
-                            date_utils.diff(d, this.gantt_start) + 'd',
-                            this.config.unit,
-                        ) / this.config.step;
-
-                    const x = diff * this.config.column_width;
-
-                    if (
-                        x >= 0 &&
-                        x < this.dates.length * this.config.column_width
-                    ) {
-                        createSVG('rect', {
-                            x: x,
-                            y: this.config.header_height,
-                            width: this.config.column_width,
-                            height: height,
-                            class: 'overlap-highlight',
-                            style: 'fill: rgba(255, 0, 0, 0.3); pointer-events: none;',
-                            append_to: this.$svg,
-                        });
-                    }
+                if (overlappingDates.has(dateKey)) {
+                    continue;
                 }
+
+                overlappingDates.add(dateKey);
+
+                const diff =
+                    date_utils.convert_scales(
+                        date_utils.diff(d, this.gantt_start) + 'd',
+                        this.config.unit,
+                    ) / this.config.step;
+
+                const x = diff * this.config.column_width;
+
+                if (x <= 0) {
+                    continue;
+                }
+
+                createSVG('rect', {
+                    x: x,
+                    y: this.config.header_height,
+                    width: this.config.column_width,
+                    height: height,
+                    class: 'overlap-highlight',
+                    style: 'fill: rgba(255, 0, 0, 0.3); pointer-events: none;',
+                    append_to: this.$svg,
+                });
             }
         });
     }
