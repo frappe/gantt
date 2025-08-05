@@ -137,6 +137,17 @@
                             >Show weekends</label
                         >
                     </div>
+                    <div class="form-check form-switch">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="toggle-overlaps"
+                        />
+                        <label class="form-check-label" for="toggle-overlaps"
+                            >Show overlaps</label
+                        >
+                    </div>
                 </div>
                 <div class="chart col-md-9" id="holidays"></div>
             </div>
@@ -597,6 +608,7 @@
                             { '#a3e635': HOLIDAYS, '#bfdbfe': 'weekend' },
                             { '#a3e635': HOLIDAYS, '#bfdbfe': [] },
                         ],
+                        'toggle-overlaps': ['overlaps', true, false],
                     },
                 ],
                 [

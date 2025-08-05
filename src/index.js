@@ -1,5 +1,6 @@
 import date_utils from './date_utils';
 import { $, createSVG } from './svg_utils';
+import task_utils from './task_utils';
 
 import Arrow from './arrow';
 import Bar from './bar';
@@ -660,6 +661,56 @@ export default class Gantt {
         }
     }
 
+    highlight_overlaps() {
+        if (!this.options.overlaps) return;
+
+        const overlaps = task_utils.find_task_overlaps(this.tasks);
+
+        if (overlaps.length === 0) return;
+
+        const height =
+            (this.options.bar_height + this.options.padding) *
+            this.tasks.length;
+
+        const overlappingDates = new Set();
+
+        overlaps.forEach((overlap) => {
+            for (
+                let d = new Date(overlap.start);
+                d < overlap.end;
+                d.setDate(d.getDate() + 1)
+            ) {
+                const dateKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                if (!overlappingDates.has(dateKey)) {
+                    overlappingDates.add(dateKey);
+
+                    const diff =
+                        date_utils.convert_scales(
+                            date_utils.diff(d, this.gantt_start) + 'd',
+                            this.config.unit,
+                        ) / this.config.step;
+
+                    const x = diff * this.config.column_width;
+
+                    if (
+                        x >= 0 &&
+                        x < this.dates.length * this.config.column_width
+                    ) {
+                        createSVG('rect', {
+                            x: x,
+                            y: this.config.header_height,
+                            width: this.config.column_width,
+                            height: height,
+                            class: 'overlap-highlight',
+                            style: 'fill: rgba(255, 0, 0, 0.3); pointer-events: none;',
+                            append_to: this.$svg,
+                        });
+                    }
+                }
+            }
+        });
+    }
+
     /**
      * Compute the horizontal x-axis distance and associated date for the current date and view.
      *
@@ -700,6 +751,7 @@ export default class Gantt {
 
     make_grid_highlights() {
         this.highlight_holidays();
+        this.highlight_overlaps();
         this.config.ignored_positions = [];
 
         const height =
