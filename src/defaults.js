@@ -125,6 +125,7 @@ const DEFAULT_OPTIONS = {
     lines: 'both',
     move_dependencies: true,
     padding: 18,
+    overlaps: false,
     popup: (ctx) => {
         ctx.set_title(ctx.task.name);
         if (ctx.task.description) ctx.set_subtitle(ctx.task.description);
