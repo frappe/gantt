@@ -662,7 +662,11 @@ export default class Gantt {
     }
 
     highlight_overlaps() {
-        if (!this.options.overlaps) return;
+        if (
+            !this.options.overlaps ||
+            !(this.options.readonly || this.options.readonly_dates)
+        )
+            return;
 
         const overlaps = task_utils.find_task_overlaps(this.tasks);
 
