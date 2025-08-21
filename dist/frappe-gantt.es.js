@@ -168,7 +168,10 @@ function c(n, t) {
 function f(n, t) {
   const e = document.createElementNS("http://www.w3.org/2000/svg", n);
   for (let i in t)
-    i === "append_to" ? t.append_to.appendChild(e) : i === "innerHTML" ? e.innerHTML = t.innerHTML : i === "clipPath" ? e.setAttribute("clip-path", "url(#" + t[i] + ")") : e.setAttribute(i, t[i]);
+    i === "append_to" ? t.append_to.appendChild(e) : i === "innerHTML" ? e.innerHTML = t.innerHTML : i === "clipPath" ? e.setAttribute("clip-path", "url(#" + t[i] + ")") : i === "style" ? t[i].split(";").forEach((s) => {
+      const [r, a] = s.split(":");
+      r && a && (e.style[r.trim()] = a.trim());
+    }) : e.setAttribute(i, t[i]);
   return e;
 }
 function L(n, t, e, i) {
