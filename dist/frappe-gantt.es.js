@@ -172,13 +172,13 @@ function f(n, t) {
   return e;
 }
 function L(n, t, e, i) {
-  const s = X(n, t, e, i);
+  const s = H(n, t, e, i);
   if (s === n) {
     const r = document.createEvent("HTMLEvents");
     r.initEvent("click", !0, !0), r.eventName = "click", s.dispatchEvent(r);
   }
 }
-function X(n, t, e, i, s = "0.4s", r = "0.1s") {
+function H(n, t, e, i, s = "0.4s", r = "0.1s") {
   const a = n.querySelector("animate");
   if (a)
     return c.attr(a, {
@@ -239,7 +239,7 @@ c.attr = (n, t, e) => {
   }
   n.setAttribute(t, e);
 };
-class q {
+class C {
   constructor(t, e, i) {
     this.gantt = t, this.from_task = e, this.to_task = i, this.calculate_path(), this.draw();
   }
@@ -294,7 +294,7 @@ class q {
     this.calculate_path(), this.element.setAttribute("d", this.path);
   }
 }
-class C {
+class q {
   constructor(t, e) {
     this.set_defaults(t, e), this.prepare_wrappers(), this.prepare_helpers(), this.refresh();
   }
@@ -902,7 +902,7 @@ class z {
         let a = [];
         e.dependencies && (a = e.dependencies.split(",").map((o) => o.trim().replaceAll(" ", "_")).filter((o) => o)), e.dependencies = a;
       }
-      return e.id ? typeof e.id == "string" ? e.id = e.id.replaceAll(" ", "_") : e.id = `${e.id}` : e.id = B(e), e;
+      return e.id ? typeof e.id == "string" ? e.id = e.id.replaceAll(" ", "_") : e.id = `${e.id}` : e.id = N(e), e;
     }).filter((e) => e), this.setup_dependencies();
   }
   setup_dependencies() {
@@ -1183,24 +1183,23 @@ class z {
   }
   make_grid_highlights() {
     this.highlight_holidays(), this.config.ignored_positions = [];
-    const t = (this.options.bar_height + this.options.padding) * this.tasks.length;
-    this.layers.grid.innerHTML += `<pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
-          <path d="M-1,1 l2,-2
-                   M0,4 l4,-4
-                   M3,5 l2,-2"
-                style="stroke:grey; stroke-width:0.3" />
-        </pattern>`;
-    for (let i = new Date(this.gantt_start); i <= this.gantt_end; i.setDate(i.getDate() + 1)) {
+    const t = (this.options.bar_height + this.options.padding) * this.tasks.length, e = "http://www.w3.org/2000/svg", i = document.createElementNS(e, "pattern");
+    i.setAttribute("id", "diagonalHatch"), i.setAttribute("patternUnits", "userSpaceOnUse"), i.setAttribute("width", "4"), i.setAttribute("height", "4");
+    const s = document.createElementNS(e, "path");
+    s.setAttribute("d", `M-1,1 l2,-2
+                        M0,4 l4,-4
+                        M3,5 l2,-2`), s.style.stroke = "grey", s.style.strokeWidth = 0.3, i.appendChild(s), this.layers.grid.appendChild(i);
+    for (let a = new Date(this.gantt_start); a <= this.gantt_end; a.setDate(a.getDate() + 1)) {
       if (!this.config.ignored_dates.find(
-        (r) => r.getTime() == i.getTime()
-      ) && (!this.config.ignored_function || !this.config.ignored_function(i)))
+        (h) => h.getTime() == a.getTime()
+      ) && (!this.config.ignored_function || !this.config.ignored_function(a)))
         continue;
-      let s = d.convert_scales(
-        d.diff(i, this.gantt_start) + "d",
+      let o = d.convert_scales(
+        d.diff(a, this.gantt_start) + "d",
         this.config.unit
       ) / this.config.step;
-      this.config.ignored_positions.push(s * this.config.column_width), f("rect", {
-        x: s * this.config.column_width,
+      this.config.ignored_positions.push(o * this.config.column_width), f("rect", {
+        x: o * this.config.column_width,
         y: this.config.header_height,
         width: this.config.column_width,
         height: t,
@@ -1281,7 +1280,7 @@ class z {
   }
   make_bars() {
     this.bars = this.tasks.map((t) => {
-      const e = new C(this, t);
+      const e = new q(this, t);
       return this.layers.bar.appendChild(e.group), e;
     });
   }
@@ -1292,7 +1291,7 @@ class z {
       e = t.dependencies.map((i) => {
         const s = this.get_task(i);
         if (!s) return;
-        const r = new q(
+        const r = new C(
           this,
           this.bars[s._index],
           // from_task
@@ -1500,8 +1499,8 @@ class z {
       ), m = this.upperTexts.find(
         (w) => w.textContent === y
       ), m !== this.$current && (this.$current && this.$current.classList.remove("current-upper"), m.classList.add("current-upper"), this.$current = m), i = _.currentTarget.scrollLeft;
-      let [A, S, H] = this.get_start_end_positions();
-      i > H + 100 ? (this.$adjust.innerHTML = "&larr;", this.$adjust.classList.remove("hide"), this.$adjust.onclick = () => {
+      let [A, S, X] = this.get_start_end_positions();
+      i > X + 100 ? (this.$adjust.innerHTML = "&larr;", this.$adjust.classList.remove("hide"), this.$adjust.onclick = () => {
         this.$container.scrollTo({
           left: S,
           behavior: "smooth"
@@ -1658,7 +1657,7 @@ z.VIEW_MODE = {
   MONTH: b[5],
   YEAR: b[6]
 };
-function B(n) {
+function N(n) {
   return n.name + "_" + Math.random().toString(36).slice(2, 12);
 }
 function $(n) {
