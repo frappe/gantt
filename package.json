@@ -1,5 +1,5 @@
 {
-    "name": "frappe-gantt",
+    "name": "frappe-gantt-impress",
     "version": "1.0.3",
     "description": "A simple, modern, interactive gantt library for the web",
     "main": "src/index.js",
@@ -14,7 +14,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/frappe/gantt.git"
+        "url": "git+https://github.com/lavdboomImpress/gantt-impress.git"
     },
     "files": [
         "src",
@@ -48,7 +48,7 @@
         "eslint-plugin-prettier": "^2.6.0",
         "postcss-nesting": "^12.1.2",
         "prettier": "3.2.5",
-        "vite": "^5.2.10"
+        "vite": "^7.1.3"
     },
     "eslintIgnore": [
         "dist"
