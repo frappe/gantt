@@ -705,12 +705,25 @@ export default class Gantt {
         const height =
             (this.options.bar_height + this.options.padding) *
             this.tasks.length;
-        this.layers.grid.innerHTML += `<pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
-          <path d="M-1,1 l2,-2
-                   M0,4 l4,-4
-                   M3,5 l2,-2"
-                style="stroke:grey; stroke-width:0.3" />
-        </pattern>`;
+
+        const svgns = "http://www.w3.org/2000/svg";
+
+        const pattern = document.createElementNS(svgns, "pattern");
+        pattern.setAttribute("id", "diagonalHatch");
+        pattern.setAttribute("patternUnits", "userSpaceOnUse");
+        pattern.setAttribute("width", "4");
+        pattern.setAttribute("height", "4");
+
+        const path = document.createElementNS(svgns, "path");
+        path.setAttribute("d", `M-1,1 l2,-2
+                        M0,4 l4,-4
+                        M3,5 l2,-2`);
+        path.style.stroke = "grey";
+        path.style.strokeWidth = 0.3;
+
+        pattern.appendChild(path);
+
+        this.layers.grid.appendChild(pattern);
 
         for (
             let d = new Date(this.gantt_start);
