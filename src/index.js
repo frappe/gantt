@@ -599,19 +599,16 @@ export default class Gantt {
         }
     }
 
-    // Cria os botões de controle de data
     createDateControls() {
         const controls = document.createElement('div');
         controls.classList.add('date-controls');
 
-        // Botão Previous
         const $prev = document.createElement('button');
         $prev.textContent = '←';
         $prev.title = 'Previous Day';
         $prev.onclick = () => this.prevDay();
         controls.appendChild($prev);
 
-        // Botão Play/Pause
         const $playPause = document.createElement('button');
         $playPause.textContent = this.isPlaying ? 'Pause' : 'Play';
         $playPause.title = this.isPlaying ? 'Pause' : 'Play';
@@ -621,14 +618,13 @@ export default class Gantt {
         };
         controls.appendChild($playPause);
 
-        // Botão Next
         const $next = document.createElement('button');
         $next.textContent = '→';
         $next.title = 'Next Day';
         $next.onclick = () => this.nextDay();
         controls.appendChild($next);
 
-        // Adiciona os controles ao header lateral
+        // Add controls to the side header
         this.$side_header.prepend(controls);
         this.$date_controls = controls;
     }
