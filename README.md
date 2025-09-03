@@ -92,7 +92,7 @@ Frappe Gantt offers a wide range of options to customize your chart.
 | `today_button`           | Adds a button to navigate to today’s date.                                      | `true`, `false`                                    | `true`                             |
 | `view_mode`              | The initial view mode of the Gantt chart.                                          | `Day`, `Week`, `Month`, `Year`.           | `Day`                            |
 | `view_mode_select`       | Allows selecting the view mode from a dropdown.                                 | `true`, `false`                                    | `false`                            |
-
+| `date_controls`          | Shows date controls.                               | `true`, `false`                                    | `false`                            |
 Apart from these ones, two options - `popup` and `view_modes` (plural, not singular) - are available. They have "sub"-APIs, and thus are listed separately.
 
 #### View Mode Configuration
