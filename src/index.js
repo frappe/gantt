@@ -19,11 +19,11 @@ export default class Gantt {
         this.currentDate = new Date();
     }
 
-    // Armazena o estado do play
+    // play status
     isPlaying = false;
     playInterval = null;
 
-    // Inicia o play (adianta 1 dia por segundo)
+    // Starts playing (advances 1 day per second)
     play() {
         if (this.isPlaying) return; // já está tocando
 
@@ -33,7 +33,6 @@ export default class Gantt {
         }, 1000); // 1000ms = 1s
     }
 
-    // Pausa o play
     pause() {
         if (!this.isPlaying) return;
 
@@ -54,11 +53,11 @@ export default class Gantt {
         this.trigger_event('today_changed', [this.currentDate, date]);
         this.currentDate = date;
 
-        // Remove anteriores se já existirem
+        // Remove old elements
         if (this.$current_highlight) this.$current_highlight.remove();
         if (this.$current_ball_highlight) this.$current_ball_highlight.remove();
 
-        // calcula a diferença de unidades em relação ao início do gantt
+        // calculates the diff in units relative to the start of the gantt
         const diff_in_units = date_utils.diff(
             date,
             this.gantt_start,
@@ -68,7 +67,7 @@ export default class Gantt {
         const left =
             (diff_in_units / this.config.step) * this.config.column_width;
 
-        // cria a barra de highlight
+        // creates new bar highlight
         this.$current_highlight = this.create_el({
             top: this.config.header_height,
             left,
@@ -77,7 +76,7 @@ export default class Gantt {
             append_to: this.$container,
         });
 
-        // cria a bolinha de highlight
+        // creates new ball highlight
         this.$current_ball_highlight = this.create_el({
             top: this.config.header_height - 6,
             left: left - 2.5,
