@@ -16,6 +16,94 @@ export default class Gantt {
         this.setup_tasks(tasks);
         this.change_view_mode();
         this.bind_events();
+        this.currentDate = new Date();
+    }
+
+    // Armazena o estado do play
+    isPlaying = false;
+    playInterval = null;
+
+    // Inicia o play (adianta 1 dia por segundo)
+    play() {
+        if (this.isPlaying) return; // já está tocando
+
+        this.isPlaying = true;
+        this.playInterval = setInterval(() => {
+            this.nextDay();
+        }, 1000); // 1000ms = 1s
+    }
+
+    // Pausa o play
+    pause() {
+        if (!this.isPlaying) return;
+
+        clearInterval(this.playInterval);
+        this.playInterval = null;
+        this.isPlaying = false;
+    }
+
+    togglePlay() {
+        if (this.isPlaying) {
+            this.pause();
+        } else {
+            this.play();
+        }
+    }
+
+    setToday(date) {
+        this.trigger_event('today_changed', [this.currentDate, date]);
+        this.currentDate = date;
+
+        // Remove anteriores se já existirem
+        if (this.$current_highlight) this.$current_highlight.remove();
+        if (this.$current_ball_highlight) this.$current_ball_highlight.remove();
+
+        // calcula a diferença de unidades em relação ao início do gantt
+        const diff_in_units = date_utils.diff(
+            date,
+            this.gantt_start,
+            this.config.unit,
+        );
+
+        const left =
+            (diff_in_units / this.config.step) * this.config.column_width;
+
+        // cria a barra de highlight
+        this.$current_highlight = this.create_el({
+            top: this.config.header_height,
+            left,
+            height: this.grid_height - this.config.header_height,
+            classes: 'current-highlight',
+            append_to: this.$container,
+        });
+
+        // cria a bolinha de highlight
+        this.$current_ball_highlight = this.create_el({
+            top: this.config.header_height - 6,
+            left: left - 2.5,
+            width: 6,
+            height: 6,
+            classes: 'current-ball-highlight',
+            append_to: this.$header,
+        });
+    }
+
+    nextDay() {
+        const next = date_utils.add(this.currentDate, 1, 'day');
+
+        if (next > this.gantt_end) return;
+
+        this.set_scroll_position(this.currentDate);
+        this.setToday(next);
+    }
+
+    prevDay() {
+        const prev = date_utils.add(this.currentDate, -1, 'day');
+
+        if (prev < this.gantt_start) return;
+
+        this.set_scroll_position(date_utils.add(this.currentDate, -3, 'day'));
+        this.setToday(prev);
     }
 
     setup_wrapper(element) {
@@ -506,6 +594,44 @@ export default class Gantt {
             this.$side_header.prepend($today_button);
             this.$today_button = $today_button;
         }
+
+        if (this.options.date_controls) {
+            this.createDateControls();
+        }
+    }
+
+    // Cria os botões de controle de data
+    createDateControls() {
+        const controls = document.createElement('div');
+        controls.classList.add('date-controls');
+
+        // Botão Previous
+        const $prev = document.createElement('button');
+        $prev.textContent = '←';
+        $prev.title = 'Previous Day';
+        $prev.onclick = () => this.prevDay();
+        controls.appendChild($prev);
+
+        // Botão Play/Pause
+        const $playPause = document.createElement('button');
+        $playPause.textContent = this.isPlaying ? 'Pause' : 'Play';
+        $playPause.title = this.isPlaying ? 'Pause' : 'Play';
+        $playPause.onclick = () => {
+            this.togglePlay();
+            $playPause.textContent = this.isPlaying ? 'Pause' : 'Play';
+        };
+        controls.appendChild($playPause);
+
+        // Botão Next
+        const $next = document.createElement('button');
+        $next.textContent = '→';
+        $next.title = 'Next Day';
+        $next.onclick = () => this.nextDay();
+        controls.appendChild($next);
+
+        // Adiciona os controles ao header lateral
+        this.$side_header.prepend(controls);
+        this.$date_controls = controls;
     }
 
     make_grid_ticks() {
@@ -971,6 +1097,9 @@ export default class Gantt {
     }
 
     scroll_current() {
+        if (this.options.date_controls) {
+            this.setToday(new Date());
+        }
         let res = this.get_closest_date();
         if (res) this.set_scroll_position(res[0]);
     }
