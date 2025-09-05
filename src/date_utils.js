@@ -123,51 +123,53 @@ export default {
     },
 
     diff(date_a, date_b, scale = 'day') {
-        let milliseconds, seconds, hours, minutes, days, months, years;
-
-        milliseconds =
-            date_a -
-            date_b +
+        const milliseconds =
+            (date_a - date_b) +
             (date_b.getTimezoneOffset() - date_a.getTimezoneOffset()) * 60000;
-        seconds = milliseconds / 1000;
-        minutes = seconds / 60;
-        hours = minutes / 60;
-        days = hours / 24;
-        // Calculate months across years
-        let yearDiff = date_a.getFullYear() - date_b.getFullYear();
-        let monthDiff = date_a.getMonth() - date_b.getMonth();
-        // calculate extra
-        monthDiff += (days % 30) / 30;
+            
+        const seconds = milliseconds / 1000;
+        const minutes = seconds / 60;
+        const hours   = minutes / 60;
+        const days    = hours / 24;
 
-        /* If monthDiff is negative, date_b is in an earlier month than
-        date_a and thus subtracted from the year difference in months */
-        months = yearDiff * 12 + monthDiff;
-        /* If date_a's (e.g. march 1st) day of the month is smaller than date_b (e.g. february 28th),
-        adjust the month difference */
-        if (date_a.getDate() < date_b.getDate()) {
-            months--;
+        function diffInMonths(a, b) {
+            let sign = 1;
+
+            // Garante que 'a' seja a data maior (mais recente)
+            if (a < b) {
+                const temp = a;
+                a = b;
+                b = temp;
+                sign = -1;
+            }
+
+            // meses inteiros brutos
+            let months = (a.getFullYear() - b.getFullYear()) * 12 +
+                        (a.getMonth() - b.getMonth());
+
+            // ancora em b + months
+            let anchor = new Date(b.getTime());
+            anchor.setMonth(anchor.getMonth() + months);
+
+            // próxima âncora (mês seguinte)
+            const next = new Date(a.getTime());
+            next.setMonth(next.getMonth() + 1);
+
+            // fração de mês baseada na duração real do mês
+            const fraction = (a - anchor) / (next - a);
+
+            // aplica o sinal no final
+            return (months + fraction) * sign;
         }
 
-        // Calculate years based on actual months
-        years = months / 12;
+        const months = diffInMonths(date_a, date_b);
+        const years  = months / 12;
 
-        if (!scale.endsWith('s')) {
-            scale += 's';
-        }
+        if (!scale.endsWith('s')) scale += 's';
 
-        return (
-            Math.round(
-                {
-                    milliseconds,
-                    seconds,
-                    minutes,
-                    hours,
-                    days,
-                    months,
-                    years,
-                }[scale] * 100,
-            ) / 100
-        );
+        const values = { milliseconds, seconds, minutes, hours, days, months, years };
+        return Math.round(values[scale] * 100) / 100;
+
     },
 
     today() {
