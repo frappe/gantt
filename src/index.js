@@ -96,7 +96,7 @@ export default class Gantt {
 
         if (typeof this.options.ignore !== 'function') {
             if (typeof this.options.ignore === 'string')
-                this.options.ignore = [this.options.ignord];
+                this.options.ignore = [this.options.ignore];
             for (let option of this.options.ignore) {
                 if (typeof option === 'function') {
                     this.config.ignored_function = option;
