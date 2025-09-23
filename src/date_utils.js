@@ -137,7 +137,7 @@ export default {
         let yearDiff = date_a.getFullYear() - date_b.getFullYear();
         let monthDiff = date_a.getMonth() - date_b.getMonth();
         // calculate extra
-        monthDiff += (days % 30) / 30;
+        monthDiff += date_a.getDate() / 31;
 
         /* If monthDiff is negative, date_b is in an earlier month than
         date_a and thus subtracted from the year difference in months */
