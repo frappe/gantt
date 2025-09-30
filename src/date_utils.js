@@ -79,49 +79,53 @@ export default {
     },
 
     format(date, date_format = 'YYYY-MM-DD HH:mm:ss.SSS', lang = 'en') {
-        const dateTimeFormat = new Intl.DateTimeFormat(lang, {
-            month: 'long',
-        });
-        const dateTimeFormatShort = new Intl.DateTimeFormat(lang, {
-            month: 'short',
-        });
-        const month_name = dateTimeFormat.format(date);
+        // Use Intl for calendar-aware parts (year, month, day) so Jalali renders correctly
+        const monthLongFmt = new Intl.DateTimeFormat(lang, { month: 'long' });
+        const monthShortFmt = new Intl.DateTimeFormat(lang, { month: 'short' });
+        const yearFmt = new Intl.DateTimeFormat(lang, { year: 'numeric' });
+        const month2Fmt = new Intl.DateTimeFormat(lang, { month: '2-digit' });
+        const day2Fmt = new Intl.DateTimeFormat(lang, { day: '2-digit' });
+        const dayFmt = new Intl.DateTimeFormat(lang, { day: 'numeric' });
+        
+        const month_name = monthLongFmt.format(date);
         const month_name_capitalized =
-            month_name.charAt(0).toUpperCase() + month_name.slice(1);
-
-        const values = this.get_date_values(date).map((d) => padStart(d, 2, 0));
+        month_name.charAt(0).toUpperCase() + month_name.slice(1);
+        
+        const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
         const format_map = {
-            YYYY: values[0],
-            MM: padStart(+values[1] + 1, 2, 0),
-            DD: values[2],
+            // Calendar-aware values
+            YYYY: yearFmt.format(date),
+            MM: month2Fmt.format(date),
+            DD: day2Fmt.format(date),
+            D: dayFmt.format(date),
+            MMMM: month_name_capitalized,
+            MMM: monthShortFmt.format(date),
+            // Time values from native Date
             HH: values[3],
             mm: values[4],
             ss: values[5],
             SSS: values[6],
-            D: values[2],
-            MMMM: month_name_capitalized,
-            MMM: dateTimeFormatShort.format(date),
         };
 
         let str = date_format;
         const formatted_values = [];
-
+        
         Object.keys(format_map)
-            .sort((a, b) => b.length - a.length) // big string first
-            .forEach((key) => {
-                if (str.includes(key)) {
-                    str = str.replaceAll(key, `$${formatted_values.length}`);
-                    formatted_values.push(format_map[key]);
-                }
-            });
-
+        .sort((a, b) => b.length - a.length) // big string first
+        .forEach((key) => {
+            if (str.includes(key)) {
+                str = str.replaceAll(key, `$${formatted_values.length}`);
+                formatted_values.push(format_map[key]);
+            }
+        });
+        
         formatted_values.forEach((value, i) => {
             str = str.replaceAll(`$${i}`, value);
         });
-
+        
         return str;
     },
-
+    
     diff(date_a, date_b, scale = 'day') {
         let milliseconds, seconds, hours, minutes, days, months, years;
 
