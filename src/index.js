@@ -260,12 +260,20 @@ export default class Gantt {
 
     // Toggle collapse state of a task
     toggle_task_collapse(task_id) {
+        // Save current scroll position
+        const scrollLeft = this.$container.scrollLeft;
+        const scrollTop = this.$container.scrollTop;
+
         if (this.collapsed_tasks.has(task_id)) {
             this.collapsed_tasks.delete(task_id);
         } else {
             this.collapsed_tasks.add(task_id);
         }
         this.render();
+
+        // Restore scroll position after render
+        this.$container.scrollLeft = scrollLeft;
+        this.$container.scrollTop = scrollTop;
     }
 
     // Check if a task should be visible
@@ -413,6 +421,7 @@ export default class Gantt {
         this.bind_holiday_labels();
         this.bind_bar_events();
         this.bind_collapse_buttons();
+        this.bind_drag_to_pan();
     }
 
     bind_collapse_buttons() {
@@ -526,8 +535,13 @@ export default class Gantt {
         });
         this.grid_height = grid_height;
         if (this.options.container_height === 'auto') {
-            // Set height on wrapper, not container, to work with flex layout
-            this.$wrapper.style.height = grid_height + 50 + 'px'; // +50 for controls bar
+            // Don't set a fixed height on wrapper when auto - let flex layout handle it
+            // The container will scroll when content exceeds its flex-allocated space
+            this.$wrapper.style.removeProperty('height');
+            this.$container.style.removeProperty('height');
+        } else {
+            // If a specific height is set, use it
+            this.$wrapper.style.height = this.options.container_height + 50 + 'px'; // +50 for controls
         }
     }
 
@@ -1343,7 +1357,13 @@ export default class Gantt {
 
         if (this.options.infinite_padding) {
             let extended = false;
-            $.on(this.$container, 'mousewheel', (e) => {
+            $.on(this.$container, 'wheel', (e) => {
+                // Only handle horizontal scrolling (shift+scroll or horizontal wheel)
+                // Ignore pure vertical scrolling
+                if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && e.deltaX === 0 && !e.shiftKey) {
+                    return; // Let normal vertical scrolling happen
+                }
+
                 let trigger = this.$container.scrollWidth / 2;
                 if (!extended && e.currentTarget.scrollLeft <= trigger) {
                     let old_scroll_left = e.currentTarget.scrollLeft;
@@ -1617,6 +1637,82 @@ export default class Gantt {
             bar = null;
             $bar_progress = null;
             $bar = null;
+        });
+    }
+
+    bind_drag_to_pan() {
+        let isPanning = false;
+        let startX = 0;
+        let scrollLeft = 0;
+
+        // Only allow panning on grid background, not on bars or other interactive elements
+        const isValidPanTarget = (target) => {
+            return target.classList.contains('grid-row') ||
+                   target.classList.contains('grid-header') ||
+                   target.classList.contains('grid-background') ||
+                   target.classList.contains('tick') ||
+                   target.classList.contains('date-highlight') ||
+                   target.classList.contains('current-highlight') ||
+                   target.tagName === 'svg' ||
+                   (target.tagName === 'g' && !target.classList.contains('bar-wrapper'));
+        };
+
+        // Change cursor on valid pan targets
+        this.$svg.addEventListener('mouseover', (e) => {
+            if (!isPanning && isValidPanTarget(e.target) &&
+                !e.target.closest('.bar-wrapper') &&
+                !e.target.closest('.handle') &&
+                !e.target.closest('.collapse-button')) {
+                this.$svg.style.cursor = 'grab';
+            } else if (!isPanning) {
+                this.$svg.style.cursor = 'default';
+            }
+        });
+
+        this.$svg.addEventListener('mousedown', (e) => {
+            // Only start panning if clicking on valid target and not on a bar
+            if (!isValidPanTarget(e.target)) {
+                return;
+            }
+
+            // Don't pan if clicking on a bar, handle, or collapse button
+            if (e.target.closest('.bar-wrapper') ||
+                e.target.closest('.handle') ||
+                e.target.closest('.collapse-button')) {
+                return;
+            }
+
+            isPanning = true;
+            this.$svg.style.cursor = 'grabbing';
+            startX = e.pageX - this.$container.offsetLeft;
+            scrollLeft = this.$container.scrollLeft;
+
+            // Prevent text selection while dragging
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isPanning) return;
+            e.preventDefault();
+
+            const x = e.pageX - this.$container.offsetLeft;
+            const walk = (startX - x) * 1.5; // Multiply for faster scrolling
+            this.$container.scrollLeft = scrollLeft + walk;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isPanning) {
+                isPanning = false;
+                this.$svg.style.cursor = 'grab';
+            }
+        });
+
+        // Also handle mouse leave to stop panning
+        this.$container.addEventListener('mouseleave', () => {
+            if (isPanning) {
+                isPanning = false;
+                this.$svg.style.cursor = 'default';
+            }
         });
     }
 

@@ -61,37 +61,42 @@ export default class Bar {
         // Calculate base width from duration
         this.width = this.gantt.config.column_width * this.duration;
 
+        // More accurate text width estimation based on average character widths
+        const text = this.task.name || '';
+        let estimated_text_width = 0;
+
+        // Use different widths for different character types
+        for (let char of text) {
+            if (char === 'W' || char === 'M') {
+                estimated_text_width += 9;  // Wide characters
+            } else if (char === 'i' || char === 'l' || char === ' ') {
+                estimated_text_width += 3;  // Narrow characters
+            } else if (char.match(/[A-Z]/)) {
+                estimated_text_width += 8;  // Uppercase
+            } else {
+                estimated_text_width += 6;  // Default
+            }
+        }
+
         // Check if this task has dependents (will have collapse button)
         const has_dependents = this.gantt.tasks_with_dependents &&
                               this.gantt.tasks_with_dependents.has(this.task.id);
 
-        // If task has collapse button, ensure minimum width to fit text
+        // Calculate minimum width needed based on whether there's a collapse button
+        let min_width_needed;
         if (has_dependents) {
-            // More accurate text width estimation based on average character widths
-            const text = this.task.name || '';
-            let estimated_text_width = 0;
+            const button_space = 23; // Actual space needed for collapse button (button ends at x+18 + 5px padding)
+            const padding = 20; // Additional padding for breathing room after text
+            min_width_needed = button_space + estimated_text_width + padding;
+        } else {
+            // For bars without collapse button, ensure text fits with padding
+            const padding = 30; // Padding on both sides (15px each side)
+            min_width_needed = estimated_text_width + padding;
+        }
 
-            // Use different widths for different character types
-            for (let char of text) {
-                if (char === 'W' || char === 'M') {
-                    estimated_text_width += 9;  // Wide characters
-                } else if (char === 'i' || char === 'l' || char === ' ') {
-                    estimated_text_width += 3;  // Narrow characters
-                } else if (char.match(/[A-Z]/)) {
-                    estimated_text_width += 8;  // Uppercase
-                } else {
-                    estimated_text_width += 6;  // Default
-                }
-            }
-
-            const button_space = 35; // Space needed for collapse button (increase for more right padding)
-            const padding = 20; // Additional padding for breathing room
-            const min_width_needed = button_space + estimated_text_width + padding;
-
-            // Expand bar if needed to fit content
-            if (this.width < min_width_needed) {
-                this.width = min_width_needed;
-            }
+        // Expand bar if needed to fit content
+        if (this.width < min_width_needed) {
+            this.width = min_width_needed;
         }
 
         if (!this.task.progress || this.task.progress < 0)
@@ -310,6 +315,7 @@ export default class Bar {
             y: this.y + this.height / 2,
             innerHTML: this.task.name,
             class: 'bar-label',
+            'text-anchor': 'start',  // Explicitly set for consistent positioning
             append_to: this.bar_group,
         });
         // labels get BBox in the next tick
@@ -813,9 +819,23 @@ export default class Bar {
                 img_mask.setAttribute('x', bar.getX() + padding + button_offset);
                 label.setAttribute('x', bar.getX() + barWidth / 2 + x_offset_label_img);
             } else {
-                // Always center the label since bar is guaranteed to be wide enough
-                const label_x = bar.getX() + barWidth / 2 - labelWidth / 2;
-                label.setAttribute('x', label_x);
+                if (this.has_collapse_button) {
+                    // For bars with collapse button:
+                    // Button starts at x+4, width 14, ends at x+18, add 5px padding = 23px total
+                    const button_end = 23; // Button ends at x+18, plus 5px padding
+                    const available_space_start = bar.getX() + button_end;
+                    const available_space_width = barWidth - button_end;
+
+                    // Center the text within this available space
+                    const text_center_x = available_space_start + (available_space_width / 2);
+                    const label_x = text_center_x - (labelWidth / 2);
+                    label.setAttribute('x', label_x);
+                } else {
+                    // For bars without collapse button, simply center the text in the full bar
+                    const bar_center_x = bar.getX() + (barWidth / 2);
+                    const label_x = bar_center_x - (labelWidth / 2);
+                    label.setAttribute('x', label_x);
+                }
             }
         }
     }
