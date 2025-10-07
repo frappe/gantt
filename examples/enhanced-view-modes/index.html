@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced View Modes - Frappe Gantt Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f7;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #1d1d1f;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        p.subtitle {
+            color: #86868b;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+
+        .demo-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .feature-card {
+            background: #f9f9fa;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .feature-card h3 {
+            color: #1d1d1f;
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-card p {
+            color: #6e6e73;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .keyboard-shortcuts {
+            background: #f9f9fa;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .keyboard-shortcuts h3 {
+            margin-top: 0;
+            color: #1d1d1f;
+        }
+
+        .shortcut-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .shortcut {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        kbd {
+            background: white;
+            border: 1px solid #d1d1d6;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+        }
+
+        #gantt {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #d1d1d6;
+            height: 600px;
+        }
+
+        .info-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .info-banner h3 {
+            margin: 0 0 8px 0;
+        }
+
+        .info-banner p {
+            margin: 0;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Enhanced View Modes</h1>
+        <p class="subtitle">Experience improved navigation with always-visible view mode buttons</p>
+
+        <div class="info-banner">
+            <h3>✨ What's New</h3>
+            <p>View mode buttons are now always visible in the header, making it easy to switch between Day, Week, Month, and Year views. The view automatically centers on today when you change time scales!</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3><span class="icon">🎯</span> Quick View Switching</h3>
+                <p>Click the view buttons in the header to instantly switch between Day, Week, Month, and Year views.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3><span class="icon">📅</span> Auto-Center on Today</h3>
+                <p>When you change view modes, the chart automatically scrolls to center on today's date for immediate context.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3><span class="icon">🎨</span> Clean UI Design</h3>
+                <p>Modern segmented control design with clear active states makes it obvious which view you're currently using.</p>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <div id="gantt"></div>
+        </div>
+
+        <div class="keyboard-shortcuts">
+            <h3>📌 Configuration Options</h3>
+            <div class="shortcut-list">
+                <div class="shortcut">
+                    <kbd>view_mode_buttons</kbd> <span>Show/hide view buttons</span>
+                </div>
+                <div class="shortcut">
+                    <kbd>view_mode_buttons_list</kbd> <span>Choose which buttons to display</span>
+                </div>
+                <div class="shortcut">
+                    <kbd>auto_scroll_to_today</kbd> <span>Auto-center on today when changing views</span>
+                </div>
+                <div class="shortcut">
+                    <kbd>today_button</kbd> <span>Show/hide Today button</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import Gantt from '../../src/index.js';
+
+        // Sample tasks for demonstration
+        const tasks = [
+            {
+                id: 'phase-1',
+                name: 'Project Kickoff',
+                start: '2025-10-01',
+                end: '2025-10-03',
+                progress: 100,
+                dependencies: []
+            },
+            {
+                id: 'research',
+                name: 'Market Research',
+                start: '2025-10-04',
+                end: '2025-10-10',
+                progress: 85,
+                dependencies: ['phase-1']
+            },
+            {
+                id: 'design-sprint',
+                name: 'Design Sprint',
+                start: '2025-10-11',
+                end: '2025-10-18',
+                progress: 70,
+                dependencies: ['research']
+            },
+            {
+                id: 'prototype',
+                name: 'Prototype Development',
+                start: '2025-10-19',
+                end: '2025-10-30',
+                progress: 45,
+                dependencies: ['design-sprint']
+            },
+            {
+                id: 'user-testing',
+                name: 'User Testing',
+                start: '2025-10-31',
+                end: '2025-11-07',
+                progress: 20,
+                dependencies: ['prototype']
+            },
+            {
+                id: 'feedback',
+                name: 'Feedback Analysis',
+                start: '2025-11-08',
+                end: '2025-11-12',
+                progress: 0,
+                dependencies: ['user-testing']
+            },
+            {
+                id: 'iteration',
+                name: 'Design Iteration',
+                start: '2025-11-13',
+                end: '2025-11-20',
+                progress: 0,
+                dependencies: ['feedback']
+            },
+            {
+                id: 'development',
+                name: 'Development Phase',
+                start: '2025-11-21',
+                end: '2025-12-15',
+                progress: 0,
+                dependencies: ['iteration']
+            },
+            {
+                id: 'qa',
+                name: 'QA Testing',
+                start: '2025-12-16',
+                end: '2025-12-22',
+                progress: 0,
+                dependencies: ['development']
+            },
+            {
+                id: 'launch-prep',
+                name: 'Launch Preparation',
+                start: '2025-12-23',
+                end: '2025-12-30',
+                progress: 0,
+                dependencies: ['qa']
+            },
+            {
+                id: 'launch',
+                name: 'Product Launch',
+                start: '2025-12-31',
+                end: '2026-01-02',
+                progress: 0,
+                dependencies: ['launch-prep']
+            }
+        ];
+
+        // Initialize Gantt with enhanced view modes
+        const gantt = new Gantt('#gantt', tasks, {
+            view_mode: 'Month',
+            date_format: 'YYYY-MM-DD',
+            today_button: true,
+            view_mode_buttons: true,  // Enable the new view mode buttons (default)
+            view_mode_buttons_list: ['Day', 'Week', 'Month', 'Year'],  // Specify which buttons to show
+            auto_scroll_to_today: true,  // Auto-center on today when changing views (default)
+            bar_height: 32,
+            padding: 20,
+            auto_move_label: false,
+            holidays: null,
+            scroll_to: 'today'
+        });
+
+        // Make gantt instance available globally for debugging
+        window.gantt = gantt;
+
+        // Log information to console
+        console.log('Enhanced View Modes Demo Loaded');
+        console.log('Features:');
+        console.log('- View mode buttons in header for quick switching');
+        console.log('- Auto-scrolls to today when changing views');
+        console.log('- Clean, modern UI with clear active states');
+    </script>
+</body>
+</html>

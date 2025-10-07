@@ -57,10 +57,22 @@ export default class Gantt {
             this.$svg.classList.add('gantt');
         }
 
-        // wrapper element
+        // Create main wrapper to contain controls and gantt container
+        this.$wrapper = this.create_el({
+            classes: 'gantt-wrapper',
+            append_to: this.$svg.parentElement,
+        });
+
+        // Create controls bar outside scrollable area
+        this.$controls = this.create_el({
+            classes: 'gantt-controls',
+            append_to: this.$wrapper,
+        });
+
+        // wrapper element (scrollable container)
         this.$container = this.create_el({
             classes: 'gantt-container',
-            append_to: this.$svg.parentElement,
+            append_to: this.$wrapper,
         });
 
         this.$container.appendChild(this.$svg);
@@ -81,11 +93,14 @@ export default class Gantt {
         };
         for (let name in CSS_VARIABLES) {
             let setting = this.options[CSS_VARIABLES[name]];
-            if (setting !== 'auto')
-                this.$container.style.setProperty(
+            if (setting !== 'auto') {
+                // Set the CSS variable on the wrapper instead of container for proper inheritance
+                const target = name === 'grid-height' ? this.$wrapper : this.$container;
+                target.style.setProperty(
                     '--gv-' + name,
                     setting + 'px',
                 );
+            }
         }
 
         this.config = {
@@ -419,6 +434,19 @@ export default class Gantt {
         });
     }
 
+    update_view_mode_buttons(modeName) {
+        // Update button states if view mode buttons exist
+        if (this.$view_mode_buttons) {
+            this.$view_mode_buttons.querySelectorAll('.view-mode-button').forEach(btn => {
+                if (btn.dataset.mode === modeName) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+    }
+
     render() {
         this.clear();
         this.setup_layers();
@@ -497,8 +525,10 @@ export default class Gantt {
             width: '100%',
         });
         this.grid_height = grid_height;
-        if (this.options.container_height === 'auto')
-            this.$container.style.height = grid_height + 'px';
+        if (this.options.container_height === 'auto') {
+            // Set height on wrapper, not container, to work with flex layout
+            this.$wrapper.style.height = grid_height + 50 + 'px'; // +50 for controls bar
+        }
     }
 
     make_grid_rows() {
@@ -542,10 +572,80 @@ export default class Gantt {
     }
 
     make_side_header() {
+        // Create side header for any remaining in-grid controls
         this.$side_header = this.create_el({ classes: 'side-header' });
         this.$upper_header.prepend(this.$side_header);
 
-        // Create view mode change select
+        // Only create controls once (they persist outside the grid)
+        if (this.$controls && this.$controls.children.length === 0) {
+            this.make_controls();
+        }
+
+        // Update active state of view mode buttons when view changes
+        if (this.$view_mode_buttons) {
+            this.$view_mode_buttons.querySelectorAll('.view-mode-button').forEach(btn => {
+                if (btn.dataset.mode === this.config.view_mode.name) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+    }
+
+    make_controls() {
+        // Create today button in controls bar (outside scrollable area)
+        if (this.options.today_button) {
+            let $today_button = document.createElement('button');
+            $today_button.classList.add('today-button');
+            $today_button.textContent = 'Today';
+            $today_button.onclick = this.scroll_current.bind(this);
+            this.$controls.appendChild($today_button);
+            this.$today_button = $today_button;
+        }
+
+        // Create view mode buttons in controls bar (outside scrollable area)
+        if (this.options.view_mode_buttons !== false) {
+            const $view_mode_container = document.createElement('div');
+            $view_mode_container.classList.add('view-mode-buttons');
+
+            // Select which view modes to show as buttons
+            const buttonModes = this.options.view_mode_buttons_list || ['Day', 'Week', 'Month', 'Year'];
+
+            buttonModes.forEach(modeName => {
+                const mode = this.options.view_modes.find(m => m.name === modeName);
+                if (mode) {
+                    const $button = document.createElement('button');
+                    $button.classList.add('view-mode-button');
+                    $button.textContent = mode.name;
+                    $button.dataset.mode = mode.name;
+
+                    if (mode.name === this.config.view_mode.name) {
+                        $button.classList.add('active');
+                    }
+
+                    $button.addEventListener('click', () => {
+                        this.change_view_mode(mode.name, true);
+                        // Update active state
+                        $view_mode_container.querySelectorAll('.view-mode-button').forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        $button.classList.add('active');
+                        // Auto-scroll to today when changing view mode
+                        if (this.options.auto_scroll_to_today !== false) {
+                            this.scroll_current();
+                        }
+                    });
+
+                    $view_mode_container.appendChild($button);
+                }
+            });
+
+            this.$controls.appendChild($view_mode_container);
+            this.$view_mode_buttons = $view_mode_container;
+        }
+
+        // Create view mode change select (legacy dropdown option) in controls bar
         if (this.options.view_mode_select) {
             const $select = document.createElement('select');
             $select.classList.add('viewmode-select');
@@ -569,19 +669,13 @@ export default class Gantt {
                 'change',
                 function () {
                     this.change_view_mode($select.value, true);
+                    // Auto-scroll to today when changing view mode
+                    if (this.options.auto_scroll_to_today !== false) {
+                        this.scroll_current();
+                    }
                 }.bind(this),
             );
-            this.$side_header.appendChild($select);
-        }
-
-        // Create today button
-        if (this.options.today_button) {
-            let $today_button = document.createElement('button');
-            $today_button.classList.add('today-button');
-            $today_button.textContent = 'Today';
-            $today_button.onclick = this.scroll_current.bind(this);
-            this.$side_header.prepend($today_button);
-            this.$today_button = $today_button;
+            this.$controls.appendChild($select);
         }
     }
 
