@@ -339,6 +339,17 @@ export default class Gantt {
                 );
             }
         }
+        if (this.config.view_mode.dow_force_start) {
+            let dow_gantt_start = this.gantt_start.getDay();
+            let dow_wanted_start = this.config.view_mode.dow_force_start;
+            if (dow_gantt_start != dow_wanted_start) {
+                this.gantt_start = date_utils.add(
+                    this.gantt_start,
+                    ((this.gantt_start.getDay() + 7 - (this.config.view_mode.dow_force_start % 7)) * (-1)) % 7,
+                    'day',
+                );
+            }
+        }
         this.config.date_format =
             this.config.view_mode.date_format || this.options.date_format;
         this.gantt_start.setHours(0, 0, 0, 0);

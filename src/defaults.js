@@ -79,6 +79,7 @@ const DEFAULT_VIEW_MODES = [
                 : '',
         thick_line: (d) => d.getDate() >= 1 && d.getDate() <= 7,
         upper_text_frequency: 4,
+        dow_force_start:1,
     },
     {
         name: 'Month',
