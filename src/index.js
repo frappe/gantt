@@ -1074,7 +1074,6 @@ export default class Gantt {
         let is_dragging = false;
         let x_on_start = 0;
         let x_on_scroll_start = 0;
-        let y_on_start = 0;
         let is_resizing_left = false;
         let is_resizing_right = false;
         let parent_bar_id = null;
@@ -1112,7 +1111,6 @@ export default class Gantt {
             if (this.popup) this.popup.hide();
 
             x_on_start = e.offsetX || e.layerX;
-            y_on_start = e.offsetY || e.layerY;
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
             let ids;
@@ -1343,7 +1341,6 @@ export default class Gantt {
         $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
             is_resizing = true;
             x_on_start = e.offsetX || e.layerX;
-            y_on_start = e.offsetY || e.layerY;
 
             const $bar_wrapper = $.closest('.bar-wrapper', handle);
             const id = $bar_wrapper.getAttribute('data-id');
@@ -1391,6 +1388,7 @@ export default class Gantt {
             }
 
             let dx = now_x - x_on_start;
+            console.log($bar_progress);
             if (dx > $bar_progress.max_dx) {
                 dx = $bar_progress.max_dx;
             }
