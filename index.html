@@ -137,6 +137,17 @@
                             >Show weekends</label
                         >
                     </div>
+                    <div class="form-check form-switch">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="custom-weekends"
+                        />
+                        <label class="form-check-label" for="custom-weekends"
+                            >Custom weekends</label
+                        >
+                    </div>
                 </div>
                 <div class="chart col-md-9" id="holidays"></div>
             </div>
@@ -598,6 +609,11 @@
                             { '#a3e635': HOLIDAYS, '#bfdbfe': 'weekend' },
                             { '#a3e635': HOLIDAYS, '#bfdbfe': [] },
                         ],
+                        'custom-weekends': [
+                            'is_weekend',
+                            (d) => d.getDay() === 6 || d.getDay() === 5,
+                            (d) => d.getDay() === 0 || d.getDay() === 6,
+                        ]
                     },
                 ],
                 [
