@@ -60,8 +60,8 @@ let tasks = [
 let gantt = new Gantt("#gantt", tasks);
 ```
 
-### Configuration
-Frappe Gantt offers a wide range of options to customize your chart.
+### Gantt configuration
+Frappe Gantt offers a wide range of options to customize your chart. Those affect the full Gantt chart:
 
 
 | **Option**               | **Description**                                                                 | **Possible Values**                                 | **Default**                        |
@@ -93,6 +93,34 @@ Frappe Gantt offers a wide range of options to customize your chart.
 | `today_button`           | Adds a button to navigate to today’s date.                                      | `true`, `false`                                    | `true`                             |
 | `view_mode`              | The initial view mode of the Gantt chart.                                          | `Day`, `Week`, `Month`, `Year`.           | `Day`                            |
 | `view_mode_select`       | Allows selecting the view mode from a dropdown.                                 | `true`, `false`                                    | `false`                            |
+
+### Task bar configuration
+
+Those settings can be applied per bar separately:
+
+| **Option**               | **Description**                                                                 | **Possible Values**                                 | **Default**                        |
+|---------------------------|---------------------------------------------------------------------------------|----------------------------------------------------|------------------------------------|
+| `readonly_progress`      | Disables editing task progress.                                                 | `true`, `false`                                    | `false`                            |
+| `readonly_dates`         | Disables editing task dates.                                                    | `true`, `false`                                    | `false`                            |
+| `readonly`               | Disables all editing features.                                                  | `true`, `false`                                    | `false`                            |
+
+You can set those on the task object:
+
+```js
+let tasks = [
+{
+id: '1',
+name: 'Redesign website',
+start: '2016-12-28',
+end: '2016-12-31',
+progress: 20, 
+readonly_progress: false,
+readonly_dates: false,
+readonly: false,
+},
+...
+]
+```
 
 Apart from these ones, two options - `popup` and `view_modes` (plural, not singular) - are available. They have "sub"-APIs, and thus are listed separately.
 

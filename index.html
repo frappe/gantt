@@ -376,6 +376,30 @@
                     id: 'Task 3',
                     progress: random(),
                 },
+                {
+                    start: daysSince(6),
+                    duration: '6d',
+                    name: 'Not mutable general',
+                    id: 'Task 6',
+                    progress: random(),
+                    readonly: true,
+                },
+                {
+                    start: daysSince(4),
+                    duration: '6d',
+                    name: 'Not mutable date',
+                    id: 'Task 4',
+                    progress: random(),
+                    readonly_dates: true,
+                },
+                {
+                    start: daysSince(5),
+                    duration: '6d',
+                    name: 'Not mutable progress',
+                    id: 'Task 5',
+                    progress: 10, // Done because the handle sometimes conflicts with the name on the bar which is a separate issue
+                    readonly_progress: true,
+                },
             ];
 
             const tasksSpread = [
