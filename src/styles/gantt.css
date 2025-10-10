@@ -141,7 +141,6 @@
         transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         transition-duration: 150ms;
         background-color: var(--g-actions-background);
-        text-align: -webkit-center;
         border-radius: 0.5rem;
         border: none;
         padding: 5px 8px;
@@ -163,8 +162,12 @@
     }
 
     & .side-header select {
-        padding-right: 1.25rem;
-        width: 50px;
+        width: 60px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+    & .side-header select:focus {
+        outline: none;
     }
 
     & .date-range-highlight {

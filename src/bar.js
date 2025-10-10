@@ -161,7 +161,7 @@ export default class Bar {
             append_to: this.bar_group,
         });
         if (this.task.color_progress)
-            this.$bar_progress.style.fill = this.task.color;
+            this.$bar_progress.style.fill = this.task.color_progress;
         const x =
             (date_utils.diff(
                 this.task._start,
@@ -395,6 +395,28 @@ export default class Bar {
 
             this.gantt.trigger_event('double_click', [this.task]);
         });
+        let tapedTwice = false;
+        $.on(this.group, 'touchstart', (e) => {
+            if (!tapedTwice) {
+                tapedTwice = true;
+                setTimeout(function () {
+                    tapedTwice = false;
+                }, 300);
+                return false;
+            }
+            e.preventDefault();
+            //action on double tap goes below
+
+            if (this.action_completed) {
+                // just finished a move action, wait for a few seconds
+                return;
+            }
+            this.group.classList.remove('active');
+            if (this.gantt.popup)
+                this.gantt.popup.parent.classList.remove('hide');
+
+            this.gantt.trigger_event('double_click', [this.task]);
+        });
     }
 
     update_bar_position({ x = null, width = null }) {
@@ -404,9 +426,9 @@ export default class Bar {
             const xs = this.task.dependencies.map((dep) => {
                 return this.gantt.get_bar(dep).$bar.getX();
             });
-            const valid_x = xs.reduce((_, curr) => {
-                return x >= curr;
-            }, x);
+            const valid_x = xs.reduce((prev, curr) => {
+                return prev && x >= curr;
+            }, true);
             if (!valid_x) return;
             this.update_attr(bar, 'x', x);
             this.x = x;
@@ -431,8 +453,7 @@ export default class Bar {
     }
 
     update_label_position_on_horizontal_scroll({ x, sx }) {
-        const container =
-            this.gantt.$container.querySelector('.gantt-container');
+        const container = this.gantt.$container;
         const label = this.group.querySelector('.bar-label');
         const img = this.group.querySelector('.bar-img') || '';
         const img_mask = this.bar_group.querySelector('.img_mask') || '';

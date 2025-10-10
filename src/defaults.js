@@ -155,6 +155,7 @@ const DEFAULT_OPTIONS = {
     view_mode: 'Day',
     view_mode_select: false,
     view_modes: DEFAULT_VIEW_MODES,
+    is_weekend: (d) => d.getDay() === 0 || d.getDay() === 6,
 };
 
 export { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES };

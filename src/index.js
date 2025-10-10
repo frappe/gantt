@@ -72,6 +72,24 @@ export default class Gantt {
 
     setup_options(options) {
         this.original_options = options;
+        if (options?.view_modes) {
+            options.view_modes = options.view_modes.map((mode) => {
+                if (typeof mode === 'string') {
+                    const predefined_mode = DEFAULT_VIEW_MODES.find(
+                        (d) => d.name === mode,
+                    );
+                    if (!predefined_mode)
+                        console.error(
+                            `The view mode "${mode}" is not predefined in Frappe Gantt. Please define the view mode object instead.`,
+                        );
+
+                    return predefined_mode;
+                }
+                return mode;
+            });
+            // automatically set the view mode to the first option
+            options.view_mode = options.view_modes[0];
+        }
         this.options = { ...DEFAULT_OPTIONS, ...options };
         const CSS_VARIABLES = {
             'grid-height': 'container_height',
@@ -96,7 +114,7 @@ export default class Gantt {
 
         if (typeof this.options.ignore !== 'function') {
             if (typeof this.options.ignore === 'string')
-                this.options.ignore = [this.options.ignord];
+                this.options.ignore = [this.options.ignore];
             for (let option of this.options.ignore) {
                 if (typeof option === 'function') {
                     this.config.ignored_function = option;
@@ -580,7 +598,7 @@ export default class Gantt {
         for (let color in this.options.holidays) {
             let check_highlight = this.options.holidays[color];
             if (check_highlight === 'weekend')
-                check_highlight = (d) => d.getDay() === 0 || d.getDay() === 6;
+                check_highlight = this.options.is_weekend;
             let extra_func;
 
             if (typeof check_highlight === 'object') {
@@ -1074,7 +1092,6 @@ export default class Gantt {
         let is_dragging = false;
         let x_on_start = 0;
         let x_on_scroll_start = 0;
-        let y_on_start = 0;
         let is_resizing_left = false;
         let is_resizing_right = false;
         let parent_bar_id = null;
@@ -1112,7 +1129,6 @@ export default class Gantt {
             if (this.popup) this.popup.hide();
 
             x_on_start = e.offsetX || e.layerX;
-            y_on_start = e.offsetY || e.layerY;
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
             let ids;
@@ -1343,7 +1359,6 @@ export default class Gantt {
         $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
             is_resizing = true;
             x_on_start = e.offsetX || e.layerX;
-            y_on_start = e.offsetY || e.layerY;
 
             const $bar_wrapper = $.closest('.bar-wrapper', handle);
             const id = $bar_wrapper.getAttribute('data-id');
@@ -1391,6 +1406,7 @@ export default class Gantt {
             }
 
             let dx = now_x - x_on_start;
+            console.log($bar_progress);
             if (dx > $bar_progress.max_dx) {
                 dx = $bar_progress.max_dx;
             }
