@@ -879,6 +879,7 @@ export default class Gantt {
 
     make_arrows() {
         this.arrows = [];
+        if (!this.options.display_arrows) return;
         for (let task of this.tasks) {
             let arrows = [];
             arrows = task.dependencies

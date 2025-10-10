@@ -115,6 +115,7 @@ const DEFAULT_OPTIONS = {
     container_height: 'auto',
     column_width: null,
     date_format: 'YYYY-MM-DD HH:mm',
+    display_arrows : true,
     upper_header_height: 45,
     lower_header_height: 30,
     snap_at: null,
