@@ -72,6 +72,24 @@ export default class Gantt {
 
     setup_options(options) {
         this.original_options = options;
+        if (options?.view_modes) {
+            options.view_modes = options.view_modes.map((mode) => {
+                if (typeof mode === 'string') {
+                    const predefined_mode = DEFAULT_VIEW_MODES.find(
+                        (d) => d.name === mode,
+                    );
+                    if (!predefined_mode)
+                        console.error(
+                            `The view mode "${mode}" is not predefined in Frappe Gantt. Please define the view mode object instead.`,
+                        );
+
+                    return predefined_mode;
+                }
+                return mode;
+            });
+            // automatically set the view mode to the first option
+            options.view_mode = options.view_modes[0];
+        }
         this.options = { ...DEFAULT_OPTIONS, ...options };
         const CSS_VARIABLES = {
             'grid-height': 'container_height',
