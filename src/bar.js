@@ -85,8 +85,8 @@ export default class Bar {
         this.compute_expected_progress();
         this.expected_progress_width =
             this.gantt.options.column_width *
-            this.duration *
-            (this.expected_progress / 100) || 0;
+                this.duration *
+                (this.expected_progress / 100) || 0;
     }
 
     draw() {
@@ -399,12 +399,13 @@ export default class Bar {
         $.on(this.group, 'touchstart', (e) => {
             if (!tapedTwice) {
                 tapedTwice = true;
-                setTimeout(function () { tapedTwice = false; }, 300);
+                setTimeout(function () {
+                    tapedTwice = false;
+                }, 300);
                 return false;
             }
             e.preventDefault();
             //action on double tap goes below
-
 
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
@@ -452,8 +453,7 @@ export default class Bar {
     }
 
     update_label_position_on_horizontal_scroll({ x, sx }) {
-        const container =
-            this.gantt.$container.querySelector('.gantt-container');
+        const container = this.gantt.$container;
         const label = this.group.querySelector('.bar-label');
         const img = this.group.querySelector('.bar-img') || '';
         const img_mask = this.bar_group.querySelector('.img_mask') || '';
@@ -549,7 +549,7 @@ export default class Bar {
             this.gantt.config.ignored_positions.reduce((acc, val) => {
                 return acc + (val >= this.x && val <= progress_area);
             }, 0) *
-            this.gantt.config.column_width;
+                this.gantt.config.column_width;
         if (progress < 0) return 0;
         const total =
             this.$bar.getWidth() -
@@ -663,8 +663,8 @@ export default class Bar {
         this.$expected_bar_progress.setAttribute(
             'width',
             this.gantt.config.column_width *
-            this.actual_duration_raw *
-            (this.expected_progress / 100) || 0,
+                this.actual_duration_raw *
+                (this.expected_progress / 100) || 0,
         );
     }
 
