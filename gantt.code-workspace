@@ -1,0 +1,142 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        },
+        "editor.tabSize": 4,
+        "editor.detectIndentation": true,
+        "files.exclude": {
+            "**/node_modules": true,
+            "**/.git": true,
+            "**/pnpm-lock.yaml": false,
+            "**/dist": true,
+            "**/.vscode": false
+        },
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/pnpm-lock.yaml": true,
+            "**/dist": true
+        },
+        "javascript.updateImportsOnFileMove.enabled": "always",
+        "typescript.updateImportsOnFileMove.enabled": "always",
+        "eslint.validate": [
+            "javascript",
+            "javascriptreact"
+        ],
+        "files.associations": {
+            "*.js": "javascript",
+            "*.css": "css",
+            "*.json": "json",
+            "*.md": "markdown"
+        },
+        "emmet.includeLanguages": {
+            "javascript": "javascriptreact"
+        },
+        "terminal.integrated.defaultProfile.windows": "Command Prompt",
+        "liveServer.settings.root": "/",
+        "liveServer.settings.port": 5173
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "type": "chrome",
+                "request": "launch",
+                "name": "Launch Chrome against localhost",
+                "url": "http://localhost:5173",
+                "webRoot": "${workspaceFolder}"
+            },
+            {
+                "type": "chrome",
+                "request": "launch",
+                "name": "Launch Collapsible Tasks Demo",
+                "url": "http://localhost:5173/collapsible-tasks-demo.html",
+                "webRoot": "${workspaceFolder}"
+            },
+            {
+                "type": "node",
+                "request": "launch",
+                "name": "Run Dev Server",
+                "runtimeExecutable": "npm",
+                "runtimeArgs": ["run", "dev"],
+                "cwd": "${workspaceFolder}",
+                "console": "integratedTerminal"
+            }
+        ]
+    },
+    "extensions": {
+        "recommendations": [
+            "esbenp.prettier-vscode",
+            "dbaeumer.vscode-eslint",
+            "ritwickdey.liveserver",
+            "streetsidesoftware.code-spell-checker",
+            "christian-kohler.npm-intellisense",
+            "christian-kohler.path-intellisense",
+            "naumovs.color-highlight",
+            "oderwat.indent-rainbow",
+            "formulahendry.auto-rename-tag",
+            "formulahendry.auto-close-tag",
+            "yzhang.markdown-all-in-one"
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "Start Dev Server",
+                "type": "npm",
+                "script": "dev",
+                "problemMatcher": [],
+                "isBackground": true,
+                "presentation": {
+                    "reveal": "always",
+                    "panel": "new"
+                },
+                "group": {
+                    "kind": "build",
+                    "isDefault": true
+                }
+            },
+            {
+                "label": "Build Project",
+                "type": "npm",
+                "script": "build",
+                "problemMatcher": [],
+                "group": "build"
+            },
+            {
+                "label": "Install Dependencies",
+                "type": "npm",
+                "script": "install",
+                "problemMatcher": [],
+                "presentation": {
+                    "reveal": "always",
+                    "panel": "new"
+                }
+            },
+            {
+                "label": "Open Demo in Browser",
+                "type": "shell",
+                "command": "start http://localhost:5173/collapsible-tasks-demo.html",
+                "windows": {
+                    "command": "start http://localhost:5173/collapsible-tasks-demo.html"
+                },
+                "osx": {
+                    "command": "open http://localhost:5173/collapsible-tasks-demo.html"
+                },
+                "linux": {
+                    "command": "xdg-open http://localhost:5173/collapsible-tasks-demo.html"
+                },
+                "dependsOn": "Start Dev Server",
+                "problemMatcher": []
+            }
+        ]
+    }
+}
