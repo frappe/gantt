@@ -57,7 +57,48 @@ export default class Bar {
         this.compute_y();
         this.compute_duration();
         this.corner_radius = this.gantt.options.bar_corner_radius;
+
+        // Calculate base width from duration
         this.width = this.gantt.config.column_width * this.duration;
+
+        // More accurate text width estimation based on average character widths
+        const text = this.task.name || '';
+        let estimated_text_width = 0;
+
+        // Use different widths for different character types
+        for (let char of text) {
+            if (char === 'W' || char === 'M') {
+                estimated_text_width += 9;  // Wide characters
+            } else if (char === 'i' || char === 'l' || char === ' ') {
+                estimated_text_width += 3;  // Narrow characters
+            } else if (char.match(/[A-Z]/)) {
+                estimated_text_width += 8;  // Uppercase
+            } else {
+                estimated_text_width += 6;  // Default
+            }
+        }
+
+        // Check if this task has dependents (will have collapse button)
+        const has_dependents = this.gantt.tasks_with_dependents &&
+                              this.gantt.tasks_with_dependents.has(this.task.id);
+
+        // Calculate minimum width needed based on whether there's a collapse button
+        let min_width_needed;
+        if (has_dependents) {
+            const button_space = 23; // Actual space needed for collapse button (button ends at x+18 + 5px padding)
+            const padding = 20; // Additional padding for breathing room after text
+            min_width_needed = button_space + estimated_text_width + padding;
+        } else {
+            // For bars without collapse button, ensure text fits with padding
+            const padding = 30; // Padding on both sides (15px each side)
+            min_width_needed = estimated_text_width + padding;
+        }
+
+        // Expand bar if needed to fit content
+        if (this.width < min_width_needed) {
+            this.width = min_width_needed;
+        }
+
         if (!this.task.progress || this.task.progress < 0)
             this.task.progress = 0;
         if (this.task.progress > 100) this.task.progress = 100;
@@ -220,11 +261,61 @@ export default class Bar {
             x_coord = this.x + this.image_size + 5;
         }
 
-        createSVG('text', {
+        // Check if this task has dependents and can be collapsed
+        const has_dependents = this.gantt.tasks_with_dependents.has(this.task.id);
+        this.has_collapse_button = has_dependents;
+
+        if (has_dependents) {
+            // Add collapse/expand button
+            const button_x = this.x + 6;
+            const button_y = this.y + this.height / 2;
+            const is_collapsed = this.gantt.collapsed_tasks.has(this.task.id);
+
+            // Create a clickable group for the collapse button
+            this.$collapse_button = createSVG('g', {
+                class: 'collapse-button',
+                'data-task-id': this.task.id,
+                append_to: this.bar_group,
+                style: 'cursor: pointer;',
+            });
+
+            // Draw the button background
+            this.$collapse_button_rect = createSVG('rect', {
+                x: button_x - 2,
+                y: button_y - 7,
+                width: 14,
+                height: 14,
+                rx: 2,
+                fill: '#fff',
+                stroke: '#999',
+                'stroke-width': 1,
+                append_to: this.$collapse_button,
+            });
+
+            // Draw the expand/collapse icon
+            const icon = is_collapsed ? '+' : '−';
+            this.$collapse_button_text = createSVG('text', {
+                x: button_x + 5,
+                y: button_y + 3,
+                innerHTML: icon,
+                style: 'font-size: 12px; font-weight: bold; fill: #666;',
+                'text-anchor': 'middle',
+                append_to: this.$collapse_button,
+            });
+
+            // Ensure label doesn't overlap with button - minimum 25px from left edge
+            const min_label_x = this.x + 25;
+            if (x_coord < min_label_x) {
+                x_coord = min_label_x;
+            }
+        }
+
+        this.$bar_label = createSVG('text', {
             x: x_coord,
             y: this.y + this.height / 2,
             innerHTML: this.task.name,
             class: 'bar-label',
+            'text-anchor': 'start',  // Explicitly set for consistent positioning
             append_to: this.bar_group,
         });
         // labels get BBox in the next tick
@@ -441,6 +532,7 @@ export default class Bar {
 
         this.update_label_position();
         this.update_handle_position();
+        this.update_collapse_button_position();
         this.date_changed();
         this.compute_duration();
 
@@ -450,6 +542,25 @@ export default class Bar {
 
         this.update_progressbar_position();
         this.update_arrow_position();
+    }
+
+    update_collapse_button_position() {
+        if (this.$collapse_button) {
+            const button_x = this.x + 5;
+            const button_y = this.y + this.height / 2;
+
+            // Update button background position
+            if (this.$collapse_button_rect) {
+                this.update_attr(this.$collapse_button_rect, 'x', button_x - 2);
+                this.update_attr(this.$collapse_button_rect, 'y', button_y - 7);
+            }
+
+            // Update button text position
+            if (this.$collapse_button_text) {
+                this.update_attr(this.$collapse_button_text, 'x', button_x + 5);
+                this.update_attr(this.$collapse_button_text, 'y', button_y + 3);
+            }
+        }
     }
 
     update_label_position_on_horizontal_scroll({ x, sx }) {
@@ -688,6 +799,8 @@ export default class Bar {
         let x_offset_label_img = this.image_size + 10;
         const labelWidth = label.getBBox().width;
         const barWidth = bar.getWidth();
+
+        // Check if label is wider than bar (shouldn't happen with our min width logic, but keep as fallback)
         if (labelWidth > barWidth) {
             label.classList.add('big');
             if (img) {
@@ -699,18 +812,30 @@ export default class Bar {
             }
         } else {
             label.classList.remove('big');
+
             if (img) {
-                img.setAttribute('x', bar.getX() + padding);
-                img_mask.setAttribute('x', bar.getX() + padding);
-                label.setAttribute(
-                    'x',
-                    bar.getX() + barWidth / 2 + x_offset_label_img,
-                );
+                const button_offset = this.has_collapse_button ? 20 : 0;
+                img.setAttribute('x', bar.getX() + padding + button_offset);
+                img_mask.setAttribute('x', bar.getX() + padding + button_offset);
+                label.setAttribute('x', bar.getX() + barWidth / 2 + x_offset_label_img);
             } else {
-                label.setAttribute(
-                    'x',
-                    bar.getX() + barWidth / 2 - labelWidth / 2,
-                );
+                if (this.has_collapse_button) {
+                    // For bars with collapse button:
+                    // Button starts at x+4, width 14, ends at x+18, add 5px padding = 23px total
+                    const button_end = 23; // Button ends at x+18, plus 5px padding
+                    const available_space_start = bar.getX() + button_end;
+                    const available_space_width = barWidth - button_end;
+
+                    // Center the text within this available space
+                    const text_center_x = available_space_start + (available_space_width / 2);
+                    const label_x = text_center_x - (labelWidth / 2);
+                    label.setAttribute('x', label_x);
+                } else {
+                    // For bars without collapse button, simply center the text in the full bar
+                    const bar_center_x = bar.getX() + (barWidth / 2);
+                    const label_x = bar_center_x - (labelWidth / 2);
+                    label.setAttribute('x', label_x);
+                }
             }
         }
     }
