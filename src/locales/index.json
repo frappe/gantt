@@ -1,0 +1,15 @@
+{
+  "locales": {
+    "en": "en-US.json",
+    "en-US": "en-US.json",
+    "en-UK": "en-UK.json",
+    "it": "it-IT.json",
+    "it-IT": "it-IT.json",
+    "fr": "fr-FR.json",
+    "fr-FR": "fr-FR.json",
+    "es": "es-ES.json",
+    "es-ES": "es-ES.json",
+    "de": "de-DE.json",
+    "de-DE": "de-DE.json"
+  }
+}
