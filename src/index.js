@@ -183,10 +183,18 @@ export default class Gantt {
                 // cache index
                 task._index = i;
 
-                // if hours is not set, assume the last day is full day
-                // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
+                // Only extend to full day if we're in day-level view modes and no time was specified
+                // For hour-level granularity, preserve the exact end time
                 const task_end_values = date_utils.get_date_values(task._end);
-                if (task_end_values.slice(3).every((d) => d === 0)) {
+                const is_hour_level_view = [
+                    'Hour',
+                    'Quarter Day',
+                    'Half Day',
+                ].includes(this.options.view_mode);
+                if (
+                    task_end_values.slice(3).every((d) => d === 0) &&
+                    !is_hour_level_view
+                ) {
                     task._end = date_utils.add(task._end, 24, 'hour');
                 }
 
@@ -341,7 +349,15 @@ export default class Gantt {
         }
         this.config.date_format =
             this.config.view_mode.date_format || this.options.date_format;
-        this.gantt_start.setHours(0, 0, 0, 0);
+
+        // Only reset hours for day-level and above views
+        if (
+            !['Hour', 'Quarter Day', 'Half Day'].includes(
+                this.config.view_mode.name,
+            )
+        ) {
+            this.gantt_start.setHours(0, 0, 0, 0);
+        }
     }
 
     setup_date_values() {

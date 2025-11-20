@@ -612,6 +612,28 @@ export default class Bar {
     }
 
     compute_duration() {
+        // For hour-level precision, calculate duration directly in the configured unit
+        if (
+            ['Hour', 'Quarter Day', 'Half Day'].includes(
+                this.gantt.config.view_mode.name,
+            )
+        ) {
+            this.duration =
+                date_utils.diff(
+                    this.task._end,
+                    this.task._start,
+                    this.gantt.config.unit,
+                ) / this.gantt.config.step;
+
+            // For hour-level views, we don't need to worry about ignored dates/weekends
+            this.actual_duration_raw = this.duration;
+            this.ignored_duration_raw = 0;
+            this.task.actual_duration = this.duration;
+            this.task.ignored_duration = 0;
+            return;
+        }
+
+        // Original day-based calculation for day-level and above views
         let actual_duration_in_days = 0,
             duration_in_days = 0;
         for (

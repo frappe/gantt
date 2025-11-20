@@ -130,19 +130,31 @@ const DEFAULT_OPTIONS = {
         if (ctx.task.description) ctx.set_subtitle(ctx.task.description);
         else ctx.set_subtitle('');
 
+        const is_hour_level = ['Hour', 'Quarter Day', 'Half Day'].includes(
+            ctx.chart.config.view_mode.name,
+        );
+        const date_format = is_hour_level ? 'MMM D HH:mm' : 'MMM D';
+
         const start_date = date_utils.format(
             ctx.task._start,
-            'MMM D',
+            date_format,
             ctx.chart.options.language,
         );
         const end_date = date_utils.format(
             date_utils.add(ctx.task._end, -1, 'second'),
-            'MMM D',
+            date_format,
             ctx.chart.options.language,
         );
 
+        const duration_unit = is_hour_level ? 'hours' : 'days';
+        const duration_value = is_hour_level
+            ? Math.round(
+                  date_utils.diff(ctx.task._end, ctx.task._start, 'hour') * 100,
+              ) / 100
+            : ctx.task.actual_duration;
+
         ctx.set_details(
-            `${start_date} - ${end_date} (${ctx.task.actual_duration} days${ctx.task.ignored_duration ? ' + ' + ctx.task.ignored_duration + ' excluded' : ''})<br/>Progress: ${Math.floor(ctx.task.progress * 100) / 100}%`,
+            `${start_date} - ${end_date} (${duration_value} ${duration_unit}${ctx.task.ignored_duration ? ' + ' + ctx.task.ignored_duration + ' excluded' : ''})<br/>Progress: ${Math.floor(ctx.task.progress * 100) / 100}%`,
         );
     },
     popup_on: 'click',
