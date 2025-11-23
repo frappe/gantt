@@ -419,7 +419,7 @@ export default class Bar {
         });
     }
 
-    update_bar_position({ x = null, width = null }) {
+    update_bar_position({ x = null, y = null, width = null }) {
         const bar = this.$bar;
 
         if (x) {
@@ -434,6 +434,14 @@ export default class Bar {
             this.x = x;
             this.$date_highlight.style.left = x + 'px';
         }
+        
+        if (y !== null) {
+            this.update_attr(bar, 'y', y);
+            this.y = y;
+            // Store the desired y position for later reordering
+            this.desired_y = y;
+        }
+        
         if (width > 0) {
             this.update_attr(bar, 'width', width);
             this.$date_highlight.style.width = width + 'px';
@@ -492,11 +500,15 @@ export default class Bar {
         if (Number(this.task._start) !== Number(new_start_date)) {
             changed = true;
             this.task._start = new_start_date;
+            // Update the original task start date to persist the change
+            this.task.start = date_utils.format(new_start_date, 'YYYY-MM-DD');
         }
 
         if (Number(this.task._end) !== Number(new_end_date)) {
             changed = true;
             this.task._end = new_end_date;
+            // Update the original task end date to persist the change
+            this.task.end = date_utils.format(new_end_date, 'YYYY-MM-DD');
         }
 
         if (!changed) return;
@@ -611,6 +623,36 @@ export default class Bar {
             this.task._index * (this.height + this.gantt.options.padding);
     }
 
+    update_task_index_from_y(y) {
+        // Calculate the new index based on vertical position
+        const new_index = Math.round(
+            (y - this.gantt.config.header_height - this.gantt.options.padding / 2) / 
+            (this.height + this.gantt.options.padding)
+        );
+        
+        // Ensure the index is within valid bounds
+        const min_index = 0;
+        const max_index = this.gantt.tasks.length - 1;
+        const clamped_index = Math.max(min_index, Math.min(max_index, new_index));
+        
+        if (clamped_index !== this.task._index) {
+            // Store the old index for reordering
+            const old_index = this.task._index;
+            this.task._index = clamped_index;
+            
+            // Trigger task reordering in the gantt chart
+            this.gantt.reorder_task(this.task.id, old_index, clamped_index);
+        }
+    }
+
+    finalize_vertical_position() {
+        // Only reorder tasks if we have a desired y position stored
+        if (this.desired_y !== undefined) {
+            this.update_task_index_from_y(this.desired_y);
+            delete this.desired_y; // Clear the stored position
+        }
+    }
+
     compute_duration() {
         let actual_duration_in_days = 0,
             duration_in_days = 0;
@@ -659,6 +701,7 @@ export default class Bar {
     update_expected_progressbar_position() {
         if (this.invalid) return;
         this.$expected_bar_progress.setAttribute('x', this.$bar.getX());
+        this.$expected_bar_progress.setAttribute('y', this.$bar.getY());
         this.compute_expected_progress();
         this.$expected_bar_progress.setAttribute(
             'width',
@@ -671,6 +714,7 @@ export default class Bar {
     update_progressbar_position() {
         if (this.invalid || this.gantt.options.readonly) return;
         this.$bar_progress.setAttribute('x', this.$bar.getX());
+        this.$bar_progress.setAttribute('y', this.$bar.getY());
 
         this.$bar_progress.setAttribute(
             'width',

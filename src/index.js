@@ -242,6 +242,32 @@ export default class Gantt {
         bar.refresh();
     }
 
+    reorder_task(task_id, old_index, new_index) {
+        // Find the task being moved
+        const task = this.tasks.find(t => t.id === task_id);
+        if (!task) return;
+        
+        // Remove task from old position
+        this.tasks.splice(old_index, 1);
+        
+        // Insert task at new position
+        this.tasks.splice(new_index, 0, task);
+        
+        // Update _index for all affected tasks
+        const start_index = Math.min(old_index, new_index);
+        const end_index = Math.max(old_index, new_index);
+        
+        for (let i = start_index; i <= end_index; i++) {
+            this.tasks[i]._index = i;
+        }
+        
+        // Refresh the chart to reflect the new order
+        this.render();
+        
+        // Trigger event for task reorder
+        this.trigger_event('task_reorder', [task, old_index, new_index]);
+    }
+
     change_view_mode(mode = this.options.view_mode, maintain_pos = false) {
         if (typeof mode === 'string') {
             mode = this.options.view_modes.find((d) => d.name === mode);
@@ -1091,6 +1117,7 @@ export default class Gantt {
     bind_bar_events() {
         let is_dragging = false;
         let x_on_start = 0;
+        let y_on_start = 0;
         let x_on_scroll_start = 0;
         let is_resizing_left = false;
         let is_resizing_right = false;
@@ -1129,6 +1156,7 @@ export default class Gantt {
             if (this.popup) this.popup.hide();
 
             x_on_start = e.offsetX || e.layerX;
+            y_on_start = e.offsetY || e.layerY;
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
             let ids;
@@ -1151,6 +1179,7 @@ export default class Gantt {
                 $bar.oy = $bar.getY();
                 $bar.owidth = $bar.getWidth();
                 $bar.finaldx = 0;
+                $bar.finaldy = 0;
             });
         });
 
@@ -1294,10 +1323,12 @@ export default class Gantt {
         $.on(this.$svg, 'mousemove', (e) => {
             if (!action_in_progress()) return;
             const dx = (e.offsetX || e.layerX) - x_on_start;
+            const dy = (e.offsetY || e.layerY) - y_on_start;
 
             bars.forEach((bar) => {
                 const $bar = bar.$bar;
                 $bar.finaldx = this.get_snap_position(dx, $bar.ox);
+                $bar.finaldy = dy; // Store vertical delta
                 this.hide_popup();
                 if (is_resizing_left) {
                     if (parent_bar_id === bar.task.id) {
@@ -1321,7 +1352,11 @@ export default class Gantt {
                     !this.options.readonly &&
                     !this.options.readonly_dates
                 ) {
-                    bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                    // Support both horizontal and vertical movement
+                    bar.update_bar_position({ 
+                        x: $bar.ox + $bar.finaldx,
+                        y: $bar.oy + $bar.finaldy
+                    });
                 }
             });
         });
@@ -1339,10 +1374,15 @@ export default class Gantt {
             this.bar_being_dragged = null;
             bars.forEach((bar) => {
                 const $bar = bar.$bar;
-                if (!$bar.finaldx) return;
+                if (!$bar.finaldx && !$bar.finaldy) return;
                 bar.date_changed();
                 bar.compute_progress();
                 bar.set_action_completed();
+                // Handle vertical positioning after drag is complete
+                if ($bar.finaldy) {
+                    bar.finalize_vertical_position();
+                    delete $bar.finaldy; // Clear the vertical drag distance
+                }
             });
         });
 

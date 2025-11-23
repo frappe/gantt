@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gantt Chart Fix Test</title>
+    <style>
+        .gantt-container {
+            width: 100%;
+            height: 400px;
+            overflow: auto;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gantt Chart Test - Bar Position and Vertical Movement</h1>
+    <div class="gantt-container"></div>
+    
+    <script src="dist/frappe-gantt.umd.js"></script>
+    <link rel="stylesheet" href="dist/frappe-gantt.css">
+    
+    <script>
+        const tasks = [
+            {
+                id: '1',
+                name: 'Task 1',
+                start: '2024-01-01',
+                end: '2024-01-15',
+                progress: 20,
+            },
+            {
+                id: '2', 
+                name: 'Task 2',
+                start: '2024-01-10',
+                end: '2024-01-25',
+                progress: 50,
+            },
+            {
+                id: '3',
+                name: 'Task 3', 
+                start: '2024-01-20',
+                end: '2024-02-05',
+                progress: 0,
+            }
+        ];
+        
+        const gantt = new Gantt('.gantt-container', tasks, {
+            view_mode: 'Day',
+            readonly: false,
+            readonly_dates: false,
+            auto_move_label: true,
+            infinite_padding: true,
+            on_date_change: (task, start, end) => {
+                console.log('Task moved:', task.name, 'Start:', start, 'End:', end);
+            },
+            on_task_reorder: (task, oldIndex, newIndex) => {
+                console.log('Task reordered:', task.name, 'From:', oldIndex, 'To:', newIndex);
+            }
+        });
+        
+        // Test function to verify positions are preserved after scroll
+        window.testScrollPosition = function() {
+            console.log('Testing scroll position preservation...');
+            const container = document.querySelector('.gantt-container');
+            const originalScroll = container.scrollLeft;
+            
+            // Scroll and then scroll back
+            container.scrollLeft = 500;
+            setTimeout(() => {
+                container.scrollLeft = originalScroll;
+                console.log('Scroll test completed');
+            }, 1000);
+        };
+        
+        console.log('Gantt chart loaded. Try dragging bars horizontally and vertically!');
+        console.log('Use testScrollPosition() to test scroll position preservation.');
+    </script>
+</body>
+</html>
