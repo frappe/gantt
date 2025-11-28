@@ -99,11 +99,13 @@ export default class Gantt {
         };
         for (let name in CSS_VARIABLES) {
             let setting = this.options[CSS_VARIABLES[name]];
-            if (setting !== 'auto')
-                this.$container.style.setProperty(
-                    '--gv-' + name,
-                    setting + 'px',
-                );
+            if (setting !== 'auto') {
+                // If setting is a string (e.g., '100%', 'calc(100vh - 200px)'), use as-is
+                // Otherwise, append 'px' for numeric values
+                const value =
+                    typeof setting === 'string' ? setting : setting + 'px';
+                this.$container.style.setProperty('--gv-' + name, value);
+            }
         }
 
         this.config = {
