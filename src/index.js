@@ -362,6 +362,7 @@ export default class Gantt {
         this.bind_grid_click();
         this.bind_holiday_labels();
         this.bind_bar_events();
+        this.bind_header_click_events();
     }
 
     render() {
@@ -1347,6 +1348,56 @@ export default class Gantt {
         });
 
         this.bind_bar_progress();
+    }
+
+    bind_header_click_events() {
+        // Seleziona tutti i testi nell'header (upper e lower)
+        const headerTexts = this.$container.querySelectorAll(
+            '.upper-text, .lower-text',
+        );
+
+        headerTexts.forEach((textEl) => {
+            textEl.style.cursor = 'pointer';
+            textEl.style.userSelect = 'none';
+
+            textEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // Estrai la data dalla classe CSS (formato: date_YYYY-MM-DD_HH_mm)
+                const classes = textEl.className.split(' ');
+                const dateClass = classes.find((cls) =>
+                    cls.startsWith('date_'),
+                );
+
+                if (!dateClass) return;
+
+                // Ricostruisci la data dal formato sanitizzato
+                const formattedDate = dateClass
+                    .replace('date_', '')
+                    .replaceAll('_', ' ')
+                    .replace(' HH', ':')
+                    .replace(' mm', '');
+
+                // Parsa la data
+                const clickedDate = date_utils.parse(formattedDate);
+
+                // Trova i task che intercorrono in questa data/ora
+                const tasksAtTime = this.tasks.filter((task) => {
+                    return (
+                        task._start <= clickedDate && clickedDate < task._end
+                    );
+                });
+
+                // Trigger l'evento personalizzato
+                this.trigger_event('header_click', {
+                    dateText: textEl.innerText,
+                    formattedDate: formattedDate,
+                    clickedDate: clickedDate,
+                    tasksAtTime: tasksAtTime,
+                    element: textEl,
+                });
+            });
+        });
     }
 
     bind_bar_progress() {

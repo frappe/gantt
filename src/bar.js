@@ -442,7 +442,7 @@ export default class Bar {
         this.update_label_position();
         this.update_handle_position();
         this.date_changed();
-        this.compute_duration();
+            this.compute_duration();
 
         if (this.gantt.options.show_expected_progress) {
             this.update_expected_progressbar_position();
@@ -612,39 +612,50 @@ export default class Bar {
     }
 
     compute_duration() {
-        let actual_duration_in_days = 0,
-            duration_in_days = 0;
-        for (
-            let d = new Date(this.task._start);
-            d < this.task._end;
-            d.setDate(d.getDate() + 1)
-        ) {
-            duration_in_days++;
+        let t = 0,
+            e = 0;
+        let current = new Date(this.task._start);
+
+        // ✅ Loop fino a quando non raggiungi _end
+        while (current < this.task._end) {
+            e++;
+
             if (
                 !this.gantt.config.ignored_dates.find(
-                    (k) => k.getTime() === d.getTime(),
+                    (s) => s.getTime() === current.getTime(),
                 ) &&
                 (!this.gantt.config.ignored_function ||
-                    !this.gantt.config.ignored_function(d))
+                    !this.gantt.config.ignored_function(current))
             ) {
-                actual_duration_in_days++;
+                t++;
             }
+
+            // ✅ Incrementa correttamente in base all'unità
+            current = date_utils.add(
+                current,
+                this.gantt.config.step,
+                this.gantt.config.unit,
+            );
         }
-        this.task.actual_duration = actual_duration_in_days;
-        this.task.ignored_duration = duration_in_days - actual_duration_in_days;
+
+        this.task.actual_duration = t;
+        this.task.ignored_duration = e - t;
+
+        // ✅ Converte usando l'unità corretta
+        const scale_map = {
+            hour: 'h',
+            minute: 'min',
+            day: 'd',
+        };
+        const scale = scale_map[this.gantt.config.unit] || 'd';
 
         this.duration =
-            date_utils.convert_scales(
-                duration_in_days + 'd',
-                this.gantt.config.unit,
-            ) / this.gantt.config.step;
+            date_utils.convert_scales(e + scale, this.gantt.config.unit) /
+            this.gantt.config.step;
 
         this.actual_duration_raw =
-            date_utils.convert_scales(
-                actual_duration_in_days + 'd',
-                this.gantt.config.unit,
-            ) / this.gantt.config.step;
-
+            date_utils.convert_scales(t + scale, this.gantt.config.unit) /
+            this.gantt.config.step;
         this.ignored_duration_raw = this.duration - this.actual_duration_raw;
     }
 
