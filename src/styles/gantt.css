@@ -323,7 +323,7 @@
     }
 
     & .bar-wrapper {
-            cursor: pointer;
+        cursor: pointer;
 
         & .bar {
             outline: 1px solid var(--g-row-border-color);
@@ -340,4 +340,24 @@
             }
         }
     }
+}
+
+.gantt-date-disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    background: #eee;
+}
+.gantt-boundary-min,
+.gantt-boundary-max {
+    stroke: #e11d48;
+    stroke-width: 2px;
+    stroke-dasharray: 6 4;
+    pointer-events: none;
+}
+
+.gantt-disabled-area {
+    fill: #eee;
+    opacity: 0.6;
+    pointer-events: all;
+    cursor: not-allowed;
 }

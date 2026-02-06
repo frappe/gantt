@@ -301,6 +301,15 @@ export default class Gantt {
             }
         }
 
+        if (this.options.min_date) {
+            const min = date_utils.parse(this.options.min_date);
+            if (gantt_start < min) gantt_start = min;
+        }
+        if (this.options.max_date) {
+            const max = date_utils.parse(this.options.max_date);
+            if (gantt_end > max) gantt_end = max;
+        }
+
         gantt_start = date_utils.start_of(gantt_start, this.config.unit);
         gantt_end = date_utils.start_of(gantt_end, this.config.unit);
 
@@ -375,6 +384,7 @@ export default class Gantt {
         this.map_arrows_on_bars();
         this.set_dimensions();
         this.set_scroll_position(this.options.scroll_to);
+        this.draw_boundary_lines();
     }
 
     setup_layers() {
@@ -720,6 +730,32 @@ export default class Gantt {
         this.highlight_holidays();
         this.config.ignored_positions = [];
 
+        const { min_date, max_date } = this.options;
+        const min = min_date ? date_utils.parse(min_date) : null;
+        const max = max_date ? date_utils.parse(max_date) : null;
+        if (min && min > this.gantt_start) {
+            const width = this.get_x_for_date(min);
+            createSVG('rect', {
+                x: 0,
+                y: this.config.header_height,
+                width,
+                height: this.grid_height - this.config.header_height,
+                class: 'gantt-disabled-area',
+                append_to: this.$svg,
+            });
+        }
+        if (max && max < this.gantt_end) {
+            const x = this.get_x_for_date(max) + this.config.column_width;
+            const width = this.dates.length * this.config.column_width - x;
+            createSVG('rect', {
+                x,
+                y: this.config.header_height,
+                width,
+                height: this.grid_height - this.config.header_height,
+                class: 'gantt-disabled-area',
+                append_to: this.$svg,
+            });
+        }
         const height =
             (this.options.bar_height + this.options.padding) *
             this.tasks.length;
@@ -767,6 +803,51 @@ export default class Gantt {
 
         if (!highlightDimensions) return;
     }
+    get_x_for_date(date) {
+        // Clamp date to the visible range
+        if (date < this.gantt_start) date = this.gantt_start;
+        if (date > this.gantt_end) date = this.gantt_end;
+
+        const units_since_start = date_utils.diff(
+            date,
+            this.gantt_start,
+            this.config.unit,
+        );
+        return (
+            (units_since_start / this.config.step) * this.config.column_width
+        );
+    }
+
+    draw_boundary_lines() {
+        const { min_date, max_date } = this.options;
+        if (!min_date && !max_date) return;
+
+        const minX = min_date
+            ? this.get_x_for_date(date_utils.parse(min_date))
+            : null;
+        const maxX = max_date
+            ? this.get_x_for_date(date_utils.parse(max_date)) +
+              this.config.column_width
+            : null;
+
+        [
+            [minX, 'gantt-boundary-min'],
+            [maxX, 'gantt-boundary-max'],
+        ].forEach(([x, className]) => {
+            if (x !== null) {
+                const line = createSVG('line', {
+                    x1: x,
+                    y1: 0,
+                    x2: x,
+                    y2:
+                        this.$svg.getAttribute('height') ||
+                        this.$svg.clientHeight,
+                    class: className,
+                });
+                this.$svg.appendChild(line);
+            }
+        });
+    }
 
     create_el({ left, top, width, height, id, classes, append_to, type }) {
         let $el = document.createElement(type || 'div');
@@ -782,11 +863,19 @@ export default class Gantt {
 
     make_dates() {
         this.get_dates_to_draw().forEach((date, i) => {
+            const isDisabled =
+                (this.options.min_date &&
+                    date.date < date_utils.parse(this.options.min_date)) ||
+                (this.options.max_date &&
+                    date.date > date_utils.parse(this.options.max_date));
             if (date.lower_text) {
                 let $lower_text = this.create_el({
                     left: date.x,
                     top: date.lower_y,
-                    classes: 'lower-text date_' + sanitize(date.formatted_date),
+                    classes:
+                        'lower-text date_' +
+                        sanitize(date.formatted_date) +
+                        (isDisabled ? ' gantt-date-disabled' : ''),
                     append_to: this.$lower_header,
                 });
                 $lower_text.innerText = date.lower_text;
