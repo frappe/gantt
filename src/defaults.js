@@ -150,6 +150,8 @@ const DEFAULT_OPTIONS = {
     readonly_progress: false,
     readonly_dates: false,
     readonly: false,
+    hover_on_date: false,
+    fixed_duration: false,
     scroll_to: 'today',
     show_expected_progress: false,
     today_button: true,

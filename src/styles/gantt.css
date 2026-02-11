@@ -341,4 +341,13 @@
             }
         }
     }
+    .grid-column {
+        fill: transparent;
+        pointer-events: all;
+    }
+
+    .grid-column:hover {
+        fill:rgba(49, 49, 49, 0.05) !important;
+        transition: fill 0.1s ease;
+    }
 }

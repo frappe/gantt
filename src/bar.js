@@ -279,7 +279,10 @@ export default class Bar {
         const bar = this.$bar;
         const handle_width = 3;
         this.handles = [];
-        if (!this.gantt.options.readonly_dates) {
+        if (
+            !this.gantt.options.readonly_dates &&
+            !this.gantt.options.fixed_duration
+        ) {
             this.handles.push(
                 createSVG('rect', {
                     x: bar.getEndX() - handle_width / 2,
