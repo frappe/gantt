@@ -140,9 +140,10 @@ const DEFAULT_OPTIONS = {
             'MMM D',
             ctx.chart.options.language,
         );
+        const word = ctx.task.actual_duration === 1 ? 'day' : 'days';
 
         ctx.set_details(
-            `${start_date} - ${end_date} (${ctx.task.actual_duration} days${ctx.task.ignored_duration ? ' + ' + ctx.task.ignored_duration + ' excluded' : ''})<br/>Progress: ${Math.floor(ctx.task.progress * 100) / 100}%`,
+            `${start_date} - ${end_date} (${ctx.task.actual_duration} ${word}${ctx.task.ignored_duration ? ' + ' + ctx.task.ignored_duration + ' excluded' : ''})<br/>Progress: ${Math.floor(ctx.task.progress * 100) / 100}%`,
         );
     },
     popup_on: 'click',

@@ -1406,7 +1406,6 @@ export default class Gantt {
             }
 
             let dx = now_x - x_on_start;
-            console.log($bar_progress);
             if (dx > $bar_progress.max_dx) {
                 dx = $bar_progress.max_dx;
             }

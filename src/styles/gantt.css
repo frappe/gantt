@@ -8,6 +8,7 @@
     height: var(--gv-grid-height);
     width: 100%;
     border-radius: 8px;
+    isolation: isolate;
 
     & .popup-wrapper {
         position: absolute;

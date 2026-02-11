@@ -51,7 +51,10 @@ export default {
                     time_parts[3] = parseFloat(time_parts[3]) * 1000;
                 }
                 vals = vals.concat(time_parts);
+            } else {
+                vals = vals.concat([0, 0, 0, 0]);
             }
+            
             return new Date(...vals);
         }
     },
@@ -235,6 +238,18 @@ export default {
             date.getMinutes(),
             date.getSeconds(),
             date.getMilliseconds(),
+        ];
+    },
+
+    get_utc_date_values(date) {
+        return [
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate(),
+            date.getUTCHours(),
+            date.getUTCMinutes(),
+            date.getUTCSeconds(),
+            date.getUTCMilliseconds(),
         ];
     },
 
