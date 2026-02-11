@@ -385,27 +385,47 @@
                     name: 'Redesign website',
                     id: 'Task 0',
                     progress: random(),
+                    group : 0,
+                },
+                {
+                    start: daysSince(-5),
+                    end: daysSince(0),
+                    name: 'Redesign website - part 2',
+                    id: 'Task 1',
+                    progress: random(),
+                    group : 0,
                 },
                 {
                     start: daysSince(-15),
                     duration: '21d',
                     name: 'Write new content',
-                    id: 'Task 1',
+                    id: 'Task 2',
                     progress: random(),
                     important: true,
+                    group : 1,
+                },
+                {
+                    start: daysSince(7),
+                    duration: '2d',
+                    name: 'Edit new content',
+                    id: 'Task 3',
+                    progress: random(),
+                    important: true,
+                    group : 1,
                 },
                 {
                     start: daysSince(10),
                     duration: '14d',
                     name: 'Review',
-                    id: 'Task 3',
+                    id: 'Task 4',
                     progress: random(),
+                    group : 2,
                 },
                 {
                     start: daysSince(-3),
                     duration: '4d',
                     name: 'Publish',
-                    id: 'Task 4',
+                    id: 'Task 5',
                     progress: random(),
                 },
             ];
@@ -547,6 +567,8 @@
                 today_button: true,
                 view_mode_select: true,
                 holidays: null,
+                enable_grouping: true,
+                groups: [0, 1, 2, 3],
             });
 
             const holidays = new Gantt('#holidays', tasksSpread, {
@@ -554,6 +576,8 @@
                     '#bfdbfe': [],
                     '#a3e635': HOLIDAYS,
                 },
+                enable_grouping: true,
+                groups: [0, 1, 2],
             });
 
             const ignore = new Gantt('#ignore', tasks, {
@@ -573,6 +597,8 @@
                 snap_at: '1d',
                 auto_move_label: false,
                 scroll_to: 'today',
+                enable_grouping: true,
+                groups: [0, 1, 2, 3],
             });
 
             const UPDATES = [
