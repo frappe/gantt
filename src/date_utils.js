@@ -54,7 +54,7 @@ export default {
             } else {
                 vals = vals.concat([0, 0, 0, 0]);
             }
-            
+
             return new Date(...vals);
         }
     },
