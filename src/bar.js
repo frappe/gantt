@@ -424,7 +424,12 @@ export default class Bar {
 
     update_bar_position({ x = null, width = null }) {
         const bar = this.$bar;
-
+        let minDate = this.gantt.options.min_date
+            ? date_utils.parse(this.gantt.options.min_date)
+            : null;
+        let maxDate = this.gantt.options.max_date
+            ? date_utils.parse(this.gantt.options.max_date)
+            : null;
         if (x) {
             const xs = this.task.dependencies.map((dep) => {
                 return this.gantt.get_bar(dep).$bar.getX();
@@ -433,11 +438,37 @@ export default class Bar {
                 return prev && x >= curr;
             }, true);
             if (!valid_x) return;
+            if (minDate && maxDate) {
+                const minDateX = [this.gantt.get_x_for_date(minDate)];
+                const valid_x_for_min_date = minDateX.reduce((prev, curr) => {
+                    return prev && x >= curr;
+                }, true);
+                if (!valid_x_for_min_date) return;
+                const maxDateX = [
+                    this.gantt.get_x_for_date(maxDate) -
+                        bar.getWidth() +
+                        this.gantt.config.column_width,
+                ];
+                const valid_x_for_max_date = maxDateX.reduce((prev, curr) => {
+                    return prev && x <= curr;
+                }, true);
+                if (!valid_x_for_max_date) return;
+            }
             this.update_attr(bar, 'x', x);
             this.x = x;
             this.$date_highlight.style.left = x + 'px';
         }
         if (width > 0) {
+            if (maxDate) {
+                const barStartX = bar.getX();
+                const maxBarEndX =
+                    this.gantt.get_x_for_date(maxDate) +
+                    this.gantt.config.column_width;
+                const maxAllowedWidth = maxBarEndX - barStartX;
+                if (barStartX + width > maxBarEndX) {
+                    width = maxAllowedWidth;
+                }
+            }
             this.update_attr(bar, 'width', width);
             this.$date_highlight.style.width = width + 'px';
         }
