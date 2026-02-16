@@ -18,6 +18,4 @@ jobs:
             - run: pnpm install
             - run: pnpm prettier-check
             - run: pnpm build
-            - uses: JS-DevTools/npm-publish@v1
-              with:
-                  token: ${{ secrets.NPM_TOKEN }}
+            - run: npm publish
