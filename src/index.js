@@ -1459,7 +1459,9 @@ export default class Gantt {
             }, []);
 
             out = out.concat(deps);
-            to_process = deps.filter((d) => !to_process.includes(d) && !out.includes(d));
+            to_process = deps.filter(
+                (d) => !to_process.includes(d) && !out.includes(d),
+            );
         }
 
         return out.filter(Boolean);
