@@ -136,19 +136,26 @@ export default {
         minutes = seconds / 60;
         hours = minutes / 60;
         days = hours / 24;
+        
         // Calculate months across years
         let yearDiff = date_a.getFullYear() - date_b.getFullYear();
         let monthDiff = date_a.getMonth() - date_b.getMonth();
-        // calculate extra
-        monthDiff += (days % 30) / 30;
-
-        /* If monthDiff is negative, date_b is in an earlier month than
-        date_a and thus subtracted from the year difference in months */
+        
+        // Simple month calculation without day-of-month adjustment
+        // This prevents incorrect month shifts in Month view
         months = yearDiff * 12 + monthDiff;
-        /* If date_a's (e.g. march 1st) day of the month is smaller than date_b (e.g. february 28th),
-        adjust the month difference */
-        if (date_a.getDate() < date_b.getDate()) {
-            months--;
+        
+        // For non-month scales, add fractional month based on day difference
+        if (scale !== 'month' && scale !== 'months') {
+            // calculate extra
+            monthDiff += (days % 30) / 30;
+            months = yearDiff * 12 + monthDiff;
+            
+            /* If date_a's (e.g. march 1st) day of the month is smaller than date_b (e.g. february 28th),
+            adjust the month difference */
+            if (date_a.getDate() < date_b.getDate()) {
+                months--;
+            }
         }
 
         // Calculate years based on actual months
