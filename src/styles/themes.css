@@ -1,0 +1,47 @@
+:root {
+    --g-arrow-color: #1f2937;
+    --g-bar-color: #fff;
+    --g-bar-border: #fff;
+    --g-tick-color-thick: #ededed;
+    --g-tick-color: #f3f3f3;
+    --g-actions-background: #f3f3f3;
+    --g-border-color: #ebeff2;
+    --g-text-muted: #7c7c7c;
+    --g-text-light: #fff;
+    --g-text-dark: #171717;
+    --g-progress-color: #dbdbdb;
+    --g-handle-color: #37352f;
+    --g-weekend-label-color: #dcdce4;
+    --g-expected-progress: #c4c4e9;
+    --g-header-background: #fff;
+    --g-row-color: #fdfdfd;
+    --g-row-border-color: #c7c7c7;
+    --g-today-highlight: #37352f;
+    --g-popup-actions: #ebeff2;
+    --g-weekend-highlight-color: #f7f7f7;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --g-arrow-color: #e5e5e5;
+        --g-bar-color: #2a2a2a;
+        --g-bar-border: #3a3a3a;
+        --g-tick-color-thick: #1a1a1a;
+        --g-tick-color: #0a0a0a;
+        --g-actions-background: #1a1a1a;
+        --g-border-color: #2a2a2a;
+        --g-text-muted: #999999;
+        --g-text-light: #ffffff;
+        --g-text-dark: #f5f5f5;
+        --g-progress-color: #4a4a4a;
+        --g-handle-color: #d0d0d0;
+        --g-weekend-label-color: #3a3a3a;
+        --g-expected-progress: #5a5a5a;
+        --g-header-background: #0a0a0a;
+        --g-row-color: #141414;
+        --g-row-border-color: #2a2a2a;
+        --g-today-highlight: #999999;
+        --g-popup-actions: #1a1a1a;
+        --g-weekend-highlight-color: #0f0f0f;
+    }
+}
