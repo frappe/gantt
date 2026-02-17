@@ -14,7 +14,7 @@
         position: absolute;
         top: 0;
         left: 0;
-        background: #fff;
+        background: var(--g-header-background);
         box-shadow: 0px 10px 24px -3px rgba(0, 0, 0, 0.2);
         padding: 10px;
         border-radius: 5px;
@@ -49,10 +49,10 @@
             border: none;
             padding: 5px 8px;
             background-color: var(--g-popup-actions);
-            border-right: 1px solid var(--g-text-light);
+            border-right: 1px solid var(--g-border-color);
 
             &:hover {
-                background-color: brightness(97%);
+                filter: brightness(97%);
             }
 
             &:first-child {
@@ -117,7 +117,7 @@
         position: sticky;
         left: 0 !important;
         padding-left: 17px;
-        background: white;
+        background: var(--g-header-background);
     }
 
     & .side-header {
@@ -205,7 +205,7 @@
         left: 0;
         opacity: 0;
         z-index: 1000;
-        background: --g-weekend-label-color;
+        background: var(--g-weekend-label-color);
         border-radius: 5px;
         padding: 2px 5px;
 
@@ -222,8 +222,8 @@
             position: absolute;
             left: 8px;
             top: calc(var(--gv-grid-height) - 60px);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
+            background-color: var(--g-actions-background);
+            color: var(--g-text-light);
             border: none;
             padding: 8px;
             border-radius: 3px;
@@ -347,7 +347,7 @@
     }
 
     .grid-column:hover {
-        fill:rgba(49, 49, 49, 0.05) !important;
+        fill: var(--g-weekend-highlight-color);
         transition: fill 0.1s ease;
     }
 }
