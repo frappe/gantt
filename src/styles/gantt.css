@@ -324,7 +324,7 @@
     }
 
     & .bar-wrapper {
-            cursor: pointer;
+        cursor: pointer;
 
         & .bar {
             outline: 1px solid var(--g-row-border-color);
