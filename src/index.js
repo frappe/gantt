@@ -1118,11 +1118,13 @@ export default class Gantt {
             if (e.target.classList.contains('grid-row')) this.unselect_all();
         };
 
-        let pos = 0;
+        let posx = 0;
+        let posy = 0;
         $.on(this.$svg, 'mousemove', '.bar-wrapper, .handle', (e) => {
             if (
                 this.bar_being_dragged === false &&
-                Math.abs((e.offsetX || e.layerX) - pos) > 10
+                (Math.abs((e.offsetX || e.layerX) - posx) > 10 ||
+                 Math.abs((e.offsetY || e.layerY) - posy) > 10)
             )
                 this.bar_being_dragged = true;
         });
@@ -1160,7 +1162,8 @@ export default class Gantt {
             bars = ids.map((id) => this.get_bar(id));
 
             this.bar_being_dragged = false;
-            pos = x_on_start;
+            posx = x_on_start;
+            posy = y_on_start;
 
             bars.forEach((bar) => {
                 const $bar = bar.$bar;
@@ -1168,6 +1171,7 @@ export default class Gantt {
                 $bar.oy = $bar.getY();
                 $bar.owidth = $bar.getWidth();
                 $bar.finaldx = 0;
+                $bar.finaldy = 0;
             });
         });
 
@@ -1311,6 +1315,7 @@ export default class Gantt {
         $.on(this.$svg, 'mousemove', (e) => {
             if (!action_in_progress()) return;
             const dx = (e.offsetX || e.layerX) - x_on_start;
+            const dy = (e.offsetY || e.layerY) - y_on_start;
 
             bars.forEach((bar) => {
                 const $bar = bar.$bar;
@@ -1338,7 +1343,16 @@ export default class Gantt {
                     !this.options.readonly &&
                     !this.options.readonly_dates
                 ) {
-                    bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                    bar.update_bar_position({
+                        x: $bar.ox + $bar.finaldx,
+                    });
+                    if (parent_bar_id === bar.task.id) {
+                        $bar.finaldy = this.get_snap_row_position(dy, $bar.oy);
+                        bar.update_bar_position({
+                            x: $bar.ox + $bar.finaldx,
+                            y: $bar.oy + $bar.finaldy
+                        });
+                    }
                 }
             });
         });
@@ -1368,6 +1382,7 @@ export default class Gantt {
 
     bind_bar_progress() {
         let x_on_start = 0;
+        let y_on_start = 0;
         let is_resizing = null;
         let bar = null;
         let $bar_progress = null;
@@ -1498,6 +1513,21 @@ export default class Gantt {
                 final_pos -= this.config.column_width * drn;
         }
         return final_pos - ox;
+    }
+
+    get_snap_row_position(dy, oy) {
+        let snap_height = this.options.bar_height + this.options.padding;
+        const rem = dy % snap_height;
+
+        let final_dy =
+            dy -
+            rem +
+            (rem < snap_height * 2
+                ? 0
+                : snap_height);
+        let final_pos = oy + final_dy;
+
+        return final_pos - oy;
     }
 
     get_ignored_region(pos, drn = 1) {
