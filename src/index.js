@@ -139,7 +139,7 @@ export default class Gantt {
 
     setup_tasks(tasks) {
         this.tasks = tasks
-            .map((task, i) => {
+            .filter(task => {
                 if (!task.start) {
                     console.error(
                         `task "${task.id}" doesn't have a start date`,
@@ -180,6 +180,9 @@ export default class Gantt {
                     return false;
                 }
 
+                return true;
+            })
+            .map((task, i) => {
                 // cache index
                 task._index = i;
 
@@ -215,8 +218,7 @@ export default class Gantt {
                 }
 
                 return task;
-            })
-            .filter((t) => t);
+            });
         this.setup_dependencies();
     }
 
