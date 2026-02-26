@@ -422,7 +422,7 @@ export default class Bar {
         });
     }
 
-    update_bar_position({ x = null, width = null }) {
+    update_bar_position({ x = null, width = null, y = null }) {
         const bar = this.$bar;
 
         if (x) {
@@ -441,7 +441,9 @@ export default class Bar {
             this.update_attr(bar, 'width', width);
             this.$date_highlight.style.width = width + 'px';
         }
-
+        if (y) {
+            this.update_attr(bar, 'y', y);
+        }
         this.update_label_position();
         this.update_handle_position();
         this.date_changed();
@@ -675,7 +677,7 @@ export default class Bar {
     update_progressbar_position() {
         if (this.invalid || this.gantt.options.readonly) return;
         this.$bar_progress.setAttribute('x', this.$bar.getX());
-
+        this.$bar_progress.setAttribute('y', this.$bar.getY());
         this.$bar_progress.setAttribute(
             'width',
             this.calculate_progress_width(),
@@ -717,6 +719,7 @@ export default class Bar {
                 );
             }
         }
+        label.setAttribute('y', bar.getY() + bar.getHeight() / 2);
     }
 
     update_handle_position() {
@@ -726,8 +729,14 @@ export default class Bar {
             .querySelector('.handle.left')
             .setAttribute('x', bar.getX());
         this.handle_group
+            .querySelector('.handle.left')
+            .setAttribute('y', bar.getY() + this.height / 4);
+        this.handle_group
             .querySelector('.handle.right')
             .setAttribute('x', bar.getEndX());
+        this.handle_group
+            .querySelector('.handle.right')
+            .setAttribute('y', bar.getY() + this.height / 4);
         const handle = this.group.querySelector('.handle.progress');
         handle && handle.setAttribute('cx', this.$bar_progress.getEndX());
     }
