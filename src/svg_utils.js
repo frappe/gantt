@@ -14,6 +14,13 @@ export function createSVG(tag, attrs) {
             elem.innerHTML = attrs.innerHTML;
         } else if (attr === 'clipPath') {
             elem.setAttribute('clip-path', 'url(#' + attrs[attr] + ')');
+        } else if (attr === 'style') {
+            attrs[attr].split(';').forEach(styleRule => {
+                const [property, val] = styleRule.split(':');
+                if (property && val) {
+                    elem.style[property.trim()] = val.trim();
+                }
+            });
         } else {
             elem.setAttribute(attr, attrs[attr]);
         }
