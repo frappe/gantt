@@ -24,19 +24,11 @@ export default class Arrow {
         start_x -= 10;
 
         let start_y =
-            this.gantt.config.header_height +
-            this.gantt.options.bar_height +
-            (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.from_task.task._index +
-            this.gantt.options.padding / 2;
+            this.from_task.$bar.getY() + this.gantt.options.bar_height
 
         let end_x = this.to_task.$bar.getX() - 13;
         let end_y =
-            this.gantt.config.header_height +
-            this.gantt.options.bar_height / 2 +
-            (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.to_task.task._index +
-            this.gantt.options.padding / 2;
+            this.to_task.$bar.getY() + this.gantt.options.bar_height / 2;
 
         const from_is_below_to =
             this.from_task.task._index > this.to_task.task._index;
@@ -80,7 +72,7 @@ export default class Arrow {
             this.path = `
               M ${start_x} ${start_y}
               V ${offset}
-              a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve}
+              a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
               L ${end_x} ${end_y}
               m -5 -5
               l 5 5
