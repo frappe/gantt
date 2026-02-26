@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collapsible Dependent Tasks - Frappe Gantt Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        #gantt {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            overflow: auto;
+        }
+        .info-box {
+            background: #e8f4fd;
+            border: 1px solid #bee5ff;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .info-box li {
+            margin: 5px 0;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Collapsible Dependent Tasks Demo</h1>
+    <p>This demo shows the new collapsible dependent tasks feature for the Frappe Gantt library.</p>
+
+    <div class="info-box">
+        <h3>How to use:</h3>
+        <ul>
+            <li>Tasks with dependencies show a collapse/expand button (−/+) on the left side</li>
+            <li>Click the button to collapse/expand all dependent tasks</li>
+            <li>When collapsed, dependent tasks and their arrows are hidden</li>
+            <li>The Gantt chart automatically adjusts the layout</li>
+        </ul>
+    </div>
+
+    <div id="gantt"></div>
+
+    <script type="module">
+        import Gantt from '../../src/index.js';
+
+        // Sample tasks with dependencies to demonstrate the feature
+        const tasks = [
+            {
+                id: 'project-planning',
+                name: 'Plan',
+                start: '2025-10-01',
+                end: '2025-10-05',
+                progress: 100,
+                dependencies: []
+            },
+            {
+                id: 'requirements',
+                name: 'Req',
+                start: '2025-10-06',
+                end: '2025-10-10',
+                progress: 80,
+                dependencies: ['project-planning']
+            },
+            {
+                id: 'design',
+                name: 'System Design',
+                start: '2025-10-11',
+                end: '2025-10-15',
+                progress: 60,
+                dependencies: ['requirements']
+            },
+            {
+                id: 'ui-design',
+                name: 'UI/UX Design',
+                start: '2025-10-11',
+                end: '2025-10-14',
+                progress: 70,
+                dependencies: ['requirements']
+            },
+            {
+                id: 'backend-dev',
+                name: 'Backend Development',
+                start: '2025-10-16',
+                end: '2025-10-25',
+                progress: 40,
+                dependencies: ['design']
+            },
+            {
+                id: 'frontend-dev',
+                name: 'Frontend Development',
+                start: '2025-10-16',
+                end: '2025-10-28',
+                progress: 30,
+                dependencies: ['ui-design']
+            },
+            {
+                id: 'api-dev',
+                name: 'API Development',
+                start: '2025-10-20',
+                end: '2025-10-25',
+                progress: 20,
+                dependencies: ['backend-dev']
+            },
+            {
+                id: 'integration',
+                name: 'Integration',
+                start: '2025-10-26',
+                end: '2025-10-30',
+                progress: 0,
+                dependencies: ['backend-dev', 'frontend-dev']
+            },
+            {
+                id: 'testing',
+                name: 'Testing',
+                start: '2025-10-31',
+                end: '2025-11-05',
+                progress: 0,
+                dependencies: ['integration']
+            },
+            {
+                id: 'deployment',
+                name: 'Deployment',
+                start: '2025-11-06',
+                end: '2025-11-08',
+                progress: 0,
+                dependencies: ['testing']
+            }
+        ];
+
+        // Initialize the Gantt chart
+        const gantt = new Gantt('#gantt', tasks, {
+            view_mode: 'Day',
+            date_format: 'YYYY-MM-DD',
+            custom_popup_html: null,
+            bar_height: 30,
+            padding: 18,
+            column_width: 30,
+            arrow_curve: 5
+        });
+
+        // Make gantt instance available globally for debugging
+        window.gantt = gantt;
+
+        console.log('Gantt chart initialized with collapsible tasks feature');
+        console.log('Tasks with dependents:', Array.from(gantt.tasks_with_dependents));
+        console.log('Click on the −/+ buttons to collapse/expand dependent tasks');
+    </script>
+</body>
+</html>

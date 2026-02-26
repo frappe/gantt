@@ -228,6 +228,59 @@ export default class Gantt {
                 this.dependency_map[d].push(t.id);
             }
         }
+
+        // Initialize collapsed tasks set
+        this.collapsed_tasks = new Set();
+
+        // Track which tasks have dependents (can be collapsed)
+        this.tasks_with_dependents = new Set();
+        for (let task_id in this.dependency_map) {
+            if (this.dependency_map[task_id] && this.dependency_map[task_id].length > 0) {
+                this.tasks_with_dependents.add(task_id);
+            }
+        }
+    }
+
+    // Get all tasks that depend on a given task (recursively)
+    get_all_dependent_tasks(task_id) {
+        const dependent_tasks = new Set();
+        const tasks_to_check = [task_id];
+
+        while (tasks_to_check.length > 0) {
+            const current_task = tasks_to_check.pop();
+            const direct_dependents = this.dependency_map[current_task] || [];
+
+            for (let dependent of direct_dependents) {
+                if (!dependent_tasks.has(dependent)) {
+                    dependent_tasks.add(dependent);
+                    tasks_to_check.push(dependent);
+                }
+            }
+        }
+
+        return Array.from(dependent_tasks);
+    }
+
+    // Toggle collapse state of a task
+    toggle_task_collapse(task_id) {
+        if (this.collapsed_tasks.has(task_id)) {
+            this.collapsed_tasks.delete(task_id);
+        } else {
+            this.collapsed_tasks.add(task_id);
+        }
+        this.render();
+    }
+
+    // Check if a task should be visible
+    is_task_visible(task_id) {
+        // Check if any parent task is collapsed
+        for (let collapsed_task of this.collapsed_tasks) {
+            const dependent_tasks = this.get_all_dependent_tasks(collapsed_task);
+            if (dependent_tasks.includes(task_id)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     refresh(tasks) {
@@ -362,6 +415,26 @@ export default class Gantt {
         this.bind_grid_click();
         this.bind_holiday_labels();
         this.bind_bar_events();
+        this.bind_collapse_buttons();
+    }
+
+    bind_collapse_buttons() {
+        // Delegate click events for collapse buttons
+        this.$svg.addEventListener('click', (e) => {
+            // Find the closest collapse button
+            let target = e.target;
+            while (target && target !== this.$svg) {
+                if (target.classList && target.classList.contains('collapse-button')) {
+                    const task_id = target.getAttribute('data-task-id');
+                    if (task_id) {
+                        this.toggle_task_collapse(task_id);
+                        e.stopPropagation();
+                        return;
+                    }
+                }
+                target = target.parentElement;
+            }
+        });
     }
 
     render() {
@@ -413,11 +486,15 @@ export default class Gantt {
 
     make_grid_background() {
         const grid_width = this.dates.length * this.config.column_width;
+
+        // Always recalculate visible tasks for accurate height
+        const visible_tasks = this.tasks.filter(t => this.is_task_visible(t.id)).length;
+
         const grid_height = Math.max(
             this.config.header_height +
                 this.options.padding +
                 (this.options.bar_height + this.options.padding) *
-                    this.tasks.length -
+                    visible_tasks -
                 10,
             this.options.container_height !== 'auto'
                 ? this.options.container_height
@@ -448,12 +525,11 @@ export default class Gantt {
         const row_width = this.dates.length * this.config.column_width;
         const row_height = this.options.bar_height + this.options.padding;
 
+        // Only create rows for visible tasks
+        const visible_tasks = this.tasks.filter(t => this.is_task_visible(t.id)).length;
+
         let y = this.config.header_height;
-        for (
-            let y = this.config.header_height;
-            y < this.grid_height;
-            y += row_height
-        ) {
+        for (let i = 0; i < visible_tasks; i++) {
             createSVG('rect', {
                 x: 0,
                 y,
@@ -462,6 +538,7 @@ export default class Gantt {
                 class: 'grid-row',
                 append_to: rows_layer,
             });
+            y += row_height;
         }
     }
 
@@ -883,21 +960,53 @@ export default class Gantt {
     }
 
     make_bars() {
+        // Track visible task index for positioning
+        let visible_index = 0;
+
+        // Create bars for all tasks, but only show visible ones
         this.bars = this.tasks.map((task) => {
+            // Store original index
+            task._original_index = task._index;
+
+            // Adjust index for visible tasks
+            if (this.is_task_visible(task.id)) {
+                task._index = visible_index;
+                visible_index++;
+            }
+
             const bar = new Bar(this, task);
-            this.layers.bar.appendChild(bar.group);
+
+            // Only append to DOM if task is visible
+            if (this.is_task_visible(task.id)) {
+                this.layers.bar.appendChild(bar.group);
+            }
+
             return bar;
         });
+
+        // Update the visible task count for grid height calculations
+        this.visible_task_count = visible_index;
     }
 
     make_arrows() {
         this.arrows = [];
         for (let task of this.tasks) {
+            // Only create arrows for visible tasks
+            if (!this.is_task_visible(task.id)) {
+                continue;
+            }
+
             let arrows = [];
             arrows = task.dependencies
                 .map((task_id) => {
                     const dependency = this.get_task(task_id);
                     if (!dependency) return;
+
+                    // Only create arrow if dependency is also visible
+                    if (!this.is_task_visible(dependency.id)) {
+                        return;
+                    }
+
                     const arrow = new Arrow(
                         this,
                         this.bars[dependency._index], // from_task
