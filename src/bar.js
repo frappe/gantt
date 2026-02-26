@@ -12,7 +12,9 @@ export default class Bar {
     refresh() {
         this.bar_group.innerHTML = '';
         this.handle_group.innerHTML = '';
-        if (this.task.custom_class) {
+        if (Array.isArray(this.task.custom_class)) {
+            this.group.classList.add(...this.task.custom_class);
+        } else if (this.task.custom_class) {
             this.group.classList.add(this.task.custom_class);
         } else {
             this.group.classList = ['bar-wrapper'];
