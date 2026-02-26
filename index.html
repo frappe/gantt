@@ -337,12 +337,12 @@
                 new Date().getTimezoneOffset() * 60000;
 
             function random(begin = 10, end = 90, multiple = 10) {
-                let k;
-                do {
-                    k = Math.floor(Math.random() * 100);
-                } while (k < begin || k > end || k % multiple !== 0);
-                return k;
+               const min=Math.ceil(begin/multiple);
+                const max=Math.floor(end/multiple);
+                const rand= Math.floor(Math.ramdom()* (max-min+1)) + min;
+                return rand*mutiple;
             }
+                
 
             const daysSince = (dx) => new Date(today + dx * 86400000);
             let tasks = [
