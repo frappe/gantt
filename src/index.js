@@ -5,7 +5,7 @@ import Arrow from './arrow';
 import Bar from './bar';
 import Popup from './popup';
 
-import { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES } from './defaults';
+import { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES, LANGUAGES } from './defaults';
 
 import './styles/gantt.css';
 
@@ -519,7 +519,8 @@ export default class Gantt {
         if (this.options.today_button) {
             let $today_button = document.createElement('button');
             $today_button.classList.add('today-button');
-            $today_button.textContent = 'Today';
+            //$today_button.textContent = 'Today';
+            $today_button.textContent = LANGUAGES[this.options.language]
             $today_button.onclick = this.scroll_current.bind(this);
             this.$side_header.prepend($today_button);
             this.$today_button = $today_button;
