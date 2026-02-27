@@ -1,5 +1,5 @@
 import date_utils from './date_utils';
-
+import language from './language/today_languages.json';
 function getDecade(d) {
     const year = d.getFullYear();
     return year - (year % 10) + '';
@@ -11,7 +11,7 @@ function formatWeek(d, ld, lang) {
     let beginFormat = !ld || d.getMonth() !== ld.getMonth() ? 'D MMM' : 'D';
     return `${date_utils.format(d, beginFormat, lang)} - ${date_utils.format(endOfWeek, endFormat, lang)}`;
 }
-
+const LANGUAGES = language
 const DEFAULT_VIEW_MODES = [
     {
         name: 'Hour',
@@ -161,4 +161,4 @@ const DEFAULT_OPTIONS = {
     is_weekend: (d) => d.getDay() === 0 || d.getDay() === 6,
 };
 
-export { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES };
+export { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES, LANGUAGES };
