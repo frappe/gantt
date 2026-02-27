@@ -325,6 +325,40 @@
                 </div>
                 <div class="col-md-9 chart" id="advanced"></div>
             </div>
+            <div class="row my-5">
+                <div class="chart col-md-9" id="boundaries"></div>
+                <div class="col-md-3 px-5 py-1">
+                    <h3 class="text-center">Chart Boundaries</h3>
+                    <p>
+                        Chart with having min and max date and setting up the
+                        boundaries so no tasks can go beyond them.
+                    </p>
+                    <div class="form-check form-switch">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="toggle-today"
+                            checked
+                        />
+                        <label class="form-check-label" for="mutable-general"
+                            >Scroll to Today</label
+                        >
+                    </div>
+                    <div class="form-check form-switch">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="toggle-view-mode"
+                            checked
+                        />
+                        <label class="form-check-label" for="mutable-general"
+                            >Change View Mode</label
+                        >
+                    </div>
+                </div>
+            </div>
         </div>
         <script type="module">
             const rawToday = new Date();
@@ -543,6 +577,14 @@
             ];
 
             const mutablity = new Gantt('#mutability', tasks);
+            const boundaries = new Gantt('#boundaries', tasksSpread, {
+                view_mode_select: true,
+                today_button: true,
+                holidays: null,
+                max_date: '2026-03-05',
+                min_date: '2026-01-05',
+                infinite_padding: false,
+            });
             const sideheader = new Gantt('#sideheader', tasksSpread, {
                 today_button: true,
                 view_mode_select: true,
@@ -612,7 +654,7 @@
                             'is_weekend',
                             (d) => d.getDay() === 6 || d.getDay() === 5,
                             (d) => d.getDay() === 0 || d.getDay() === 6,
-                        ]
+                        ],
                     },
                 ],
                 [
