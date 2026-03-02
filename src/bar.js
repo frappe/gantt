@@ -60,7 +60,7 @@ export default class Bar {
         if (this.gantt.options.bar_corner_radius > max_radius) {
             if (!this.gantt.has_warned_radius) {
                 console.warn(
-                    `Frappe Gantt: bar_corner_radius (${this.gantt.options.bar_corner_radius}) exceeds half the bar height. Clamping to ${max_radius} to prevent distortion.`,
+                    `Frappe Gantt: the provided bar_corner_radius (${this.gantt.options.bar_corner_radius}) exceeds the maximum limit of half the bar height. Clamped to ${max_radius} to prevent distortion.`,
                 );
                 this.gantt.has_warned_radius = true;
             }
