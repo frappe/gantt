@@ -11,7 +11,6 @@ function formatWeek(d, ld, lang) {
     let beginFormat = !ld || d.getMonth() !== ld.getMonth() ? 'D MMM' : 'D';
     return `${date_utils.format(d, beginFormat, lang)} - ${date_utils.format(endOfWeek, endFormat, lang)}`;
 }
-const LANGUAGES = language
 const DEFAULT_VIEW_MODES = [
     {
         name: 'Hour',
@@ -155,10 +154,11 @@ const DEFAULT_OPTIONS = {
     scroll_to: 'today',
     show_expected_progress: false,
     today_button: true,
+    today_button_label: 'Today',
     view_mode: 'Day',
     view_mode_select: false,
     view_modes: DEFAULT_VIEW_MODES,
     is_weekend: (d) => d.getDay() === 0 || d.getDay() === 6,
 };
 
-export { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES, LANGUAGES };
+export { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES };
