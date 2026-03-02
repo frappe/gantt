@@ -58,9 +58,13 @@ export default class Bar {
         this.compute_duration();
         const max_radius = this.height / 2;
         if (this.gantt.options.bar_corner_radius > max_radius) {
-            console.warn(
+            if(!this.gantt.has_warned_radius){
+                            console.warn(
                 `Frappe Gantt: bar_corner_radius (${this.gantt.options.bar_corner_radius}) exceeds half the bar height. Clamping to ${max_radius} to prevent distortion.`,
             );
+            this.gantt.has_warned_radius = true;
+          }
+
         }
         this.corner_radius = Math.min(
             this.gantt.options.bar_corner_radius,
