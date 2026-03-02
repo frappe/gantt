@@ -1,5 +1,4 @@
 import date_utils from './date_utils';
-import language from './language/today_languages.json';
 function getDecade(d) {
     const year = d.getFullYear();
     return year - (year % 10) + '';
