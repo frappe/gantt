@@ -128,10 +128,11 @@ export default {
     diff(date_a, date_b, scale = 'day') {
         let milliseconds, seconds, hours, minutes, days, months, years;
 
-        milliseconds =
-            date_a -
-            date_b +
-            (date_b.getTimezoneOffset() - date_a.getTimezoneOffset()) * 60000;
+        // Use raw millisecond difference — it already represents the true
+        // elapsed time regardless of DST.  The previous timezone-offset
+        // correction double-compensated because Date subtraction already
+        // accounts for the underlying UTC timestamps.
+        milliseconds = date_a - date_b;
         seconds = milliseconds / 1000;
         minutes = seconds / 60;
         hours = minutes / 60;
@@ -184,14 +185,27 @@ export default {
 
     add(date, qty, scale) {
         qty = parseInt(qty, 10);
+        // For sub-day scales, use millisecond-based addition to avoid
+        // incorrect results when crossing DST boundaries.
+        // new Date(y, m, d, h+qty, ...) uses local time setters which
+        // can skip or repeat hours during DST transitions.
+        const MS_PER = {
+            [HOUR]: 3600000,
+            [MINUTE]: 60000,
+            [SECOND]: 1000,
+            [MILLISECOND]: 1,
+        };
+        if (MS_PER[scale]) {
+            return new Date(date.getTime() + qty * MS_PER[scale]);
+        }
         const vals = [
             date.getFullYear() + (scale === YEAR ? qty : 0),
             date.getMonth() + (scale === MONTH ? qty : 0),
             date.getDate() + (scale === DAY ? qty : 0),
-            date.getHours() + (scale === HOUR ? qty : 0),
-            date.getMinutes() + (scale === MINUTE ? qty : 0),
-            date.getSeconds() + (scale === SECOND ? qty : 0),
-            date.getMilliseconds() + (scale === MILLISECOND ? qty : 0),
+            date.getHours(),
+            date.getMinutes(),
+            date.getSeconds(),
+            date.getMilliseconds(),
         ];
         return new Date(...vals);
     },
