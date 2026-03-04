@@ -41,7 +41,7 @@ export default class Gantt {
         } else {
             throw new TypeError(
                 'Frappe Gantt only supports usage of a string CSS selector,' +
-                " HTML DOM element or SVG DOM element for the 'element' parameter",
+                    " HTML DOM element or SVG DOM element for the 'element' parameter",
             );
         }
 
@@ -529,7 +529,6 @@ export default class Gantt {
             $today_button.onclick = this.scroll_current.bind(this);
             this.$side_header.prepend($today_button);
             this.$today_button = $today_button;
-
         }
     }
 
