@@ -243,9 +243,13 @@ export default class Gantt {
     }
 
     change_view_mode(mode = this.options.view_mode, maintain_pos = false) {
-        if (typeof mode === 'string') {
-            mode = this.options.view_modes.find((d) => d.name === mode);
-        }
+        const name = typeof mode === 'string' ? mode : mode.name;
+        const custom_mode =
+            this.options.view_modes.find((d) => d.name === name) || {};
+        const default_mode =
+            DEFAULT_VIEW_MODES.find((d) => d.name === name) || {};
+        mode = { ...default_mode, ...custom_mode };
+
         let old_pos, old_scroll_op;
         if (maintain_pos) {
             old_pos = this.$container.scrollLeft;
