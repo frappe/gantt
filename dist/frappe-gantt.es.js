@@ -22,6 +22,10 @@ const v = "year", k = "month", M = "day", D = "hour", T = "minute", L = "second"
     if (n instanceof Date)
       return n;
     if (typeof n == "string") {
+      if (n.includes("T")) {
+        const o = new Date(n);
+        if (!isNaN(o)) return o;
+      }
       let i, s;
       const r = n.split(" ");
       i = r[0].split(t).map((o) => parseInt(o, 10)), s = r[1] && r[1].split(e), i[1] = i[1] ? i[1] - 1 : 0;
@@ -721,7 +725,7 @@ function A(n) {
   const t = n.getFullYear();
   return t - t % 10 + "";
 }
-function O(n, t, e) {
+function N(n, t, e) {
   let i = d.add(n, 6, "day"), s = i.getMonth() !== n.getMonth() ? "D MMM" : "D", r = !t || n.getMonth() !== t.getMonth() ? "D MMM" : "D";
   return `${d.format(n, r, e)} - ${d.format(i, s, e)}`;
 }
@@ -768,7 +772,7 @@ const b = [
     step: "7d",
     date_format: "YYYY-MM-DD",
     column_width: 140,
-    lower_text: O,
+    lower_text: N,
     upper_text: (n, t, e) => !t || n.getMonth() !== t.getMonth() ? d.format(n, "MMMM", e) : "",
     thick_line: (n) => n.getDate() >= 1 && n.getDate() <= 7,
     upper_text_frequency: 4
@@ -794,7 +798,7 @@ const b = [
     lower_text: "YYYY",
     snap_at: "30d"
   }
-], B = {
+], O = {
   arrow_curve: 5,
   auto_move_label: !1,
   bar_corner_radius: 3,
@@ -841,7 +845,7 @@ const b = [
   view_modes: b,
   is_weekend: (n) => n.getDay() === 0 || n.getDay() === 6
 };
-class z {
+class B {
   constructor(t, e, i) {
     this.setup_wrapper(t), this.setup_options(i), this.setup_tasks(e), this.change_view_mode(), this.bind_events();
   }
@@ -885,7 +889,7 @@ class z {
         ), s;
       }
       return i;
-    }), t.view_mode = t.view_modes[0]), this.options = { ...B, ...t };
+    }), t.view_mode = t.view_modes[0]), this.options = { ...O, ...t };
     const e = {
       "grid-height": "container_height",
       "bar-height": "bar_height",
@@ -941,7 +945,7 @@ class z {
         let a = [];
         e.dependencies && (a = e.dependencies.split(",").map((o) => o.trim().replaceAll(" ", "_")).filter((o) => o)), e.dependencies = a;
       }
-      return e.id ? typeof e.id == "string" ? e.id = e.id.replaceAll(" ", "_") : e.id = `${e.id}` : e.id = N(e), e;
+      return e.id ? typeof e.id == "string" ? e.id = e.id.replaceAll(" ", "_") : e.id = `${e.id}` : e.id = z(e), e;
     }).filter((e) => e), this.setup_dependencies();
   }
   setup_dependencies() {
@@ -1712,7 +1716,7 @@ class z {
     this.$svg.innerHTML = "", (e = (t = this.$header) == null ? void 0 : t.remove) == null || e.call(t), (s = (i = this.$side_header) == null ? void 0 : i.remove) == null || s.call(i), (a = (r = this.$current_highlight) == null ? void 0 : r.remove) == null || a.call(r), (h = (o = this.$extras) == null ? void 0 : o.remove) == null || h.call(o), (l = (g = this.popup) == null ? void 0 : g.hide) == null || l.call(g);
   }
 }
-z.VIEW_MODE = {
+B.VIEW_MODE = {
   HOUR: b[0],
   QUARTER_DAY: b[1],
   HALF_DAY: b[2],
@@ -1721,12 +1725,12 @@ z.VIEW_MODE = {
   MONTH: b[5],
   YEAR: b[6]
 };
-function N(n) {
+function z(n) {
   return n.name + "_" + Math.random().toString(36).slice(2, 12);
 }
 function $(n) {
   return n.replaceAll(" ", "_").replaceAll(":", "_").replaceAll(".", "_");
 }
 export {
-  z as default
+  B as default
 };

@@ -33,6 +33,11 @@ export default {
             return date;
         }
         if (typeof date === 'string') {
+            // Handle ISO 8601 with T separator (e.g. "2025-03-05T18:30:00")
+            if (date.includes('T')) {
+                const d = new Date(date);
+                if (!isNaN(d)) return d;
+            }
             let date_parts, time_parts;
             const parts = date.split(' ');
             date_parts = parts[0]
