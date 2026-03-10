@@ -94,6 +94,10 @@ export default class Bar {
     }
 
     prepare_expected_progress_values() {
+        if (!this.gantt.options.show_expected_progress) {
+            this.expected_progress_width = 0;
+            return;
+        }
         this.compute_expected_progress();
         this.expected_progress_width =
             this.gantt.options.column_width *
@@ -574,14 +578,17 @@ export default class Bar {
 
     compute_expected_progress() {
         this.expected_progress =
-            date_utils.diff(date_utils.today(), this.task._start, 'hour') /
-            this.gantt.config.step;
+            date_utils.diff(
+                date_utils.now(),
+                this.task._start,
+                this.gantt.config.unit,
+            ) / this.gantt.config.step;
+        const safe_progress = Math.max(
+            0,
+            Math.min(this.expected_progress, this.duration),
+        );
         this.expected_progress =
-            ((this.expected_progress < this.duration
-                ? this.expected_progress
-                : this.duration) *
-                100) /
-            this.duration;
+            this.duration > 0 ? (safe_progress * 100) / this.duration : 0;
     }
 
     compute_x() {
