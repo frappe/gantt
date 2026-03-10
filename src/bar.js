@@ -627,9 +627,24 @@ export default class Bar {
     }
 
     compute_duration() {
+        // Use actual time difference for precise sub-day durations
+        const MS_PER = {
+            millisecond: 1,
+            second: 1000,
+            minute: 60000,
+            hour: 3600000,
+            day: 86400000,
+        };
+        const diff_ms = this.task._end - this.task._start;
+        const ms_per_unit =
+            MS_PER[this.gantt.config.unit] || MS_PER.day;
+
+        this.duration =
+            diff_ms / ms_per_unit / this.gantt.config.step;
+
+        // Count days for ignored dates logic
         let actual_duration_in_days = 0,
             duration_in_days = 0;
-        // console.log(this.task._start, this.task._end);
         for (
             let d = new Date(this.task._start);
             d < this.task._end;
@@ -649,17 +664,13 @@ export default class Bar {
         this.task.actual_duration = actual_duration_in_days;
         this.task.ignored_duration = duration_in_days - actual_duration_in_days;
 
-        this.duration =
-            date_utils.convert_scales(
-                duration_in_days + 'd',
-                this.gantt.config.unit,
-            ) / this.gantt.config.step;
-
-        this.actual_duration_raw =
-            date_utils.convert_scales(
-                actual_duration_in_days + 'd',
-                this.gantt.config.unit,
-            ) / this.gantt.config.step;
+        if (duration_in_days > 0) {
+            this.actual_duration_raw =
+                this.duration *
+                (actual_duration_in_days / duration_in_days);
+        } else {
+            this.actual_duration_raw = this.duration;
+        }
 
         this.ignored_duration_raw = this.duration - this.actual_duration_raw;
     }

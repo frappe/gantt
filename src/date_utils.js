@@ -33,10 +33,12 @@ export default {
             return date;
         }
         if (typeof date === 'string') {
-            // Handle ISO 8601 with T separator (e.g. "2025-03-05T18:30:00")
+            // Normalize ISO 8601 (T separator, timezone) to space-separated local time
             if (date.includes('T')) {
-                const d = new Date(date);
-                if (!isNaN(d)) return d;
+                date = date
+                    .replace('T', ' ')
+                    .replace(/Z$/, '')
+                    .replace(/[+-]\d{2}:?\d{2}$/, '');
             }
             let date_parts, time_parts;
             const parts = date.split(' ');
