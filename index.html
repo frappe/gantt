@@ -327,14 +327,12 @@
             </div>
         </div>
         <script type="module">
-            const rawToday = new Date();
-            const today =
-                Date.UTC(
-                    rawToday.getFullYear(),
-                    rawToday.getMonth(),
-                    rawToday.getDate(),
-                ) +
-                new Date().getTimezoneOffset() * 60000;
+          const rawToday = new Date();
+            const todayUTC = Date.UTC(
+             rawToday.getFullYear(),
+               rawToday.getMonth(),
+              rawToday.getDate()
+               ); 
 
             function random(begin = 10, end = 90, multiple = 10) {
                 let k;
