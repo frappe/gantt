@@ -191,11 +191,12 @@ export default {
     },
 
     add(date, qty, scale) {
-        qty = parseInt(qty, 10);
         // For sub-day scales, use millisecond-based addition to avoid
         // incorrect results when crossing DST boundaries.
         // new Date(y, m, d, h+qty, ...) uses local time setters which
         // can skip or repeat hours during DST transitions.
+        // Note: parseInt is NOT applied here so fractional quantities
+        // (e.g. 11.983 hours from pixel→date conversion) are preserved.
         const MS_PER = {
             [HOUR]: 3600000,
             [MINUTE]: 60000,
@@ -205,6 +206,7 @@ export default {
         if (MS_PER[scale]) {
             return new Date(date.getTime() + qty * MS_PER[scale]);
         }
+        qty = parseInt(qty, 10);
         const vals = [
             date.getFullYear() + (scale === YEAR ? qty : 0),
             date.getMonth() + (scale === MONTH ? qty : 0),

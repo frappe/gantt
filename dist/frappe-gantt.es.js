@@ -85,7 +85,6 @@ const v = "year", k = "month", M = "day", D = "hour", T = "minute", L = "second"
     return /* @__PURE__ */ new Date();
   },
   add(n, t, e) {
-    t = parseInt(t, 10);
     const i = {
       [D]: 36e5,
       [T]: 6e4,
@@ -94,6 +93,7 @@ const v = "year", k = "month", M = "day", D = "hour", T = "minute", L = "second"
     };
     if (i[e])
       return new Date(n.getTime() + t * i[e]);
+    t = parseInt(t, 10);
     const s = [
       n.getFullYear() + (e === v ? t : 0),
       n.getMonth() + (e === k ? t : 0),
