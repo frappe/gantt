@@ -517,9 +517,15 @@ export default class Gantt {
 
         // Create today button
         if (this.options.today_button) {
+            let today_button_text;
+            if (this.options.today_button === true) {
+                today_button_text = 'Today'
+            } else {
+                today_button_text = this.options.today_button
+            }
             let $today_button = document.createElement('button');
             $today_button.classList.add('today-button');
-            $today_button.textContent = 'Today';
+            $today_button.textContent = today_button_text
             $today_button.onclick = this.scroll_current.bind(this);
             this.$side_header.prepend($today_button);
             this.$today_button = $today_button;
