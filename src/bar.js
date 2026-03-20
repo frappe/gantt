@@ -174,19 +174,10 @@ export default class Bar {
         });
         if (this.task.color_progress)
             this.$bar_progress.style.fill = this.task.color_progress;
-        const x =
-            (date_utils.diff(
-                this.task._start,
-                this.gantt.gantt_start,
-                this.gantt.config.unit,
-            ) /
-                this.gantt.config.step) *
-            this.gantt.config.column_width;
-
         let $date_highlight = this.gantt.create_el({
             classes: `date-range-highlight hide highlight-${this.task.id}`,
             width: this.width,
-            left: x,
+            left: this.x,
         });
         this.$date_highlight = $date_highlight;
         this.gantt.$lower_header.prepend(this.$date_highlight);
@@ -585,38 +576,38 @@ export default class Bar {
     }
 
     compute_x() {
+        this.x = this.compute_x_for_date(this.task._start);
+    }
+
+    compute_x_for_date(date) {
         const { column_width } = this.gantt.config;
-        const task_start = this.task._start;
-        const gantt_start = this.gantt.gantt_start;
+        let diff;
 
-        const diff =
-            date_utils.diff(task_start, gantt_start, this.gantt.config.unit) /
-            this.gantt.config.step;
+        if (this.gantt.config.unit === 'month') {
+            const month_diff =
+                (date.getFullYear() - this.gantt.gantt_start.getFullYear()) *
+                    12 +
+                (date.getMonth() - this.gantt.gantt_start.getMonth());
+            const day_fraction =
+                (date.getDate() -
+                    1 +
+                    date.getHours() / 24 +
+                    date.getMinutes() / 1440 +
+                    date.getSeconds() / 86400 +
+                    date.getMilliseconds() / 86400000) /
+                date_utils.get_days_in_month(date);
 
-        let x = diff * column_width;
+            diff = month_diff + day_fraction;
+        } else {
+            diff =
+                date_utils.diff(
+                    date,
+                    this.gantt.gantt_start,
+                    this.gantt.config.unit,
+                ) / this.gantt.config.step;
+        }
 
-        /* Since the column width is based on 30,
-        we count the month-difference, multiply it by 30 for a "pseudo-month"
-        and then add the days in the month, making sure the number does not exceed 29
-        so it is within the column */
-
-        // if (this.gantt.view_is('Month')) {
-        //     const diffDaysBasedOn30DayMonths =
-        //         date_utils.diff(task_start, gantt_start, 'month') * 30;
-        //     const dayInMonth = Math.min(
-        //         29,
-        //         date_utils.format(
-        //             task_start,
-        //             'DD',
-        //             this.gantt.options.language,
-        //         ),
-        //     );
-        //     const diff = diffDaysBasedOn30DayMonths + dayInMonth;
-
-        //     x = (diff * column_width) / 30;
-        // }
-
-        this.x = x;
+        return diff * column_width;
     }
 
     compute_y() {
@@ -649,11 +640,18 @@ export default class Bar {
         this.task.actual_duration = actual_duration_in_days;
         this.task.ignored_duration = duration_in_days - actual_duration_in_days;
 
-        this.duration =
-            date_utils.convert_scales(
-                duration_in_days + 'd',
-                this.gantt.config.unit,
-            ) / this.gantt.config.step;
+        if (this.gantt.config.unit === 'month') {
+            this.duration =
+                (this.compute_x_for_date(this.task._end) -
+                    this.compute_x_for_date(this.task._start)) /
+                this.gantt.config.column_width;
+        } else {
+            this.duration =
+                date_utils.convert_scales(
+                    duration_in_days + 'd',
+                    this.gantt.config.unit,
+                ) / this.gantt.config.step;
+        }
 
         this.actual_duration_raw =
             date_utils.convert_scales(
