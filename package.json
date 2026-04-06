@@ -47,7 +47,7 @@
         "eslint-plugin-prettier": "^2.6.0",
         "postcss-nesting": "^12.1.2",
         "prettier": "3.2.5",
-        "vite": "^5.2.10"
+        "vite": "^6.4.2"
     },
     "eslintIgnore": [
         "dist"
