@@ -87,8 +87,10 @@ export default class Gantt {
                 }
                 return mode;
             });
-            // automatically set the view mode to the first option
-            options.view_mode = options.view_modes[0];
+            // only set default view mode if none was explicitly provided
+            if (!options.view_mode) {
+                options.view_mode = options.view_modes[0];
+            }
         }
         this.options = { ...DEFAULT_OPTIONS, ...options };
         const CSS_VARIABLES = {
@@ -133,8 +135,9 @@ export default class Gantt {
     }
 
     update_options(options) {
+        const current_view_mode = this.config.view_mode;
         this.setup_options({ ...this.original_options, ...options });
-        this.change_view_mode(undefined, true);
+        this.change_view_mode(current_view_mode, true);
     }
 
     setup_tasks(tasks) {
@@ -182,13 +185,6 @@ export default class Gantt {
 
                 // cache index
                 task._index = i;
-
-                // if hours is not set, assume the last day is full day
-                // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
-                const task_end_values = date_utils.get_date_values(task._end);
-                if (task_end_values.slice(3).every((d) => d === 0)) {
-                    task._end = date_utils.add(task._end, 24, 'hour');
-                }
 
                 // dependencies
                 if (
