@@ -1,91 +1,204 @@
 import { createSVG } from './svg_utils';
 
+const DEFAULT_DEPENDENCY_TYPE = 'finish-start';
+
+const DEPENDENCY_TYPES = {
+    'finish-start': {
+        from: 'finish',
+        to: 'start',
+    },
+    'finish-finish': {
+        from: 'finish',
+        to: 'finish',
+    },
+    'start-start': {
+        from: 'start',
+        to: 'start',
+    },
+    'start-finish': {
+        from: 'start',
+        to: 'finish',
+    },
+};
+
 export default class Arrow {
-    constructor(gantt, from_task, to_task) {
+    /**
+     *        Supported types :
+     *        - "finish-start"  : finish source   -> start dist
+     *        - "finish-finish" : finish source   -> finish dist
+     *        - "start-start"   : start source -> start dist
+     *        - "start-finish"  : start source -> finish dist
+     */
+    constructor(gantt, from_task, to_task, dependencyType = DEFAULT_DEPENDENCY_TYPE) {
         this.gantt = gantt;
         this.from_task = from_task;
         this.to_task = to_task;
+        this.dependencyType = this.normalize_dependency_type(dependencyType);
 
         this.calculate_path();
         this.draw();
     }
 
-    calculate_path() {
-        let start_x =
-            this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
+    normalize_dependency_type(type) {
+        const normalized = `${type || DEFAULT_DEPENDENCY_TYPE}`.toLowerCase();
 
-        const condition = () =>
-            this.to_task.$bar.getX() < start_x + this.gantt.options.padding &&
-            start_x > this.from_task.$bar.getX() + this.gantt.options.padding;
-
-        while (condition()) {
-            start_x -= 10;
+        if (DEPENDENCY_TYPES[normalized]) {
+            return normalized;
         }
-        start_x -= 10;
 
-        let start_y =
-            this.gantt.config.header_height +
-            this.gantt.options.bar_height +
-            (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.from_task.task._index +
-            this.gantt.options.padding / 2;
+        return DEFAULT_DEPENDENCY_TYPE;
+    }
 
-        let end_x = this.to_task.$bar.getX() - 13;
-        let end_y =
-            this.gantt.config.header_height +
-            this.gantt.options.bar_height / 2 +
-            (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.to_task.task._index +
-            this.gantt.options.padding / 2;
+    get_bar_port(task_bar, side) {
+        const bar = task_bar.$bar;
+        const x = side === 'start'
+            ? bar.getX()
+            : bar.getX() + bar.getWidth();
 
-        const from_is_below_to =
-            this.from_task.task._index > this.to_task.task._index;
+        const y = bar.getY() + bar.getHeight() / 2;
 
-        let curve = this.gantt.options.arrow_curve;
-        const clockwise = from_is_below_to ? 1 : 0;
-        let curve_y = from_is_below_to ? -curve : curve;
+        return { x, y };
+    }
 
-        if (
-            this.to_task.$bar.getX() <=
-            this.from_task.$bar.getX() + this.gantt.options.padding
-        ) {
-            let down_1 = this.gantt.options.padding / 2 - curve;
-            if (down_1 < 0) {
-                down_1 = 0;
-                curve = this.gantt.options.padding / 2;
-                curve_y = from_is_below_to ? -curve : curve;
+    get_side_direction(side) {
+        // if start, left side
+        // if end, right side
+        return side === 'start' ? -1 : 1;
+    }
+
+    remove_duplicate_points(points) {
+        return points.filter((point, index) => {
+            if (index === 0) return true;
+            const previous = points[index - 1];
+            return previous.x !== point.x || previous.y !== point.y;
+        });
+    }
+
+    build_rounded_path(points, radius) {
+        const cleanedPoints = this.remove_duplicate_points(points);
+
+        if (cleanedPoints.length < 2) {
+            return '';
+        }
+
+        if (!radius || radius <= 0 || cleanedPoints.length < 3) {
+            const [first, ...rest] = cleanedPoints;
+            return [
+                `M ${first.x} ${first.y}`,
+                ...rest.map((point) => `L ${point.x} ${point.y}`),
+            ].join(' ');
+        }
+
+        let path = `M ${cleanedPoints[0].x} ${cleanedPoints[0].y}`;
+
+        for (let i = 1; i < cleanedPoints.length - 1; i++) {
+            const previous = cleanedPoints[i - 1];
+            const current = cleanedPoints[i];
+            const next = cleanedPoints[i + 1];
+
+            const prevDx = current.x - previous.x;
+            const prevDy = current.y - previous.y;
+            const nextDx = next.x - current.x;
+            const nextDy = next.y - current.y;
+
+            const prevLength = Math.sqrt(prevDx * prevDx + prevDy * prevDy);
+            const nextLength = Math.sqrt(nextDx * nextDx + nextDy * nextDy);
+
+            if (prevLength === 0 || nextLength === 0) {
+                continue;
             }
-            const down_2 =
-                this.to_task.$bar.getY() +
-                this.to_task.$bar.getHeight() / 2 -
-                curve_y;
-            const left = this.to_task.$bar.getX() - this.gantt.options.padding;
-            this.path = `
-                M ${start_x} ${start_y}
-                v ${down_1}
-                a ${curve} ${curve} 0 0 1 ${-curve} ${curve}
-                H ${left}
-                a ${curve} ${curve} 0 0 ${clockwise} ${-curve} ${curve_y}
-                V ${down_2}
-                a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
-                L ${end_x} ${end_y}
-                m -5 -5
-                l 5 5
-                l -5 5`;
-        } else {
-            if (end_x < start_x + curve) curve = end_x - start_x;
 
-            let offset = from_is_below_to ? end_y + curve : end_y - curve;
+            const curveRadius = Math.min(radius, prevLength / 2, nextLength / 2);
 
-            this.path = `
-              M ${start_x} ${start_y}
-              V ${offset}
-              a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve}
-              L ${end_x} ${end_y}
-              m -5 -5
-              l 5 5
-              l -5 5`;
+            const before = {
+                x: current.x - (prevDx / prevLength) * curveRadius,
+                y: current.y - (prevDy / prevLength) * curveRadius,
+            };
+
+            const after = {
+                x: current.x + (nextDx / nextLength) * curveRadius,
+                y: current.y + (nextDy / nextLength) * curveRadius,
+            };
+
+            path += ` L ${before.x} ${before.y}`;
+            path += ` Q ${current.x} ${current.y} ${after.x} ${after.y}`;
         }
+
+        const last = cleanedPoints[cleanedPoints.length - 1];
+        path += ` L ${last.x} ${last.y}`;
+
+        return path;
+    }
+
+    build_arrow_head(end, toSide) {
+        const size = 6;
+
+        if (toSide === 'start') {
+            return `
+                M ${end.x - size} ${end.y - size}
+                L ${end.x} ${end.y}
+                L ${end.x - size} ${end.y + size}
+            `;
+        }
+
+        return `
+            M ${end.x + size} ${end.y - size}
+            L ${end.x} ${end.y}
+            L ${end.x + size} ${end.y + size}
+        `;
+    }
+
+    calculate_path() {
+        const dependency = DEPENDENCY_TYPES[this.dependencyType]
+            || DEPENDENCY_TYPES[DEFAULT_DEPENDENCY_TYPE];
+
+        const fromSide = dependency.from;
+        const toSide = dependency.to;
+
+        const start = this.get_bar_port(this.from_task, fromSide);
+        const end = this.get_bar_port(this.to_task, toSide);
+
+        const fromDirection = this.get_side_direction(fromSide);
+        const toDirection = this.get_side_direction(toSide);
+
+        const horizontalOffset = Math.max(
+            14,
+            this.gantt.options.padding || 0,
+        );
+
+        const startOffset = {
+            x: start.x + fromDirection * horizontalOffset,
+            y: start.y,
+        };
+
+        const endOffset = {
+            x: end.x + toDirection * horizontalOffset,
+            y: end.y,
+        };
+
+        const points = [
+            start,
+
+            startOffset,
+
+            {
+                x: startOffset.x,
+                y: endOffset.y,
+            },
+
+            endOffset,
+            end,
+        ];
+
+        const curve = Math.min(
+            this.gantt.options.arrow_curve || 0,
+            horizontalOffset / 2,
+        );
+
+        const linePath = this.build_rounded_path(points, curve);
+        const arrowHead = this.build_arrow_head(end, toSide);
+
+        this.path = `${linePath} ${arrowHead}`;
     }
 
     draw() {
@@ -93,6 +206,10 @@ export default class Arrow {
             d: this.path,
             'data-from': this.from_task.task.id,
             'data-to': this.to_task.task.id,
+            'data-type': this.dependencyType,
+            class: `arrow arrow-${this.dependencyType}`,
+            'stroke-width': '2',
+            fill: 'none',
         });
     }
 

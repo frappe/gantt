@@ -438,9 +438,19 @@ export default class Bar {
         const bar = this.$bar;
 
         if (x) {
-            const xs = this.task.dependencies.map((dep) => {
-                return this.gantt.get_bar(dep).$bar.getX();
-            });
+            const xs = this.task.dependencies
+                .map((dep) => {
+                    const dependencyId =
+                        typeof dep === 'string'
+                            ? dep
+                            : dep.id;
+
+                    return this.gantt.get_bar(dependencyId);
+                })
+                .filter(Boolean)
+                .map((bar) => {
+                    return bar.$bar.getX();
+                });
             const valid_x = xs.reduce((prev, curr) => {
                 return prev && x >= curr;
             }, true);
@@ -627,41 +637,121 @@ export default class Bar {
     }
 
     compute_duration() {
-        let actual_duration_in_days = 0,
-            duration_in_days = 0;
-        // console.log(this.task._start, this.task._end);
-        for (
-            let d = new Date(this.task._start);
-            d < this.task._end;
-            d.setDate(d.getDate() + 1)
+        const start = this.task._start;
+        const end = this.task._end;
+
+        const unit = this.gantt.config.unit;
+        const step = this.gantt.config.step;
+
+        const ms = end.getTime() - start.getTime();
+
+        const SECOND = 1000;
+        const MINUTE = SECOND * 60;
+        const HOUR = MINUTE * 60;
+        const DAY = HOUR * 24;
+
+        if (ms <= 0) {
+            this.duration = 0;
+            this.actual_duration_raw = 0;
+            this.ignored_duration_raw = 0;
+            this.task.actual_duration = 0;
+            this.task.ignored_duration = 0;
+            return;
+        }
+
+        if (unit === 'hour') {
+            const duration_in_hours = ms / HOUR;
+
+            this.duration = duration_in_hours / step;
+            this.actual_duration_raw = this.duration;
+            this.ignored_duration_raw = 0;
+
+            this.task.actual_duration = ms / DAY;
+            this.task.ignored_duration = 0;
+
+            return;
+        }
+
+        if (unit === 'minute') {
+            const duration_in_minutes = ms / MINUTE;
+
+            this.duration = duration_in_minutes / step;
+            this.actual_duration_raw = this.duration;
+            this.ignored_duration_raw = 0;
+
+            this.task.actual_duration = ms / DAY;
+            this.task.ignored_duration = 0;
+
+            return;
+        }
+
+        if (unit === 'day') {
+            const duration_in_days = ms / DAY;
+
+            this.duration = duration_in_days / step;
+            this.actual_duration_raw = this.duration;
+            this.ignored_duration_raw = 0;
+
+            this.task.actual_duration = duration_in_days;
+            this.task.ignored_duration = 0;
+
+            return;
+        }
+
+        let duration_in_days = Math.ceil(ms / DAY);
+        let actual_duration_in_days = duration_in_days;
+
+        if (
+            this.gantt.config.ignored_dates?.length ||
+            this.gantt.config.ignored_function
         ) {
-            duration_in_days++;
-            if (
-                !this.gantt.config.ignored_dates.find(
-                    (k) => k.getTime() === d.getTime(),
-                ) &&
-                (!this.gantt.config.ignored_function ||
-                    !this.gantt.config.ignored_function(d))
-            ) {
-                actual_duration_in_days++;
+            actual_duration_in_days = 0;
+
+            const cursor = new Date(
+                start.getFullYear(),
+                start.getMonth(),
+                start.getDate(),
+            );
+
+            for (let i = 0; i < duration_in_days; i++) {
+                const d = new Date(cursor);
+                d.setDate(cursor.getDate() + i);
+
+                const is_ignored_date = this.gantt.config.ignored_dates?.find(
+                    (k) =>
+                        k.getFullYear() === d.getFullYear() &&
+                        k.getMonth() === d.getMonth() &&
+                        k.getDate() === d.getDate(),
+                );
+
+                const is_ignored_by_function =
+                    this.gantt.config.ignored_function &&
+                    this.gantt.config.ignored_function(d);
+
+                if (!is_ignored_date && !is_ignored_by_function) {
+                    actual_duration_in_days++;
+                }
             }
         }
+
         this.task.actual_duration = actual_duration_in_days;
-        this.task.ignored_duration = duration_in_days - actual_duration_in_days;
+        this.task.ignored_duration =
+            duration_in_days - actual_duration_in_days;
 
         this.duration =
             date_utils.convert_scales(
                 duration_in_days + 'd',
                 this.gantt.config.unit,
-            ) / this.gantt.config.step;
+            ) / step;
 
         this.actual_duration_raw =
             date_utils.convert_scales(
                 actual_duration_in_days + 'd',
                 this.gantt.config.unit,
-            ) / this.gantt.config.step;
+            ) / step;
 
-        this.ignored_duration_raw = this.duration - this.actual_duration_raw;
+        this.ignored_duration_raw =
+            this.duration - this.actual_duration_raw;
     }
 
     update_attr(element, attr, value) {

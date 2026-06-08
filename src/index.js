@@ -190,20 +190,56 @@ export default class Gantt {
                     task._end = date_utils.add(task._end, 24, 'hour');
                 }
 
-                // dependencies
-                if (
-                    typeof task.dependencies === 'string' ||
-                    !task.dependencies
-                ) {
-                    let deps = [];
-                    if (task.dependencies) {
-                        deps = task.dependencies
-                            .split(',')
-                            .map((d) => d.trim().replaceAll(' ', '_'))
-                            .filter((d) => d);
-                    }
-                    task.dependencies = deps;
+                // dependencies 
+                const validDependencyTypes = [
+                    'finish-start',
+                    'finish-finish',
+                    'start-start',
+                    'start-finish',
+                ];
+
+                if (typeof task.dependencies === 'string') {
+                    task.dependencies = task.dependencies
+                        .split(',')
+                        .map((dependency) => dependency.trim())
+                        .filter(Boolean);
                 }
+
+                if (task.dependencies) {
+                    task.dependencies = task.dependencies.map((dependency) => {
+                        // Object Format : { id: 'Task 0', type: 'start-start' }
+                        if (typeof dependency === 'object') {
+                            const type = `${dependency.type || 'finish-start'}`.toLowerCase();
+
+                            return {
+                                id: `${dependency.id}`.replaceAll(' ', '_'),
+                                type: validDependencyTypes.includes(type)
+                                    ? type
+                                    : 'finish-start',
+                            };
+                        }
+
+                        // Format string : 'Task 0 start-start'
+                        const parts = `${dependency}`.trim().split(/\s+/);
+                        const possibleType = parts[parts.length - 1]?.toLowerCase();
+
+                        let type = 'finish-start';
+                        let idParts = parts;
+
+                        if (validDependencyTypes.includes(possibleType)) {
+                            type = possibleType;
+                            idParts = parts.slice(0, -1);
+                        }
+
+                        return {
+                            id: idParts.join('_'),
+                            type,
+                        };
+                    });
+                } else {
+                    task.dependencies = [];
+                }
+
 
                 // uids
                 if (!task.id) {
@@ -222,10 +258,18 @@ export default class Gantt {
 
     setup_dependencies() {
         this.dependency_map = {};
-        for (let t of this.tasks) {
-            for (let d of t.dependencies) {
-                this.dependency_map[d] = this.dependency_map[d] || [];
-                this.dependency_map[d].push(t.id);
+
+        for (let task of this.tasks) {
+            for (let dependency of task.dependencies) {
+                const dependencyId =
+                    typeof dependency === 'string'
+                        ? dependency
+                        : dependency.id;
+
+                this.dependency_map[dependencyId] =
+                    this.dependency_map[dependencyId] || [];
+
+                this.dependency_map[dependencyId].push(task.id);
             }
         }
     }
@@ -796,13 +840,23 @@ export default class Gantt {
 
     make_dates() {
         this.get_dates_to_draw().forEach((date, i) => {
+            const labels_on_ticks =
+                this.options.labels_on_ticks ||
+                this.config.view_mode.labels_on_ticks;
+
+            const tick_class = labels_on_ticks ? ' label-on-tick' : '';
+
             if (date.lower_text) {
                 let $lower_text = this.create_el({
                     left: date.x,
                     top: date.lower_y,
-                    classes: 'lower-text date_' + sanitize(date.formatted_date),
+                    classes:
+                        'lower-text date_' +
+                        sanitize(date.formatted_date) +
+                        tick_class,
                     append_to: this.$lower_header,
                 });
+
                 $lower_text.innerText = date.lower_text;
             }
 
@@ -810,15 +864,18 @@ export default class Gantt {
                 let $upper_text = this.create_el({
                     left: date.x,
                     top: date.upper_y,
-                    classes: 'upper-text',
+                    classes: 'upper-text' + tick_class,
                     append_to: this.$upper_header,
                 });
+
                 $upper_text.innerText = date.upper_text;
             }
         });
+
         this.upperTexts = Array.from(
             this.$container.querySelectorAll('.upper-text'),
         );
+
         this.lowerTexts = Array.from(
             this.$container.querySelectorAll('.lower-text'),
         );
@@ -897,20 +954,38 @@ export default class Gantt {
     make_arrows() {
         this.arrows = [];
         for (let task of this.tasks) {
-            let arrows = [];
-            arrows = task.dependencies
-                .map((task_id) => {
-                    const dependency = this.get_task(task_id);
-                    if (!dependency) return;
+            const arrows = task.dependencies
+                .map((dependencyInfo) => {
+                    const dependencyId =
+                        typeof dependencyInfo === 'string'
+                            ? dependencyInfo
+                            : dependencyInfo.id;
+
+                    const dependencyType =
+                        typeof dependencyInfo === 'string'
+                            ? 'finish-start'
+                            : dependencyInfo.type || 'finish-start';
+
+                    const dependency = this.get_task(dependencyId);
+
+                    if (!dependency) {
+                        console.warn(
+                            `Dependency "${dependencyId}" not found for task "${task.id}"`
+                        );
+                        return;
+                    }
+
                     const arrow = new Arrow(
                         this,
-                        this.bars[dependency._index], // from_task
-                        this.bars[task._index], // to_task
+                        this.bars[dependency._index],
+                        this.bars[task._index],
+                        dependencyType,
                     );
                     this.layers.arrow.appendChild(arrow.element);
                     return arrow;
                 })
-                .filter(Boolean); // filter falsy values
+                .filter(Boolean);
+
             this.arrows = this.arrows.concat(arrows);
         }
     }

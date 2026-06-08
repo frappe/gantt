@@ -92,6 +92,20 @@
     & .lower-header {
         height: var(--gv-lower-header-height);
     }
+    
+    & .lower-text.label-on-tick {
+        width: var(--gv-column-width);
+        margin: 0;
+        transform: translateX(-50%);
+        text-align: center;
+    }
+
+    & .upper-text.label-on-tick {
+        margin: 0;
+        transform: translateX(-50%);
+        text-align: center;
+    }
+
 
     & .lower-text {
         font-size: 12px;

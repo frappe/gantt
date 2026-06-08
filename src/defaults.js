@@ -24,6 +24,7 @@ const DEFAULT_VIEW_MODES = [
                 ? date_utils.format(d, 'D MMMM', lang)
                 : '',
         upper_text_frequency: 24,
+        labels_on_ticks: true,
     },
     {
         name: 'Quarter Day',
@@ -36,6 +37,7 @@ const DEFAULT_VIEW_MODES = [
                 ? date_utils.format(d, 'D MMM', lang)
                 : '',
         upper_text_frequency: 4,
+        labels_on_ticks: true,
     },
     {
         name: 'Half Day',
@@ -50,21 +52,27 @@ const DEFAULT_VIEW_MODES = [
                     : date_utils.format(d, 'D', lang)
                 : '',
         upper_text_frequency: 2,
+        labels_on_ticks: true,
     },
     {
         name: 'Day',
         padding: '7d',
         date_format: 'YYYY-MM-DD',
         step: '1d',
+        column_width: 90,
+
         lower_text: (d, ld, lang) =>
             !ld || d.getDate() !== ld.getDate()
                 ? date_utils.format(d, 'D', lang)
                 : '',
+
         upper_text: (d, ld, lang) =>
             !ld || d.getMonth() !== ld.getMonth()
                 ? date_utils.format(d, 'MMMM', lang)
                 : '',
+
         thick_line: (d) => d.getDay() === 1,
+        labels_on_ticks: true,
     },
     {
         name: 'Week',
@@ -79,6 +87,7 @@ const DEFAULT_VIEW_MODES = [
                 : '',
         thick_line: (d) => d.getDate() >= 1 && d.getDate() <= 7,
         upper_text_frequency: 4,
+        labels_on_ticks: true,
     },
     {
         name: 'Month',
@@ -93,6 +102,7 @@ const DEFAULT_VIEW_MODES = [
                 : '',
         thick_line: (d) => d.getMonth() % 3 === 0,
         snap_at: '7d',
+        labels_on_ticks: true,
     },
     {
         name: 'Year',
@@ -104,6 +114,7 @@ const DEFAULT_VIEW_MODES = [
             !ld || getDecade(d) !== getDecade(ld) ? getDecade(d) : '',
         lower_text: 'YYYY',
         snap_at: '30d',
+        labels_on_ticks: true,
     },
 ];
 

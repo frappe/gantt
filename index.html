@@ -360,7 +360,7 @@
                     id: 'Task 1',
                     progress: random(),
                     important: true,
-                    dependencies: 'Task 0',
+                    dependencies: [{id: 'Task 0', type: 'start-finish'}, {id: 'Task 3', type: 'finish-start'}],
                 },
                 {
                     start: daysSince(4),
@@ -368,6 +368,7 @@
                     name: 'Apply new styles',
                     id: 'Task 2',
                     progress: random(),
+                    dependencies: [{id: 'Task 0', type: 'finish-finish'}, {id: 'Task 3', type: 'start-start'}],
                 },
                 {
                     start: daysSince(-4),
@@ -380,8 +381,8 @@
 
             const tasksSpread = [
                 {
-                    start: daysSince(-30),
-                    end: daysSince(-10),
+                    start: '2026-06-01 09:00:00',
+                    end: '2026-06-01 17:00:00',
                     name: 'Redesign website',
                     id: 'Task 0',
                     progress: random(),
