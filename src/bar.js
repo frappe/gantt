@@ -70,6 +70,9 @@ export default class Bar {
             max_radius,
         );
         this.width = this.gantt.config.column_width * this.duration;
+        if (this.width < 1 && this.task._end > this.task._start) {
+            this.width = 1;
+        }
         if (!this.task.progress || this.task.progress < 0)
             this.task.progress = 0;
         if (this.task.progress > 100) this.task.progress = 100;

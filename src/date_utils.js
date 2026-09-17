@@ -144,23 +144,16 @@ export default {
         minutes = seconds / 60;
         hours = minutes / 60;
         days = hours / 24;
-        // Calculate months across years
-        let yearDiff = date_a.getFullYear() - date_b.getFullYear();
-        let monthDiff = date_a.getMonth() - date_b.getMonth();
-        // calculate extra
-        monthDiff += date_a.getDate() / 31;
-
-        /* If monthDiff is negative, date_b is in an earlier month than
-        date_a and thus subtracted from the year difference in months */
-        months = yearDiff * 12 + monthDiff;
-        /* If date_a's (e.g. march 1st) day of the month is smaller than date_b (e.g. february 28th),
-        adjust the month difference */
-        if (date_a.getDate() < date_b.getDate()) {
-            months--;
-        }
-
-        // Calculate years based on actual months
-        years = months / 12;
+        // Derive months and years from the linear day count.
+        // The previous calendar-based approach (getMonth/getDate) was
+        // broken for sub-month durations: it used the date's absolute
+        // position within the month (getDate()/31) rather than the
+        // relative difference, causing e.g. a half-day task on the 17th
+        // to appear as ~0.55 months wide instead of ~0.017 months.
+        // Using 30 and 365 as divisors matches the grid column width
+        // calculations in _precompute_grid_data.
+        months = days / 30;
+        years = days / 365;
 
         if (!scale.endsWith('s')) {
             scale += 's';
