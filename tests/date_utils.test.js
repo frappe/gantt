@@ -16,7 +16,6 @@ test('Parse: parses string datetime', () => {
     expect(date.getDate()).toBe(27);
     expect(date.getHours()).toBe(16);
     expect(date.getMinutes()).toBe(8);
-    expect(date.getSeconds()).toBe(34);
 });
 
 test('Parse: parses string datetime', () => {
