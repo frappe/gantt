@@ -12,11 +12,11 @@ export default class Bar {
     refresh() {
         this.bar_group.innerHTML = '';
         this.handle_group.innerHTML = '';
-        if (this.task.custom_class) {
-            this.group.classList.add(this.task.custom_class);
-        } else {
-            this.group.classList = ['bar-wrapper'];
-        }
+        this.group.setAttribute(
+            'class',
+            'bar-wrapper' +
+                (this.task.custom_class ? ' ' + this.task.custom_class : ''),
+        );
 
         this.prepare_values();
         this.draw();
@@ -32,9 +32,6 @@ export default class Bar {
 
     prepare_wrappers() {
         this.group = createSVG('g', {
-            class:
-                'bar-wrapper' +
-                (this.task.custom_class ? ' ' + this.task.custom_class : ''),
             'data-id': this.task.id,
         });
         this.bar_group = createSVG('g', {
