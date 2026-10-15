@@ -1,0 +1,78 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Task custom class regression tests</title>
+<link rel="stylesheet" href="../dist/frappe-gantt.css" />
+<style>
+    .gantt .bar-wrapper.category .bar {
+        fill: rgb(255, 0, 0);
+    }
+    .gantt .bar-wrapper.priority .bar-label {
+        font-weight: 700;
+    }
+</style>
+<p>Run <code>pnpm build</code>, serve the repository, and open this page.</p>
+<pre id="results"></pre>
+<div id="gantt"></div>
+<script src="../dist/frappe-gantt.umd.js"></script>
+<script>
+    const results = document.querySelector('#results');
+    const task = {
+        id: '1',
+        name: 'Website',
+        start: '2026-10-12',
+        end: '2026-10-16',
+        progress: 20,
+        custom_class: 'category priority',
+    };
+    let count = 0;
+    function check(condition, message) {
+        if (!condition) throw new Error(message);
+        results.textContent += `PASS: ${message}\n`;
+        count++;
+    }
+    function checkClasses(expected) {
+        const wrapper = document.querySelector('.bar-wrapper');
+        check(
+            [...wrapper.classList].sort().join(' ') ===
+                ['bar-wrapper', ...expected].sort().join(' '),
+            `Classes match ${JSON.stringify(expected)}`,
+        );
+        check(!!wrapper.querySelector('.bar'), 'Task still renders');
+    }
+    try {
+        const gantt = new Gantt('#gantt', [task]);
+        checkClasses(['category', 'priority']);
+        check(
+            getComputedStyle(document.querySelector('.bar-wrapper rect.bar'))
+                .fill === 'rgb(255, 0, 0)',
+            'Category style applies',
+        );
+        check(
+            getComputedStyle(document.querySelector('.bar-label'))
+                .fontWeight === '700',
+            'Priority style applies',
+        );
+        gantt.update_task('1', { custom_class: 'replacement urgent' });
+        checkClasses(['replacement', 'urgent']);
+        gantt.update_task('1', { progress: 50 });
+        checkClasses(['replacement', 'urgent']);
+        gantt.change_view_mode('Week');
+        checkClasses(['replacement', 'urgent']);
+        gantt.update_task('1', { custom_class: ' single\tspaced\nclasses  ' });
+        checkClasses(['single', 'spaced', 'classes']);
+        for (const custom_class of ['', undefined, null, ' \t\n ']) {
+            gantt.update_task('1', { custom_class });
+            checkClasses([]);
+        }
+        gantt.update_task('1', { custom_class: 'only' });
+        checkClasses(['only']);
+        gantt.refresh([{ ...task, custom_class: 'fresh priority' }]);
+        checkClasses(['fresh', 'priority']);
+        results.dataset.status = 'passed';
+        results.textContent += `${count} assertions passed\n`;
+    } catch (error) {
+        results.dataset.status = 'failed';
+        results.textContent += `FAIL: ${error.stack}\n`;
+        throw error;
+    }
+</script>
