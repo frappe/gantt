@@ -1524,15 +1524,16 @@ export default class Gantt {
     }
 
     view_is(modes) {
+        const currentModeName = this.config?.view_mode?.name || (typeof this.options?.view_mode === 'string' ? this.options.view_mode : this.options?.view_mode?.name);
         if (typeof modes === 'string') {
-            return this.config.view_mode.name === modes;
+            return currentModeName?.toLowerCase() === modes.toLowerCase();
         }
-
+    
         if (Array.isArray(modes)) {
-            return modes.some(view_is);
+            return modes.some((mode) => this.view_is(mode));
         }
-
-        return this.config.view_mode.name === modes.name;
+    
+        return currentModeName === modes?.name;
     }
 
     get_task(id) {
@@ -1567,10 +1568,6 @@ export default class Gantt {
         if (this.options['on_' + event]) {
             this.options['on_' + event].apply(this, args);
         }
-    }
-
-    view_is(view) {
-        return this.options.view_mode.name === view;
     }
 
     getDateFromClick(event) {
